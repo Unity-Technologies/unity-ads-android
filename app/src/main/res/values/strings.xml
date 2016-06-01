@@ -1,0 +1,6 @@
+<resources>
+    <string name="unityads_example_product_name">UnityAds 2.0</string>
+    <string name="unityads_example_initialize_text">Initialize</string>
+    <string name="unityads_example_interstitial_text">Interstitial</string>
+    <string name="unityads_example_incentivized_text">Incentivized</string>
+</resources>
