@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.os.Build;
 
 import com.unity3d.ads.adunit.AdUnitOpen;
-import com.unity3d.ads.api.Placement;
+import com.unity3d.ads.placement.Placement;
 import com.unity3d.ads.cache.CacheThread;
 import com.unity3d.ads.configuration.Configuration;
 import com.unity3d.ads.configuration.EnvironmentCheck;
@@ -76,7 +76,7 @@ public final class UnityAds {
 	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
 	 * @param listener Listener for IUnityAdsListener callbacks
 	 */
-	public static void initialize(final Activity activity, final String gameId, IUnityAdsListener listener) {
+	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener) {
 		initialize(activity, gameId, listener, false);
 	}
 
@@ -114,9 +114,9 @@ public final class UnityAds {
 		}
 
 		if(testMode) {
-			DeviceLog.info("Initializing Unity Ads with game id " + gameId + " in test mode");
+			DeviceLog.info("Initializing Unity Ads " + SdkProperties.getVersionName() + " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in test mode");
 		} else {
-			DeviceLog.info("Initializing Unity Ads with game id " + gameId + " in production mode");
+			DeviceLog.info("Initializing Unity Ads " + SdkProperties.getVersionName() + " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in production mode");
 		}
 
 		if(EnvironmentCheck.isEnvironmentOk()) {
@@ -268,6 +268,7 @@ public final class UnityAds {
 		}
 
 		if(isReady(placementId)) {
+			DeviceLog.info("Unity Ads opening new ad unit for placement " + placementId);
 			ClientProperties.setActivity(activity);
 			new Thread(new Runnable() {
 				@Override
@@ -305,10 +306,11 @@ public final class UnityAds {
 	}
 
 	private static void handleShowError(final String placementId, final UnityAdsError error, final String message) {
+		final String errorMessage = "Unity Ads show failed: " + message;
+		DeviceLog.error(errorMessage);
+
 		final IUnityAdsListener listener = ClientProperties.getListener();
 		if(listener != null) {
-			final String errorMessage = "Unity Ads show failed: " + message;
-			DeviceLog.error(errorMessage);
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {

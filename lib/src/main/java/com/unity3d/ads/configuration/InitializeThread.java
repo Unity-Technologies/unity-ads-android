@@ -2,7 +2,9 @@ package com.unity3d.ads.configuration;
 
 import android.os.ConditionVariable;
 
-import com.unity3d.ads.api.Placement;
+import com.unity3d.ads.IUnityAdsListener;
+import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.placement.Placement;
 import com.unity3d.ads.cache.CacheThread;
 import com.unity3d.ads.connectivity.ConnectivityMonitor;
 import com.unity3d.ads.connectivity.IConnectivityListener;
@@ -18,7 +20,9 @@ import com.unity3d.ads.webview.WebViewApp;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 public class InitializeThread extends Thread  {
 	private static InitializeThread _thread;
@@ -90,7 +94,7 @@ public class InitializeThread extends Thread  {
 				}
 
 				if (!success) {
-					return new InitializeStateError("open conditionvariable", new Exception("Reset failed on opening ConditionVariable"));
+					return new InitializeStateError("reset webapp", new Exception("Reset failed on opening ConditionVariable"));
 				}
 			}
 
@@ -100,6 +104,64 @@ public class InitializeThread extends Thread  {
 			ConnectivityMonitor.stopAll();
 			StorageManager.init(ClientProperties.getApplicationContext());
 			AdvertisingId.init(ClientProperties.getApplicationContext());
+
+			_configuration.setConfigUrl(SdkProperties.getConfigUrl());
+			return new InitializeStateAdBlockerCheck(_configuration);
+		}
+	}
+
+	public static class InitializeStateAdBlockerCheck extends InitializeState {
+		private Configuration _configuration;
+		private InetAddress _address;
+
+		public InitializeStateAdBlockerCheck(Configuration configuration) {
+			_configuration = configuration;
+		}
+
+		public Configuration getConfiguration() {
+			return _configuration;
+		}
+
+		@Override
+		public InitializeState execute() {
+			DeviceLog.debug("Unity Ads init: checking for ad blockers");
+
+			final String configHost;
+			try {
+				configHost = new URL(_configuration.getConfigUrl()).getHost();
+			} catch(MalformedURLException e) {
+				return new InitializeStateConfig(_configuration);
+			}
+
+			final ConditionVariable cv = new ConditionVariable();
+			new Thread() {
+				@Override
+				public void run() {
+					try {
+						InitializeStateAdBlockerCheck.this._address = InetAddress.getByName(configHost);
+						cv.open();
+					} catch(Exception e) {
+						cv.open();
+					}
+				}
+			}.start();
+
+			// This is checking if config url is in /etc/hosts or equivalent. No need for long wait.
+			boolean success = cv.block(2000);
+			if(success && _address != null && _address.isLoopbackAddress()) {
+				DeviceLog.error("Unity Ads init: halting init because Unity Ads config resolves to loopback address (due to ad blocker?)");
+
+				final IUnityAdsListener listener = UnityAds.getListener();
+				if(listener != null) {
+					Utilities.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							listener.onUnityAdsError(UnityAds.UnityAdsError.AD_BLOCKER_DETECTED, "Unity Ads config server resolves to loopback address (due to ad blocker?)");
+						}
+					});
+				}
+				return null;
+			}
 
 			return new InitializeStateConfig(_configuration);
 		}
@@ -117,10 +179,9 @@ public class InitializeThread extends Thread  {
 
 		@Override
 		public InitializeState execute() {
-			DeviceLog.debug("Unity Ads init: load configuration from " + SdkProperties.getConfigUrl());
+			DeviceLog.info("Unity Ads init: load configuration from " + SdkProperties.getConfigUrl());
 
 			try {
-				_configuration.setConfigUrl(SdkProperties.getConfigUrl());
 				_configuration.makeRequest();
 			} catch (Exception e) {
 				if (_retries < _maxRetries) {
@@ -155,7 +216,7 @@ public class InitializeThread extends Thread  {
 			try {
 				localWebViewData = Utilities.readFileBytes(new File(SdkProperties.getLocalWebViewFile()));
 			} catch (IOException e) {
-				DeviceLog.exception("IOException while loading local webview from cache", e);
+				DeviceLog.debug("Unity Ads init: webapp not found in local cache: " + e.getMessage());
 				return new InitializeStateLoadWeb(_configuration);
 			}
 
@@ -170,6 +231,7 @@ public class InitializeThread extends Thread  {
 					return new InitializeStateError("load cache", e);
 				}
 
+				DeviceLog.info("Unity Ads init: webapp loaded from local cache");
 				return new InitializeStateCreate(_configuration, webViewDataString);
 			}
 
@@ -193,7 +255,7 @@ public class InitializeThread extends Thread  {
 
 		@Override
 		public InitializeState execute() {
-			DeviceLog.debug("Unity Ads init: loading webapp from " + _configuration.getWebViewUrl());
+			DeviceLog.info("Unity Ads init: loading webapp from " + _configuration.getWebViewUrl());
 
 			WebRequest request;
 
@@ -268,7 +330,7 @@ public class InitializeThread extends Thread  {
 				return new InitializeStateComplete();
 			}
 			else {
-				DeviceLog.error("Timeout?");
+				DeviceLog.error("Unity Ads webapp creation timeout");
 				return new InitializeStateError("create webapp", new Exception("Creation of WebApp most likely timed out!"));
 			}
 		}
@@ -293,6 +355,17 @@ public class InitializeThread extends Thread  {
 		@Override
 		public InitializeState execute() {
 			DeviceLog.error("Unity Ads init: halting init in " + _state + ": " + _exception.getMessage());
+
+			final IUnityAdsListener listener = UnityAds.getListener();
+			final String message = "Init failed in " + _state;
+			if(UnityAds.getListener() != null) {
+				Utilities.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						listener.onUnityAdsError(UnityAds.UnityAdsError.INITIALIZE_FAILED, message);
+					}
+				});
+			}
 			return null;
 		}
 	}
@@ -313,7 +386,7 @@ public class InitializeThread extends Thread  {
 
 		@Override
 		public InitializeState execute() {
-			DeviceLog.debug("Unity Ads init: network error, waiting for connection events");
+			DeviceLog.error("Unity Ads init: network error, waiting for connection events");
 
 			ConnectivityMonitor.addListener(this);
 			_conditionVariable = new ConditionVariable();
@@ -332,7 +405,7 @@ public class InitializeThread extends Thread  {
 		public void onConnected() {
 			_receivedConnectedEvents++;
 
-			DeviceLog.debug("Got connected -event");
+			DeviceLog.debug("Unity Ads init got connected event");
 			if (shouldHandleConnectedEvent()) {
 				_conditionVariable.open();
 			}
@@ -346,7 +419,7 @@ public class InitializeThread extends Thread  {
 
 		@Override
 		public void onDisconnected() {
-			DeviceLog.debug("Got disconnected -event");
+			DeviceLog.debug("Unity Ads init got disconnected event");
 		}
 
 		private boolean shouldHandleConnectedEvent () {

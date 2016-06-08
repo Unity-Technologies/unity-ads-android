@@ -30,7 +30,6 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class InitializeThreadTest {
-	private String _configUrl;
 	private static final String _testConfigUrl = "https://www.example.net/test/webview.html";
 	private String _testConfigHash = "12345";
 	private Class[] _apiClassList = {com.unity3d.ads.api.Sdk.class};
@@ -40,8 +39,7 @@ public class InitializeThreadTest {
 	@Before
 	public void setup() throws MalformedURLException, URISyntaxException {
 		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
-		_configUrl = TestUtilities.getTestServerAddress() + "/testconfig.json";
-		SdkProperties.setConfigUrl(_configUrl);
+		SdkProperties.setConfigUrl(TestUtilities.getTestServerAddress() + "/testconfig.json");
 	}
 
 	@Test
@@ -63,27 +61,50 @@ public class InitializeThreadTest {
 		WebViewApp.getCurrentApp().setWebAppLoaded(true);
 		SdkProperties.setInitialized(true);
 
-		Configuration config = new Configuration();
-		config.setWebAppApiClassList(_apiClassList);
-		InitializeThread.InitializeStateReset state = new InitializeThread.InitializeStateReset(config);
+		Configuration initConfig = new Configuration();
+		initConfig.setWebAppApiClassList(_apiClassList);
+		InitializeThread.InitializeStateReset state = new InitializeThread.InitializeStateReset(initConfig);
 		Object nextState = state.execute();
 
-		assertFalse("Init state reset test: SDK is not initialized", SdkProperties.isInitialized());
-		assertFalse("Init state reset test: webapp is not loaded", WebViewApp.getCurrentApp().isWebAppLoaded());
-		assertTrue("Init state reset test: next state is config", nextState instanceof InitializeThread.InitializeStateConfig);
+		assertFalse("Init state reset test: SDK is initialized after SDK was reset", SdkProperties.isInitialized());
+		assertFalse("Init state reset test: webapp is loaded after SDK was reset", WebViewApp.getCurrentApp().isWebAppLoaded());
+		assertTrue("Init state reset test: next state is not config", nextState instanceof InitializeThread.InitializeStateAdBlockerCheck);
+
+		Configuration config = ((InitializeThread.InitializeStateAdBlockerCheck)nextState).getConfiguration();
+
+		assertEquals("Init state reset test: next state config url is not set", config.getConfigUrl(), SdkProperties.getConfigUrl());
+	}
+
+	@Test
+	public void testInitializeStateAdBlockerCheck() {
+		Configuration goodConfig = new Configuration();
+		goodConfig.setConfigUrl("http://www.unity3d.com/test");
+		InitializeThread.InitializeStateAdBlockerCheck state = new InitializeThread.InitializeStateAdBlockerCheck(goodConfig);
+		Object nextState = state.execute();
+
+		assertTrue("Init state ad blocker check test: next state is not load config", nextState instanceof InitializeThread.InitializeStateConfig);
+
+		Configuration badConfig = new Configuration();
+		badConfig.setConfigUrl("http://localhost/test");
+		InitializeThread.InitializeStateAdBlockerCheck state2 = new InitializeThread.InitializeStateAdBlockerCheck(badConfig);
+		Object nextState2 = state2.execute();
+
+		assertNull("Init state ad blocker check test: next state is not null", nextState2);
 	}
 
 	@Test
 	public void testInitializeStateConfig() {
-		InitializeThread.InitializeStateConfig state = new InitializeThread.InitializeStateConfig(new Configuration());
+		Configuration initConfig = new Configuration();
+		initConfig.setConfigUrl(SdkProperties.getConfigUrl());
+		InitializeThread.InitializeStateConfig state = new InitializeThread.InitializeStateConfig(initConfig);
 		Object nextState = state.execute();
 
-		assertTrue("Init state config test: next state is load cache", nextState instanceof InitializeThread.InitializeStateLoadCache);
+		assertTrue("Init state config test: next state is not load cache", nextState instanceof InitializeThread.InitializeStateLoadCache);
 
 		Configuration config = ((InitializeThread.InitializeStateLoadCache)nextState).getConfiguration();
 
-		assertEquals("Init state config test: config webview url matches url in testconfig.json", config.getWebViewUrl(), _testConfigUrl);
-		assertEquals("Init state config test: config webview hash matches hash in testconfig.json", config.getWebViewHash(), _testConfigHash);
+		assertEquals("Init state config test: config webview url does not match url in testconfig.json", config.getWebViewUrl(), _testConfigUrl);
+		assertEquals("Init state config test: config webview hash does not match hash in testconfig.json", config.getWebViewHash(), _testConfigHash);
 	}
 
 	// Test for cache load fail case, success case is handled in load web test
@@ -97,12 +118,12 @@ public class InitializeThreadTest {
 		InitializeThread.InitializeStateLoadCache state = new InitializeThread.InitializeStateLoadCache(bogusConfig);
 		Object nextState = state.execute();
 
-		assertTrue("Init state load cache test: bogus config means cached webview is not found and next state is load web ", nextState instanceof InitializeThread.InitializeStateLoadWeb);
+		assertTrue("Init state load cache test: init is not loading from web with bogus config ", nextState instanceof InitializeThread.InitializeStateLoadWeb);
 
 		Configuration webConfig = ((InitializeThread.InitializeStateLoadWeb)nextState).getConfiguration();
 
-		assertEquals("Init state load cache test: load web config url is correct", webConfig.getWebViewUrl(), _testConfigUrl);
-		assertEquals("Init state load cache test: load web config hash is correct", webConfig.getWebViewHash(), _testConfigHash);
+		assertEquals("Init state load cache test: load web config url is not correct", webConfig.getWebViewUrl(), _testConfigUrl);
+		assertEquals("Init state load cache test: load web config hash is not correct", webConfig.getWebViewHash(), _testConfigHash);
 	}
 
 	@Test
@@ -118,30 +139,30 @@ public class InitializeThreadTest {
 		InitializeThread.InitializeStateLoadWeb state = new InitializeThread.InitializeStateLoadWeb(webConfig);
 		Object nextState = state.execute();
 
-		assertTrue("Init state load web test: next state is create", nextState instanceof InitializeThread.InitializeStateCreate);
+		assertTrue("Init state load web test: next state is not create", nextState instanceof InitializeThread.InitializeStateCreate);
 
 		Configuration createConfig = ((InitializeThread.InitializeStateCreate)nextState).getConfiguration();
 
-		assertEquals("Init state load web test: original webview url matches created url", webUrl, createConfig.getWebViewUrl());
-		assertEquals("Init state load web test: original webview hash matches created hash", webHash, createConfig.getWebViewHash());
+		assertEquals("Init state load web test: original webview url does not match created url", webUrl, createConfig.getWebViewUrl());
+		assertEquals("Init state load web test: original webview hash does not match created hash", webHash, createConfig.getWebViewHash());
 
 		String createWebData = ((InitializeThread.InitializeStateCreate)nextState).getWebData();
 
-		assertEquals("Init state load web test: original webview content matches created webview content", webData, createWebData);
+		assertEquals("Init state load web test: original webview content does not match created webview content", webData, createWebData);
 
 		InitializeThread.InitializeStateLoadCache state2 = new InitializeThread.InitializeStateLoadCache(webConfig);
 		Object nextState2 = state2.execute();
 
-		assertTrue("Init state load web test: webapp was successfully cached", nextState2 instanceof InitializeThread.InitializeStateCreate);
+		assertTrue("Init state load web test: webapp was not successfully cached", nextState2 instanceof InitializeThread.InitializeStateCreate);
 
 		Configuration createConfig2 = ((InitializeThread.InitializeStateCreate)nextState2).getConfiguration();
 
-		assertEquals("Init state load web test: cached webview url matches created url", webUrl, createConfig2.getWebViewUrl());
-		assertEquals("Init state load web test: cached webview hash matches created hash", webHash, createConfig2.getWebViewHash());
+		assertEquals("Init state load web test: cached webview url does not match created url", webUrl, createConfig2.getWebViewUrl());
+		assertEquals("Init state load web test: cached webview hash does not match created hash", webHash, createConfig2.getWebViewHash());
 
 		String createWebData2 = ((InitializeThread.InitializeStateCreate)nextState2).getWebData();
 
-		assertEquals("Init state load web test: cached webview content matches created webview content", webData, createWebData2);
+		assertEquals("Init state load web test: cached webview content does not match created webview content", webData, createWebData2);
 	}
 
 	@Test
@@ -163,7 +184,7 @@ public class InitializeThreadTest {
 		InitializeThread.InitializeStateCreate state = new InitializeThread.InitializeStateCreate(config, data);
 		Object nextState = state.execute();
 
-		assertTrue("Init state create test: next state is complete", nextState instanceof InitializeThread.InitializeStateComplete);
+		assertTrue("Init state create test: next state is not complete", nextState instanceof InitializeThread.InitializeStateComplete);
 	}
 
 	@Test
@@ -171,7 +192,7 @@ public class InitializeThreadTest {
 		InitializeThread.InitializeStateComplete state = new InitializeThread.InitializeStateComplete();
 		Object nextState = state.execute();
 
-		assertNull("Init state complete test: next step must be null", nextState);
+		assertNull("Init state complete test: next step is not null", nextState);
 	}
 
 	@Test

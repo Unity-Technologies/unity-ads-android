@@ -67,7 +67,7 @@ public class Cache {
 
 		fileList = cacheDirectory.listFiles(filter);
 
-		if (fileList.length == 0) {
+		if (fileList == null || fileList.length == 0) {
 			callback.invoke(new JSONArray());
 		}
 
