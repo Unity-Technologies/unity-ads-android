@@ -1,6 +1,6 @@
 # Unity Ads 2.0 Android Release Repository
 
-Welcome to the Unity Ads 2.0 Android release repository
+Welcome to the Unity Ads 2.0 Android release repository. *Please note that SDK 2.0 is still in BETA*.
 
 ## Binaries
 
