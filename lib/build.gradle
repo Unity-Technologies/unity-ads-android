@@ -13,7 +13,7 @@ android {
     minSdkVersion 9
     targetSdkVersion 23
     versionCode = 2000
-    versionName = "2.0.0-beta2"
+    versionName = "2.0.0-beta3"
 
     setProperty("archivesBaseName", "unity-ads")
 

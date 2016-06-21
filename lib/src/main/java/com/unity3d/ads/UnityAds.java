@@ -119,6 +119,11 @@ public final class UnityAds {
 			DeviceLog.info("Initializing Unity Ads " + SdkProperties.getVersionName() + " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in production mode");
 		}
 
+		ClientProperties.setGameId(gameId);
+		ClientProperties.setListener(listener);
+		ClientProperties.setApplicationContext(activity.getApplicationContext());
+		SdkProperties.setTestMode(testMode);
+
 		if(EnvironmentCheck.isEnvironmentOk()) {
 			DeviceLog.info("Unity Ads environment check OK");
 		} else {
@@ -128,11 +133,6 @@ public final class UnityAds {
 			}
 			return;
 		}
-
-		ClientProperties.setGameId(gameId);
-		ClientProperties.setListener(listener);
-		ClientProperties.setApplicationContext(activity.getApplicationContext());
-		SdkProperties.setTestMode(testMode);
 
 		Configuration configuration = new Configuration();
 		Class[] apiClassList = {

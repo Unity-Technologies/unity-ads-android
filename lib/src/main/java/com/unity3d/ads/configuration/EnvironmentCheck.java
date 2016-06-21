@@ -3,13 +3,15 @@ package com.unity3d.ads.configuration;
 import android.os.Build;
 
 import com.unity3d.ads.log.DeviceLog;
+import com.unity3d.ads.properties.SdkProperties;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 public class EnvironmentCheck {
 	public static boolean isEnvironmentOk() {
-		return testProGuard();
+		return testProGuard() && testCacheDirectory();
 	}
 
 	public static boolean testProGuard() {
@@ -35,6 +37,17 @@ public class EnvironmentCheck {
 			DeviceLog.exception("Unknown exception during Unity Ads ProGuard check: " + e.getMessage(), e);
 			// Unknown exception, return test success just to be on the safe side
 			return true;
+		}
+	}
+
+	public static boolean testCacheDirectory() {
+		File cacheDirectory = SdkProperties.getCacheDirectory();
+		if(cacheDirectory != null) {
+			DeviceLog.debug("Unity Ads cache directory check OK");
+			return true;
+		} else {
+			DeviceLog.error("Unity Ads cache directory check fail: no working cache directory available");
+			return false;
 		}
 	}
 

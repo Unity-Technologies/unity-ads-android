@@ -35,14 +35,14 @@ public class BroadcastMonitor {
 	public static void removeBroadcastListener(String name) {
 		if(_eventReceivers != null && _eventReceivers.containsKey(name)) {
 			ClientProperties.getApplicationContext().unregisterReceiver(_eventReceivers.get(name));
-			_eventReceivers.remove(_eventReceivers.get(name));
+			_eventReceivers.remove(name);
 		}
 	}
 
 	public static void removeAllBroadcastListeners() {
 		if(_eventReceivers != null) {
 			for(String key : _eventReceivers.keySet()) {
-				removeBroadcastListener(key);
+				ClientProperties.getApplicationContext().unregisterReceiver(_eventReceivers.get(key));
 			}
 
 			_eventReceivers = null;

@@ -123,4 +123,19 @@
 
     </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/unityads_example_statustext"
+        android:layout_below="@+id/unityads_example_button_container"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textAlignment="center"
+        android:textColor="#ffffff"
+        android:gravity="center" />
+
 </RelativeLayout>

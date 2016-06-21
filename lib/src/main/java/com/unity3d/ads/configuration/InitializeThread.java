@@ -4,6 +4,7 @@ import android.os.ConditionVariable;
 
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.broadcast.BroadcastMonitor;
 import com.unity3d.ads.placement.Placement;
 import com.unity3d.ads.cache.CacheThread;
 import com.unity3d.ads.connectivity.ConnectivityMonitor;
@@ -100,6 +101,7 @@ public class InitializeThread extends Thread  {
 
 			SdkProperties.setInitialized(false);
 			Placement.reset();
+			BroadcastMonitor.removeAllBroadcastListeners();
 			CacheThread.cancel();
 			ConnectivityMonitor.stopAll();
 			StorageManager.init(ClientProperties.getApplicationContext());

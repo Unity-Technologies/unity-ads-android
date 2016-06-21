@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 
 import com.unity3d.ads.BuildConfig;
+import com.unity3d.ads.cache.CacheDirectory;
 import com.unity3d.ads.log.DeviceLog;
 
 import java.io.File;
@@ -13,7 +14,7 @@ import java.net.URL;
 
 public class SdkProperties {
 	private static String _configUrl = getDefaultConfigUrl("release");
-	private static File _cacheDirectory = null;
+	private static CacheDirectory _cacheDirectory = null;
 	private static final String CACHE_DIR_NAME = "UnityAdsCache";
 	private static final String LOCAL_CACHE_FILE_PREFIX = "UnityAdsCache-";
 	private static final String LOCAL_STORAGE_FILE_PREFIX = "UnityAdsStorage-";
@@ -94,34 +95,11 @@ public class SdkProperties {
 	}
 
 	public static File getCacheDirectory (Context context) {
-		if (_cacheDirectory == null) {
-			File filesDir = context.getFilesDir();
-			// If device storage is full, filesDir might be null
-			if (filesDir != null) {
-				_cacheDirectory = new File(filesDir.getPath());
-			}
-
-			if (Build.VERSION.SDK_INT > 18) {
-				File externalCacheFile = context.getExternalCacheDir();
-				// If device storage is full, external cachedir might be null
-				if (externalCacheFile != null) {
-					String absoluteCachePath = externalCacheFile.getAbsolutePath();
-					_cacheDirectory = new File(absoluteCachePath, CACHE_DIR_NAME);
-					if (_cacheDirectory.mkdirs()) {
-						DeviceLog.debug("Successfully created cache");
-					}
-				}
-			}
-
-			if (!_cacheDirectory.isDirectory()) {
-				DeviceLog.error("Unity Ads cache: Creating cache dir failed");
-				return null;
-			}
-
-			DeviceLog.debug("Unity Ads cache: using " + _cacheDirectory.getAbsolutePath() + " as cache");
+		if(_cacheDirectory == null) {
+			_cacheDirectory = new CacheDirectory(CACHE_DIR_NAME);
 		}
 
-		return _cacheDirectory;
+		return _cacheDirectory.getCacheDirectory(context);
 	}
 
 	public static void setShowTimeout(int timeout) {

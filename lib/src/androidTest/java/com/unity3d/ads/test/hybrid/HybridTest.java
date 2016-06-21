@@ -61,6 +61,7 @@ public class HybridTest {
     Configuration configuration = new Configuration();
     final Class[] apiClassList = {
       com.unity3d.ads.api.AdUnit.class,
+      com.unity3d.ads.api.Broadcast.class,
       com.unity3d.ads.api.Cache.class,
       com.unity3d.ads.api.Connectivity.class,
       com.unity3d.ads.api.DeviceInfo.class,

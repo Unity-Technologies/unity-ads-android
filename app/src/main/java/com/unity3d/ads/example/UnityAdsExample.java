@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.unity3d.ads.IUnityAdsListener;
@@ -76,6 +77,7 @@ public class UnityAdsExample extends Activity {
 		final Button initializeButton = (Button) findViewById(R.id.unityads_example_initialize_button);
 		final EditText gameIdEdit = (EditText) findViewById(R.id.unityads_example_gameid_edit);
 		final CheckBox testModeCheckbox = (CheckBox) findViewById(R.id.unityads_example_testmode_checkbox);
+		final TextView statusText = (TextView) findViewById(R.id.unityads_example_statustext);
 
 		SharedPreferences preferences = getSharedPreferences("Settings", MODE_PRIVATE);
 		gameIdEdit.setText(preferences.getString("gameId", defaultGameId));
@@ -93,6 +95,7 @@ public class UnityAdsExample extends Activity {
 				gameIdEdit.setEnabled(false);
 				testModeCheckbox.setEnabled(false);
 
+				statusText.setText("Initializing...");
 				UnityAds.initialize(self, gameId, unityAdsListener, testModeCheckbox.isChecked());
 
 				// store entered gameid in app settings
@@ -174,6 +177,9 @@ public class UnityAdsExample extends Activity {
 
 		@Override
 		public void onUnityAdsReady(final String zoneId) {
+			TextView statusText = (TextView) findViewById(R.id.unityads_example_statustext);
+			statusText.setText("");
+
 			DeviceLog.debug("onUnityAdsReady: " + zoneId);
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
@@ -216,6 +222,9 @@ public class UnityAdsExample extends Activity {
 		public void onUnityAdsError(UnityAds.UnityAdsError error, String message) {
 			DeviceLog.debug("onUnityAdsError: " + error + " - " + message);
 			toast("Error", error + " " + message);
+
+			TextView statusText = (TextView) findViewById(R.id.unityads_example_statustext);
+			statusText.setText(error + " - " + message);
 		}
 
 		private void toast(String callback, String msg) {

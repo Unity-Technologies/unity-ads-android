@@ -5,6 +5,7 @@ import android.content.Context;
 import com.unity3d.ads.device.Storage;
 import com.unity3d.ads.device.StorageEvent;
 import com.unity3d.ads.device.StorageManager;
+import com.unity3d.ads.log.DeviceLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +59,8 @@ public class MetaData {
 				storage.writeStorage();
 				storage.sendEvent(StorageEvent.SET, _metaData);
 			}
+		} else {
+			DeviceLog.error("Unity Ads could not commit metadata due to storage error");
 		}
 	}
 }

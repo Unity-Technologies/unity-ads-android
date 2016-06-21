@@ -21,4 +21,9 @@ public class EnvironmentCheckTest {
 	public void testProGuardTest() {
 		assertTrue("Environment check for ProGuard failed", EnvironmentCheck.testProGuard());
 	}
+
+	@Test
+	public void testCacheDirectory() {
+		assertTrue("Environment check for cache directory failed", EnvironmentCheck.testCacheDirectory());
+	}
 }

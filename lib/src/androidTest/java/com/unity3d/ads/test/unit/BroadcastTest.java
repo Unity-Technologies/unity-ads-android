@@ -17,6 +17,7 @@ import com.unity3d.ads.webview.WebViewEventCategory;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +32,11 @@ public class BroadcastTest {
 	@Before
 	public void setup() {
 		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+	}
+
+	@After
+	public void cleanup() {
+		BroadcastMonitor.removeAllBroadcastListeners();
 	}
 
 	@Test

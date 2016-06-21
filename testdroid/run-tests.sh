@@ -70,16 +70,23 @@ echo "**************************"
 echo "*** [$(date)] ***"
 
 # We cannot risk running out of time or we have no results and TD leaves process stuck.
-(sleep 300 ; echo "[$(date)] 300s spent... Killing all adb!" ; killall adb ; sleep 2 ; killall -9 adb) &
+( sleep 300 ; 
+  echo "[$(date)] TIMEOUT 300s spent... Killing all adb!" ; 
+  adb shell log -pd -tQAinformer "TIMEOUT 300s spent. Killing all adb processes"
+  killall adb ; 
+  sleep 2 ; 
+  killall -9 adb) &
 
 echo "*********"
 echo "*********"
 echo "*********"
 echo "*********"
+adb shell log -pd -tQAinformer "Starting test execution"
 
 adb shell am instrument -r -w -e class com.unity3d.ads.test.UnitTestSuite,com.unity3d.ads.test.HybridTestSuite com.unity3d.ads.test/android.support.test.runner.AndroidJUnitRunner 2>&1 |tee $TEST_RESULTS_FILE
 
 echo "[$(date)]Test Done!"
+adb shell log -pd -tQAinformer "Tests done"
 echo "parsing results"
 echo "which python = '$(which python 2>&1)'"
 echo "Python version = '$(python --version 2>&1)'"
