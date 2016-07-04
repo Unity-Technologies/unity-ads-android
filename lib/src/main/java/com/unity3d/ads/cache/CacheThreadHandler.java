@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class CacheThreadHandler extends Handler {
+class 	CacheThreadHandler extends Handler {
 	private WebRequest _currentRequest = null;
 	private boolean _canceled = false;
 	private boolean _active = false;
@@ -137,12 +137,10 @@ class CacheThreadHandler extends Handler {
 	private void postProcessDownload(long startTime, String source, File targetFile, long byteCount, long totalBytes, boolean canceled, int responseCode, Map<String, List<String>> responseHeaders) {
 		long duration = SystemClock.elapsedRealtime() - startTime;
 
-		if (Build.VERSION.SDK_INT < 19) {
-			// With some old Androids the MediaPlayer cannot play the file unless it's set to readable for all
-			boolean result = targetFile.setReadable(true, false);
-			if (!result) {
-				DeviceLog.debug("Unity Ads cache: could not set file readable!");
-			}
+		// With some old Androids the MediaPlayer cannot play the file unless it's set to readable for all
+		boolean result = targetFile.setReadable(true, false);
+		if (!result) {
+			DeviceLog.debug("Unity Ads cache: could not set file readable!");
 		}
 
 		if (!canceled) {

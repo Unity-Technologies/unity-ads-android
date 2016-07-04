@@ -28,12 +28,14 @@ public class VideoPlayerView extends VideoView {
 		_videoTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
+				boolean isPlaying = false;
 				try {
+					isPlaying = isPlaying();
 					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PROGRESS, getCurrentPosition());
 				}
 				catch (IllegalStateException e) {
 					DeviceLog.exception("Exception while sending current position to webapp", e);
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE, VideoPlayerEvent.PROGRESS, isPlaying());
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE, VideoPlayerEvent.PROGRESS, isPlaying);
 				}
 			}
 		}, _progressEventInterval, _progressEventInterval);

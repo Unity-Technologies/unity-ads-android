@@ -22,8 +22,22 @@ public final class UnityAds {
 	private static boolean _configurationInitialized = false;
 	private static boolean _debugMode = false;
 
+	/**
+	 *  An enumeration for the completion state of an ad.
+	 */
 	public enum FinishState {
-		ERROR, COMPLETED, SKIPPED
+		/**
+		 *  A state that indicates that the ad did not successfully display.
+		 */
+		ERROR,
+		/**
+		 *  A state that indicates that the user skipped the ad.
+		 */
+		SKIPPED,
+		/**
+		 *  A state that indicates that the ad was played entirely.
+		 */
+		COMPLETED
 	}
 
 	/**
