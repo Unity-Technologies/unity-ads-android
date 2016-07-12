@@ -284,7 +284,8 @@ public class AdUnitActivity extends Activity {
 	private void destroyVideoPlayer () {
 		if (VideoPlayer.getVideoPlayerView() != null) {
 			ViewUtilities.removeViewFromParent(VideoPlayer.getVideoPlayerView());
-			VideoPlayer.getVideoPlayerView().stop();
+			VideoPlayer.getVideoPlayerView().stopPlayback();
+			VideoPlayer.getVideoPlayerView().stopVideoProgressTimer();
 		}
 
 		VideoPlayer.setVideoPlayerView(null);

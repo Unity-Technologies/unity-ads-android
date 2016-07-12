@@ -17,6 +17,7 @@ import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.metadata.MediationMetaData;
+import com.unity3d.ads.metadata.MetaData;
 import com.unity3d.ads.metadata.PlayerMetaData;
 import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.SdkProperties;
@@ -43,6 +44,10 @@ public class UnityAdsExample extends Activity {
 		mediationMetaData.setVersion("v12345");
 		mediationMetaData.setOrdinal(1);
 		mediationMetaData.commit();
+
+		MetaData debugMetaData = new MetaData(this);
+		debugMetaData.set("test.debugOverlayEnabled", true);
+		debugMetaData.commit();
 
 		final Button interstitialButton = (Button) findViewById(R.id.unityads_example_interstitial_button);
 		disableButton(interstitialButton);

@@ -9,7 +9,7 @@ android {
     minSdkVersion 9
     targetSdkVersion 23
     versionCode = 2000
-    versionName = "2.0.0-beta4"
+    versionName = "2.0.0-beta5"
   }
   buildTypes {
     release {
