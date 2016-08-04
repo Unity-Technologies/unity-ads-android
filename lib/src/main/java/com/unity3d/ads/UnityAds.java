@@ -133,6 +133,8 @@ public final class UnityAds {
 			DeviceLog.info("Initializing Unity Ads " + SdkProperties.getVersionName() + " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in production mode");
 		}
 
+		setDebugMode(_debugMode);
+
 		ClientProperties.setGameId(gameId);
 		ClientProperties.setListener(listener);
 		ClientProperties.setApplicationContext(activity.getApplicationContext());

@@ -1,14 +1,20 @@
 package com.unity3d.ads.test.unit;
 
+import android.os.ConditionVariable;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.ViewGroup;
 
 import com.unity3d.ads.api.Connectivity;
 import com.unity3d.ads.api.DeviceInfo;
 import com.unity3d.ads.connectivity.ConnectivityEvent;
 import com.unity3d.ads.connectivity.ConnectivityMonitor;
 import com.unity3d.ads.connectivity.IConnectivityListener;
+import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.properties.ClientProperties;
+import com.unity3d.ads.video.VideoPlayerView;
 import com.unity3d.ads.webview.WebViewApp;
 import com.unity3d.ads.webview.WebViewEventCategory;
 import com.unity3d.ads.webview.bridge.CallbackStatus;
@@ -72,28 +78,65 @@ public class ConnectivityTest {
 		// Make sure connectivity monitor thinks it's connected when test starts
 		ConnectivityMonitor.connected();
 
-		MockWebViewApp webapp = new MockWebViewApp();
+		final MockWebViewApp webapp = new MockWebViewApp();
 		WebViewApp.setCurrentApp(webapp);
 		WebViewApp.getCurrentApp().setWebAppLoaded(true);
 
-		Connectivity.setConnectionMonitoring(true, webapp.getCallback());
+		Handler handler = new Handler(Looper.getMainLooper());
+		ConditionVariable cv = new ConditionVariable();
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				Connectivity.setConnectionMonitoring(true, webapp.getCallback());
+				webapp.getInvocation().sendInvocationCallback();
+
+			}
+		});
+		boolean success = cv.block(1000);
+
 		assertTrue("Connectivity MockWebViewApp did not respond with success callback", webapp.getCallbackInvoked());
 
-		ConnectivityMonitor.disconnected();
+		cv = new ConditionVariable();
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				ConnectivityMonitor.disconnected();
+			}
+		});
+		success = cv.block(1000);
+
 		assertEquals("Connectivity MockWebViewApp did not get one disconnect event", 1, webapp.getDisconnectedEvents());
 
-		ConnectivityMonitor.connected();
-		assertEquals("Connectivity MockWebViewApp did not get one connect event", 1, webapp.getConnectedEvents());
+		cv = new ConditionVariable();
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				ConnectivityMonitor.connected();
+			}
+		});
+		success = cv.block(1000);
+
+		assertTrue("Connectivity MockWebViewApp did not get connect event", webapp.getConnectedEvents() > 0);
 	}
 
 	private class MockWebViewApp extends WebViewApp {
 		private int _disconnectedEvents = 0;
 		private int _connectedEvents = 0;
 		boolean _callbackInvoked = false;
+		Invocation _invocation = null;
+		ConditionVariable _cv = null;
 
 		public WebViewCallback getCallback() {
-			Invocation invocation = new Invocation();
-			return new WebViewCallback("1234", invocation.getId());
+			_invocation = new Invocation();
+			return new WebViewCallback("1234", _invocation.getId());
+		}
+
+		public Invocation getInvocation() {
+			return _invocation;
+		}
+
+		public void setCV(ConditionVariable cv) {
+			_cv = cv;
 		}
 
 		@Override
@@ -104,11 +147,24 @@ public class ConnectivityTest {
 				_callbackInvoked = true;
 			}
 
-			return super.invokeCallback(invocation);
+			openCVAndReset();
+
+			return true;
 		}
 
 		public boolean getCallbackInvoked() {
 			return _callbackInvoked;
+		}
+
+		public void openCVAndReset () {
+			if (_cv != null) {
+				DeviceLog.debug("Opening CV");
+				_cv.open();
+				_cv = null;
+			}
+			if (_invocation != null) {
+				_invocation = null;
+			}
 		}
 
 		@Override
@@ -117,13 +173,17 @@ public class ConnectivityTest {
 				throw new IllegalArgumentException("Event category not CONNECTIVITY");
 			}
 
+			DeviceLog.debug("EVENT: " + eventId.name());
+
 			switch((ConnectivityEvent)eventId) {
 				case CONNECTED:
 					_connectedEvents++;
+					openCVAndReset();
 					break;
 
 				case DISCONNECTED:
 					_disconnectedEvents++;
+					openCVAndReset();
 					break;
 
 				case NETWORK_CHANGE:

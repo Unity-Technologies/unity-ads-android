@@ -59,7 +59,7 @@ public class MetaDataTest {
 
 		HashMap<String, Object> params = (HashMap<String, Object>)((MetaDataWebApp)WebViewApp.getCurrentApp()).PARAMS[1];
 
-		assertEquals("Metadata doesn't have correct amount of values", params.size(), 4 * 2);
+		assertEquals("Metadata doesn't have correct amount of values", params.size(), 1 * 2);
 
 		HashMap<String, Object> metadataEntries = (HashMap<String, Object>)metaData.getEntries();
 		for (String k : params.keySet()) {

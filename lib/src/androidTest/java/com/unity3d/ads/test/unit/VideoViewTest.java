@@ -458,11 +458,18 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 
 		assertTrue("Condition Variable was not opened: VIDEO PROGRESS or PREPARE ERROR event was not received", success);
 
+		int failedIntervals = 0;
+
 		for (int idx = 0; idx < EVENT_POSITIONS.size(); idx++) {
 			if (idx + 1 < EVENT_POSITIONS.size()) {
 				long interval = Math.abs(300 - (EVENT_POSITIONS.get(idx + 1) - EVENT_POSITIONS.get(idx)));
 				DeviceLog.debug("Interval is: " + interval);
-				assertFalse("Interval of the events weren't as accurate as expected (threshold of 70ms, was: " + interval + ")", interval > 70);
+
+				if (interval > 80) {
+					failedIntervals++;
+				}
+
+				assertFalse("Too many intervals failed to arrive in 80ms threshold (" + failedIntervals + ")", failedIntervals > 3);
 			}
 		}
 

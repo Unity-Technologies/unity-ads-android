@@ -400,7 +400,7 @@ public class CacheTest {
 						break;
 
 					case DOWNLOAD_PROGRESS:
-						if(REMOTE_VIDEO.equals(params[0]) && (Long)params[1] > minDownloadBytes) {
+						if(REMOTE_VIDEO.equals(params[0]) && (Long)params[1] > 1) {
 							setFlag("cancelInvoked");
 							Invocation invocation = new Invocation();
 							WebViewCallback callback = new WebViewCallback("1234", invocation.getId());
@@ -416,7 +416,7 @@ public class CacheTest {
 
 					case DOWNLOAD_STOPPED:
 						// params: url, total bytes
-						if(REMOTE_VIDEO.equals(params[0]) && (Long)params[1] > minDownloadBytes) {
+						if(REMOTE_VIDEO.equals(params[0]) && (Long)params[1] > 1) {
 							setFlag("stopEventReceived");
 							downloadPosition = (long)params[1];
 							cacheCv.open();
@@ -438,7 +438,7 @@ public class CacheTest {
 
 		Invocation invocation = new Invocation();
 		WebViewCallback callback = new WebViewCallback("1234", invocation.getId());
-		CacheThread.setProgressInterval(10);
+		CacheThread.setProgressInterval(2);
 		Cache.download(REMOTE_VIDEO, REMOTE_VIDEO_FILE_ID, callback);
 		invocation.sendInvocationCallback();
 

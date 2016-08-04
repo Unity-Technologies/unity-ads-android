@@ -86,6 +86,7 @@ public class UnityAdsExample extends Activity {
 
 		SharedPreferences preferences = getSharedPreferences("Settings", MODE_PRIVATE);
 		gameIdEdit.setText(preferences.getString("gameId", defaultGameId));
+               testModeCheckbox.setChecked(true);
 
 		initializeButton.setOnClickListener(new View.OnClickListener() {
 			@Override
