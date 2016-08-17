@@ -143,6 +143,7 @@ public class InitializeThread extends Thread  {
 						InitializeStateAdBlockerCheck.this._address = InetAddress.getByName(configHost);
 						cv.open();
 					} catch(Exception e) {
+						DeviceLog.exception("Couldn't get address. Host: " + configHost, e);
 						cv.open();
 					}
 				}

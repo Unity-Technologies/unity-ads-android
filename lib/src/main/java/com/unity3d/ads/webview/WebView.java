@@ -32,6 +32,7 @@ public class WebView extends android.webkit.WebView {
 			try {
 				_evaluateJavascript = android.webkit.WebView.class.getMethod("evaluateJavascript", String.class, ValueCallback.class);
 			} catch(NoSuchMethodException e) {
+				DeviceLog.exception("Method evaluateJavascript not found", e);
 				_evaluateJavascript = null;
 			}
 		}

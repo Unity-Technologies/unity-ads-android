@@ -165,6 +165,9 @@ public class WebRequest {
 			input = connection.getInputStream();
 		} catch (IOException e) {
 			input = connection.getErrorStream();
+			if(input == null) {
+				throw new IOException("Can't open error stream");
+			}
 		}
 
 		if(_progressListener != null) {

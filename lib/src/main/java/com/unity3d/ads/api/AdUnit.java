@@ -19,6 +19,7 @@ import java.util.Arrays;
 
 public class AdUnit {
 	private static AdUnitActivity _adUnitActivity;
+	private static int _currentActivityId = -1;
 
 	private AdUnit () {
 	}
@@ -31,18 +32,26 @@ public class AdUnit {
 		return _adUnitActivity;
 	}
 
-	@WebViewExposed
-	public static void open (JSONArray views, Integer orientation, WebViewCallback callback) {
-		open(views, orientation, null, callback);
+	public static int getCurrentAdUnitActivityId () {
+		return _currentActivityId;
+	}
+
+	public static void setCurrentAdUnitActivityId (int activityId) {
+		_currentActivityId = activityId;
 	}
 
 	@WebViewExposed
-	public static void open (JSONArray views, Integer orientation, JSONArray keyevents, WebViewCallback callback) {
-		open(views, orientation, keyevents, 0, true, callback);
+	public static void open (Integer activityId, JSONArray views, Integer orientation, WebViewCallback callback) {
+		open(activityId, views, orientation, null, callback);
 	}
 
 	@WebViewExposed
-	public static void open (JSONArray views, Integer orientation, JSONArray keyevents, Integer systemUiVisibility, Boolean hardwareAcceleration, WebViewCallback callback) {
+	public static void open (Integer activityId, JSONArray views, Integer orientation, JSONArray keyevents, WebViewCallback callback) {
+		open(activityId, views, orientation, keyevents, 0, true, callback);
+	}
+
+	@WebViewExposed
+	public static void open (Integer activityId, JSONArray views, Integer orientation, JSONArray keyevents, Integer systemUiVisibility, Boolean hardwareAcceleration, WebViewCallback callback) {
 		final Intent intent;
 
 		if(hardwareAcceleration) {
@@ -55,6 +64,24 @@ public class AdUnit {
 
 		int flags = Intent.FLAG_ACTIVITY_NO_ANIMATION | Intent.FLAG_ACTIVITY_NEW_TASK;
 		intent.addFlags(flags);
+
+		if (activityId != null) {
+			try {
+				intent.putExtra(AdUnitActivity.EXTRA_ACTIVITY_ID, activityId.intValue());
+			}
+			catch (Exception e) {
+				DeviceLog.exception("Could not set activityId for intent", e);
+				callback.error(AdUnitError.ACTIVITY_ID, activityId.intValue(), e.getMessage());
+				return;
+			}
+
+			setCurrentAdUnitActivityId(activityId.intValue());
+		}
+		else {
+			DeviceLog.error("Activity ID is NULL");
+			callback.error(AdUnitError.ACTIVITY_ID, "Activity ID NULL");
+			return;
+		}
 
 		try {
 			intent.putExtra(AdUnitActivity.EXTRA_VIEWS, getViewList(views));
@@ -92,8 +119,6 @@ public class AdUnit {
 		else {
 			callback.error(AdUnitError.ACTIVITY_NULL);
 		}
-
-		setAdUnitActivity(null);
 	}
 
 	@WebViewExposed

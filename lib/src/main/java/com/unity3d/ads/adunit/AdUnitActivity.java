@@ -26,6 +26,7 @@ import java.util.Arrays;
 public class AdUnitActivity extends Activity {
 
 	public static final String EXTRA_VIEWS = "views";
+	public static final String EXTRA_ACTIVITY_ID = "activityId";
 	public static final String EXTRA_ORIENTATION = "orientation";
 	public static final String EXTRA_SYSTEM_UI_VISIBILITY = "systemUiVisibility";
 	public static final String EXTRA_KEY_EVENT_LIST = "keyEvents";
@@ -35,6 +36,7 @@ public class AdUnitActivity extends Activity {
 	private String[] _views;
 	private int _orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 	private int _systemUiVisibility;
+	private int _activityId;
 	private ArrayList<Integer> _keyEventList;
 	boolean _keepScreenOn;
 
@@ -62,6 +64,9 @@ public class AdUnitActivity extends Activity {
 			if (getIntent().hasExtra(EXTRA_SYSTEM_UI_VISIBILITY)) {
 				_systemUiVisibility = getIntent().getIntExtra(EXTRA_SYSTEM_UI_VISIBILITY, 0);
 			}
+			if (getIntent().hasExtra(EXTRA_ACTIVITY_ID)) {
+				_activityId = getIntent().getIntExtra(EXTRA_ACTIVITY_ID, -1);
+			}
 			event = AdUnitEvent.ON_CREATE;
 		} else {
 			_views = savedInstanceState.getStringArray(EXTRA_VIEWS);
@@ -69,6 +74,7 @@ public class AdUnitActivity extends Activity {
 			_systemUiVisibility = savedInstanceState.getInt(EXTRA_SYSTEM_UI_VISIBILITY, 0);
 			_keyEventList = savedInstanceState.getIntegerArrayList(EXTRA_KEY_EVENT_LIST);
 			_keepScreenOn = savedInstanceState.getBoolean(EXTRA_KEEP_SCREEN_ON);
+			_activityId = savedInstanceState.getInt(EXTRA_ACTIVITY_ID, -1);
 			setKeepScreenOn(_keepScreenOn);
 			event = AdUnitEvent.ON_RESTORE;
 		}
@@ -80,19 +86,19 @@ public class AdUnitActivity extends Activity {
 			createVideoPlayer();
 		}
 
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, event);
+		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, event, _activityId);
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_START);
+		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_START, _activityId);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_STOP);
+		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_STOP, _activityId);
 	}
 
 	@Override
@@ -100,7 +106,7 @@ public class AdUnitActivity extends Activity {
 		super.onResume();
 		setViews(_views);
 
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_RESUME);
+		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_RESUME, _activityId);
 	}
 
 	@Override
@@ -112,7 +118,7 @@ public class AdUnitActivity extends Activity {
 		}
 
 		destroyVideoPlayer();
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_PAUSE, isFinishing());
+		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_PAUSE, isFinishing(), _activityId);
 	}
 
 	@Override
@@ -124,20 +130,25 @@ public class AdUnitActivity extends Activity {
 		outState.putIntegerArrayList(EXTRA_KEY_EVENT_LIST, _keyEventList);
 		outState.putBoolean(EXTRA_KEEP_SCREEN_ON, _keepScreenOn);
 		outState.putStringArray(EXTRA_VIEWS, _views);
+		outState.putInt(EXTRA_ACTIVITY_ID, _activityId);
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		AdUnit.setAdUnitActivity(null);
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_DESTROY, isFinishing());
+		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_DESTROY, isFinishing(), _activityId);
+
+		if (AdUnit.getCurrentAdUnitActivityId() == _activityId) {
+			AdUnit.setAdUnitActivity(null);
+		}
 	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (_keyEventList != null) {
 			if (_keyEventList.contains(keyCode)) {
-				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.KEY_DOWN, keyCode, event.getEventTime(), event.getDownTime(), event.getRepeatCount());
+				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.KEY_DOWN, keyCode, event.getEventTime(), event.getDownTime(), event.getRepeatCount(), _activityId);
 				return true;
 			}
 		}
