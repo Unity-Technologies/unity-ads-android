@@ -8,7 +8,7 @@ Binaries can be found from the [releases tab](https://github.com/Unity-Technolog
 
 ## Integration Guide
 
-Integration guide can be found [here](https://github.com/Unity-Technologies/unity-ads-android/wiki/sdk_android_integration_guide)
+Integration guide can be found [here](https://github.com/Unity-Technologies/unity-ads-android/wiki/sdk_android_integration_guide). There is [integration tutorial video](https://www.youtube.com/watch?v=MNdJ0KWlYPw) on YouTube.
 
 ## API Reference
 
