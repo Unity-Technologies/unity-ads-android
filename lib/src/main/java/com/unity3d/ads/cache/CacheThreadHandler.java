@@ -113,15 +113,23 @@ class 	CacheThreadHandler extends Handler {
 			// Note: active must be set to false before sending end/error event back to webview to allow webview to start next download or other operation immediately after receiving the event
 			_active = false;
 			postProcessDownload(startTime, source, targetFile, total, _currentRequest.getContentLength(), _currentRequest.isCanceled(), _currentRequest.getResponseCode(), _currentRequest.getResponseHeaders());
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e) {
 			DeviceLog.exception("Couldn't create target file", e);
 			_active = false;
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_IO_ERROR, source, e.getMessage());
-		} catch (IOException e) {
+		}
+		catch (MalformedURLException e) {
+			DeviceLog.exception("Malformed URL", e);
+			_active = false;
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.MALFORMED_URL, source, e.getMessage());
+		}
+		catch (IOException e) {
 			DeviceLog.exception("Couldn't request stream", e);
 			_active = false;
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_IO_ERROR, source, e.getMessage());
-		} finally {
+		}
+		finally {
 			_currentRequest = null;
 			try {
 				if (fileOutput != null) {
@@ -152,22 +160,13 @@ class 	CacheThreadHandler extends Handler {
 		}
 	}
 
-	private WebRequest getWebRequest(String source, long position, int connectTimeout, int readTimeout) {
+	private WebRequest getWebRequest(String source, long position, int connectTimeout, int readTimeout) throws MalformedURLException {
 		HashMap<String, List<String>> headers = new HashMap<>();
 		if (position > 0) {
 			ArrayList list = new ArrayList(Arrays.asList(new String[]{"bytes=" + position + "-"}));
 			headers.put("Range", list);
 		}
 
-		WebRequest request = null;
-
-		try {
-			request = new WebRequest(source, "GET", headers, connectTimeout, readTimeout);
-		}
-		catch (MalformedURLException e) {
-			DeviceLog.exception("Malformed URL", e);
-		}
-
-		return request;
+		return new WebRequest(source, "GET", headers, connectTimeout, readTimeout);
 	}
 }

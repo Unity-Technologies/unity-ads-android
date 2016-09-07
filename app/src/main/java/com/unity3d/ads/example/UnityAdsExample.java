@@ -29,6 +29,8 @@ public class UnityAdsExample extends Activity {
 	private String interstitialPlacementId;
 	private String incentivizedPlacementId;
 
+	private static int ordinal = 1;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -42,7 +44,6 @@ public class UnityAdsExample extends Activity {
 		MediationMetaData mediationMetaData = new MediationMetaData(this);
 		mediationMetaData.setName("mediationPartner");
 		mediationMetaData.setVersion("v12345");
-		mediationMetaData.setOrdinal(1);
 		mediationMetaData.commit();
 
 		MetaData debugMetaData = new MetaData(this);
@@ -60,6 +61,10 @@ public class UnityAdsExample extends Activity {
 				playerMetaData.setServerId("rikshot");
 				playerMetaData.commit();
 
+				MediationMetaData ordinalMetaData = new MediationMetaData(self);
+				ordinalMetaData.setOrdinal(ordinal++);
+				ordinalMetaData.commit();
+
 				UnityAds.show(self, interstitialPlacementId);
 			}
 		});
@@ -74,6 +79,10 @@ public class UnityAdsExample extends Activity {
 				PlayerMetaData playerMetaData = new PlayerMetaData(self);
 				playerMetaData.setServerId("rikshot");
 				playerMetaData.commit();
+
+				MediationMetaData ordinalMetaData = new MediationMetaData(self);
+				ordinalMetaData.setOrdinal(ordinal++);
+				ordinalMetaData.commit();
 
 				UnityAds.show(self, incentivizedPlacementId);
 			}

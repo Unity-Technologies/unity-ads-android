@@ -40,10 +40,17 @@ public class AdUnitActivity extends Activity {
 	private ArrayList<Integer> _keyEventList;
 	boolean _keepScreenOn;
 
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// This error condition will trigger if activity is backgrounded while activity is in foreground,
+		// app process is killed while app is in background and then app is yet again launched to foreground
+		if(WebViewApp.getCurrentApp() == null) {
+			DeviceLog.error("Unity Ads web app is null, closing Unity Ads activity from onCreate");
+			finish();
+			return;
+		}
 
 		AdUnit.setAdUnitActivity(this);
 
@@ -92,18 +99,45 @@ public class AdUnitActivity extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+
+		if(WebViewApp.getCurrentApp() == null) {
+			if(!isFinishing()) {
+				DeviceLog.error("Unity Ads web app is null, closing Unity Ads activity from onStart");
+				finish();
+			}
+			return;
+		}
+
 		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_START, _activityId);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+
+		if(WebViewApp.getCurrentApp() == null) {
+			if(!isFinishing()) {
+				DeviceLog.error("Unity Ads web app is null, closing Unity Ads activity from onStop");
+				finish();
+			}
+			return;
+		}
+
 		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_STOP, _activityId);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+
+		if(WebViewApp.getCurrentApp() == null) {
+			if(!isFinishing()) {
+				DeviceLog.error("Unity Ads web app is null, closing Unity Ads activity from onResume");
+				finish();
+			}
+			return;
+		}
+
 		setViews(_views);
 
 		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_RESUME, _activityId);
@@ -112,6 +146,14 @@ public class AdUnitActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+
+		if(WebViewApp.getCurrentApp() == null) {
+			if(!isFinishing()) {
+				DeviceLog.error("Unity Ads web app is null, closing Unity Ads activity from onPause");
+				finish();
+			}
+			return;
+		}
 
 		if (isFinishing()) {
 			ViewUtilities.removeViewFromParent(WebViewApp.getCurrentApp().getWebView());
@@ -136,6 +178,15 @@ public class AdUnitActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+
+		if(WebViewApp.getCurrentApp() == null) {
+			if(!isFinishing()) {
+				DeviceLog.error("Unity Ads web app is null, closing Unity Ads activity from onDestroy");
+				finish();
+			}
+			return;
+		}
+
 		AdUnit.setAdUnitActivity(null);
 		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_DESTROY, isFinishing(), _activityId);
 

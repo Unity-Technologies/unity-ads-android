@@ -28,7 +28,6 @@ public class WebView extends android.webkit.WebView {
 		}
 
 		if (Build.VERSION.SDK_INT >= 19) {
-			WebView.setWebContentsDebuggingEnabled(true);
 			try {
 				_evaluateJavascript = android.webkit.WebView.class.getMethod("evaluateJavascript", String.class, ValueCallback.class);
 			} catch(NoSuchMethodException e) {

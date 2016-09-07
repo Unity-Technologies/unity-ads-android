@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
 public class AdUnitOpen {
 	private static ConditionVariable _waitShowStatus;
 
-	public static boolean open(String placementId, JSONObject options) throws NoSuchMethodException {
+	public static synchronized boolean open(String placementId, JSONObject options) throws NoSuchMethodException {
 		Method showCallback = AdUnitOpen.class.getMethod("showCallback", CallbackStatus.class);
 		_waitShowStatus = new ConditionVariable();
 		WebViewApp.getCurrentApp().invokeMethod("webview", "show", showCallback, placementId, options);
