@@ -7,7 +7,7 @@ android {
   defaultConfig {
     applicationId "com.unity3d.ads.example"
     minSdkVersion 9
-    targetSdkVersion 23
+    targetSdkVersion 24
     versionCode = 2004
     versionName = "2.0.4"
   }
