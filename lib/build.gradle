@@ -12,8 +12,8 @@ android {
   defaultConfig {
     minSdkVersion 9
     targetSdkVersion 23
-    versionCode = 2004
-    versionName = "2.0.4"
+    versionCode = 2005
+    versionName = "2.0.5"
 
     setProperty("archivesBaseName", "unity-ads")
 
@@ -85,9 +85,9 @@ android.libraryVariants.all { variant ->
         source = variant.javaCompile.source
         ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
         classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
-		options { 
-		       links "http://docs.oracle.com/javase/7/docs/api/" 
-		       linksOffline "http://developer.android.com/reference","${android.sdkDirectory}/docs/reference" 
+		options {
+		       links "http://docs.oracle.com/javase/7/docs/api/"
+		       linksOffline "http://developer.android.com/reference","${android.sdkDirectory}/docs/reference"
 		     }
         exclude '**/R.java'
 		destinationDir = file("../javadoc/")
@@ -96,5 +96,10 @@ android.libraryVariants.all { variant ->
 
 def getPropertyStringWithDefaultValue(String key, String defaultValue) {
   def value = project.getProperties().get(key);
+  // Ensure that string is quoted
+  if ((value != null) && (!(value ==~ /^".*"$/)) ){
+    println "Value for key '$key' is not quoted, adding quotes to '$value'";
+    value = "\"$value\"";
+  }
   return value != null ? value : defaultValue;
 }

@@ -1,0 +1,17 @@
+com.unity3d.ads
+com.unity3d.ads.adunit
+com.unity3d.ads.api
+com.unity3d.ads.broadcast
+com.unity3d.ads.cache
+com.unity3d.ads.configuration
+com.unity3d.ads.connectivity
+com.unity3d.ads.device
+com.unity3d.ads.log
+com.unity3d.ads.metadata
+com.unity3d.ads.misc
+com.unity3d.ads.placement
+com.unity3d.ads.properties
+com.unity3d.ads.request
+com.unity3d.ads.video
+com.unity3d.ads.webview
+com.unity3d.ads.webview.bridge

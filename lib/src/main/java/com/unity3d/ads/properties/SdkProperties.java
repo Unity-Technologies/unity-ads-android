@@ -76,7 +76,7 @@ public class SdkProperties {
 	}
 
 	public static String getDefaultConfigUrl(String flavor) {
-		return "https://cdn.unityads.unity3d.com/webview/" + getWebViewBranch() + "/" + flavor + "/config.json";
+		return "https://config.unityads.unity3d.com/webview/" + getWebViewBranch() + "/" + flavor + "/config.json";
 	}
 
 	private static String getWebViewBranch() {

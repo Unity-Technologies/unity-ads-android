@@ -391,8 +391,8 @@ public class InitializeThread extends Thread  {
 		public InitializeState execute() {
 			DeviceLog.error("Unity Ads init: network error, waiting for connection events");
 
-			ConnectivityMonitor.addListener(this);
 			_conditionVariable = new ConditionVariable();
+			ConnectivityMonitor.addListener(this);
 
 			if (_conditionVariable.block(10000L * 60L)) {
 				ConnectivityMonitor.removeListener(this);
