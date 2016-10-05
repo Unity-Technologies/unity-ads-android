@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.unity3d.ads.example" >
+          package="com.wds.ads.example">
 
     <application
         android:allowBackup="true"
@@ -8,7 +8,7 @@
         android:label="UnityAds 2.0"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.unity3d.ads.example.UnityAdsExample"
+            android:name="com.wds.ads.example.UnityAdsExample"
             android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
             android:label="UnityAds 2.0" >
             <intent-filter>
