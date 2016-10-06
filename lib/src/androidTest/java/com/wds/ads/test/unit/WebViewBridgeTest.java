@@ -115,17 +115,17 @@ public class WebViewBridgeTest {
 
   @Test(expected = NullPointerException.class)
   public void testClassNameSetOthersNull() throws Exception {
-    WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", null, null, null);
+    WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", null, null, null);
   }
 
   @Test(expected = NullPointerException.class)
   public void testClassNameMethodSetOthersNull() throws Exception {
-    WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", null, null);
+    WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", null, null);
   }
 
   @Test(expected = NullPointerException.class)
   public void testOthersSetParametersNull() throws Exception {
-    WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", null, new MockWebViewCallback("APICALLBACK_01", 1));
+    WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", null, new MockWebViewCallback("APICALLBACK_01", 1));
   }
 
   @Test
@@ -133,7 +133,7 @@ public class WebViewBridgeTest {
     boolean gotException = false;
 
     try {
-      WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", null, new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+      WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", null, new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
     } catch (NoSuchMethodException e) {
       assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
       gotException = true;
@@ -141,7 +141,7 @@ public class WebViewBridgeTest {
 
     assertTrue("Should have received exception", gotException);
     assertEquals("WebViewCallback should have received error WebViewBridgeError.METHOD_NOT_FOUND", WebViewBridgeError.METHOD_NOT_FOUND, webViewCallbackError);
-    assertEquals("Class name was not the same than originally was called", "com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", webViewCallbackClassname);
+    assertEquals("Class name was not the same than originally was called", "com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", webViewCallbackClassname);
     assertNull("Method name was supposed to be null", webViewCallbackMethodname);
   }
 
@@ -167,7 +167,7 @@ public class WebViewBridgeTest {
     boolean gotException = false;
 
     try {
-      WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApina", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+      WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApina", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
     } catch (NoSuchMethodException e) {
       assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
       gotException = true;
@@ -175,7 +175,7 @@ public class WebViewBridgeTest {
 
     assertTrue("Should have received exception", gotException);
     assertEquals("WebViewCallback should have received error WebViewBridgeError.METHOD_NOT_FOUND", WebViewBridgeError.METHOD_NOT_FOUND, webViewCallbackError);
-    assertEquals("Class name was not the same than originally was called", "com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApina", webViewCallbackClassname);
+    assertEquals("Class name was not the same than originally was called", "com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApina", webViewCallbackClassname);
     assertEquals("Method name was not the same than originally was called", "apiTestMethod", webViewCallbackMethodname);
   }
 
@@ -184,7 +184,7 @@ public class WebViewBridgeTest {
     boolean gotException = false;
 
     try {
-      WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apinaTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+      WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apinaTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
     } catch (NoSuchMethodException e) {
       assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
       gotException = true;
@@ -192,13 +192,13 @@ public class WebViewBridgeTest {
 
     assertTrue("Should have received exception", gotException);
     assertEquals("WebViewCallback should have received error WebViewBridgeError.METHOD_NOT_FOUND", WebViewBridgeError.METHOD_NOT_FOUND, webViewCallbackError);
-    assertEquals("Class name was not the same than originally was called", "com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", webViewCallbackClassname);
+    assertEquals("Class name was not the same than originally was called", "com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", webViewCallbackClassname);
     assertEquals("Method name was not the same than originally was called", "apinaTestMethod", webViewCallbackMethodname);
   }
 
   @Test(expected = NullPointerException.class)
   public void testAllSetParametersWrong() throws Exception {
-    WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{1, "test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+    WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{1, "test"}, new MockWebViewCallback("APICALLBACK_01", 1));
   }
 
   @Test
@@ -223,7 +223,7 @@ public class WebViewBridgeTest {
     boolean gotException = false;
 
     try {
-      WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+      WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
     } catch (NoSuchMethodException e) {
       assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
       gotException = true;
@@ -231,13 +231,13 @@ public class WebViewBridgeTest {
 
     assertTrue("Should have received exception", gotException);
     assertEquals("WebViewCallback should have received error WebViewBridgeError.METHOD_NOT_FOUND", WebViewBridgeError.METHOD_NOT_FOUND, webViewCallbackError);
-    assertEquals("Class name was not the same than originally was called", "com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", webViewCallbackClassname);
+    assertEquals("Class name was not the same than originally was called", "com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", webViewCallbackClassname);
     assertEquals("Method name was not the same than originally was called", "", webViewCallbackMethodname);
   }
 
   @Test(expected = NullPointerException.class)
   public void testOthersSetCallbackNull() throws Exception {
-    WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, null);
+    WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, null);
   }
 
   @Test
@@ -245,7 +245,7 @@ public class WebViewBridgeTest {
     boolean gotException = false;
 
     try {
-      WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "wrongMethodName", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+      WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "wrongMethodName", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
     } catch (Exception e) {
       assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
       gotException = true;
@@ -253,7 +253,7 @@ public class WebViewBridgeTest {
 
     assertTrue("Should have received exception", gotException);
     assertEquals("WebViewCallback should have received error WebViewBridgeError.METHOD_NOT_FOUND", WebViewBridgeError.METHOD_NOT_FOUND, webViewCallbackError);
-    assertEquals("Class name was not the same than originally was called", "com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", webViewCallbackClassname);
+    assertEquals("Class name was not the same than originally was called", "com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", webViewCallbackClassname);
     assertEquals("Method name was not the same than originally was called", "wrongMethodName", webViewCallbackMethodname);
   }
 
@@ -262,7 +262,7 @@ public class WebViewBridgeTest {
 
   @Test
   public void testAllSetMethodNoParams() throws Exception {
-    WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethodNoParams", new Object[]{}, new MockWebViewCallback("APICALLBACK_01", 1));
+    WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethodNoParams", new Object[]{}, new MockWebViewCallback("APICALLBACK_01", 1));
     assertEquals(true, WebViewBridgeTestApi.invoked);
     assertNull(WebViewBridgeTestApi.value);
     assertNotNull(WebViewBridgeTestApi.callback);
@@ -271,7 +271,7 @@ public class WebViewBridgeTest {
 
   @Test
   public void testOthersSetParametersNullMethodNoParams() throws Exception {
-    WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethodNoParams", null, new MockWebViewCallback("APICALLBACK_01", 1));
+    WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethodNoParams", null, new MockWebViewCallback("APICALLBACK_01", 1));
     assertEquals(true, WebViewBridgeTestApi.invoked);
     assertNull(WebViewBridgeTestApi.value);
     assertNotNull(WebViewBridgeTestApi.callback);
@@ -280,7 +280,7 @@ public class WebViewBridgeTest {
 
   @Test
   public void testAllSetCorrectly() throws Exception {
-    WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+    WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
     assertEquals(true, WebViewBridgeTestApi.invoked);
     assertEquals("test", WebViewBridgeTestApi.value);
     assertNotNull(WebViewBridgeTestApi.callback);
@@ -289,7 +289,7 @@ public class WebViewBridgeTest {
 
   @Test
   public void testAllSetCallbackEmpty() throws Exception {
-    WebViewBridge.handleInvocation("com.unity3d.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("", 1));
+    WebViewBridge.handleInvocation("com.wds.ads.test.unit.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("", 1));
     assertEquals(true, WebViewBridgeTestApi.invoked);
     assertEquals("test", WebViewBridgeTestApi.value);
     assertNotNull(WebViewBridgeTestApi.callback);

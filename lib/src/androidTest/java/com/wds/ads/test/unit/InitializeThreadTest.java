@@ -174,7 +174,7 @@ public class InitializeThreadTest {
 
     // This is very hackish but also reproducing the full init procedure would be very fragile
     String data = "<script>var nativebridge = new Object(); nativebridge.handleCallback = new function() { " +
-      "webviewbridge.handleInvocation(\"[['com.unity3d.ads.api.Sdk','initComplete', [], 'CALLBACK_01']]\");" +
+      "webviewbridge.handleInvocation(\"[['com.wds.ads.api.Sdk','initComplete', [], 'CALLBACK_01']]\");" +
       "}</script>";
     String hash = Utilities.Sha256(data);
 

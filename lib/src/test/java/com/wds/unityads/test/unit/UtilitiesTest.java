@@ -1,4 +1,4 @@
-package com.wds.ads.test.unit;
+package com.wds.unityads.test.unit;
 
 import com.wds.ads.misc.Utilities;
 

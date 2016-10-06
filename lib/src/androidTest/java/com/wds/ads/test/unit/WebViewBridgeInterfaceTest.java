@@ -113,7 +113,7 @@ public class WebViewBridgeInterfaceTest {
   @Test(expected = ClassCastException.class)
   public void testHandleInvocationShouldFailParametersNull() throws JSONException {
     WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-    webInterface.handleInvocation("[[\"com.unity3d.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", null, \"CALLBACK_01\"]]");
+    webInterface.handleInvocation("[[\"com.wds.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", null, \"CALLBACK_01\"]]");
   }
 
   @Test(expected = NullPointerException.class)
@@ -125,7 +125,7 @@ public class WebViewBridgeInterfaceTest {
   @Test(expected = ClassCastException.class)
   public void testHandleInvocationShouldFailParametersEmpty() throws JSONException {
     WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-    webInterface.handleInvocation("[[\"com.unity3d.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", \"\", \"CALLBACK_01\"]]");
+    webInterface.handleInvocation("[[\"com.wds.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", \"\", \"CALLBACK_01\"]]");
   }
 
   @Test(expected = JSONException.class)
@@ -137,7 +137,7 @@ public class WebViewBridgeInterfaceTest {
   @Test
   public void testHandleInvocationShouldSucceed() throws JSONException {
     WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-    webInterface.handleInvocation("[[\"com.unity3d.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", [], \"CALLBACK_01\"]]");
+    webInterface.handleInvocation("[[\"com.wds.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", [], \"CALLBACK_01\"]]");
     assertTrue("ApiMethod should have been invoked but wasn't", WebViewBridgeTestApi.invoked);
     assertEquals("CallbackID's didn't match", "CALLBACK_01", WebViewBridgeTestApi.callback.getCallbackId());
   }
@@ -145,7 +145,7 @@ public class WebViewBridgeInterfaceTest {
   @Test
   public void testHandleInvocationWithParamsShouldSucceed() throws JSONException {
     WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-    webInterface.handleInvocation("[[\"com.unity3d.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethod\", [\"test\"], \"CALLBACK_01\"]]");
+    webInterface.handleInvocation("[[\"com.wds.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethod\", [\"test\"], \"CALLBACK_01\"]]");
     assertTrue("ApiMethod should have been invoked but wasn't", WebViewBridgeTestApi.invoked);
     assertEquals("CallbackID's didn't match", "CALLBACK_01", WebViewBridgeTestApi.callback.getCallbackId());
     assertEquals("Callback value wasn't same as was originally given", "test", WebViewBridgeTestApi.value);

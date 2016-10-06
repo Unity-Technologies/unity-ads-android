@@ -88,10 +88,10 @@ public class InvocationTest {
 
     boolean success = cv.block(30000);
     assertTrue("Condition Variable was not opened", success);
-    batch.addInvocation("com.unity3d.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test1"}, new WebViewCallback("CALLBACK_01", batch.getId()));
-    batch.addInvocation("com.unity3d.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test2"}, new WebViewCallback("CALLBACK_02", batch.getId()));
-    batch.addInvocation("com.unity3d.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test3"}, new WebViewCallback("CALLBACK_03", batch.getId()));
-    batch.addInvocation("com.unity3d.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test4"}, new WebViewCallback("CALLBACK_04", batch.getId()));
+    batch.addInvocation("com.wds.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test1"}, new WebViewCallback("CALLBACK_01", batch.getId()));
+    batch.addInvocation("com.wds.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test2"}, new WebViewCallback("CALLBACK_02", batch.getId()));
+    batch.addInvocation("com.wds.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test3"}, new WebViewCallback("CALLBACK_03", batch.getId()));
+    batch.addInvocation("com.wds.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test4"}, new WebViewCallback("CALLBACK_04", batch.getId()));
 
     batch.nextInvocation();
     batch.nextInvocation();
@@ -128,10 +128,10 @@ public class InvocationTest {
     boolean success = cv.block(30000);
     assertTrue("Condition Variable was not opened", success);
 
-    batch.addInvocation("com.unity3d.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethodNonExistent", new Object[]{"test1"}, new WebViewCallback("CALLBACK_01", batch.getId()));
-    batch.addInvocation("com.unity3d.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test2"}, new WebViewCallback("CALLBACK_02", batch.getId()));
-    batch.addInvocation("com.unity3d.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test3"}, new WebViewCallback("CALLBACK_03", batch.getId()));
-    batch.addInvocation("com.unity3d.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test4"}, new WebViewCallback("CALLBACK_04", batch.getId()));
+    batch.addInvocation("com.wds.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethodNonExistent", new Object[]{"test1"}, new WebViewCallback("CALLBACK_01", batch.getId()));
+    batch.addInvocation("com.wds.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test2"}, new WebViewCallback("CALLBACK_02", batch.getId()));
+    batch.addInvocation("com.wds.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test3"}, new WebViewCallback("CALLBACK_03", batch.getId()));
+    batch.addInvocation("com.wds.ads.test.unit.InvocationTest$BatchInvocationTestApi", "apiTestMethod", new Object[]{"test4"}, new WebViewCallback("CALLBACK_04", batch.getId()));
 
     batch.nextInvocation();
     batch.nextInvocation();

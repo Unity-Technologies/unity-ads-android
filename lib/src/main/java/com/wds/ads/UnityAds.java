@@ -67,9 +67,11 @@ public final class UnityAds {
 		}
 
 		if (testMode) {
-			DeviceLog.info("Initializing Unity Ads " + SdkProperties.getVersionName() + " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in test mode");
+			DeviceLog.info("Initializing Unity Ads " + SdkProperties.getVersionName() +
+        " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in test mode");
 		} else {
-			DeviceLog.info("Initializing Unity Ads " + SdkProperties.getVersionName() + " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in production mode");
+			DeviceLog.info("Initializing Unity Ads " + SdkProperties.getVersionName() +
+        " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in production mode");
 		}
 
 		setDebugMode(_debugMode);
@@ -244,7 +246,7 @@ public final class UnityAds {
 						}
 					} catch (NoSuchMethodException exception) {
 						DeviceLog.exception("Could not get callback method", exception);
-						handleShowError(placementId, UnityAdsError.SHOW_ERROR, "Could not get com.unity3d.ads.properties.showCallback method");
+						handleShowError(placementId, UnityAdsError.SHOW_ERROR, "Could not get com.wds.ads.properties.showCallback method");
 					}
 				}
 			}).start();

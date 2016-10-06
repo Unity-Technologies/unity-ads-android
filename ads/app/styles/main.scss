@@ -1,0 +1,43 @@
+@import 'vars';
+@import 'typography';
+
+html {
+  overflow: hidden;
+  height: 100vh;
+}
+
+body {
+  font-family: "Helvetica Neue",Verdana,Helvetica,Arial,sans-serif;
+  color: $font-color--dark;
+  background-color: $background--light;
+}
+
+img {
+  display: block;
+  max-width: 95%;
+  max-height: 55vh;
+  margin: auto;
+  padding: 8px;
+}
+
+h1 {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 2px 0;
+}
+
+h2 {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin: 2px 0;
+}
+
+.verse {
+  padding: 0 4px 0 0;
+  height: 38vh;
+  overflow: auto;
+}
+
+.rtl {
+  direction: rtl;
+}

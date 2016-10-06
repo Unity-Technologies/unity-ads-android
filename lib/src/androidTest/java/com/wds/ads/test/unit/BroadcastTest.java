@@ -40,8 +40,8 @@ public class BroadcastTest {
 
   @Test
   public void testOneReceiver() {
-    final String testAction = "com.unity3d.ads.ACTION_TEST";
-    final String fakeAction = "com.unity3d.ads.ACTION_FAKE";
+    final String testAction = "com.wds.ads.ACTION_TEST";
+    final String fakeAction = "com.wds.ads.ACTION_FAKE";
     final String testReceiverName = "testReceiver";
 
     final ConditionVariable broadcastCv = new ConditionVariable();
@@ -123,9 +123,9 @@ public class BroadcastTest {
 
   @Test
   public void testTwoReceivers() throws JSONException {
-    final String jsonAction = "com.unity3d.ads.ACTION_JSON";
+    final String jsonAction = "com.wds.ads.ACTION_JSON";
     final String jsonReceiverName = "jsonReceiver";
-    final String dataSchemeAction = "com.unity3d.ads.ACTION_DATA_SCHEME";
+    final String dataSchemeAction = "com.wds.ads.ACTION_DATA_SCHEME";
     final String dataSchemeReceiverName = "dataSchemeReceiver";
 
     final String testDataScheme = "test";

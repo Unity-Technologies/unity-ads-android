@@ -71,8 +71,8 @@ public class Configuration {
 	}
 
 	protected String buildQueryString () {
-		String queryString = "?ts=" + System.currentTimeMillis() + "&sdkVersion=" + SdkProperties.getVersionCode() + "&sdkVersionName=" + SdkProperties.getVersionName();
-		return queryString;
+		return "?ts=" + System.currentTimeMillis() + "&sdkVersion=" +
+			SdkProperties.getVersionCode() + "&sdkVersionName=" + SdkProperties.getVersionName();
 	}
 
 	protected void makeRequest () throws IOException, JSONException {
