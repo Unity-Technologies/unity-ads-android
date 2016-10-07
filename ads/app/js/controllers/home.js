@@ -1,7 +1,6 @@
 function HomeCtrl($scope, Word, Config) {
-    // ViewModel
     const vm = this;
-    var element = 'Mk-11-20';
+    var element = 'Jn-10-1';
     var lang = 'en';
 
     var getWord = function(config) {
@@ -11,7 +10,7 @@ function HomeCtrl($scope, Word, Config) {
           element: element,
       });
 
-      vm.word.image = element;
+      vm.image = element;
     };
 
     Config.get({lang: lang}, getWord);

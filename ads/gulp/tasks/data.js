@@ -24,7 +24,7 @@ gulp.task('data', function() {
     };
 
     return gulp.src(config.data.src)
-//        .pipe(changed(config.data.dest)) // Ignore unchanged files
+        .pipe(changed(config.data.dest))
         .pipe(jsonlint())
         .pipe(jsonlint.reporter())
         .pipe(gulpif(global.isProd, tap(encrypt)))
