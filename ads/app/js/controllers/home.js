@@ -1,8 +1,8 @@
 function HomeCtrl($scope, Data, Config) {
     // ViewModel
     const vm = this;
-    var element = 'Mat-14-22';
-    var lang = 'ar';
+    var element = 'Mat-6-19';
+    var lang = 'zh';
 
     var getData = function(config) {
       vm.config = config;
@@ -10,6 +10,7 @@ function HomeCtrl($scope, Data, Config) {
           version: config.version,
           element: element,
       });
+
       vm.data.image = element;
     };
 
