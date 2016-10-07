@@ -1,20 +1,20 @@
-function HomeCtrl($scope, Data, Config) {
+function HomeCtrl($scope, Word, Config) {
     // ViewModel
     const vm = this;
     var element = 'Mat-6-19';
-    var lang = 'zh';
+    var lang = 'es';
 
-    var getData = function(config) {
+    var getWord = function(config) {
       vm.config = config;
-      vm.data = Data.get({
+      vm.word = Word.get({
           version: config.version,
           element: element,
       });
 
-      vm.data.image = element;
+      vm.word.image = element;
     };
 
-    Config.get({lang: lang}, getData);
+    Config.get({lang: lang}, getWord);
 }
 
 export default {
@@ -22,4 +22,4 @@ export default {
     fn: HomeCtrl
 };
 
-HomeCtrl.$inject = ['$scope', 'Data', 'Config'];
+HomeCtrl.$inject = ['$scope', 'Word', 'Config'];

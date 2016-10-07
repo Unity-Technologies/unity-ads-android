@@ -1,10 +1,10 @@
 <div class="verse" ng-class="{ rtl: home.config.rtl }">
-  <h1>{{ home.data.title }}</h1>
-  <h2>{{ home.data.subtitle }}</h2>
-  <span>{{ home.data.verse }}</span>
+  <h1>{{ home.word.title }}</h1>
+  <h2>{{ home.word.subtitle }}</h2>
+  <span>{{ home.word.verse }}</span>
 </div>
 <div>
-  <img ng-src="images/{{ home.data.image }}.jpg"  />
+  <img ng-src="images/{{ home.word.image }}.jpg"  />
 </div>
 <footer>
   <button class="more">{{ home.config.more }}</button>
