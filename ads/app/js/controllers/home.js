@@ -1,8 +1,8 @@
 function HomeCtrl($scope, Word, Config) {
     // ViewModel
     const vm = this;
-    var element = 'Mat-6-19';
-    var lang = 'es';
+    var element = 'Mk-11-20';
+    var lang = 'en';
 
     var getWord = function(config) {
       vm.config = config;
