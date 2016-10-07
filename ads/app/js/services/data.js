@@ -1,10 +1,9 @@
-function DataService($resource) {
+function Data($resource) {
   'ngInject';
-  var service = $resource('/data/:element/:lang.json');
-  return service;
+  return $resource('/data/:element/:version.json');
 }
 
 export default {
-  name: 'DataService',
-  fn: DataService
+  name: 'Data',
+  fn: Data
 };

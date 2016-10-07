@@ -1,14 +1,19 @@
-function HomeCtrl($scope, DataService) {
+function HomeCtrl($scope, Data, Config) {
     // ViewModel
     const vm = this;
     var element = 'Mat-14-22';
-    vm.data = DataService.get({
-        lang: 'esv',
-        element: element,
-    });
+    var lang = 'ar';
 
-    vm.data.image = element;
-    console.log(vm.data);
+    var getData = function(config) {
+      vm.config = config;
+      vm.data = Data.get({
+          version: config.version,
+          element: element,
+      });
+      vm.data.image = element;
+    };
+
+    Config.get({lang: lang}, getData);
 }
 
 export default {
@@ -16,4 +21,4 @@ export default {
     fn: HomeCtrl
 };
 
-HomeCtrl.$inject = ['$scope', 'DataService'];
+HomeCtrl.$inject = ['$scope', 'Data', 'Config'];

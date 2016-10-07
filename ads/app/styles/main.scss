@@ -41,3 +41,26 @@ h2 {
 .rtl {
   direction: rtl;
 }
+
+.more {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size: 1.4em;
+  padding: 5px;
+  border: 0px;
+  background-color: #2196F3;
+  color: #fff;
+  border: 1px solid transparent;
+  transition: background-color .25s, border .25s;
+
+  &:hover {
+    background-color: #42A5F5;
+    border: 1px solid #64B5F6;
+  }
+
+  &:active {
+    background-color: #64B5F6;
+    border: 1px solid #90CAF9;
+  }
+}
