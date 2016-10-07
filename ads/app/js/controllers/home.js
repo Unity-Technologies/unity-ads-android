@@ -1,6 +1,6 @@
 function HomeCtrl($scope, Word, Config) {
     const vm = this;
-    var element = 'Jn-10-1';
+    var element = 'Mat-17-1';
     var lang = 'en';
 
     var getWord = function(config) {
