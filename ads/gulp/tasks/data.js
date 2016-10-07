@@ -5,13 +5,14 @@ import changed from 'gulp-changed';
 import gulp from 'gulp';
 import gulpif from 'gulp-if';
 import tap from 'gulp-tap';
+import jsonlint from 'gulp-jsonlint';
 // import cryptojs from 'crypto-js';
 import AES from 'crypto-js/aes';
 import browserSync from 'browser-sync';
 
 gulp.task('data', function() {
 
-    var key = 'Jesus Loves You!';
+    var key = 'Bread is Good!';
     console.log(AES);
 
     var encrypt = function(file) {
@@ -23,7 +24,9 @@ gulp.task('data', function() {
     };
 
     return gulp.src(config.data.src)
-        .pipe(changed(config.data.dest)) // Ignore unchanged files
+//        .pipe(changed(config.data.dest)) // Ignore unchanged files
+        .pipe(jsonlint())
+        .pipe(jsonlint.reporter())
         .pipe(gulpif(global.isProd, tap(encrypt)))
         .pipe(gulp.dest(config.data.dest))
         .pipe(browserSync.stream());

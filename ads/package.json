@@ -43,6 +43,7 @@
     "gulp-gzip": "^1.2.0",
     "gulp-if": "^2.0.0",
     "gulp-imagemin": "^2.4.0",
+    "gulp-jsonlint": "^1.1.2",
     "gulp-notify": "^2.0.0",
     "gulp-protractor": "^2.1.0",
     "gulp-rename": "^1.2.0",

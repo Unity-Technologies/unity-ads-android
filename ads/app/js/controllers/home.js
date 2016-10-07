@@ -1,9 +1,9 @@
 function HomeCtrl($scope, DataService) {
     // ViewModel
     const vm = this;
-    var element = 'Genesis-1';
+    var element = 'Jn-14-15';
     vm.data = DataService.get({
-        lang: 'cnvs',
+        lang: 'esv',
         element: element,
     });
 
