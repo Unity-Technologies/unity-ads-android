@@ -1,4 +1,5 @@
 /build
+/lib/src/*/assets
 .DS_Store
 
 # built application files
