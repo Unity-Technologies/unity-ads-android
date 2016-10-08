@@ -6,7 +6,7 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
   $scope.vm = vm;
 
   vm.id = 'Jn-14-1';
-  var lang = 'en';
+  var lang = 'th';
 
   var read = $cookies.getObject('read') || {};
   var readByWeight = _.reduce(read, (result,value,key) => {

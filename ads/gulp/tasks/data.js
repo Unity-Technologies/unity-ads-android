@@ -9,6 +9,7 @@ import jsonlint from 'gulp-jsonlint';
 // import cryptojs from 'crypto-js';
 import AES from 'crypto-js/aes';
 import browserSync from 'browser-sync';
+import zip from 'gulp-zip';
 
 gulp.task('data', function() {
 
@@ -17,9 +18,9 @@ gulp.task('data', function() {
 
     var encrypt = function(file) {
         var encrypted = AES.encrypt(file.contents.toString(), key);
-        console.log(encrypted.toString());
         // var decrypted = AES.decrypt(encrypted.toString(), key);
         // console.log(decrypted.toString(cryptojs.enc.Utf8));
+        file.path += '.enc';
         file.contents = new Buffer(encrypted.toString());
     };
 
@@ -27,6 +28,7 @@ gulp.task('data', function() {
         .pipe(changed(config.data.dest))
         .pipe(jsonlint())
         .pipe(jsonlint.reporter())
+        .pipe(gulpif(global.isProd, zip('data.zip')))
         .pipe(gulpif(global.isProd, tap(encrypt)))
         .pipe(gulp.dest(config.data.dest))
         .pipe(browserSync.stream());
