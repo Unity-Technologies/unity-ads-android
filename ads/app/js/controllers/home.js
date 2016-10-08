@@ -5,7 +5,7 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
   const vm = this;
   $scope.vm = vm;
 
-  // vm.id = 'Acts-2-1';
+  vm.id = 'Jn-14-1';
   var lang = 'en';
 
   var read = $cookies.getObject('read') || {};
@@ -62,7 +62,7 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
     var randomId = rwc(levels);
     vm.element = _.find(levels, {id: randomId});
     // todo: switch element once its selected
-    vm.id = randomId;
+    // vm.id = randomId;
 
     console.log(vm.element, levels);
 
