@@ -1,6 +1,6 @@
 function Config($resource) {
   'ngInject';
-  return $resource('/data/config/:lang.json');
+  return $resource('data/config/:lang.json');
 }
 
 export default {

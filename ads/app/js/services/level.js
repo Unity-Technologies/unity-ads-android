@@ -1,6 +1,6 @@
 function Level($resource) {
   'ngInject';
-  return $resource('/data/level.json');
+  return $resource('data/level.json');
 }
 
 export default {

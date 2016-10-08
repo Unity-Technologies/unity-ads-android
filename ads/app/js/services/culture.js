@@ -1,6 +1,6 @@
 function Culture($resource) {
   'ngInject';
-  return $resource('/data/culture.json');
+  return $resource('data/culture.json');
 }
 
 export default {

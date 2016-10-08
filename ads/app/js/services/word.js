@@ -1,6 +1,6 @@
 function Word($resource) {
   'ngInject';
-  return $resource('/data/word/:element/:version.json');
+  return $resource('data/word/:element/:version.json');
 }
 
 export default {
