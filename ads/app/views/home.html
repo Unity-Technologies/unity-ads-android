@@ -1,7 +1,7 @@
 <header>
   <button class="plain close" ng-class="{ 'float-left': home.config.rtl }">x</button>
 </header>
-<div class="verse" ng-class="{ rtl: home.config.rtl }">
+<div class="verse" ng-class="{ rtl: home.config.rtl }" scroll>
   <h1>{{ home.word.title }}</h1>
   <h2>{{ home.word.subtitle }}</h2>
   <span>{{ home.word.verse }}</span>
@@ -10,5 +10,5 @@
   <img ng-src="images/{{ home.image }}.jpg"  />
 </div>
 <footer>
-  <button class="primary more">{{ home.config.more }}</button>
+  <button class="primary more" ng-click="read(home.element)">{{ home.config.more }}</button>
 </footer>

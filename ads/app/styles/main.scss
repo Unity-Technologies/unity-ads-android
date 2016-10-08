@@ -28,8 +28,9 @@ $grey-600: #757575;
 }
 
 html {
-  overflow: hidden;
-  height: 100vh;
+position: fixed;
+height: 100%;
+width: 100%;
 }
 
 body {
