@@ -4,8 +4,8 @@ import angular from 'angular';
 import constants from './constants';
 import onConfig  from './on_config';
 import onRun     from './on_run';
-
-import 'angular-resource'; 
+ 
+import 'angular-resource';
 import 'angular-ui-router';
 import './templates';
 import './filters';

@@ -1,6 +1,32 @@
 @import 'vars';
 @import 'typography';
 
+$blue-200: #90CAF9;
+$blue-300: #64B5F6;
+$blue-400: #42A5F5;
+$blue-500: #2196F3;
+
+$grey-200: #EEEEEE;
+$grey-300: #E0E0E0;
+$grey-400: #BDBDBD;
+$grey-500: #9E9E9E;
+$grey-600: #757575;
+
+@mixin default-button($background, $background-hover, $border-hover, $border-active) {
+  background-color: $background;
+  font-size: 1.2em;
+  border: 2px solid transparent;
+  transition: background-color 0.25s, border 0.25s;
+  &:hover {
+    background-color: $background-hover;
+    border: 2px solid $border-hover;
+  }
+  &:active {
+    background-color: $border-hover;
+    border: 2px solid $border-active;
+  }
+}
+
 html {
   overflow: hidden;
   height: 100vh;
@@ -33,7 +59,7 @@ h2 {
 }
 
 .verse {
-  padding: 0 4px 0 0;
+  padding: 0 8px 0 0;
   height: 38vh;
   overflow: auto;
 }
@@ -42,24 +68,33 @@ h2 {
   direction: rtl;
 }
 
+.primary {
+  color: #fff;
+  padding: 2px 8px;
+  @include default-button($blue-500, $blue-400, $blue-300, $blue-200);
+}
+
+.plain {
+  color: #fff;
+  padding: 0px 8px;
+  @include default-button($grey-400, $grey-400, $grey-300, $grey-200);
+}
+
+.close {
+  margin-left: 4px;
+  float: right;
+  top: 10px;
+  right: 10px;
+  height: auto;
+}
+
+.float-left {
+  float: left;
+}
+
 .more {
   position: absolute;
   bottom: 10px;
   right: 10px;
-  font-size: 1.2em;
   padding: 12px;
-  background-color: #2196F3;
-  color: #fff;
-  border: 1px solid transparent;
-  transition: background-color .25s, border .25s;
-
-  &:hover {
-    background-color: #42A5F5;
-    border: 1px solid #64B5F6;
-  }
-
-  &:active {
-    background-color: #64B5F6;
-    border: 1px solid #90CAF9;
-  }
 }
