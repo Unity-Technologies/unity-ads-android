@@ -8,7 +8,7 @@ function ExampleDirective() {
       message: '@clickMessage'
     },
     link: (scope, element) => {
-      element.on('click', () => {
+      id.on('click', () => {
         window.alert('Element clicked: ' + scope.message);
       });
     }

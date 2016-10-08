@@ -4,8 +4,9 @@ import angular from 'angular';
 import constants from './constants';
 import onConfig  from './on_config';
 import onRun     from './on_run';
- 
+
 import 'angular-resource';
+import 'angular-cookies';
 import 'angular-ui-router';
 import './templates';
 import './filters';
@@ -16,6 +17,7 @@ import './directives';
 // create and bootstrap application
 const requires = [
   'ngResource',
+  'ngCookies',
   'ui.router',
   'templates',
   'app.filters',
