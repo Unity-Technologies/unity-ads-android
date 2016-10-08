@@ -5,7 +5,7 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
   const vm = this;
   $scope.vm = vm;
 
-  vm.id = 'Ex-14-10';
+  // vm.id = 'Acts-2-1';
   var lang = 'en';
 
   var read = $cookies.getObject('read') || {};
@@ -15,6 +15,7 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
   },{});
 
   var onRead = (element, value) => {
+    console.log('read');
     read[element.id] = {
       value: value,
       weight: element.rank
@@ -26,7 +27,8 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
   $scope.$on('read', ($evt) => onRead(vm.element, .5));
 
   $scope.$watchGroup(['vm.config.version', 'vm.element'], val => {
-    if (!val[0]) return;
+    if (!val[0] || !(val[0] && val[1])) return;
+
     vm.word = Word.get({
       version: vm.config.version,
       element: vm.id,
@@ -60,6 +62,10 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
     var randomId = rwc(levels);
     vm.element = _.find(levels, {id: randomId});
     // todo: switch element once its selected
+    vm.id = randomId;
+
+    console.log(vm.element, levels);
+
   });
 
   vm.config = Config.get({lang: lang});
