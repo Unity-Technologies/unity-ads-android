@@ -35,15 +35,14 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
 
   });
 
+  // todo: move this?
   $scope.$watchCollection('vm.levels', val => {
     if (val.length == 0) return;
     var addWeight = 0;
     var levels = _.reduce(vm.levels, (result, level, idx) => {
-      console.log('add', addWeight);
       var nextLevelDiff = vm.levels.length > idx + 1 ?
         level.rank - vm.levels[idx + 1].rank : level.rank / 2;
 
-      console.log('sub', nextLevelDiff);
       _.each(level.elements, id => {
         var subtractWeight = (read[id] || {value: 0}).value * nextLevelDiff;
         result.push({
@@ -58,10 +57,9 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
       return result;
     }, []);
 
-    console.log(levels);
     var randomId = rwc(levels);
     vm.element = _.find(levels, {id: randomId});
-    console.log(vm.element);
+    // todo: switch element once its selected
   });
 
   vm.config = Config.get({lang: lang});
