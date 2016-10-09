@@ -37,6 +37,9 @@ public class WebViewBridge {
 
 					overrideTable.put(Arrays.deepHashCode(method.getParameterTypes()), method);
 					methodTable.put(methodName, overrideTable);
+
+
+					DeviceLog.debug("registered %s %s", cls.getCanonicalName(), methodName);
 				}
 			}
 			_classTable.put(cls.getName(), methodTable);

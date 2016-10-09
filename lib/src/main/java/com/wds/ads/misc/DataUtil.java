@@ -1,53 +1,74 @@
 package com.wds.ads.misc;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.util.Base64InputStream;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
-import com.google.common.io.CharSink;
-import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import com.google.common.primitives.Bytes;
-import com.scottyab.aescrypt.AESCrypt;
+import com.google.gson.Gson;
+import com.wds.ads.BuildConfig;
 import com.wds.ads.R;
 import com.wds.ads.log.DeviceLog;
+import com.wds.ads.models.Secure;
+import com.wds.ads.properties.SdkProperties;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.EncodedKeySpec;
-import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
+import javax.crypto.CipherInputStream;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class DataUtil {
+  private static final String AES_MODE = "AES/CBC/NoPadding";
+
   private final Context context;
   private String destRoot;
   private String webRoot;
-  private static final byte[] ivBytes = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-  private static final String AES_MODE = "AES/CBC/PKCS5Padding";
-  private static final String HASH_ALGORITHM = "MD5";
 
   public DataUtil(Context context) {
     this.context = context;
     webRoot = context.getString(R.string.web_assets_root) + File.separator
       + context.getString(R.string.web_data_path) + File.separator;
     destRoot = context.getCacheDir() + File.separator + webRoot;
+  }
+
+  private static byte[] hexStringToByteArray(String s) {
+    int len = s.length();
+    byte[] data = new byte[len / 2];
+    for (int i = 0; i < len; i += 2) {
+      data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+        + Character.digit(s.charAt(i + 1), 16));
+    }
+    return data;
+  }
+
+  public boolean isInitialized() {
+    File web = new File(destRoot);
+    if (BuildConfig.DEBUG || !web.exists()) {
+      return false;
+    }
+
+    SharedPreferences defaultSharedPreferences =
+      PreferenceManager.getDefaultSharedPreferences(context);
+    String versionCodeKey = context.getString(R.string.version_code_key);
+    int versionCode = defaultSharedPreferences.getInt(versionCodeKey, 0);
+
+    defaultSharedPreferences.edit()
+      .putInt(versionCodeKey, SdkProperties.getVersionCode())
+      .apply();
+
+    return versionCode == SdkProperties.getVersionCode();
   }
 
   public void decryptData() {
@@ -60,19 +81,31 @@ public class DataUtil {
         context.getString(R.string.data_zip_path));
       Files.createParentDirs(outputFile);
 
-      String key = context.getString(R.string.key_name);
-      SecretKeySpec secretKeySpec = generateKey(key);
+      InputStream secureInput = context.getAssets()
+        .open(webRoot + context.getString(R.string.secure_json_path));
+
+      String secureJson = new String(ByteStreams.toByteArray(secureInput));
+      Secure secure = new Gson().fromJson(secureJson, Secure.class);
+
+      byte[] keyBytes = hexStringToByteArray(secure.getKeyHex());
 
       Cipher cipher = Cipher.getInstance(AES_MODE);
-      IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+      IvParameterSpec ivSpec = new IvParameterSpec(new byte[16]);
 
-      cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivSpec);
+      cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(keyBytes, "AES"), ivSpec);
+      CipherInputStream cipherInputStream = new CipherInputStream(input, cipher);
+      Base64InputStream base64InputStream = new Base64InputStream(cipherInputStream, 0);
 
-      byte[] bytes = ByteStreams.toByteArray(input);
-      byte[] decryptedBytes = cipher.doFinal(bytes);
+      byte[] header = new byte[]{0x50, 0x4b, 0x03, 0x04, 0x14, 0x00,
+        0x08, 0x00, 0x08, 0x00, 0x6b, 0x42};
+      long skip = base64InputStream.skip(48);
 
-      ByteSink output = Files.asByteSink(outputFile);
-      output.write(decryptedBytes);
+      ByteSink byteSink = Files.asByteSink(outputFile);
+      byteSink.write(Bytes.concat(header, ByteStreams.toByteArray(base64InputStream)));
+
+      // byteSink.write(ByteStreams.toByteArray(cipherInputStream));
+      base64InputStream.close();
+      cipherInputStream.close();
 
       DeviceLog.debug("data decrypted successfully");
     } catch (IOException | GeneralSecurityException e) {
@@ -80,41 +113,28 @@ public class DataUtil {
     }
   }
 
-
-  private static SecretKeySpec generateKey(final String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-    final MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM);
-    byte[] bytes = password.getBytes("UTF-8");
-    digest.update(bytes, 0, bytes.length);
-    byte[] key = digest.digest();
-    return new SecretKeySpec(key, "AES");
-  }
-
   public void extractData() {
     try {
-      ByteSource byteSource = Files.asByteSource(
-        new File(destRoot + context.getString(R.string.data_zip_path)));
+      // ByteSource byteSource = Files.asByteSource(
+        // new File(webRoot + context.getString(R.string.data_zip_path)));
+      InputStream open = context.getAssets()
+        .open(webRoot + context.getString(R.string.data_zip_path));
 
-      ZipInputStream zipInputStream = new ZipInputStream(byteSource.openBufferedStream());
+      // ZipInputStream zipInputStream = new ZipInputStream(byteSource.openStream());
+      ZipInputStream zipInputStream = new ZipInputStream(open);
       ZipEntry entry;
 
       while ((entry = zipInputStream.getNextEntry()) != null) {
         File file = new File(destRoot + entry.getName());
+        if (entry.isDirectory()) {
+          continue;
+        }
 
         if (file.exists()) {
-          DeviceLog.debug(file.getAbsolutePath() + "\texists");
-          continue;
+          file.delete();
         }
 
-        if (entry.isDirectory()) {
-          if (!file.exists()){
-            boolean mkdirs = file.mkdirs();
-          }
-          DeviceLog.debug("mk directory: " + file.getAbsolutePath());
-          continue;
-        }
-
-        DeviceLog.debug("extracting:" + entry + " to " + file.getAbsolutePath());
-
+        Files.createParentDirs(file);
         ByteSink output = Files.asByteSink(file);
         output.writeFrom(zipInputStream);
       }

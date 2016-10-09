@@ -9,9 +9,29 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
   vm.id = 'Jn-14-1';
   const lang = 'th';
 
-  debugger;
-  const key = 'Bread is Good!';
-  const test = aes.encrypt('something to encrypt', key);
+  var loaded = [
+    ['com.wds.ads.api.Sdk','loadComplete', [], 'CALLBACK_01']
+  ];
+  var init = false;
+  window.nativebridge = {
+    handleCallback: () => {
+      if(!init) {
+        var inited = [['com.wds.ads.api.Sdk','initComplete', [], 'CALLBACK_01']];
+        window.webviewbridge
+          .handleInvocation(JSON.stringify(inited));
+        var ready = [
+          ['com.wds.ads.api.Listener','sendReadyEvent', ["defaultVideoAndPictureZone"], 'CALLBACK_01'],
+          ['com.wds.ads.api.Placement', 'setPlacementState', ["defaultVideoAndPictureZone", "READY"], "CALLBACK_02"]
+        ];
+        window.webviewbridge
+          .handleInvocation(JSON.stringify(ready));
+      }
+      init = true;
+
+    }
+  };
+  window.webviewbridge
+    .handleInvocation(JSON.stringify(loaded));
 
   var read = $cookies.getObject('read') || {};
   var readByWeight = _.reduce(read, (result,value,key) => {

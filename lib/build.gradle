@@ -12,8 +12,8 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 23
-        versionCode = 2005
-        versionName = "2.0.5"
+        versionCode = 2007
+        versionName = "2.0.7"
 
         setProperty("archivesBaseName", "unity-ads")
 
@@ -30,7 +30,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
-    buildTypes {
+    buildTypes  {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt')
@@ -72,7 +72,7 @@ dependencies {
     androidTestCompile 'org.mockito:mockito-core:1.10.19'
     androidTestCompile 'com.android.support.test:runner:0.4'
     androidTestCompile 'com.android.support.test:rules:0.4'
-    compile 'com.scottyab:aescrypt:0.0.1'
+    compile 'com.google.code.gson:gson:2.7'
     compile 'com.google.guava:guava:19.0'
 }
 
@@ -107,9 +107,16 @@ def getPropertyStringWithDefaultValue(String key, String defaultValue) {
     return value != null ? value : defaultValue;
 }
 
-task copyFiles(type: Copy) {
-    from '../ads/build'
-    into 'src/main/assets/web'
+def webAssets = 'src/main/assets/web'
+
+task cleanData(type: Delete) {
+    delete webAssets
 }
 
+task copyFiles(type: Copy) {
+    from '../ads/build'
+    into webAssets
+}
+
+copyFiles.dependsOn(cleanData)
 preBuild.dependsOn(copyFiles)

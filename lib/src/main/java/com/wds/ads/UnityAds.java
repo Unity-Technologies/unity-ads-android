@@ -52,8 +52,10 @@ public final class UnityAds {
 		_configurationInitialized = true;
 
     DataUtil dataUtil = new DataUtil(activity);
-    dataUtil.decryptData();
-    dataUtil.extractData();
+		if(!dataUtil.isInitialized()) {
+			// dataUtil.decryptData();
+			dataUtil.extractData();
+		}
 
     if (gameId == null || gameId.length() == 0) {
 			DeviceLog.error("Error while initializing Unity Ads: empty game ID, halting Unity Ads init");

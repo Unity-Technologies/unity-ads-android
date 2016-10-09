@@ -10,6 +10,6 @@
 }
 
 # Keep all classes in Unity Ads package
--keep class com.unity3d.ads.** {
+-keep class com.wds.ads.** {
    *;
 }

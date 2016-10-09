@@ -3,15 +3,6 @@
 
     <item
         is-multidex="true"
-        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\support-core-ui\24.2.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="c84e216d9bf618464d6b9564d71d9a656433e7c4">
-        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-core-ui-24.2.0_92cf239df710e88ce93fc7b97a47d05605c84203\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
         jar="C:\Users\Brad\.gradle\caches\modules-2\files-2.1\com.google.guava\guava\19.0\6ce200f6b23222af3d8abb6b6459e6c44f4bb0e9\guava-19.0.jar"
         jumboMode="true"
         optimize="true"
@@ -36,6 +27,60 @@
         revision="24.0.3"
         sha1="6be858a75633b1f0a2d24cad740db57775cb6871">
         <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\support-annotations-24.2.0_f631421e4819e96db23e86873e6d34734d43f39d\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\support-compat\24.2.0\jars\libs\internal_impl-24.2.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="24.0.3"
+        sha1="771b3cc0e597b54da25f8086ba73180c59c6bc71">
+        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\internal_impl-24.2.0_22bd41ed95abec75bfaf40ce5215e588371cb49e\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\24.2.0\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="24.0.3"
+        sha1="f3ee23ef25c9a8fe3d40246d0b7097267963a612">
+        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-animated-vector-drawable-24.2.0_db833bfad61170b3cee306ccff94127343ff7b86\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\24.2.0\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="24.0.3"
+        sha1="c3c638be6e650b165ab9ae144857b64e82787fad">
+        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-appcompat-v7-24.2.0_d89c0095735460ff44d73dafe411f396c3aedd36\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\support-v4\24.2.0\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="24.0.3"
+        sha1="45f5eda279825ff470e3f51019d374d1ef61e000">
+        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-v4-24.2.0_24363c183915ef41cf2abb8ae845f4d28b2b192a\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\support-fragment\24.2.0\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="24.0.3"
+        sha1="d8bd2268fdcbfd52c76ade65d9900cd8def93a44">
+        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-fragment-24.2.0_309d92d7c5e68dbc790630bbe6f1ceb4a049a2fb\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\support-core-ui\24.2.0\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="24.0.3"
+        sha1="c84e216d9bf618464d6b9564d71d9a656433e7c4">
+        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-core-ui-24.2.0_92cf239df710e88ce93fc7b97a47d05605c84203\classes.dex" />
     </item>
     <item
         is-multidex="true"
@@ -75,30 +120,12 @@
     </item>
     <item
         is-multidex="true"
-        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\support-compat\24.2.0\jars\libs\internal_impl-24.2.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="771b3cc0e597b54da25f8086ba73180c59c6bc71">
-        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\internal_impl-24.2.0_22bd41ed95abec75bfaf40ce5215e588371cb49e\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
         jar="S:\unity-ads-android\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
         jumboMode="true"
         optimize="true"
         revision="24.0.3"
-        sha1="00d9af723786918a7bf4e8dff1099acb4220b05f">
+        sha1="99e3f4b895bfcb55f45bc37c6f67e39193646c48">
         <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run-bootstrap_d4649aa4ce8ffedfc948c96931ac3e6bdfab8671\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\24.2.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="f3ee23ef25c9a8fe3d40246d0b7097267963a612">
-        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-animated-vector-drawable-24.2.0_db833bfad61170b3cee306ccff94127343ff7b86\classes.dex" />
     </item>
     <item
         is-multidex="true"
@@ -111,21 +138,21 @@
     </item>
     <item
         is-multidex="true"
+        jar="C:\Users\Brad\.gradle\caches\modules-2\files-2.1\com.google.code.gson\gson\2.7\751f548c85fa49f330cecbb1875893f971b33c4e\gson-2.7.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="24.0.3"
+        sha1="751f548c85fa49f330cecbb1875893f971b33c4e">
+        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\gson-2.7_57c51dfd1db686e1b20915c2709e656fdb9bdec7\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
         jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\24.2.0\jars\classes.jar"
         jumboMode="true"
         optimize="true"
         revision="24.0.3"
         sha1="beac40bcc8a320a896dd15f5109cfcaea5e1e0e3">
         <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-vector-drawable-24.2.0_77ed46ad93128dbac68c93f4170c803c37223ac6\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\24.2.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="c3c638be6e650b165ab9ae144857b64e82787fad">
-        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-appcompat-v7-24.2.0_d89c0095735460ff44d73dafe411f396c3aedd36\classes.dex" />
     </item>
     <item
         is-multidex="true"
@@ -142,35 +169,8 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.3"
-        sha1="e80d77f68b87b4a1d8370137472a6a5ef8043bc6">
+        sha1="5d96bd63d8055b3616640bb0792c45b3692181d3">
         <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run_cd38ca3b886389d994845027e8676f57b8f084b6\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.scottyab\aescrypt\0.0.1\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="439f1fa08fbc88d31ffdb11d80a13211689da6aa">
-        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.scottyab-aescrypt-0.0.1_e442ed9b77dd2745d54bb0abbb0c409c764031e2\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\support-v4\24.2.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="45f5eda279825ff470e3f51019d374d1ef61e000">
-        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-v4-24.2.0_24363c183915ef41cf2abb8ae845f4d28b2b192a\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="S:\unity-ads-android\app\build\intermediates\exploded-aar\com.android.support\support-fragment\24.2.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="d8bd2268fdcbfd52c76ade65d9900cd8def93a44">
-        <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-fragment-24.2.0_309d92d7c5e68dbc790630bbe6f1ceb4a049a2fb\classes.dex" />
     </item>
 
 </items>

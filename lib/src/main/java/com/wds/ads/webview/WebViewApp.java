@@ -1,5 +1,6 @@
 package com.wds.ads.webview;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.ConditionVariable;
 import android.os.Looper;
@@ -8,6 +9,7 @@ import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebViewClient;
 
+import com.wds.ads.R;
 import com.wds.ads.configuration.Configuration;
 import com.wds.ads.log.DeviceLog;
 import com.wds.ads.misc.Utilities;
@@ -45,7 +47,12 @@ public class WebViewApp extends WebViewClient {
 		WebViewBridge.setClassTable(getConfiguration().getWebAppApiClassList());
 		_webView = new WebView(ClientProperties.getApplicationContext());
 		_webView.setWebViewClient(new WebAppClient());
-		_webView.setWebChromeClient(new WebAppChromeClient());
+		_webView.setWebChromeClient(new WebAppChromeClient() {
+			@Override
+			public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+				DeviceLog.debug("%d %s %s", lineNumber, sourceID, message);
+			}
+		});
 	}
 
 	public WebViewApp() { }
@@ -90,8 +97,12 @@ public class WebViewApp extends WebViewClient {
 					DeviceLog.exception("Unsupported charset when encoding webview version", e);
 				}
 
+				Context context = ClientProperties.getApplicationContext();
+
 				webViewApp.getWebView()
-					.loadDataWithBaseURL("file://" + SdkProperties.getLocalWebViewFile() + queryString, configuration.getWebViewData(), "text/html", "UTF-8", null);
+					.loadDataWithBaseURL("file:///android_asset/" + context.getString(R.string.web_assets_root) +
+						File.separator + "index.html",
+						configuration.getWebViewData(), "text/html", "UTF-8", null);
 
 				setCurrentApp(webViewApp);
 			}
@@ -295,6 +306,7 @@ public class WebViewApp extends WebViewClient {
 		@Override
 		public void onReceivedError(android.webkit.WebView view, WebResourceRequest request, WebResourceError error) {
 			super.onReceivedError(view, request, error);
+
 			if (view != null) {
 				DeviceLog.error("WEBVIEW_ERROR: " + view.toString());
 			}
