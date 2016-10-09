@@ -1,4 +1,5 @@
 import rwc from 'random-weighted-choice';
+import aes from 'crypto-js/aes';
 import _ from 'lodash';
 
 function HomeCtrl($cookies, $scope, Word, Config, Level) {
@@ -6,7 +7,11 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
   $scope.vm = vm;
 
   vm.id = 'Jn-14-1';
-  var lang = 'th';
+  const lang = 'th';
+
+  debugger;
+  const key = 'Bread is Good!';
+  const test = aes.encrypt('something to encrypt', key);
 
   var read = $cookies.getObject('read') || {};
   var readByWeight = _.reduce(read, (result,value,key) => {

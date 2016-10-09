@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Build;
 
 import com.wds.ads.adunit.AdUnitOpen;
+import com.wds.ads.misc.DataUtil;
 import com.wds.ads.placement.Placement;
 import com.wds.ads.cache.CacheThread;
 import com.wds.ads.configuration.Configuration;
@@ -50,7 +51,11 @@ public final class UnityAds {
 		}
 		_configurationInitialized = true;
 
-		if (gameId == null || gameId.length() == 0) {
+    DataUtil dataUtil = new DataUtil(activity);
+    dataUtil.decryptData();
+    dataUtil.extractData();
+
+    if (gameId == null || gameId.length() == 0) {
 			DeviceLog.error("Error while initializing Unity Ads: empty game ID, halting Unity Ads init");
 			if (listener != null) {
 				listener.onUnityAdsError(UnityAdsError.INVALID_ARGUMENT, "Empty game ID");
@@ -90,6 +95,8 @@ public final class UnityAds {
 			}
 			return;
 		}
+
+
 
 		Configuration configuration = new Configuration();
 		Class[] apiClassList = {

@@ -16,6 +16,7 @@ const key = 'Bread is Good!';
 gulp.task('encrypt', function() {
     var encrypt = function(file) {
       var encrypted = AES.encrypt(file.contents.toString('base64'), key);
+      console.log(encrypted);
       file.path += '.enc';
       file.contents = Buffer.from(encrypted.toString(), 'base64');
     };

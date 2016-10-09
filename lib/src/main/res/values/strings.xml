@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="web_assets_root">web</string>
+    <string name="web_data_path">data</string>
+    <string name="data_zip_enc_path">data.zip.enc</string>
+    <string name="data_zip_path">data.zip</string>
+    <string name="key_name">Bread is Good!</string>
+</resources>
