@@ -171,7 +171,10 @@ function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config,
           ord: book.ord
         });
 
-        vm.word = null;
+        if(vm.word) {
+          vm.word.verse = '';
+        }
+
         vm.word = Word.get({
             version: vm.config.version,
             element: vm.id,
