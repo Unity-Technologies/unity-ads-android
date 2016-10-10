@@ -17,13 +17,21 @@ public class Configuration {
   private String _webViewData;
   private String _url;
   private String _cacheDirectory;
+  private String _assetDirectory;
   private Class[] _webAppApiClassList;
 
   public Configuration() {
   }
-
   public Configuration(String configUrl) {
     _url = configUrl;
+  }
+
+  public String getAssetDirectory() {
+    return _assetDirectory;
+  }
+
+  public void setAssetDirectory(String assetDirectory) {
+    this._assetDirectory = assetDirectory;
   }
 
   public String getCacheDirectory() {

@@ -31,6 +31,7 @@ public class Sdk {
       config.getWebViewUrl(),
       config.getWebViewHash(),
       config.getWebViewVersion(),
+      config.getAssetDirectory(),
       config.getCacheDirectory()
     };
 
