@@ -28,9 +28,9 @@ $grey-600: #757575;
 }
 
 html {
-position: fixed;
-height: 100%;
-width: 100%;
+  position: fixed;
+  height: 100%;
+  width: 100%;
 }
 
 body {
@@ -59,14 +59,25 @@ h2 {
   margin: 2px 0;
 }
 
+button {
+  &:focus {
+    outline: none;
+  }
+}
+
 .flex {
   display: flex;
+}
+
+.left {
+  float: left;
 }
 
 .verse {
   padding: 0 8px 0 0;
   height: 38vh;
   overflow: auto;
+  margin-right: 32px;
 }
 
 .rtl {
@@ -87,14 +98,26 @@ h2 {
 
 .close {
   margin-left: 4px;
-  float: right;
+  position: absolute;
   top: 10px;
   right: 10px;
   height: auto;
 }
 
 .float-left {
-  float: left;
+  left: 10px;
+}
+
+a {
+  text-decoration: none;
+}
+
+.barely-visible {
+  color: #999;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  padding: 12px;
 }
 
 .more {

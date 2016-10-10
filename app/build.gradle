@@ -6,7 +6,7 @@ android {
 
   defaultConfig {
     applicationId "com.wds.ads.example"
-    minSdkVersion 10
+    minSdkVersion 12
     targetSdkVersion 24
     versionCode = 2006
     versionName = "2.0.6"

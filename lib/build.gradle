@@ -10,7 +10,7 @@ android {
     publishNonDefault true
 
     defaultConfig {
-        minSdkVersion 10
+        minSdkVersion 12
         targetSdkVersion 23
         versionCode = 2007
         versionName = "2.0.7"

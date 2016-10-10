@@ -124,7 +124,7 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.3"
-        sha1="14edff3aea1ac612ad8be1dcc772f4ae03d14c26">
+        sha1="db3129306572612880ff6645d0cce60821b17c83">
         <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run-bootstrap_d4649aa4ce8ffedfc948c96931ac3e6bdfab8671\classes.dex" />
     </item>
     <item
@@ -169,7 +169,7 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.3"
-        sha1="c399ed0f3d2378e136eb6dcfe198b33c736c7eab">
+        sha1="7259fb82e290d9379e7d8e5b3c84f48a3ea69f39">
         <dex dex="S:\unity-ads-android\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run_cd38ca3b886389d994845027e8676f57b8f084b6\classes.dex" />
     </item>
 

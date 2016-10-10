@@ -1,0 +1,266 @@
+[
+  {
+    "abbr": "Gen",
+    "ord": "1"
+  },
+  {
+    "abbr": "Ex",
+    "ord": "2"
+  },
+  {
+    "abbr": "Lev",
+    "ord": "3"
+  },
+  {
+    "abbr": "Num",
+    "ord": "4"
+  },
+  {
+    "abbr": "Deut",
+    "ord": "5"
+  },
+  {
+    "abbr": "Josh",
+    "ord": "6"
+  },
+  {
+    "abbr": "Judg",
+    "ord": "7"
+  },
+  {
+    "abbr": "Ruth",
+    "ord": "8"
+  },
+  {
+    "abbr": "1Sam",
+    "ord": "9"
+  },
+  {
+    "abbr": "2Sam",
+    "ord": "10"
+  },
+  {
+    "abbr": "1Kgs",
+    "ord": "11"
+  },
+  {
+    "abbr": "2Kgs",
+    "ord": "12"
+  },
+  {
+    "abbr": "1Chr",
+    "ord": "13"
+  },
+  {
+    "abbr": "2Chr",
+    "ord": "14"
+  },
+  {
+    "abbr": "Ezra",
+    "ord": "15"
+  },
+  {
+    "abbr": "Neh",
+    "ord": "16"
+  },
+  {
+    "abbr": "Esth",
+    "ord": "17"
+  },
+  {
+    "abbr": "Job",
+    "ord": "18"
+  },
+  {
+    "abbr": "Ps",
+    "ord": "19"
+  },
+  {
+    "abbr": "Prov",
+    "ord": "20"
+  },
+  {
+    "abbr": "Eccl",
+    "ord": "21"
+  },
+  {
+    "abbr": "Song",
+    "ord": "22"
+  },
+  {
+    "abbr": "Isa",
+    "ord": "23"
+  },
+  {
+    "abbr": "Jer",
+    "ord": "24"
+  },
+  {
+    "abbr": "Lam",
+    "ord": "25"
+  },
+  {
+    "abbr": "Ezek",
+    "ord": "26"
+  },
+  {
+    "abbr": "Dan",
+    "ord": "27"
+  },
+  {
+    "abbr": "Hos",
+    "ord": "28"
+  },
+  {
+    "abbr": "Joel",
+    "ord": "29"
+  },
+  {
+    "abbr": "Amos",
+    "ord": "30"
+  },
+  {
+    "abbr": "Obad",
+    "ord": "31"
+  },
+  {
+    "abbr": "Jonah",
+    "ord": "32"
+  },
+  {
+    "abbr": "Mic",
+    "ord": "33"
+  },
+  {
+    "abbr": "Nah",
+    "ord": "34"
+  },
+  {
+    "abbr": "Hab",
+    "ord": "35"
+  },
+  {
+    "abbr": "Zeph",
+    "ord": "36"
+  },
+  {
+    "abbr": "Hag",
+    "ord": "37"
+  },
+  {
+    "abbr": "Zech",
+    "ord": "38"
+  },
+  {
+    "abbr": "Mal",
+    "ord": "39"
+  },
+  {
+    "abbr": "Mat",
+    "ord": "40"
+  },
+  {
+    "abbr": "Mk",
+    "ord": "41"
+  },
+  {
+    "abbr": "Luk",
+    "ord": "42"
+  },
+  {
+    "abbr": "Jn",
+    "ord": "43"
+  },
+  {
+    "abbr": "Acts",
+    "ord": "44"
+  },
+  {
+    "abbr": "Rom",
+    "ord": "45"
+  },
+  {
+    "abbr": "1Cor",
+    "ord": "46"
+  },
+  {
+    "abbr": "2Cor",
+    "ord": "47"
+  },
+  {
+    "abbr": "Gal",
+    "ord": "48"
+  },
+  {
+    "abbr": "Eph",
+    "ord": "49"
+  },
+  {
+    "abbr": "Phil",
+    "ord": "50"
+  },
+  {
+    "abbr": "Col",
+    "ord": "51"
+  },
+  {
+    "abbr": "1Thess",
+    "ord": "52"
+  },
+  {
+    "abbr": "2Thess",
+    "ord": "53"
+  },
+  {
+    "abbr": "1Tim",
+    "ord": "54"
+  },
+  {
+    "abbr": "2Tim",
+    "ord": "55"
+  },
+  {
+    "abbr": "Titus",
+    "ord": "56"
+  },
+  {
+    "abbr": "Phlm",
+    "ord": "57"
+  },
+  {
+    "abbr": "Heb",
+    "ord": "58"
+  },
+  {
+    "abbr": "Jas",
+    "ord": "59"
+  },
+  {
+    "abbr": "1Pet",
+    "ord": "60"
+  },
+  {
+    "abbr": "2Pet",
+    "ord": "61"
+  },
+  {
+    "abbr": "1Jn",
+    "ord": "62"
+  },
+  {
+    "abbr": "2John",
+    "ord": "63"
+  },
+  {
+    "abbr": "3John",
+    "ord": "64"
+  },
+  {
+    "abbr": "Jude",
+    "ord": "65"
+  },
+  {
+    "abbr": "Rev",
+    "ord": "66"
+  }
+]

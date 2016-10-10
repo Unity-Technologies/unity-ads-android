@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.ConditionVariable;
 import android.os.Looper;
+import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -45,6 +46,10 @@ public class WebViewApp extends WebViewClient {
 	private WebViewApp (Configuration configuration) {
 		setConfiguration(configuration);
 		WebViewBridge.setClassTable(getConfiguration().getWebAppApiClassList());
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+			CookieManager.setAcceptFileSchemeCookies(true);
+		}
+
 		_webView = new WebView(ClientProperties.getApplicationContext());
 		_webView.setWebViewClient(new WebAppClient());
     _webView.setWebChromeClient(new WebAppChromeClient());

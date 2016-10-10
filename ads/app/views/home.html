@@ -1,5 +1,6 @@
 <header>
-  <button class="plain close" ng-class="{ 'float-left': home.config.rtl }">x</button>
+  <span class="empty"></span>
+  <button class="plain close" ng-show="home.showClose" ng-click="close()" ng-class="{ 'float-left': home.config.rtl }">x</button>
 </header>
 <div class="verse" ng-class="{ rtl: home.config.rtl }" scroll>
   <h1>{{ home.word.title }}</h1>
@@ -10,5 +11,8 @@
   <img ng-src="{{ home.assets }}/images/{{ home.image }}.jpg"/>
 </div>
 <footer>
-  <button class="primary more" ng-click="read(home.element)">{{ home.config.more }}</button>
+  <span class="barely-visible" ng-hide="home.showClose">{{ home.timer }}</span>
+  <a target="_blank" class="primary more" ng-href="{{ home.isWebView ? '' : home.readUrl }}" ng-click="read(home.element)">
+    {{ home.config.more }}
+  </a>
 </footer>

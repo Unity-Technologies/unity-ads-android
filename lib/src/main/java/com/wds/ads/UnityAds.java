@@ -2,6 +2,7 @@ package com.wds.ads;
 
 import android.app.Activity;
 import android.os.Build;
+import android.webkit.CookieSyncManager;
 
 import com.wds.ads.adunit.AdUnitOpen;
 import com.wds.ads.misc.DataUtil;
@@ -110,6 +111,7 @@ public final class UnityAds {
 			com.wds.ads.api.Connectivity.class,
 			com.wds.ads.api.DeviceInfo.class,
 			com.wds.ads.api.Listener.class,
+			com.wds.ads.api.Read.class,
 			com.wds.ads.api.Storage.class,
 			com.wds.ads.api.Sdk.class,
 			com.wds.ads.api.Request.class,
@@ -118,6 +120,11 @@ public final class UnityAds {
 			com.wds.ads.api.Placement.class,
 			com.wds.ads.api.Intent.class,
 		};
+
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+			//noinspection deprecation
+			CookieSyncManager.createInstance(activity);
+		}
 
 		configuration.setWebAppApiClassList(apiClassList);
 		configuration.setCacheDirectory(activity.getFilesDir()

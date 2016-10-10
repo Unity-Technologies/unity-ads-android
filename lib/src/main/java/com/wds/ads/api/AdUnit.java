@@ -1,6 +1,9 @@
 package com.wds.ads.api;
 
 import android.content.Intent;
+import android.os.Build;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 
 import com.wds.ads.adunit.AdUnitActivity;
 import com.wds.ads.adunit.AdUnitError;
@@ -8,6 +11,7 @@ import com.wds.ads.adunit.AdUnitSoftwareActivity;
 import com.wds.ads.log.DeviceLog;
 import com.wds.ads.misc.Utilities;
 import com.wds.ads.properties.ClientProperties;
+import com.wds.ads.webview.WebViewApp;
 import com.wds.ads.webview.bridge.WebViewCallback;
 import com.wds.ads.webview.bridge.WebViewExposed;
 
