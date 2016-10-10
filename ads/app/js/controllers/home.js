@@ -2,32 +2,65 @@ import rwc from 'random-weighted-choice';
 import aes from 'crypto-js/aes';
 import _ from 'lodash';
 
-function HomeCtrl($cookies, $scope, Word, Config, Level) {
+function HomeCtrl($location, $cookies, $scope, Word, Config, Level) {
+  'ngInject';
+
   const vm = this;
   $scope.vm = vm;
 
+  vm.prefix = '';
   vm.id = 'Jn-14-1';
   const lang = 'th';
 
   var loaded = [
-    ['com.wds.ads.api.Sdk','loadComplete', [], 'CALLBACK_01']
+    ['com.wds.ads.api.Sdk','loadComplete', [], 'onLoadComplete']
   ];
   var init = false;
   window.nativebridge = {
-    handleCallback: () => {
+    handleCallback: (params) => {
+      console.log('handleCallback: ' + JSON.stringify(params));
+
+      _.forEach(params, (paramArray) => {
+        if(paramArray[0] == 'onLoadComplete') {
+          console.log('onLoadComplete invoked: ' + JSON.stringify(paramArray));
+          var config = paramArray[2];
+          $scope.$apply((scope) => {
+            vm.prefix = _.last(config);
+            scope.$root.baseUrl = vm.prefix;
+          });
+        }
+      });
+
       if(!init) {
-        var inited = [['com.wds.ads.api.Sdk','initComplete', [], 'CALLBACK_01']];
+        var inited = [['com.wds.ads.api.Sdk','initComplete', [], 'onInitComplete']];
         window.webviewbridge
           .handleInvocation(JSON.stringify(inited));
         var ready = [
-          ['com.wds.ads.api.Listener','sendReadyEvent', ["defaultVideoAndPictureZone"], 'CALLBACK_01'],
-          ['com.wds.ads.api.Placement', 'setPlacementState', ["defaultVideoAndPictureZone", "READY"], "CALLBACK_02"]
+          ['com.wds.ads.api.Listener','sendReadyEvent', ['defaultVideoAndPictureZone'], 'CALLBACK_01'],
+          ['com.wds.ads.api.Placement', 'setPlacementState', ['defaultVideoAndPictureZone', 'READY'], 'CALLBACK_02']
         ];
         window.webviewbridge
           .handleInvocation(JSON.stringify(ready));
       }
       init = true;
 
+    },
+    handleInvocation: (params) => {
+      console.log('handleInvocation', params);
+      if(params[0] == 'webview' && params[1] == 'show') {
+        var openAdUnit = [['com.wds.ads.api.AdUnit','open', [1, ['webview'], 0], 'CALLBACK_02']];
+        window.webviewbridge
+          .handleInvocation(JSON.stringify(openAdUnit));
+        console.log('opened adunit');
+      }
+
+      _nativeBridge.AndroidAdUnit.open(1, [ 'videoplayer', 'webview' ], e, n, 1, i);
+      // on show, gives time to get ready
+      window.webviewbridge
+        .handleCallback(params[2], 'OK', JSON.stringify([]));
+    },
+    handleEvent: (params) => {
+      console.log('handleEvent', params);
     }
   };
   window.webviewbridge
@@ -64,7 +97,7 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
 
   // todo: move this?
   $scope.$watchCollection('vm.levels', val => {
-    if (val.length == 0) return;
+    if (!val || val.length == 0) return;
     var addWeight = 0;
     var levels = _.reduce(vm.levels, (result, level, idx) => {
       var nextLevelDiff = vm.levels.length > idx + 1 ?
@@ -93,13 +126,15 @@ function HomeCtrl($cookies, $scope, Word, Config, Level) {
 
   });
 
-  vm.config = Config.get({lang: lang});
-  vm.levels = Level.query();
+  $scope.$watch('vm.prefix', val => {
+    console.log(val);
+    vm.config = Config.get({lang: lang});
+    vm.levels = Level.query({});
+  });
+
 }
 
 export default {
   name: 'HomeCtrl',
   fn: HomeCtrl
 };
-
-HomeCtrl.$inject = ['$cookies', '$scope', 'Word', 'Config', 'Level'];

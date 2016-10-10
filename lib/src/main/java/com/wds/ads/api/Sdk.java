@@ -1,10 +1,12 @@
 package com.wds.ads.api;
 
 import com.wds.ads.UnityAds;
+import com.wds.ads.configuration.Configuration;
 import com.wds.ads.configuration.InitializeThread;
 import com.wds.ads.log.DeviceLog;
 import com.wds.ads.properties.ClientProperties;
 import com.wds.ads.properties.SdkProperties;
+import com.wds.ads.webview.WebView;
 import com.wds.ads.webview.WebViewApp;
 import com.wds.ads.webview.bridge.WebViewCallback;
 import com.wds.ads.webview.bridge.WebViewExposed;
@@ -14,20 +16,23 @@ public class Sdk {
 	public static void loadComplete(WebViewCallback callback) {
 		DeviceLog.debug("Web Application loaded");
 		WebViewApp.getCurrentApp().setWebAppLoaded(true);
+    Configuration config = WebViewApp.getCurrentApp()
+      .getConfiguration();
 
-		Object[] parameters = new Object[] {
-			ClientProperties.getGameId(),
+    Object[] parameters = new Object[]{
+      ClientProperties.getGameId(),
 			SdkProperties.isTestMode(),
 			ClientProperties.getAppName(),
 			ClientProperties.getAppVersion(),
 			SdkProperties.getVersionCode(),
 			SdkProperties.getVersionName(),
 			ClientProperties.isAppDebuggable(),
-			WebViewApp.getCurrentApp().getConfiguration().getConfigUrl(),
-			WebViewApp.getCurrentApp().getConfiguration().getWebViewUrl(),
-			WebViewApp.getCurrentApp().getConfiguration().getWebViewHash(),
-			WebViewApp.getCurrentApp().getConfiguration().getWebViewVersion()
-		};
+      config.getConfigUrl(),
+      config.getWebViewUrl(),
+      config.getWebViewHash(),
+      config.getWebViewVersion(),
+      config.getCacheDirectory()
+    };
 
 		callback.invoke(parameters);
 	}

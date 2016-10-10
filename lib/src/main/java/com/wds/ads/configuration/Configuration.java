@@ -11,92 +11,100 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 public class Configuration {
-	private String _webViewUrl;
-	private String _webViewHash;
-	private String _webViewVersion;
-	private String _webViewData;
-	private String _url;
+  private String _webViewUrl;
+  private String _webViewHash;
+  private String _webViewVersion;
+  private String _webViewData;
+  private String _url;
+  private String _cacheDirectory;
+  private Class[] _webAppApiClassList;
 
-	private Class[] _webAppApiClassList;
+  public Configuration() {
+  }
 
-	public Configuration () {
-	}
+  public Configuration(String configUrl) {
+    _url = configUrl;
+  }
 
-	public Configuration (String configUrl) {
-		_url = configUrl;
-	}
+  public String getCacheDirectory() {
+    return _cacheDirectory;
+  }
 
-	public String getConfigUrl () {
-		return _url;
-	}
+  public void setCacheDirectory(String cacheDirectory) {
+    this._cacheDirectory = cacheDirectory;
+  }
 
-	public void setConfigUrl(String url) {
-		_url = url;
-	}
+  public String getConfigUrl() {
+    return _url;
+  }
 
-	public Class[] getWebAppApiClassList () {
-		return _webAppApiClassList;
-	}
+  public void setConfigUrl(String url) {
+    _url = url;
+  }
 
-	public void setWebAppApiClassList(Class[] apiClassList) {
-		_webAppApiClassList = apiClassList;
-	}
+  public Class[] getWebAppApiClassList() {
+    return _webAppApiClassList;
+  }
 
-	public String getWebViewUrl() {
-		return _webViewUrl;
-	}
+  public void setWebAppApiClassList(Class[] apiClassList) {
+    _webAppApiClassList = apiClassList;
+  }
 
-	public void setWebViewUrl (String url) {
-		_webViewUrl = url;
-	}
+  public String getWebViewUrl() {
+    return _webViewUrl;
+  }
 
-	public String getWebViewHash() {
-		return _webViewHash;
-	}
+  public void setWebViewUrl(String url) {
+    _webViewUrl = url;
+  }
 
-	public void setWebViewHash (String hash) {
-		_webViewHash = hash;
-	}
+  public String getWebViewHash() {
+    return _webViewHash;
+  }
 
-	public String getWebViewVersion () {
-		return _webViewVersion;
-	}
+  public void setWebViewHash(String hash) {
+    _webViewHash = hash;
+  }
 
-	public String getWebViewData () {
-		return _webViewData;
-	}
+  public String getWebViewVersion() {
+    return _webViewVersion;
+  }
 
-	public void setWebViewData (String data) {
-		_webViewData = data;
-	}
+  public String getWebViewData() {
+    return _webViewData;
+  }
 
-	protected String buildQueryString () {
-		return "?ts=" + System.currentTimeMillis() + "&sdkVersion=" +
-			SdkProperties.getVersionCode() + "&sdkVersionName=" + SdkProperties.getVersionName();
-	}
+  public void setWebViewData(String data) {
+    _webViewData = data;
+  }
 
-	protected void makeRequest () throws IOException, JSONException {
-		if (_url == null) {
-			throw new MalformedURLException("Base URL is null");
-		}
+  protected String buildQueryString() {
+    return "?ts=" + System.currentTimeMillis() + "&sdkVersion=" +
+      SdkProperties.getVersionCode() + "&sdkVersionName=" + SdkProperties.getVersionName();
+  }
 
-		String url = _url + buildQueryString();
-		DeviceLog.debug("Requesting configuration with: " + url);
+  protected void makeRequest() throws IOException, JSONException {
+    if (_url == null) {
+      throw new MalformedURLException("Base URL is null");
+    }
 
-		WebRequest request = new WebRequest(url, "GET", null);
-		String data = request.makeRequest();
-		JSONObject config = new JSONObject(data);
+    String url = _url + buildQueryString();
+    DeviceLog.debug("Requesting configuration with: " + url);
 
-		_webViewUrl = config.getString("url");
-		if(!config.isNull("hash")) {
-			_webViewHash = config.getString("hash");
-		}
-		if(config.has("version")) {
-			_webViewVersion = config.getString("version");
-		}
+    WebRequest request = new WebRequest(url, "GET", null);
+    String data = request.makeRequest();
+    JSONObject config = new JSONObject(data);
 
-		if (_webViewUrl == null || _webViewUrl.isEmpty()) {
-			throw new MalformedURLException("Invalid data. Web view URL is null or empty");
-		}
-	}
+    _webViewUrl = config.getString("url");
+    if (!config.isNull("hash")) {
+      _webViewHash = config.getString("hash");
+    }
+    if (config.has("version")) {
+      _webViewVersion = config.getString("version");
+    }
+
+    if (_webViewUrl == null || _webViewUrl.isEmpty()) {
+      throw new MalformedURLException("Invalid data. Web view URL is null or empty");
+    }
+  }
 }

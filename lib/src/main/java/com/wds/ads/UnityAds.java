@@ -19,6 +19,8 @@ import com.wds.ads.properties.SdkProperties;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+
 public final class UnityAds {
 	private static boolean _configurationInitialized = false;
 	private static boolean _debugMode = false;
@@ -118,6 +120,10 @@ public final class UnityAds {
 		};
 
 		configuration.setWebAppApiClassList(apiClassList);
+		configuration.setCacheDirectory(activity.getFilesDir()
+			.getAbsolutePath() +
+			File.separator + activity.getString(R.string.web_assets_root) + File.separator);
+
 		InitializeThread.initialize(configuration);
 	}
 

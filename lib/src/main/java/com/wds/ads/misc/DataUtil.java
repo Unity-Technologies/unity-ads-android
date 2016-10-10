@@ -40,7 +40,7 @@ public class DataUtil {
     this.context = context;
     webRoot = context.getString(R.string.web_assets_root) + File.separator
       + context.getString(R.string.web_data_path) + File.separator;
-    destRoot = context.getCacheDir() + File.separator + webRoot;
+    destRoot = context.getFilesDir() + File.separator + webRoot;
   }
 
   private static byte[] hexStringToByteArray(String s) {

@@ -1,7 +1,10 @@
-function OnConfig($stateProvider, $locationProvider, $urlRouterProvider) {
+function OnConfig($stateProvider, $locationProvider, $urlRouterProvider, $httpProvider) {
     'ngInject';
 
-    // $locationProvider.html5Mode(true);
+    $locationProvider.html5Mode({
+      enabled: true,
+      requireBase: false
+    });
 
     $stateProvider
         .state('Home', {
@@ -12,6 +15,16 @@ function OnConfig($stateProvider, $locationProvider, $urlRouterProvider) {
         });
 
     $urlRouterProvider.otherwise('/');
+
+    $httpProvider.interceptors.push(($rootScope) => {
+      return {
+        request: config => {
+          console.log(JSON.stringify(config));
+          config.url = ($rootScope.baseUrl || '') + config.url;
+          return config;
+        }
+      };
+    });
 
 }
 

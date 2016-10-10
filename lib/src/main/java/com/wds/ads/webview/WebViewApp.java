@@ -47,13 +47,8 @@ public class WebViewApp extends WebViewClient {
 		WebViewBridge.setClassTable(getConfiguration().getWebAppApiClassList());
 		_webView = new WebView(ClientProperties.getApplicationContext());
 		_webView.setWebViewClient(new WebAppClient());
-		_webView.setWebChromeClient(new WebAppChromeClient() {
-			@Override
-			public void onConsoleMessage(String message, int lineNumber, String sourceID) {
-				DeviceLog.debug("%d %s %s", lineNumber, sourceID, message);
-			}
-		});
-	}
+    _webView.setWebChromeClient(new WebAppChromeClient());
+  }
 
 	public WebViewApp() { }
 
@@ -99,13 +94,17 @@ public class WebViewApp extends WebViewClient {
 
 				Context context = ClientProperties.getApplicationContext();
 
-				webViewApp.getWebView()
-					.loadDataWithBaseURL("file:///android_asset/" + context.getString(R.string.web_assets_root) +
-						File.separator + "index.html",
-						configuration.getWebViewData(), "text/html", "UTF-8", null);
+        WebView webView = webViewApp.getWebView();
+        String index = "file:///android_asset/" + context.getString(R.string.web_assets_root) +
+          File.separator + "index.html";
+        webView.loadDataWithBaseURL(index, configuration.getWebViewData(),
+          "text/html", "UTF-8", null);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+          android.webkit.WebView.setWebContentsDebuggingEnabled(true);
+        }
 
-				setCurrentApp(webViewApp);
-			}
+        setCurrentApp(webViewApp);
+      }
 		});
 
 		_conditionVariable = new ConditionVariable();
@@ -311,9 +310,13 @@ public class WebViewApp extends WebViewClient {
 				DeviceLog.error("WEBVIEW_ERROR: " + view.toString());
 			}
 			if (request != null) {
-				DeviceLog.error("WEBVIEW_ERROR: " + request.toString());
-			}
-			if (error != null) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+          DeviceLog.error("WEBVIEW_ERROR url: " + request.getUrl());
+        }
+        DeviceLog.error("WEBVIEW_ERROR: " + request.toString());
+      }
+      if (error != null) {
 				DeviceLog.error("WEBVIEW_ERROR: " + error.toString());
 			}
 		}

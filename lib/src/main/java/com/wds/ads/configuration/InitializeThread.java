@@ -1,6 +1,7 @@
 package com.wds.ads.configuration;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.ConditionVariable;
 
 import com.google.common.io.ByteStreams;
