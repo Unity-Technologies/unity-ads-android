@@ -39,3 +39,5 @@ build
 *.swp
 
 /mockApi
+/lib/libs
+/ads/dist

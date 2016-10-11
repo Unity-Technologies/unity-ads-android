@@ -10,13 +10,13 @@ import jsonlint from 'gulp-jsonlint';
 import cryptojs from 'crypto-js';
 import AES from 'crypto-js/aes';
 import browserSync from 'browser-sync';
-import archiver from 'gulp-archiver';
 import _ from 'lodash';
 
 const key = 'Bread is Good!';
 var keyJson;
 
 gulp.task('encrypt', function() {
+
     var encrypt = function(file, t) {
         var encrypted = AES.encrypt(file.contents.toString('base64'), key);
 
@@ -44,12 +44,6 @@ gulp.task('encrypt', function() {
         .pipe(changed(config.data.dest))
         .pipe(jsonlint())
         .pipe(jsonlint.reporter())
-        .pipe(gulpif(global.isProd, archiver('data.zip', {})))
-        // .pipe(gulpif(global.isProd, tap(encrypt)))
-        // .pipe(gulpif(global.isProd, ))
-        // .pipe(gulp.dest(config.data.dest)) 
-        // .pipe(gulpif(global.isProd, tap(decrypt)))
-        //.pipe(gulpfile('secure.json', keyJson))
         .pipe(gulp.dest(config.data.dest))
         .pipe(browserSync.stream());
 });

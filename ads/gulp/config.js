@@ -59,10 +59,10 @@ export default {
     dest: 'app/js'
   },
 
-  gzip: {
+  zip: {
     src: 'build/**/*.{html,xml,json,css,js,js.map,css.map}',
-    dest: 'build/',
-    options: {}
+    name: 'web.zip',
+    dest: './dist'
   },
 
   browserify: {

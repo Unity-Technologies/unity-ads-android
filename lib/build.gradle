@@ -15,7 +15,7 @@ android {
         versionCode = 2007
         versionName = "2.0.7"
 
-        setProperty("archivesBaseName", "unity-ads")
+        setProperty("archivesBaseName", "UnityAds")
 
         buildConfigField 'String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"' + versionName + '"')
 
@@ -68,7 +68,7 @@ android {
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile 'org.mockito:mockito-core:1.10.19'
     androidTestCompile 'com.android.support.test:runner:0.4'
     androidTestCompile 'com.android.support.test:rules:0.4'
@@ -107,16 +107,22 @@ def getPropertyStringWithDefaultValue(String key, String defaultValue) {
     return value != null ? value : defaultValue;
 }
 
-def webAssets = 'src/main/assets/web'
+def webAssets = 'src/main/assets'
+
+task copyLibs(type: Copy) {
+    from configurations.compile
+    into 'libs'
+}
 
 task cleanData(type: Delete) {
     delete webAssets
 }
 
 task copyFiles(type: Copy) {
-    from '../ads/build'
+    from '../ads/dist'
     into webAssets
 }
 
+preBuild.dependsOn(copyLibs)
 copyFiles.dependsOn(cleanData)
 preBuild.dependsOn(copyFiles)
