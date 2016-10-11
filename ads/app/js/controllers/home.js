@@ -69,10 +69,9 @@ function HomeCtrl($location, $cookies, $scope, $interval,
                       .handleInvocation(JSON.stringify(openAdUnit));
                   console.log('opened adunit');
 
-                  vm.pick();
-
                   window.webviewbridge
                       .handleCallback(params[2], 'OK', JSON.stringify([]));
+
                   $scope.$apply((scope) => {
                     scope.close = () => {
                       var closeAdUnit = [
@@ -80,7 +79,12 @@ function HomeCtrl($location, $cookies, $scope, $interval,
                       ];
                       window.webviewbridge
                         .handleInvocation(JSON.stringify(closeAdUnit));
+                      // reset timer
+                      vm.showClose = false;
+                      delete vm.timer;
                     };
+
+                    vm.pick();
                     setupTimer();
                   });
               }
@@ -181,7 +185,7 @@ function HomeCtrl($location, $cookies, $scope, $interval,
             element: vm.id,
         });
         vm.image = vm.id;
-        
+
         Analytics.trackPage('/word/' + vm.lang + '/' + vm.id);
     });
 
@@ -216,10 +220,9 @@ function HomeCtrl($location, $cookies, $scope, $interval,
           if(window.webviewbridge) {
             return;
           }
-
-          vm.pick();
         }, true);
 
+        vm.pick();
         vm.read = $cookies.getObject('read') || {};
         console.log('read cookie: ' + JSON.stringify(vm.read));
     });
@@ -233,7 +236,9 @@ function HomeCtrl($location, $cookies, $scope, $interval,
       vm.element = _.find(vm.weightTable, {
           id: randomId
       });
+
       vm.id = randomId;
+      delete vm.word;
     };
 
     $scope.$watch('vm.prefix', val => {
