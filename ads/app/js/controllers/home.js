@@ -82,6 +82,7 @@ function HomeCtrl($location, $cookies, $scope, $interval,
                       // reset timer
                       vm.showClose = false;
                       delete vm.timer;
+                      delete vm.word;
                     };
 
                     vm.pick();
