@@ -99,10 +99,10 @@ public class WebViewApp extends WebViewClient {
 				Context context = ClientProperties.getApplicationContext();
 
         WebView webView = webViewApp.getWebView();
-        String index = "file:///android_asset/" + context.getString(R.string.web_assets_root) +
-          File.separator + "index.html";
+        String index = "file:///" + configuration.getCacheDirectory() + "index.html";
         webView.loadDataWithBaseURL(index, configuration.getWebViewData(),
           "text/html", "UTF-8", null);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
           android.webkit.WebView.setWebContentsDebuggingEnabled(true);
         }

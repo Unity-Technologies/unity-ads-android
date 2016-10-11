@@ -8,6 +8,7 @@ import onRun     from './on_run';
 import 'angular-resource';
 import 'angular-cookies';
 import 'angular-ui-router';
+import 'angular-google-analytics';
 import './templates';
 import './filters';
 import './controllers';
@@ -19,6 +20,7 @@ const requires = [
   'ngResource',
   'ngCookies',
   'ui.router',
+  'angular-google-analytics',
   'templates',
   'app.filters',
   'app.controllers',

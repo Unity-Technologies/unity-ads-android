@@ -18,9 +18,6 @@ public class WebViewBridgeInterface {
 		for (int idx = 0; idx < invocationArray.length(); idx++) {
 			JSONArray currentInvocation = (JSONArray)invocationArray.get(idx);
 			String className = (String)currentInvocation.get(0);
-			// todo: remove this
-			className = className.replace("unity3d", "wds");
-
 			String methodName = (String)currentInvocation.get(1);
 			JSONArray parameters = (JSONArray)currentInvocation.get(2);
 			String callback = (String)currentInvocation.get(3);

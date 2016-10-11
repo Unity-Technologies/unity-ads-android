@@ -37,8 +37,7 @@ public class DataUtil {
 
   public DataUtil(Context context) {
     this.context = context;
-    webRoot = context.getString(R.string.web_assets_root) + File.separator
-      + context.getString(R.string.web_data_path) + File.separator;
+    webRoot = context.getString(R.string.web_assets_root) + File.separator;
     destRoot = context.getFilesDir() + File.separator + webRoot;
   }
 
@@ -72,12 +71,12 @@ public class DataUtil {
 
   public void decryptData() {
     try {
-      String source = webRoot + context.getString(R.string.data_zip_enc_path);
-      InputStream input = context.getAssets()
-        .open(source);
+      //todo: this doesn't work
+      String source = context.getString(R.string.web_zip_enc_path);
+      InputStream input = context.getAssets().open(source);
 
       File outputFile = new File(destRoot + File.separator +
-        context.getString(R.string.data_zip_path));
+        context.getString(R.string.web_zip_path));
       Files.createParentDirs(outputFile);
 
       InputStream secureInput = context.getAssets()
@@ -115,7 +114,7 @@ public class DataUtil {
   public void extractData() {
     try {
       InputStream open = context.getAssets()
-        .open(webRoot + context.getString(R.string.data_zip_path));
+        .open(context.getString(R.string.web_zip_path));
 
       ZipInputStream zipInputStream = new ZipInputStream(open);
       ZipEntry entry;

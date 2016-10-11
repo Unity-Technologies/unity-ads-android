@@ -128,8 +128,7 @@ public final class UnityAds {
 
 		configuration.setWebAppApiClassList(apiClassList);
 		configuration.setCacheDirectory(activity.getFilesDir()
-			.getAbsolutePath() +
-			File.separator + activity.getString(R.string.web_assets_root) + File.separator);
+			.getAbsolutePath() + File.separator + activity.getString(R.string.web_assets_root) + File.separator);
 		configuration.setAssetDirectory("android_asset" + File.separator +
 			activity.getString(R.string.web_assets_root));
 

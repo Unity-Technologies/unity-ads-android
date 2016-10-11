@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.ConditionVariable;
 
 import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.R;
 import com.unity3d.ads.UnityAds;
@@ -211,24 +212,20 @@ public class InitializeThread extends Thread {
 
       try {
         Context context = ClientProperties.getApplicationContext();
-        String webRoot = context.getString(R.string.web_assets_root) + File.separator;
+        String webRoot = context.getFilesDir() + File.separator +
+          context.getString(R.string.web_assets_root) + File.separator;
 
-        InputStream open = context.getAssets()
-          .open(webRoot + "index.html");
+        File index = new File(webRoot + "index.html");
+        localWebViewData = Files.toByteArray(index);
 
-        DeviceLog.debug("Unity Ads init: webapp opened from " + webRoot + "index.html");
-        localWebViewData = ByteStreams.toByteArray(open);
-        open.close();
       } catch (IOException e) {
         DeviceLog.debug("Unity Ads init: webapp not found in local cache: " + e.getMessage());
         return new InitializeStateLoadWeb(_configuration);
       }
 
-      String localWebViewHash = Utilities.Sha256(localWebViewData);
-
+      // String localWebViewHash = Utilities.Sha256(localWebViewData);
 
       String webViewDataString;
-
       try {
         webViewDataString = new String(localWebViewData, "UTF-8");
       } catch (UnsupportedEncodingException e) {
@@ -237,8 +234,6 @@ public class InitializeThread extends Thread {
 
       DeviceLog.info("Unity Ads init: webapp loaded from local cache");
       return new InitializeStateCreate(_configuration, webViewDataString);
-
-      // return new InitializeStateLoadWeb(_configuration);
     }
   }
 

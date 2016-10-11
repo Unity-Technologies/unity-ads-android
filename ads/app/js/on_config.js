@@ -1,4 +1,5 @@
-function OnConfig($stateProvider, $locationProvider, $urlRouterProvider, $httpProvider) {
+function OnConfig($stateProvider, $locationProvider, $urlRouterProvider,
+  $httpProvider, AnalyticsProvider) {
     'ngInject';
 
     $locationProvider.html5Mode({
@@ -26,6 +27,9 @@ function OnConfig($stateProvider, $locationProvider, $urlRouterProvider, $httpPr
       };
     });
 
+    AnalyticsProvider
+      .logAllCalls(true)
+      .setAccount('UA-2724338-7');
 }
 
 export default OnConfig;

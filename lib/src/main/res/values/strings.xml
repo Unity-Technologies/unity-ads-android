@@ -3,8 +3,8 @@
     <string name="web_assets_root">web</string>
     <string name="web_data_path">data</string>
     <string name="secure_json_path">secure.json</string>
-    <string name="data_zip_enc_path">data.zip.enc</string>
-    <string name="data_zip_path">data.zip</string>
+    <string name="web_zip_enc_path">data.zip.enc</string>
+    <string name="web_zip_path">web.zip</string>
     <string name="key_name">Bread is Good!</string>
     <string name="version_code_key">version_code</string>
 </resources>

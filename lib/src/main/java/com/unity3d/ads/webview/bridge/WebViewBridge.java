@@ -19,7 +19,7 @@ public class WebViewBridge {
 		_classTable = new HashMap<>();
 
 		for (Class cls : apiClassList) {
-			if (cls == null || !cls.getPackage().getName().startsWith("com.wds.ads")) {
+			if (cls == null || !cls.getPackage().getName().startsWith("com.unity3d.ads")) {
 				continue;
 			}
 

@@ -60,7 +60,7 @@ export default {
   },
 
   zip: {
-    src: 'build/**/*.{html,xml,json,css,js,js.map,css.map}',
+    src: 'build/**/*.{html,xml,json,css,js,jpg,png,gif,js.map,css.map}',
     name: 'web.zip',
     dest: './dist'
   },

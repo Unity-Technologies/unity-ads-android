@@ -1,8 +1,8 @@
 import rwc from 'random-weighted-choice';
-import aes from 'crypto-js/aes';
 import _ from 'lodash';
 
-function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config, Level, Books) {
+function HomeCtrl($location, $cookies, $scope, $interval,
+  Analytics, Culture, Word, Config, Level, Books) {
     'ngInject';
 
     const vm = this;
@@ -10,7 +10,6 @@ function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config,
 
     vm.isWebView = window.webviewbridge;
     vm.prefix = '';
-    vm.assets = '';
     // vm.id = 'Jn-14-1';
     const lang = 'en';
 
@@ -24,7 +23,7 @@ function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config,
     var setupBridge = () => {
 
       var loaded = [
-          ['com.wds.ads.api.Sdk', 'loadComplete', [], 'onLoadComplete']
+          ['com.unity3d.ads.api.Sdk', 'loadComplete', [], 'onLoadComplete']
       ];
       var init = false;
 
@@ -37,7 +36,6 @@ function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config,
                       console.log('onLoadComplete invoked: ' + JSON.stringify(paramArray));
                       var config = paramArray[2];
                       $scope.$apply((scope) => {
-                          vm.assets = config[config.length - 2];
                           vm.prefix = config[config.length - 1];
                           scope.$root.baseUrl = vm.prefix;
                       });
@@ -46,13 +44,14 @@ function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config,
 
               if (!init) {
                   var inited = [
-                      ['com.wds.ads.api.Sdk', 'initComplete', [], 'onInitComplete']
+                      ['com.unity3d.ads.api.Sdk', 'initComplete', [], 'onInitComplete']
                   ];
                   window.webviewbridge
                       .handleInvocation(JSON.stringify(inited));
                   var ready = [
-                      ['com.wds.ads.api.Listener', 'sendReadyEvent', ['defaultVideoAndPictureZone'], 'CALLBACK_01'],
-                      ['com.wds.ads.api.Placement', 'setPlacementState', ['defaultVideoAndPictureZone', 'READY'], 'CALLBACK_02']
+                      ['com.unity3d.ads.api.Listener', 'sendReadyEvent', ['defaultVideoAndPictureZone'], 'CALLBACK_01'],
+                      ['com.unity3d.ads.api.Placement', 'setDefaultPlacement', ['defaultVideoAndPictureZone'], 'CALLBACK_03'],
+                      ['com.unity3d.ads.api.Placement', 'setPlacementState', ['defaultVideoAndPictureZone', 'READY'], 'CALLBACK_02']
                   ];
                   window.webviewbridge
                       .handleInvocation(JSON.stringify(ready));
@@ -64,7 +63,7 @@ function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config,
               console.log('handleInvocation', params);
               if (params[0] == 'webview' && params[1] == 'show') {
                   var openAdUnit = [
-                      ['com.wds.ads.api.AdUnit', 'open', [1, ['webview'], -1], 'CALLBACK_02']
+                      ['com.unity3d.ads.api.AdUnit', 'open', [1, ['webview'], -1], 'CALLBACK_02']
                   ];
                   window.webviewbridge
                       .handleInvocation(JSON.stringify(openAdUnit));
@@ -77,7 +76,7 @@ function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config,
                   $scope.$apply((scope) => {
                     scope.close = () => {
                       var closeAdUnit = [
-                          ['com.wds.ads.api.AdUnit', 'close', [], 'onClosed']
+                          ['com.unity3d.ads.api.AdUnit', 'close', [], 'onClosed']
                       ];
                       window.webviewbridge
                         .handleInvocation(JSON.stringify(closeAdUnit));
@@ -113,11 +112,13 @@ function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config,
       $cookies.putObject('read', vm.read);
       if(window.webviewbridge) {
         var updateRead = [
-            ['com.wds.ads.api.Read', 'read', [], 'onReadUpdated']
+            ['com.unity3d.ads.api.Read', 'read', [], 'onReadUpdated']
         ];
         window.webviewbridge
           .handleInvocation(JSON.stringify(updateRead));
       }
+
+      Analytics.trackEvent('word', 'read', element.id, value);
     };
 
     var onRead = (element, value) => {
@@ -128,7 +129,7 @@ function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config,
       }
 
       var launchWeb = [
-          ['com.wds.ads.api.Intent', 'launch', [{
+          ['com.unity3d.ads.api.Intent', 'launch', [{
             action: 'android.intent.action.VIEW',
             uri: vm.readUrl
           }], 'onReadUpdated']
@@ -180,6 +181,8 @@ function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config,
             element: vm.id,
         });
         vm.image = vm.id;
+        
+        Analytics.trackPage('/word/' + vm.lang + '/' + vm.id);
     });
 
     // todo: move this?
@@ -236,9 +239,10 @@ function HomeCtrl($location, $cookies, $scope, $interval, Culture, Word, Config,
     $scope.$watch('vm.prefix', val => {
       vm.culture.$promise.then(() => {
         var detectedLang = navigator.language.split('-')[0];
+        vm.lang = vm.culture[detectedLang] ? detectedLang : lang;
 
         var params = {
-          lang: vm.culture[detectedLang] ? detectedLang : lang
+          lang: vm.lang
         };
 
         vm.config = Config.get(params, config => {
