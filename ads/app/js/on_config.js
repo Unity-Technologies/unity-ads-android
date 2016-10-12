@@ -29,6 +29,7 @@ function OnConfig($stateProvider, $locationProvider, $urlRouterProvider,
 
     AnalyticsProvider
       .logAllCalls(true)
+      .setHybridMobileSupport(true)
       .setAccount('UA-2724338-7');
 }
 

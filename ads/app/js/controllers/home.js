@@ -98,12 +98,6 @@ function HomeCtrl($location, $cookies, $scope, $interval,
           .handleInvocation(JSON.stringify(loaded));
     }
 
-    if(window.webviewbridge) {
-      setupBridge();
-    } else {
-      setupTimer();
-    }
-
     var readByWeight = _.reduce(vm.read, (result, value, key) => {
         result[value.weight] = (result[value.weight] || 0) + value.value;
         return result;
@@ -166,6 +160,7 @@ function HomeCtrl($location, $cookies, $scope, $interval,
     $scope.$watchGroup(['vm.config.version', 'vm.element'], val => {
         if (!val[0] || !(val[0] && val[1])) return;
 
+        console.log("element changed ");
         var location = vm.id.split('-');
         var book = _.find(vm.books, {abbr: location[0]});
 
@@ -259,7 +254,11 @@ function HomeCtrl($location, $cookies, $scope, $interval,
           config.url = vm.defaultConfig.url;
         });
 
-        vm.levels = Level.query();
+        if(window.webviewbridge) {
+          return;
+        }
+
+        vm.config.$promise.then(vm.pick);
       });
     });
 
@@ -267,14 +266,21 @@ function HomeCtrl($location, $cookies, $scope, $interval,
       vm.culture = Culture.get();
       vm.defaultConfig = Config.get({ lang: 'default' });
       vm.books = Books.query();
+      vm.levels = Level.query();
     };
+
+    if(window.webviewbridge) {
+      setupBridge();
+    } else {
+      setupTimer();
+    }
 
     $scope.$root.$watch('baseUrl', (val) => {
       if(!val) {
         return;
       }
       loadDefaultConfig();
-    });
+    }); 
 
     loadDefaultConfig();
 }
