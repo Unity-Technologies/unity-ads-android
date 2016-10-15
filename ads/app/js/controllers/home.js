@@ -157,31 +157,38 @@ function HomeCtrl($location, $cookies, $scope, $interval,
     $scope.read = element => onRead(element, 1);
     $scope.$on('read', ($evt) => setRead(vm.element, .5));
 
+    var setReadUrl = (version) => {
+      var location = vm.id.split('-');
+      var book = _.find(vm.books, {abbr: location[0]});
+
+      vm.readUrl = interpolate(vm.config.url, {
+        abbr: location[0],
+        chapter: location[1],
+        verse: location[2],
+        version: version,
+        ord: book.ord
+      });
+    };
+
     $scope.$watchGroup(['vm.config.version', 'vm.element'], val => {
         if (!val[0] || !(val[0] && val[1])) return;
 
-        console.log("element changed ");
-        var location = vm.id.split('-');
-        var book = _.find(vm.books, {abbr: location[0]});
-
-        vm.readUrl = interpolate(vm.config.url, {
-          abbr: location[0],
-          chapter: location[1],
-          verse: location[2],
-          version: vm.config.version,
-          ord: book.ord
-        });
-
-        if(vm.word) {
-          vm.word.verse = '';
-        }
+        setReadUrl(vm.config.version);
 
         vm.word = Word.get({
             version: vm.config.version,
             element: vm.id,
-        });
-        vm.image = vm.id;
+        }, () => {
+          if(vm.word.url) {
+            vm.readUrl = vm.word.url;
+          }
 
+          if(vm.word.version) {
+            setReadUrl(vm.word.version);
+          }
+        });
+
+        vm.image = vm.id;
         Analytics.trackPage('/word/' + vm.lang + '/' + vm.id);
     });
 
@@ -280,7 +287,7 @@ function HomeCtrl($location, $cookies, $scope, $interval,
         return;
       }
       loadDefaultConfig();
-    }); 
+    });
 
     loadDefaultConfig();
 }
