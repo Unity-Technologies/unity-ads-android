@@ -6,6 +6,7 @@ import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.ActivityInstrumentationTestCase2;
 
@@ -16,13 +17,10 @@ import com.unity3d.ads.webview.WebView;
 import com.unity3d.ads.webview.WebViewApp;
 import com.unity3d.ads.webview.bridge.CallbackStatus;
 import com.unity3d.ads.webview.bridge.Invocation;
-import android.support.test.rule.ActivityTestRule;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.lang.reflect.Method;
@@ -32,192 +30,194 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class AdUnitActivityTestBaseClass extends ActivityInstrumentationTestCase2<AdUnitActivity> {
-	public AdUnitActivityTestBaseClass() {
-		super(AdUnitActivity.class);
-	}
+  @Rule
+  public MyCustomRule<AdUnitActivity> testRule = new MyCustomRule<>(AdUnitActivity.class, false, false);
 
-	protected class MyCustomRule<A extends AdUnitActivity> extends ActivityTestRule<A> {
-		public MyCustomRule(Class<A> activityClass, boolean initialTouchMode, boolean launchActivity) {
-			super(activityClass, initialTouchMode, launchActivity);
-		}
+  public AdUnitActivityTestBaseClass() {
+    super(AdUnitActivity.class);
+  }
 
-		@Override
-		protected void afterActivityFinished() {
-			super.afterActivityFinished();
-		}
-	}
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+    injectInstrumentation(InstrumentationRegistry.getInstrumentation());
+  }
 
-	@Rule
-	public MyCustomRule<AdUnitActivity> testRule = new MyCustomRule<>(AdUnitActivity.class, false, false);
+  @After
+  public void tearDown() throws Exception {
+    super.tearDown();
+  }
 
-	@Before
-	public void setUp() throws Exception {
-		super.setUp();
-		injectInstrumentation(InstrumentationRegistry.getInstrumentation());
-	}
+  protected boolean waitForActivityFinish(final Activity activity) {
+    final ConditionVariable cv = new ConditionVariable();
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new MockWebViewApp() {
+          private boolean allowEvents = true;
 
-	@After
-	public void tearDown() throws Exception {
-		super.tearDown();
-	}
+          @Override
+          public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
+            if (allowEvents) {
+              EVENT_CATEGORIES.add(eventCategory);
+              EVENTS.add(eventId);
+              EVENT_PARAMS = params;
+              EVENT_COUNT++;
 
-	protected class MockWebViewApp extends WebViewApp {
-		public CallbackStatus CALLBACK_STATUS = null;
-		public Enum CALLBACK_ERROR = null;
-		public Object[] CALLBACK_PARAMS = null;
-		public VideoPlayerView VIDEOPLAYER_VIEW = null;
-		public List<Integer> INFO_EVENTS = null;
-		public boolean EVENT_TRIGGERED = false;
-		public Object[] EVENT_PARAMS = null;
-		public int EVENT_COUNT = 0;
-		public ConditionVariable CONDITION_VARIABLE = null;
+              DeviceLog.debug(eventId.name());
 
-		public ArrayList<Enum> EVENT_CATEGORIES = new ArrayList<>();
-		public ArrayList<Enum> EVENTS = new ArrayList<>();
+              if ("ON_DESTROY".equals(eventId.name())) {
+                allowEvents = false;
+                cv.open();
+              }
+            }
 
-		@Override
-		public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
-			return true;
-		}
+            return true;
+          }
+        });
 
-		@Override
-		public boolean invokeCallback(Invocation invocation) {
-			for (ArrayList<Object> response : invocation.getResponses()) {
-				CallbackStatus status = (CallbackStatus) response.get(0);
-				Enum error = (Enum) response.get(1);
-				Object[] params = (Object[]) response.get(2);
+        activity.finish();
+      }
+    }).start();
+    return cv.block(30000);
+  }
 
-				ArrayList<Object> paramList = new ArrayList<>();
-				paramList.addAll(Arrays.asList(params));
-				paramList.add(1, status.name());
+  protected Activity waitForActivityStart(final Intent intent) {
+    final ConditionVariable cv = new ConditionVariable();
+    WebViewApp.setCurrentApp(new MockWebViewApp() {
+      private boolean allowEvents = true;
+      private boolean launched = false;
 
-				if (error != null) {
-					paramList.add(2, error.name());
-				}
+      @Override
+      public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
+        if (allowEvents) {
 
-				CALLBACK_ERROR = error;
-				CALLBACK_PARAMS = params;
-				CALLBACK_STATUS = status;
+          DeviceLog.debug(eventId.name());
 
-				break;
-			}
+          if ("LAUNCHED".equals(eventId.name())) {
+            launched = true;
+          } else {
+            EVENT_CATEGORIES.add(eventCategory);
+            EVENTS.add(eventId);
+            EVENT_PARAMS = params;
+            EVENT_COUNT++;
+          }
 
-			return true;
-		}
+          if ("ON_RESUME".equals(eventId.name())) {
+            //allowEvents = false;
 
-		@Override
-		public boolean invokeMethod(String className, String methodName, Method callback, Object... params) {
-			return true;
-		}
-	}
+            if (launched) {
+              DeviceLog.debug("Activity launch already came through, opening CV");
+              cv.open();
+            }
+          }
+        }
 
-	protected boolean waitForActivityFinish (final Activity activity) {
-		final ConditionVariable cv = new ConditionVariable();
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new MockWebViewApp() {
-					private boolean allowEvents = true;
-					@Override
-					public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
-						if (allowEvents) {
-							EVENT_CATEGORIES.add(eventCategory);
-							EVENTS.add(eventId);
-							EVENT_PARAMS = params;
-							EVENT_COUNT++;
+        return true;
+      }
+    });
 
-							DeviceLog.debug(eventId.name());
+    final ConditionVariable webViewCV = new ConditionVariable();
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.getCurrentApp()
+          .setWebView(new WebView(InstrumentationRegistry.getTargetContext()));
+        webViewCV.open();
+      }
+    });
 
-							if ("ON_DESTROY".equals(eventId.name())) {
-								allowEvents = false;
-								cv.open();
-							}
-						}
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        Intent tmpIntent = intent;
+        if (tmpIntent == null) tmpIntent = new Intent();
+        testRule.launchActivity(tmpIntent);
+        WebViewApp.getCurrentApp()
+          .sendEvent(ExtraEvents.LAUNCHED, ExtraEvents.LAUNCHED);
+        cv.open();
+      }
+    }).start();
 
-						return true;
-					}
-				});
+    boolean success = cv.block(30000);
+    return testRule.getActivity();
+  }
 
-				activity.finish();
-			}
-		}).start();
-		return cv.block(30000);
-	}
+  protected String printEvents(ArrayList<Enum> events) {
+    String retString = "";
 
-	protected Activity waitForActivityStart (final Intent intent) {
-		final ConditionVariable cv = new ConditionVariable();
-		WebViewApp.setCurrentApp(new MockWebViewApp() {
-			private boolean allowEvents = true;
-			private boolean launched = false;
+    if (events != null) {
+      for (Enum event : events) {
+        retString += event.name() + ", ";
+      }
+    }
 
-			@Override
-			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
-				if (allowEvents) {
+    retString = retString.substring(0, retString.length() - 1);
+    return retString;
+  }
 
-					DeviceLog.debug(eventId.name());
+  private enum ExtraEvents {LAUNCHED}
 
-					if ("LAUNCHED".equals(eventId.name())) {
-						launched = true;
-					}
-					else {
-						EVENT_CATEGORIES.add(eventCategory);
-						EVENTS.add(eventId);
-						EVENT_PARAMS = params;
-						EVENT_COUNT++;
-					}
+  protected class MyCustomRule<A extends AdUnitActivity> extends ActivityTestRule<A> {
+    public MyCustomRule(Class<A> activityClass, boolean initialTouchMode, boolean launchActivity) {
+      super(activityClass, initialTouchMode, launchActivity);
+    }
 
-					if ("ON_RESUME".equals(eventId.name())) {
-						//allowEvents = false;
+    @Override
+    protected void afterActivityFinished() {
+      super.afterActivityFinished();
+    }
+  }
 
-						if (launched) {
-							DeviceLog.debug("Activity launch already came through, opening CV");
-							cv.open();
-						}
-					}
-				}
+  protected class MockWebViewApp extends WebViewApp {
+    public CallbackStatus CALLBACK_STATUS = null;
+    public Enum CALLBACK_ERROR = null;
+    public Object[] CALLBACK_PARAMS = null;
+    public VideoPlayerView VIDEOPLAYER_VIEW = null;
+    public List<Integer> INFO_EVENTS = null;
+    public boolean EVENT_TRIGGERED = false;
+    public Object[] EVENT_PARAMS = null;
+    public int EVENT_COUNT = 0;
+    public ConditionVariable CONDITION_VARIABLE = null;
 
-				return true;
-			}
-		});
+    public ArrayList<Enum> EVENT_CATEGORIES = new ArrayList<>();
+    public ArrayList<Enum> EVENTS = new ArrayList<>();
 
-		final ConditionVariable webViewCV = new ConditionVariable();
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.getCurrentApp().setWebView(new WebView(InstrumentationRegistry.getTargetContext()));
-				webViewCV.open();
-			}
-		});
+    @Override
+    public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
+      return true;
+    }
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				Intent tmpIntent = intent;
-				if (tmpIntent == null) tmpIntent = new Intent();
-				testRule.launchActivity(tmpIntent);
-				WebViewApp.getCurrentApp().sendEvent(ExtraEvents.LAUNCHED, ExtraEvents.LAUNCHED);
-				cv.open();
-			}
-		}).start();
+    @Override
+    public boolean invokeMethod(String className, String methodName, Method callback, Object... params) {
+      return true;
+    }
 
-		boolean success = cv.block(30000);
-		return testRule.getActivity();
-	}
+    @Override
+    public boolean invokeCallback(Invocation invocation) {
+      for (ArrayList<Object> response : invocation.getResponses()) {
+        CallbackStatus status = (CallbackStatus) response.get(0);
+        Enum error = (Enum) response.get(1);
+        Object[] params = (Object[]) response.get(2);
 
-	private enum ExtraEvents { LAUNCHED }
+        ArrayList<Object> paramList = new ArrayList<>();
+        paramList.addAll(Arrays.asList(params));
+        paramList.add(1, status.name());
 
-	protected String printEvents (ArrayList<Enum> events) {
-		String retString = "";
+        if (error != null) {
+          paramList.add(2, error.name());
+        }
 
-		if (events != null) {
-			for (Enum event : events) {
-				retString += event.name() + ", ";
-			}
-		}
+        CALLBACK_ERROR = error;
+        CALLBACK_PARAMS = params;
+        CALLBACK_STATUS = status;
 
-		retString = retString.substring(0, retString.length() - 1);
-		return retString;
-	}
+        break;
+      }
+
+      return true;
+    }
+  }
 }
 

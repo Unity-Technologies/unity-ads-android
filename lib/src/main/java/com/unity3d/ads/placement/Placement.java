@@ -8,10 +8,6 @@ public class Placement {
 	private static HashMap<String,UnityAds.PlacementState> _placementReadyMap;
 	private static String _defaultPlacement;
 
-	public static void setDefaultPlacement(String placement) {
-		_defaultPlacement = placement;
-	}
-
 	public static void setPlacementState(String placement, String placementState) {
 		if (_placementReadyMap == null) {
 			_placementReadyMap = new HashMap<>();
@@ -48,6 +44,10 @@ public class Placement {
 
 	public static String getDefaultPlacement() {
 		return _defaultPlacement;
+	}
+
+	public static void setDefaultPlacement(String placement) {
+		_defaultPlacement = placement;
 	}
 
 	private static UnityAds.PlacementState currentState(String placement) {

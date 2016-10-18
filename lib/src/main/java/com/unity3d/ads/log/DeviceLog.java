@@ -8,22 +8,16 @@ import java.util.HashMap;
 
 public class DeviceLog {
 
+	public static final int LOGLEVEL_INFO = 4;
+	public static final int LOGLEVEL_DEBUG = 8;
+	private static final int LOGLEVEL_ERROR = 1;
+	private static final int LOGLEVEL_WARNING = 2;
+	private static final HashMap<UnityAdsLogLevel, DeviceLogLevel> _deviceLogLevel = new HashMap<>();
 	private static boolean LOG_ERROR = true;
 	private static boolean LOG_WARNING = true;
 	private static boolean LOG_INFO = true;
 	private static boolean LOG_DEBUG = true;
 	private static boolean FORCE_DEBUG_LOG = false;
-
-	private static final int LOGLEVEL_ERROR = 1;
-	private static final int LOGLEVEL_WARNING = 2;
-	public static final int LOGLEVEL_INFO = 4;
-	public static final int LOGLEVEL_DEBUG = 8;
-
-	public enum UnityAdsLogLevel {
-		INFO, DEBUG, WARNING, ERROR
-	}
-
-	private static final HashMap<UnityAdsLogLevel, DeviceLogLevel> _deviceLogLevel = new HashMap<>();
 
 	static {
 		if (_deviceLogLevel.size() == 0) {
@@ -67,8 +61,6 @@ public class DeviceLog {
 			LOG_DEBUG = false;
 		}
 	}
-
-
 
 	public static void entered() {
 		debug("ENTERED METHOD");
@@ -176,10 +168,10 @@ public class DeviceLog {
 		else {
 			finalMessage = message;
 		}
-		
+
 		return finalMessage;
 	}
-	
+
 	private static DeviceLogLevel getLogLevel(UnityAdsLogLevel logLevel) {
 		return _deviceLogLevel.get(logLevel);
 	}
@@ -238,5 +230,9 @@ public class DeviceLog {
 				}
 			}
 		}
+	}
+
+	public enum UnityAdsLogLevel {
+		INFO, DEBUG, WARNING, ERROR
 	}
 }

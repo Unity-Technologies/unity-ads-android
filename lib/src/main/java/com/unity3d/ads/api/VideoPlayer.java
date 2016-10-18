@@ -14,12 +14,12 @@ import com.unity3d.ads.webview.bridge.WebViewExposed;
 public class VideoPlayer {
 	private static VideoPlayerView _videoPlayerView;
 
-	public static void setVideoPlayerView (VideoPlayerView videoPlayerView) {
-		_videoPlayerView = videoPlayerView;
-	}
-
 	public static VideoPlayerView getVideoPlayerView() {
 		return _videoPlayerView;
+	}
+
+	public static void setVideoPlayerView(VideoPlayerView videoPlayerView) {
+		_videoPlayerView = videoPlayerView;
 	}
 
 	@WebViewExposed

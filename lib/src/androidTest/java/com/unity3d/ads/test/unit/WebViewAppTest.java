@@ -16,8 +16,6 @@ import com.unity3d.ads.webview.bridge.CallbackStatus;
 import com.unity3d.ads.webview.bridge.Invocation;
 import com.unity3d.ads.webview.bridge.NativeCallback;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,452 +26,540 @@ import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class WebViewAppTest {
-	public static void nativeCallbackMethod () {
-	}
+  public static void nativeCallbackMethod() {
+  }
 
-	@BeforeClass
-	public static void prepareTests () throws Exception {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
-	}
+  @BeforeClass
+  public static void prepareTests() throws Exception {
+    ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+  }
 
-	@Test
-	public void testCreate () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final Configuration conf = new Configuration(TestUtilities.getTestServerAddress());
+  public static void testNativeCallbackMethod() {
+  }
 
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-			}
-		}, 100);
+  @Test
+  public void testCreate() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final Configuration conf = new Configuration(TestUtilities.getTestServerAddress());
 
-		WebViewApp.create(conf);
-		assertNotNull("After creating WebApp, the current WebApp should not be null", WebViewApp.getCurrentApp());
-	}
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+      }
+    }, 100);
 
-	@Test
-	public void testAddCallback () throws NoSuchMethodException {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
+    WebViewApp.create(conf);
+    assertNotNull("After creating WebApp, the current WebApp should not be null", WebViewApp.getCurrentApp());
+  }
 
-		Method m = getClass().getMethod("nativeCallbackMethod");
-		NativeCallback localNativeCallback = new NativeCallback(m);
+  @Test
+  public void testAddCallback() throws NoSuchMethodException {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
 
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+    Method m = getClass().getMethod("nativeCallbackMethod");
+    NativeCallback localNativeCallback = new NativeCallback(m);
 
-		boolean success = cv.block(10000);
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-		WebViewApp.getCurrentApp().addCallback(localNativeCallback);
-		NativeCallback remoteNativeCallback = WebViewApp.getCurrentApp().getCallback(localNativeCallback.getId());
+    boolean success = cv.block(10000);
 
-		assertTrue("ConditionVariable was not opened successfully", success);
-		assertNotNull("The WebApp stored callback should not be NULL", remoteNativeCallback);
-		assertEquals("The local and the WebApp stored callback should be the same object", localNativeCallback, remoteNativeCallback);
-		assertEquals("The local and the WebApp stored callback should have the same ID", localNativeCallback.getId(), remoteNativeCallback.getId());
-	}
+    WebViewApp.getCurrentApp()
+      .addCallback(localNativeCallback);
+    NativeCallback remoteNativeCallback = WebViewApp.getCurrentApp()
+      .getCallback(localNativeCallback.getId());
 
-	@Test
-	public void testRemoveCallback () throws NoSuchMethodException {
-		WebViewApp.setCurrentApp(null);
-		Method m = getClass().getMethod("nativeCallbackMethod");
-		NativeCallback localNativeCallback = new NativeCallback(m);
-		final ConditionVariable cv = new ConditionVariable();
+    assertTrue("ConditionVariable was not opened successfully", success);
+    assertNotNull("The WebApp stored callback should not be NULL", remoteNativeCallback);
+    assertEquals("The local and the WebApp stored callback should be the same object", localNativeCallback, remoteNativeCallback);
+    assertEquals("The local and the WebApp stored callback should have the same ID", localNativeCallback.getId(), remoteNativeCallback.getId());
+  }
 
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+  @Test
+  public void testRemoveCallback() throws NoSuchMethodException {
+    WebViewApp.setCurrentApp(null);
+    Method m = getClass().getMethod("nativeCallbackMethod");
+    NativeCallback localNativeCallback = new NativeCallback(m);
+    final ConditionVariable cv = new ConditionVariable();
 
-		boolean success = cv.block(10000);
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-		assertTrue("ConditionVariable was not opened successfully", success);
-		WebViewApp.getCurrentApp().addCallback(localNativeCallback);
-		NativeCallback remoteNativeCallback = WebViewApp.getCurrentApp().getCallback(localNativeCallback.getId());
-		assertNotNull("The WebApp stored callback should not be NULL", remoteNativeCallback);
-		WebViewApp.getCurrentApp().removeCallback(localNativeCallback);
-		remoteNativeCallback = WebViewApp.getCurrentApp().getCallback(localNativeCallback.getId());
-		assertNull("The WebApp stored callback should be NULL because it was removed", remoteNativeCallback);
-	}
+    boolean success = cv.block(10000);
 
-	@Test
-	public void testSetWebView () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
+    assertTrue("ConditionVariable was not opened successfully", success);
+    WebViewApp.getCurrentApp()
+      .addCallback(localNativeCallback);
+    NativeCallback remoteNativeCallback = WebViewApp.getCurrentApp()
+      .getCallback(localNativeCallback.getId());
+    assertNotNull("The WebApp stored callback should not be NULL", remoteNativeCallback);
+    WebViewApp.getCurrentApp()
+      .removeCallback(localNativeCallback);
+    remoteNativeCallback = WebViewApp.getCurrentApp()
+      .getCallback(localNativeCallback.getId());
+    assertNull("The WebApp stored callback should be NULL because it was removed", remoteNativeCallback);
+  }
 
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebView webView = new WebView(InstrumentationRegistry.getContext());
-				WebViewApp.getCurrentApp().setWebView(webView);
-				assertEquals("Local and WebApps WebView should be the same object", webView, WebViewApp.getCurrentApp().getWebView());
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+  @Test
+  public void testSetWebView() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
 
-		boolean success = cv.block(10000);
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebView webView = new WebView(InstrumentationRegistry.getContext());
+        WebViewApp.getCurrentApp()
+          .setWebView(webView);
+        assertEquals("Local and WebApps WebView should be the same object", webView, WebViewApp.getCurrentApp()
+          .getWebView());
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-		assertTrue("ConditionVariable was not opened successfully", success);
-		assertNotNull("Current WebApps WebView should not be null because it was set", WebViewApp.getCurrentApp().getWebView());
-	}
+    boolean success = cv.block(10000);
 
-	@Test
-	public void testSetConfiguration () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
+    assertTrue("ConditionVariable was not opened successfully", success);
+    assertNotNull("Current WebApps WebView should not be null because it was set", WebViewApp.getCurrentApp()
+      .getWebView());
+  }
 
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+  @Test
+  public void testSetConfiguration() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
 
-		boolean success = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", success);
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-		final Configuration conf = new Configuration(TestUtilities.getTestServerAddress());
-		WebViewApp.getCurrentApp().setConfiguration(conf);
+    boolean success = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", success);
 
-		assertNotNull("Current WebApp configuration should not be null", WebViewApp.getCurrentApp().getConfiguration());
-		assertEquals("Local configuration and current WebApp configuration should be the same object", conf, WebViewApp.getCurrentApp().getConfiguration());
-	}
+    final Configuration conf = new Configuration(TestUtilities.getTestServerAddress());
+    WebViewApp.getCurrentApp()
+      .setConfiguration(conf);
 
-	@Test
-	public void testSetWebAppLoaded () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
+    assertNotNull("Current WebApp configuration should not be null", WebViewApp.getCurrentApp()
+      .getConfiguration());
+    assertEquals("Local configuration and current WebApp configuration should be the same object", conf, WebViewApp.getCurrentApp()
+      .getConfiguration());
+  }
 
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+  @Test
+  public void testSetWebAppLoaded() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
 
-		boolean success = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", success);
-		assertFalse("WebApp should not be loaded. It was just created", WebViewApp.getCurrentApp().isWebAppLoaded());
-		WebViewApp.getCurrentApp().setWebAppLoaded(true);
-		assertTrue("WebApp should now be \"loaded\". We set the status to true", WebViewApp.getCurrentApp().isWebAppLoaded());
-	}
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-	@Test
-	public void testSendEventShouldFail () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
+    boolean success = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", success);
+    assertFalse("WebApp should not be loaded. It was just created", WebViewApp.getCurrentApp()
+      .isWebAppLoaded());
+    WebViewApp.getCurrentApp()
+      .setWebAppLoaded(true);
+    assertTrue("WebApp should now be \"loaded\". We set the status to true", WebViewApp.getCurrentApp()
+      .isWebAppLoaded());
+  }
 
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+  @Test
+  public void testSendEventShouldFail() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
 
-		boolean cvsuccess = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", cvsuccess);
-		boolean success = WebViewApp.getCurrentApp().sendEvent(MockEventCategory.TEST_CATEGORY_1, MockEvent.TEST_EVENT_1);
-		assertFalse("sendEvent -method should've returned false", success);
-		assertFalse("WebView invokeJavascript should've not been invoked but was (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_INVOKED);
-		assertNull("The invoked JavaScript string should be null (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_CALL);
-	}
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-	@Test
-	public void testSendEventShouldSucceed () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
+    boolean cvsuccess = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", cvsuccess);
+    boolean success = WebViewApp.getCurrentApp()
+      .sendEvent(MockEventCategory.TEST_CATEGORY_1, MockEvent.TEST_EVENT_1);
+    assertFalse("sendEvent -method should've returned false", success);
+    assertFalse("WebView invokeJavascript should've not been invoked but was (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_INVOKED);
+    assertNull("The invoked JavaScript string should be null (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_CALL);
+  }
 
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+  @Test
+  public void testSendEventShouldSucceed() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
 
-		boolean cvsuccess = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", cvsuccess);
-		boolean success = WebViewApp.getCurrentApp().sendEvent(MockEventCategory.TEST_CATEGORY_1, MockEvent.TEST_EVENT_1);
-		assertTrue("sendEvent should have succeeded", success);
-		assertTrue("WebView invokeJavascript should've been invoked but was not", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_INVOKED);
-		assertNotNull("The invoked JavaScript string should not be null", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_CALL);
-	}
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-	@Test
-	public void testSendEventWithParamsShouldSucceed () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+    boolean cvsuccess = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", cvsuccess);
+    boolean success = WebViewApp.getCurrentApp()
+      .sendEvent(MockEventCategory.TEST_CATEGORY_1, MockEvent.TEST_EVENT_1);
+    assertTrue("sendEvent should have succeeded", success);
+    assertTrue("WebView invokeJavascript should've been invoked but was not", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_INVOKED);
+    assertNotNull("The invoked JavaScript string should not be null", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_CALL);
+  }
 
-		boolean cvsuccess = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", cvsuccess);
-		boolean success = WebViewApp.getCurrentApp().sendEvent(MockEventCategory.TEST_CATEGORY_1, MockEvent.TEST_EVENT_1, "Test", 12345, true);
-		assertTrue("sendEvent should have succeeded", success);
-		assertTrue("WebView invokeJavascript should've been invoked but was not", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_INVOKED);
-		assertNotNull("The invoked JavaScript string should not be null", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_CALL);
-	}
+  @Test
+  public void testSendEventWithParamsShouldSucceed() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-	@Test
-	public void testInvokeMethodShouldFailWebAppNotLoaded () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppLoaded(false);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+    boolean cvsuccess = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", cvsuccess);
+    boolean success = WebViewApp.getCurrentApp()
+      .sendEvent(MockEventCategory.TEST_CATEGORY_1, MockEvent.TEST_EVENT_1, "Test", 12345, true);
+    assertTrue("sendEvent should have succeeded", success);
+    assertTrue("WebView invokeJavascript should've been invoked but was not", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_INVOKED);
+    assertNotNull("The invoked JavaScript string should not be null", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_CALL);
+  }
 
-		boolean cvsuccess = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", cvsuccess);
-		Method m = getClass().getMethod("testNativeCallbackMethod");
-		boolean success = WebViewApp.getCurrentApp().invokeMethod("TestClass", "testMethod", m);
-		assertFalse("invokeMethod -method should've returned false", success);
-		assertFalse("WebView invokeJavascript should've not been invoked but was (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_INVOKED);
-		assertNull("The invoked JavaScript string should be null (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_CALL);
-	}
+  @Test
+  public void testInvokeMethodShouldFailWebAppNotLoaded() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(false);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-	@Test
-	public void testInvokeMethodShouldSucceedMethodNull () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+    boolean cvsuccess = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", cvsuccess);
+    Method m = getClass().getMethod("testNativeCallbackMethod");
+    boolean success = WebViewApp.getCurrentApp()
+      .invokeMethod("TestClass", "testMethod", m);
+    assertFalse("invokeMethod -method should've returned false", success);
+    assertFalse("WebView invokeJavascript should've not been invoked but was (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_INVOKED);
+    assertNull("The invoked JavaScript string should be null (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_CALL);
+  }
 
-		boolean cvsuccess = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", cvsuccess);
-		Method m = null;
-		boolean success = WebViewApp.getCurrentApp().invokeMethod("TestClass", "testMethod", m);
-		assertTrue("invokeMethod -method should've returned true", success);
-		assertTrue("WebView invokeJavascript should've succeeded but didn't", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_INVOKED);
-		assertNotNull("The invoked JavaScript string should not be null.", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_CALL);
-	}
+  @Test
+  public void testInvokeMethodShouldSucceedMethodNull() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-	@Test
-	public void testInvokeMethodShouldSucceed () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+    boolean cvsuccess = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", cvsuccess);
+    Method m = null;
+    boolean success = WebViewApp.getCurrentApp()
+      .invokeMethod("TestClass", "testMethod", m);
+    assertTrue("invokeMethod -method should've returned true", success);
+    assertTrue("WebView invokeJavascript should've succeeded but didn't", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_INVOKED);
+    assertNotNull("The invoked JavaScript string should not be null.", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_CALL);
+  }
 
-		boolean cvsuccess = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", cvsuccess);
-		Method m = getClass().getMethod("testNativeCallbackMethod");
-		boolean success = WebViewApp.getCurrentApp().invokeMethod("TestClass", "testMethod", m);
-		assertTrue("invokeMethod -method should've returned true", success);
-		assertTrue("WebView invokeJavascript should've succeeded but didn't", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_INVOKED);
-		assertNotNull("The invoked JavaScript string should not be null.", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_CALL);
-	}
+  @Test
+  public void testInvokeMethodShouldSucceed() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-	@Test
-	public void testInvokeMethodWithParamsShouldSucceed () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+    boolean cvsuccess = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", cvsuccess);
+    Method m = getClass().getMethod("testNativeCallbackMethod");
+    boolean success = WebViewApp.getCurrentApp()
+      .invokeMethod("TestClass", "testMethod", m);
+    assertTrue("invokeMethod -method should've returned true", success);
+    assertTrue("WebView invokeJavascript should've succeeded but didn't", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_INVOKED);
+    assertNotNull("The invoked JavaScript string should not be null.", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_CALL);
+  }
 
-		boolean cvsuccess = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", cvsuccess);
-		Method m = getClass().getMethod("testNativeCallbackMethod");
-		boolean success = WebViewApp.getCurrentApp().invokeMethod("TestClass", "testMethod", m, "Test", 12345, true);
-		assertTrue("invokeMethod -method should've returned true", success);
-		assertTrue("WebView invokeJavascript should've succeeded but didn't", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_INVOKED);
-		assertNotNull("The invoked JavaScript string should not be null.", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_CALL);
-	}
+  @Test
+  public void testInvokeMethodWithParamsShouldSucceed() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-	@Test
-	public void testInvokeCallbackShouldFailWebAppNotLoaded () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+    boolean cvsuccess = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", cvsuccess);
+    Method m = getClass().getMethod("testNativeCallbackMethod");
+    boolean success = WebViewApp.getCurrentApp()
+      .invokeMethod("TestClass", "testMethod", m, "Test", 12345, true);
+    assertTrue("invokeMethod -method should've returned true", success);
+    assertTrue("WebView invokeJavascript should've succeeded but didn't", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_INVOKED);
+    assertNotNull("The invoked JavaScript string should not be null.", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_CALL);
+  }
 
-		boolean cvsuccess = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", cvsuccess);
-		Invocation invocation = new Invocation();
-		invocation.setInvocationResponse(CallbackStatus.OK, null, "Test", 12345, true);
-		boolean success = WebViewApp.getCurrentApp().invokeCallback(invocation);
-		assertFalse("invokeCallback -method should've returned false (webapp not loaded)", success);
-		assertFalse("WebView invokeJavascript should've not been invoked but was (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_INVOKED);
-		assertNull("The invoked JavaScript string should be null (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_CALL);
-	}
+  @Test
+  public void testInvokeCallbackShouldFailWebAppNotLoaded() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-	@Test
-	public void testInvokeCallbackShouldSucceed () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+    boolean cvsuccess = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", cvsuccess);
+    Invocation invocation = new Invocation();
+    invocation.setInvocationResponse(CallbackStatus.OK, null, "Test", 12345, true);
+    boolean success = WebViewApp.getCurrentApp()
+      .invokeCallback(invocation);
+    assertFalse("invokeCallback -method should've returned false (webapp not loaded)", success);
+    assertFalse("WebView invokeJavascript should've not been invoked but was (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_INVOKED);
+    assertNull("The invoked JavaScript string should be null (webviewapp is not loaded so no call should have occured)", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_CALL);
+  }
 
-		boolean cvsuccess = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", cvsuccess);
-		Invocation invocation = new Invocation();
-		invocation.setInvocationResponse(CallbackStatus.OK, null, "Test", 12345, true);
-		boolean success = WebViewApp.getCurrentApp().invokeCallback(invocation);
-		assertTrue("invokeCallback -method should've returned true", success);
-		assertTrue("WebView invokeJavascript should've been invoked but was not", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_INVOKED);
-		assertNotNull("The invoked JavaScript string should not be null", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_CALL);
-	}
+  @Test
+  public void testInvokeCallbackShouldSucceed() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-	@Test
-	public void testInvokeCallbackWithErrorShouldSucceed () throws Exception {
-		WebViewApp.setCurrentApp(null);
-		final ConditionVariable cv = new ConditionVariable();
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				cv.open();
-			}
-		});
+    boolean cvsuccess = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", cvsuccess);
+    Invocation invocation = new Invocation();
+    invocation.setInvocationResponse(CallbackStatus.OK, null, "Test", 12345, true);
+    boolean success = WebViewApp.getCurrentApp()
+      .invokeCallback(invocation);
+    assertTrue("invokeCallback -method should've returned true", success);
+    assertTrue("WebView invokeJavascript should've been invoked but was not", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_INVOKED);
+    assertNotNull("The invoked JavaScript string should not be null", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_CALL);
+  }
 
-		boolean cvsuccess = cv.block(10000);
-		assertTrue("ConditionVariable was not opened successfully", cvsuccess);
-		Invocation invocation = new Invocation();
-		invocation.setInvocationResponse(CallbackStatus.OK, MockError.TEST_ERROR_1, "Test", 12345, true);
-		boolean success = WebViewApp.getCurrentApp().invokeCallback(invocation);
-		assertTrue("invokeCallback -method should've returned true", success);
-		assertTrue("WebView invokeJavascript should've been invoked but was not", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_INVOKED);
-		assertNotNull("The invoked JavaScript string should not be null", ((MockWebView) WebViewApp.getCurrentApp().getWebView()).JS_CALL);
-	}
+  @Test
+  public void testInvokeCallbackWithErrorShouldSucceed() throws Exception {
+    WebViewApp.setCurrentApp(null);
+    final ConditionVariable cv = new ConditionVariable();
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.setCurrentApp(new WebViewApp());
+        WebViewApp.getCurrentApp()
+          .setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        cv.open();
+      }
+    });
 
-	public static void testNativeCallbackMethod () {
-	}
+    boolean cvsuccess = cv.block(10000);
+    assertTrue("ConditionVariable was not opened successfully", cvsuccess);
+    Invocation invocation = new Invocation();
+    invocation.setInvocationResponse(CallbackStatus.OK, MockError.TEST_ERROR_1, "Test", 12345, true);
+    boolean success = WebViewApp.getCurrentApp()
+      .invokeCallback(invocation);
+    assertTrue("invokeCallback -method should've returned true", success);
+    assertTrue("WebView invokeJavascript should've been invoked but was not", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_INVOKED);
+    assertNotNull("The invoked JavaScript string should not be null", ((MockWebView) WebViewApp.getCurrentApp()
+      .getWebView()).JS_CALL);
+  }
 
-	private enum MockEventCategory {
-		TEST_CATEGORY_1,
-		TEST_CATEGORY_2
-	}
+  private enum MockEventCategory {
+    TEST_CATEGORY_1,
+    TEST_CATEGORY_2
+  }
 
-	private enum MockEvent {
-		TEST_EVENT_1,
-		TEST_EVENT_2
-	}
+  private enum MockEvent {
+    TEST_EVENT_1,
+    TEST_EVENT_2
+  }
 
-	private enum MockError {
-		TEST_ERROR_1,
-		TEST_ERROR_2
-	}
+  private enum MockError {
+    TEST_ERROR_1,
+    TEST_ERROR_2
+  }
 
-	private class MockWebView extends WebView {
-		public boolean JS_INVOKED = false;
-		public String JS_CALL = null;
+  private class MockWebView extends WebView {
+    public boolean JS_INVOKED = false;
+    public String JS_CALL = null;
 
-		public MockWebView(Context context) {
-			super(context);
-		}
+    public MockWebView(Context context) {
+      super(context);
+    }
 
-		@Override
-		public void loadUrl(String url) {
-		}
+    @Override
+    public void invokeJavascript(String data) {
+      JS_INVOKED = true;
+      JS_CALL = data;
+    }
 
-		@Override
-		public void invokeJavascript(String data) {
-			JS_INVOKED = true;
-			JS_CALL = data;
-		}
-	}
+    @Override
+    public void loadUrl(String url) {
+    }
+  }
 }

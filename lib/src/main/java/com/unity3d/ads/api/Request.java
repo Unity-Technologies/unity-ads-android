@@ -1,10 +1,7 @@
 package com.unity3d.ads.api;
 
 import com.unity3d.ads.log.DeviceLog;
-import com.unity3d.ads.request.IResolveHostListener;
 import com.unity3d.ads.request.IWebRequestListener;
-import com.unity3d.ads.request.ResolveHostError;
-import com.unity3d.ads.request.ResolveHostEvent;
 import com.unity3d.ads.request.WebRequest;
 import com.unity3d.ads.request.WebRequestError;
 import com.unity3d.ads.request.WebRequestEvent;

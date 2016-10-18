@@ -9,4 +9,5 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
   IntegrationTest.class,
 })
-public class IntegrationTestSuite {}
+public class IntegrationTestSuite {
+}

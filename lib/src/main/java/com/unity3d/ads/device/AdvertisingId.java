@@ -155,8 +155,8 @@ public class AdvertisingId {
 
 	private class GoogleAdvertisingServiceConnection implements ServiceConnection {
 
-		boolean _consumed = false;
 		private final BlockingQueue<IBinder> _binderQueue = new LinkedBlockingQueue<>();
+		boolean _consumed = false;
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {

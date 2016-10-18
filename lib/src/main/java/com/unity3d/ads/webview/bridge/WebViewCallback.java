@@ -9,6 +9,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class WebViewCallback implements Parcelable {
+	public static final Parcelable.Creator<WebViewCallback> CREATOR = new Parcelable.Creator<WebViewCallback>() {
+
+		@Override
+		public WebViewCallback createFromParcel(Parcel in) {
+			return new WebViewCallback(in);
+		}
+
+		@Override
+		public WebViewCallback[] newArray(int size) {
+			return new WebViewCallback[size];
+		}
+	};
 	private boolean _invoked;
 	private int _invocationId;
 	private String _callbackId;
@@ -70,17 +82,4 @@ public class WebViewCallback implements Parcelable {
 		dest.writeByte((byte)(_invoked ? 1 : 0));
 		dest.writeInt(_invocationId);
 	}
-
-	public static final Parcelable.Creator<WebViewCallback> CREATOR  = new Parcelable.Creator<WebViewCallback>() {
-
-		@Override
-		public WebViewCallback createFromParcel(Parcel in) {
-			return new WebViewCallback(in);
-		}
-
-		@Override
-		public WebViewCallback[] newArray(int size) {
-			return new WebViewCallback[size];
-		}
-	};
 }

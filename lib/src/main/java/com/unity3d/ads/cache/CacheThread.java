@@ -7,12 +7,10 @@ import android.os.Looper;
 import android.os.Message;
 
 public class CacheThread extends Thread {
+	public static final int MSG_DOWNLOAD = 1;
+	private static final Object _readyLock = new Object();
 	private static CacheThreadHandler _handler = null;
 	private static boolean _ready = false;
-	private static final Object _readyLock = new Object();
-
-	public static final int MSG_DOWNLOAD = 1;
-
 	private static int _connectTimeout = 30000;
 	private static int _readTimeout = 30000;
 	private static int _progressInterval = 0;
@@ -31,17 +29,6 @@ public class CacheThread extends Thread {
 				DeviceLog.debug("Couldn't synchronize thread");
 			}
 		}
-	}
-
-	@Override
-	public void run() {
-		Looper.prepare();
-		_handler = new CacheThreadHandler();
-		_ready = true;
-		synchronized(_readyLock) {
-			_readyLock.notify();
-		}
-		Looper.loop();
 	}
 
 	public static synchronized void download(String source, String target) {
@@ -81,27 +68,38 @@ public class CacheThread extends Thread {
 		_handler.setCancelStatus(true);
 	}
 
+	public static int getProgressInterval() {
+		return _progressInterval;
+	}
+
 	public static void setProgressInterval(int interval) {
 		_progressInterval = interval;
 	}
 
-	public static int getProgressInterval() {
-		return _progressInterval;
+	public static int getConnectTimeout() {
+		return _connectTimeout;
 	}
 
 	public static void setConnectTimeout (int connectTimeout) {
 		_connectTimeout = connectTimeout;
 	}
 
+	public static int getReadTimeout() {
+		return _readTimeout;
+	}
+
 	public static void setReadTimeout (int readTimeout) {
 		_readTimeout = readTimeout;
 	}
 
-	public static int getConnectTimeout () {
-		return _connectTimeout;
-	}
-
-	public static int getReadTimeout () {
-		return _readTimeout;
+	@Override
+	public void run() {
+		Looper.prepare();
+		_handler = new CacheThreadHandler();
+		_ready = true;
+		synchronized (_readyLock) {
+			_readyLock.notify();
+		}
+		Looper.loop();
 	}
 }

@@ -1,12 +1,10 @@
 package com.unity3d.ads.cache;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 
-import com.unity3d.ads.api.Cache;
 import com.unity3d.ads.api.Request;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.device.Device;

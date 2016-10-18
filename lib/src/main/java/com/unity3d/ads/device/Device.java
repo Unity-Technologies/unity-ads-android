@@ -19,7 +19,6 @@ import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.ClientProperties;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -31,8 +30,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Device {
-
-	public enum MemoryInfoType { TOTAL_MEMORY, FREE_MEMORY }
 
 	public static int getApiLevel() {
 		return Build.VERSION.SDK_INT;
@@ -309,7 +306,6 @@ public class Device {
 		return -1;
 	}
 
-
 	public static int getBatteryStatus () {
 		if (ClientProperties.getApplicationContext() != null) {
 			Intent i = ClientProperties.getApplicationContext().registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
@@ -409,5 +405,7 @@ public class Device {
 		}
 		return false;
 	}
+
+	public enum MemoryInfoType {TOTAL_MEMORY, FREE_MEMORY}
 
 }

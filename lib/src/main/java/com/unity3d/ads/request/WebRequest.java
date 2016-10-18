@@ -32,12 +32,6 @@ public class WebRequest {
 
 	private IWebRequestProgressListener _progressListener;
 
-	public enum RequestType {
-		POST,
-		GET,
-		HEAD
-	}
-
 	public WebRequest (String url, String requestType, Map<String, List<String>> headers) throws MalformedURLException {
 		this(url, requestType, headers, 30000, 30000);
 	}
@@ -225,5 +219,11 @@ public class WebRequest {
 		}
 
 		return connection;
+	}
+
+	public enum RequestType {
+		POST,
+		GET,
+		HEAD
 	}
 }

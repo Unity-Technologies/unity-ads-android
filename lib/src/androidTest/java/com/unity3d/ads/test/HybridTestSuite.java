@@ -9,4 +9,5 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
   HybridTest.class
 })
-public class HybridTestSuite {}
+public class HybridTestSuite {
+}

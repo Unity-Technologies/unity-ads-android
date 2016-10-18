@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 public class StorageManager {
-	public enum StorageType { PRIVATE, PUBLIC }
-
 	protected static final Map<StorageType, String> _storageFileMap = new HashMap<>();
 	protected static final List<Storage> _storages = new ArrayList<>();
 
@@ -100,4 +98,6 @@ public class StorageManager {
 			_storageFileMap.remove(type);
 		}
 	}
+
+	public enum StorageType {PRIVATE, PUBLIC}
 }

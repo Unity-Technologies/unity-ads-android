@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.widget.VideoView;
+
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.webview.WebViewApp;
 import com.unity3d.ads.webview.WebViewEventCategory;
@@ -182,15 +183,15 @@ public class VideoPlayerView extends VideoView {
 		}
 	}
 
+	public int getProgressEventInterval() {
+		return _progressEventInterval;
+	}
+
 	public void setProgressEventInterval (int ms) {
 		_progressEventInterval = ms;
 		if(_videoTimer != null) {
 			stopVideoProgressTimer();
 			startVideoProgressTimer();
 		}
-	}
-
-	public int getProgressEventInterval () {
-		return _progressEventInterval;
 	}
 }

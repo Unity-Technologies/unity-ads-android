@@ -13,13 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Intent {
-	public enum IntentError {
-		COULDNT_PARSE_EXTRAS,
-		COULDNT_PARSE_CATEGORIES,
-		INTENT_WAS_NULL,
-		ACTIVITY_WAS_NULL
-	}
-
 	@WebViewExposed
 	public static void launch (JSONObject intentData, WebViewCallback callback) {
 		android.content.Intent intent;
@@ -152,5 +145,12 @@ public class Intent {
 		}
 
 		return act;
+	}
+
+	public enum IntentError {
+		COULDNT_PARSE_EXTRAS,
+		COULDNT_PARSE_CATEGORIES,
+		INTENT_WAS_NULL,
+		ACTIVITY_WAS_NULL
 	}
 }

@@ -24,12 +24,12 @@ public class AdUnit {
 	private AdUnit () {
 	}
 
-	public static void setAdUnitActivity (AdUnitActivity activity) {
-		_adUnitActivity = activity;
-	}
-
 	public static AdUnitActivity getAdUnitActivity () {
 		return _adUnitActivity;
+	}
+
+	public static void setAdUnitActivity(AdUnitActivity activity) {
+		_adUnitActivity = activity;
 	}
 
 	public static int getCurrentAdUnitActivityId () {

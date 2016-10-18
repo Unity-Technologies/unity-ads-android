@@ -15,9 +15,9 @@ import java.util.Map;
 public class WebRequestThread extends Thread {
 
 	protected static final int MSG_REQUEST = 1;
+	private static final Object _readyLock = new Object();
 	private static WebRequestHandler _handler;
 	private static boolean _ready = false;
-	private static final Object _readyLock = new Object();
 
 	private static void init() {
 		WebRequestThread thread = new WebRequestThread();
@@ -33,23 +33,6 @@ public class WebRequestThread extends Thread {
 				DeviceLog.debug("Couldn't synchronize thread");
 			}
 		}
-	}
-
-	@Override
-	public void run() {
-		Looper.prepare();
-
-		if (_handler == null) {
-			_handler = new WebRequestHandler();
-		}
-
-		_ready = true;
-
-		synchronized(_readyLock) {
-			_readyLock.notify();
-		}
-
-		Looper.loop();
 	}
 
 	public static synchronized void request (String url, WebRequest.RequestType requestType, Map<String, List<String>> headers, Integer connectTimeout, Integer readTimeout, IWebRequestListener listener) {
@@ -135,5 +118,22 @@ public class WebRequestThread extends Thread {
 		}
 
 		return true;
+	}
+
+	@Override
+	public void run() {
+		Looper.prepare();
+
+		if (_handler == null) {
+			_handler = new WebRequestHandler();
+		}
+
+		_ready = true;
+
+		synchronized (_readyLock) {
+			_readyLock.notify();
+		}
+
+		Looper.loop();
 	}
 }

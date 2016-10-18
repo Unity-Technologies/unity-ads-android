@@ -31,14 +31,13 @@ public class AdUnitActivity extends Activity {
 	public static final String EXTRA_SYSTEM_UI_VISIBILITY = "systemUiVisibility";
 	public static final String EXTRA_KEY_EVENT_LIST = "keyEvents";
 	public static final String EXTRA_KEEP_SCREEN_ON = "keepScreenOn";
-
-	private RelativeLayout _layout;
+  boolean _keepScreenOn;
+  private RelativeLayout _layout;
 	private String[] _views;
 	private int _orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 	private int _systemUiVisibility;
 	private int _activityId;
 	private ArrayList<Integer> _keyEventList;
-	boolean _keepScreenOn;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -112,21 +111,6 @@ public class AdUnitActivity extends Activity {
 	}
 
 	@Override
-	protected void onStop() {
-		super.onStop();
-
-		if(WebViewApp.getCurrentApp() == null) {
-			if(!isFinishing()) {
-				DeviceLog.error("Unity Ads web app is null, closing Unity Ads activity from onStop");
-				finish();
-			}
-			return;
-		}
-
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_STOP, _activityId);
-	}
-
-	@Override
 	protected void onResume() {
 		super.onResume();
 
@@ -144,7 +128,19 @@ public class AdUnitActivity extends Activity {
 	}
 
 	@Override
-	protected void onPause() {
+  public void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+
+    outState.putInt(EXTRA_ORIENTATION, _orientation);
+    outState.putInt(EXTRA_SYSTEM_UI_VISIBILITY, _systemUiVisibility);
+    outState.putIntegerArrayList(EXTRA_KEY_EVENT_LIST, _keyEventList);
+    outState.putBoolean(EXTRA_KEEP_SCREEN_ON, _keepScreenOn);
+    outState.putStringArray(EXTRA_VIEWS, _views);
+    outState.putInt(EXTRA_ACTIVITY_ID, _activityId);
+  }
+
+  @Override
+  protected void onPause() {
 		super.onPause();
 
 		if(WebViewApp.getCurrentApp() == null) {
@@ -164,16 +160,20 @@ public class AdUnitActivity extends Activity {
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
+  protected void onStop() {
+    super.onStop();
 
-		outState.putInt(EXTRA_ORIENTATION, _orientation);
-		outState.putInt(EXTRA_SYSTEM_UI_VISIBILITY, _systemUiVisibility);
-		outState.putIntegerArrayList(EXTRA_KEY_EVENT_LIST, _keyEventList);
-		outState.putBoolean(EXTRA_KEEP_SCREEN_ON, _keepScreenOn);
-		outState.putStringArray(EXTRA_VIEWS, _views);
-		outState.putInt(EXTRA_ACTIVITY_ID, _activityId);
-	}
+    if (WebViewApp.getCurrentApp() == null) {
+      if (!isFinishing()) {
+        DeviceLog.error("Unity Ads web app is null, closing Unity Ads activity from onStop");
+        finish();
+      }
+      return;
+    }
+
+    WebViewApp.getCurrentApp()
+      .sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_STOP, _activityId);
+  }
 
 	@Override
 	protected void onDestroy() {
@@ -199,8 +199,10 @@ public class AdUnitActivity extends Activity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (_keyEventList != null) {
 			if (_keyEventList.contains(keyCode)) {
-				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.KEY_DOWN, keyCode, event.getEventTime(), event.getDownTime(), event.getRepeatCount(), _activityId);
-				return true;
+        WebViewApp.getCurrentApp()
+          .sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.KEY_DOWN,
+            keyCode, event.getEventTime(), event.getDownTime(), event.getRepeatCount(), _activityId);
+        return true;
 			}
 		}
 
@@ -208,6 +210,24 @@ public class AdUnitActivity extends Activity {
 	}
 
 	/* API */
+
+  private void handleViewPlacement(View view) {
+    if (view.getParent() != null && view.getParent()
+      .equals(_layout)) {
+      _layout.bringChildToFront(view);
+    } else {
+      ViewUtilities.removeViewFromParent(view);
+      RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+      params.addRule(RelativeLayout.CENTER_IN_PARENT);
+      params.setMargins(0, 0, 0, 0);
+      view.setPadding(0, 0, 0, 0);
+      _layout.addView(view, params);
+    }
+  }
+
+  public String[] getViews() {
+    return _views;
+  }
 
 	public void setViews (String[] views) {
 		String[] actualViews;
@@ -260,24 +280,6 @@ public class AdUnitActivity extends Activity {
 				}
 			}
 		}
-	}
-
-	private void handleViewPlacement (View view) {
-		if (view.getParent() != null && view.getParent().equals(_layout)) {
-			_layout.bringChildToFront(view);
-		}
-		else {
-			ViewUtilities.removeViewFromParent(view);
-			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-			params.addRule(RelativeLayout.CENTER_IN_PARENT);
-			params.setMargins(0, 0, 0, 0);
-			view.setPadding(0, 0, 0, 0);
-			_layout.addView(view, params);
-		}
-	}
-
-	public String[] getViews () {
-		return _views;
 	}
 
 	public void setOrientation (int orientation) {

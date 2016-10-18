@@ -1,6 +1,7 @@
 package com.unity3d.ads.api;
 
 import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.configuration.Configuration;
 import com.unity3d.ads.configuration.InitializeThread;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.properties.ClientProperties;
@@ -14,20 +15,24 @@ public class Sdk {
 	public static void loadComplete(WebViewCallback callback) {
 		DeviceLog.debug("Web Application loaded");
 		WebViewApp.getCurrentApp().setWebAppLoaded(true);
+    Configuration config = WebViewApp.getCurrentApp()
+      .getConfiguration();
 
-		Object[] parameters = new Object[] {
-			ClientProperties.getGameId(),
+    Object[] parameters = new Object[]{
+      ClientProperties.getGameId(),
 			SdkProperties.isTestMode(),
 			ClientProperties.getAppName(),
 			ClientProperties.getAppVersion(),
 			SdkProperties.getVersionCode(),
 			SdkProperties.getVersionName(),
 			ClientProperties.isAppDebuggable(),
-			WebViewApp.getCurrentApp().getConfiguration().getConfigUrl(),
-			WebViewApp.getCurrentApp().getConfiguration().getWebViewUrl(),
-			WebViewApp.getCurrentApp().getConfiguration().getWebViewHash(),
-			WebViewApp.getCurrentApp().getConfiguration().getWebViewVersion()
-		};
+      config.getConfigUrl(),
+      config.getWebViewUrl(),
+      config.getWebViewHash(),
+      config.getWebViewVersion(),
+      config.getAssetDirectory(),
+      config.getCacheDirectory()
+    };
 
 		callback.invoke(parameters);
 	}

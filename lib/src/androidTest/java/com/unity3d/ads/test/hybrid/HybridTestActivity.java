@@ -5,5 +5,7 @@ import android.os.Bundle;
 
 public class HybridTestActivity extends Activity {
   @Override
-  protected void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+  }
 }

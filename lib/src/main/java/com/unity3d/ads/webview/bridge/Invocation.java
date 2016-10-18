@@ -3,8 +3,6 @@ package com.unity3d.ads.webview.bridge;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.webview.WebViewApp;
 
-import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +23,14 @@ public class Invocation {
 		}
 
 		_invocationSets.put(_invocationId, this);
+	}
+
+	public static synchronized Invocation getInvocationById(int id) {
+		if (_invocationSets != null && _invocationSets.containsKey(id)) {
+			return _invocationSets.get(id);
+		}
+
+		return null;
 	}
 
 	public void addInvocation (String className, String methodName, Object[] parameters, WebViewCallback callback) {
@@ -77,13 +83,5 @@ public class Invocation {
 
 	public ArrayList<ArrayList<Object>> getResponses () {
 		return _responses;
-	}
-
-	public static synchronized Invocation getInvocationById(int id) {
-		if (_invocationSets != null && _invocationSets.containsKey(id)) {
-			return _invocationSets.get(id);
-		}
-
-		return null;
 	}
 }

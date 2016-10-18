@@ -24,199 +24,207 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeoutException;
+
+import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class WebViewBridgeInterfaceTest {
 
-	private static boolean nativeCallbackInvoked = false;
-	private static CallbackStatus nativeCallbackStatus = null;
-	private static String nativeCallbackValue = null;
+  private static boolean nativeCallbackInvoked = false;
+  private static CallbackStatus nativeCallbackStatus = null;
+  private static String nativeCallbackValue = null;
 
-	private static Class[] apiTestClassList = {
-			com.unity3d.ads.test.unit.WebViewBridgeInterfaceTest.WebViewBridgeTestApi.class
-	};
+  private static Class[] apiTestClassList = {
+    com.unity3d.ads.test.unit.WebViewBridgeInterfaceTest.WebViewBridgeTestApi.class
+  };
 
-	public static class WebViewBridgeTestApi {
-		private static boolean invoked = false;
-		private static String value = null;
-		private static WebViewCallback callback = null;
-		private static int callbackCount = 0;
+  @BeforeClass
+  public static void prepareTests() {
+    ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+  }
 
-		@WebViewExposed
-			public static void apiTestMethod (String value, WebViewCallback callback) {
-			invoked = true;
-			WebViewBridgeTestApi.value = value;
-			WebViewBridgeTestApi.callback = callback;
-			callbackCount++;
+  public static void staticTestHandleCallback(CallbackStatus status) {
+    nativeCallbackInvoked = true;
+    nativeCallbackStatus = status;
+  }
 
-			callback.invoke(value);
-		}
+  public static void staticTestHandleCallbackStringParam(CallbackStatus status, String value) {
+    nativeCallbackInvoked = true;
+    nativeCallbackStatus = status;
+    nativeCallbackValue = value;
+  }
 
-		@WebViewExposed
-		public static void apiTestMethodNoParams (WebViewCallback callback) {
-			invoked = true;
-			value = null;
-			WebViewBridgeTestApi.callback = callback;
-			callbackCount++;
+  @Before
+  public void beforeTest() throws TimeoutException {
+    WebViewBridgeTestApi.invoked = false;
+    WebViewBridgeTestApi.value = null;
+    WebViewBridgeTestApi.callback = null;
+    WebViewBridgeTestApi.callbackCount = 0;
+    nativeCallbackInvoked = false;
+    nativeCallbackStatus = null;
+    nativeCallbackValue = null;
 
-			callback.invoke();
-		}
-	}
+    final Configuration config = new Configuration(TestUtilities.getTestServerAddress()) {
+      @Override
+      public Class[] getWebAppApiClassList() {
+        return apiTestClassList;
+      }
+    };
 
-	@BeforeClass
-	public static void prepareTests () {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
-	}
+    final ConditionVariable cv = new ConditionVariable();
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        WebViewApp.getCurrentApp()
+          .setWebAppLoaded(true);
+        WebViewApp.getCurrentApp()
+          .setWebAppInitialized(true);
+        WebViewApp.getCurrentApp()
+          .setWebView(new WebView(ClientProperties.getApplicationContext()) {
+            @Override
+            public void invokeJavascript(String data) {
+            }
+          });
 
-	@Before
-	public void beforeTest () throws TimeoutException {
-		WebViewBridgeTestApi.invoked = false;
-		WebViewBridgeTestApi.value = null;
-		WebViewBridgeTestApi.callback = null;
-		WebViewBridgeTestApi.callbackCount = 0;
-		nativeCallbackInvoked = false;
-		nativeCallbackStatus = null;
-		nativeCallbackValue = null;
+        cv.open();
+      }
+    }, 100);
 
-		final Configuration config = new Configuration(TestUtilities.getTestServerAddress()) {
-			@Override
-			public Class[] getWebAppApiClassList() {
-				return apiTestClassList;
-			}
-		};
+    WebViewApp.create(config);
+    boolean success = cv.block(30000);
+    if (!success)
+      throw new TimeoutException("ConditionVariable was not opened in preparation");
+  }
 
-		final ConditionVariable cv = new ConditionVariable();
-		Handler handler = new Handler(Looper.getMainLooper());
-		handler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				WebViewApp.getCurrentApp().setWebAppLoaded(true);
-				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				WebViewApp.getCurrentApp().setWebView(new WebView(ClientProperties.getApplicationContext()) {
-					@Override
-					public void invokeJavascript(String data) {
-					}
-				});
+  @After
+  public void afterTest() {
+    WebViewBridgeTestApi.invoked = false;
+    WebViewBridgeTestApi.value = null;
+    WebViewBridgeTestApi.callback = null;
+    WebViewBridgeTestApi.callbackCount = 0;
+    nativeCallbackInvoked = false;
+    nativeCallbackStatus = null;
+    nativeCallbackValue = null;
+  }
 
-				cv.open();
-			}
-		}, 100);
+  @Test(expected = ClassCastException.class)
+  public void testHandleInvocationShouldFailParametersNull() throws JSONException {
+    WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+    webInterface.handleInvocation("[[\"com.wds.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", null, \"CALLBACK_01\"]]");
+  }
 
-		WebViewApp.create(config);
-		boolean success = cv.block(30000);
-		if (!success)
-			throw new TimeoutException("ConditionVariable was not opened in preparation");
-	}
+  @Test(expected = NullPointerException.class)
+  public void testHandleCallbackShouldFailParametersNull() throws Exception {
+    WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+    webInterface.handleCallback("CALLBACK_01", "OK", null);
+  }
 
-	@After
-	public void afterTest () {
-		WebViewBridgeTestApi.invoked = false;
-		WebViewBridgeTestApi.value = null;
-		WebViewBridgeTestApi.callback = null;
-		WebViewBridgeTestApi.callbackCount = 0;
-		nativeCallbackInvoked = false;
-		nativeCallbackStatus = null;
-		nativeCallbackValue = null;
-	}
+  @Test(expected = ClassCastException.class)
+  public void testHandleInvocationShouldFailParametersEmpty() throws JSONException {
+    WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+    webInterface.handleInvocation("[[\"com.wds.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", \"\", \"CALLBACK_01\"]]");
+  }
 
-	@Test (expected = ClassCastException.class)
-	public void testHandleInvocationShouldFailParametersNull () throws JSONException {
-		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-		webInterface.handleInvocation("[[\"com.unity3d.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", null, \"CALLBACK_01\"]]");
-	}
+  @Test(expected = JSONException.class)
+  public void testHandleCallbackShouldFailParametersEmpty() throws Exception {
+    WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+    webInterface.handleCallback("CALLBACK_01", "OK", "");
+  }
 
-	@Test (expected = NullPointerException.class)
-	public void testHandleCallbackShouldFailParametersNull () throws Exception {
-		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-		webInterface.handleCallback("CALLBACK_01", "OK", null);
-	}
+  @Test
+  public void testHandleInvocationShouldSucceed() throws JSONException {
+    WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+    webInterface.handleInvocation("[[\"com.wds.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", [], \"CALLBACK_01\"]]");
+    assertTrue("ApiMethod should have been invoked but wasn't", WebViewBridgeTestApi.invoked);
+    assertEquals("CallbackID's didn't match", "CALLBACK_01", WebViewBridgeTestApi.callback.getCallbackId());
+  }
 
-	@Test (expected = ClassCastException.class)
-	public void testHandleInvocationShouldFailParametersEmpty () throws JSONException {
-		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-		webInterface.handleInvocation("[[\"com.unity3d.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", \"\", \"CALLBACK_01\"]]");
-	}
+  @Test
+  public void testHandleInvocationWithParamsShouldSucceed() throws JSONException {
+    WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+    webInterface.handleInvocation("[[\"com.wds.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethod\", [\"test\"], \"CALLBACK_01\"]]");
+    assertTrue("ApiMethod should have been invoked but wasn't", WebViewBridgeTestApi.invoked);
+    assertEquals("CallbackID's didn't match", "CALLBACK_01", WebViewBridgeTestApi.callback.getCallbackId());
+    assertEquals("Callback value wasn't same as was originally given", "test", WebViewBridgeTestApi.value);
+  }
 
-	@Test (expected = JSONException.class)
-	public void testHandleCallbackShouldFailParametersEmpty () throws Exception {
-		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-		webInterface.handleCallback("CALLBACK_01", "OK", "");
-	}
+  @Test(expected = NullPointerException.class)
+  public void testHandleCallbackShouldFailCallbackNotAdded() throws Exception {
+    WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+    Method m = getClass().getMethod("staticTestHandleCallback", CallbackStatus.class);
+    NativeCallback callback = new NativeCallback(m);
+    webInterface.handleCallback(callback.getId(), "OK", "[]");
+  }
 
-	@Test
-	public void testHandleInvocationShouldSucceed () throws JSONException {
-		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-		webInterface.handleInvocation("[[\"com.unity3d.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", [], \"CALLBACK_01\"]]");
-		assertTrue("ApiMethod should have been invoked but wasn't", WebViewBridgeTestApi.invoked);
-		assertEquals("CallbackID's didn't match", "CALLBACK_01", WebViewBridgeTestApi.callback.getCallbackId());
-	}
+  @Test(expected = NullPointerException.class)
+  public void testHandleCallbackShouldFailMethodNotStatic() throws Exception {
+    WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+    Method m = getClass().getMethod("instanceTestHandleCallback", CallbackStatus.class);
+    NativeCallback callback = new NativeCallback(m);
+    WebViewApp.getCurrentApp()
+      .addCallback(callback);
+    webInterface.handleCallback(callback.getId(), "OK", "[]");
+  }
 
-	@Test
-	public void testHandleInvocationWithParamsShouldSucceed () throws JSONException {
-		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-		webInterface.handleInvocation("[[\"com.unity3d.ads.test.unit.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethod\", [\"test\"], \"CALLBACK_01\"]]");
-		assertTrue("ApiMethod should have been invoked but wasn't", WebViewBridgeTestApi.invoked);
-		assertEquals("CallbackID's didn't match", "CALLBACK_01", WebViewBridgeTestApi.callback.getCallbackId());
-		assertEquals("Callback value wasn't same as was originally given", "test", WebViewBridgeTestApi.value);
-	}
+  @Test
+  public void testHandleCallbackShouldSucceed() throws Exception {
+    WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+    Method m = getClass().getMethod("staticTestHandleCallback", CallbackStatus.class);
+    NativeCallback callback = new NativeCallback(m);
+    WebViewApp.getCurrentApp()
+      .addCallback(callback);
+    webInterface.handleCallback(callback.getId(), "OK", "[]");
+    assertTrue("NativeCallback -method should have been invoked but wasn't", nativeCallbackInvoked);
+    assertEquals("NativeCallback status wasn't OK", CallbackStatus.OK, nativeCallbackStatus);
+  }
 
-	@Test (expected = NullPointerException.class)
-	public void testHandleCallbackShouldFailCallbackNotAdded () throws Exception {
-		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-		Method m = getClass().getMethod("staticTestHandleCallback", CallbackStatus.class);
-		NativeCallback callback = new NativeCallback(m);
-		webInterface.handleCallback(callback.getId(), "OK", "[]");
-	}
+  @Test
+  public void testHandleCallbackWithParamsShouldSucceed() throws Exception {
+    WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+    Method m = getClass().getMethod("staticTestHandleCallbackStringParam", CallbackStatus.class, String.class);
+    NativeCallback callback = new NativeCallback(m);
+    WebViewApp.getCurrentApp()
+      .addCallback(callback);
+    webInterface.handleCallback(callback.getId(), "OK", "[\"test\"]");
 
-	@Test (expected = NullPointerException.class)
-	public void testHandleCallbackShouldFailMethodNotStatic () throws Exception {
-		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-		Method m = getClass().getMethod("instanceTestHandleCallback", CallbackStatus.class);
-		NativeCallback callback = new NativeCallback(m);
-		WebViewApp.getCurrentApp().addCallback(callback);
-		webInterface.handleCallback(callback.getId(), "OK", "[]");
-	}
+    assertTrue("NativeCallback -method should have been invoked but wasn't", nativeCallbackInvoked);
+    assertEquals("NativeCallback status wasn't OK", CallbackStatus.OK, nativeCallbackStatus);
+    assertNotNull("Received value should not be null", nativeCallbackValue);
+    assertEquals("The value received wasn't the same than was originally given", "test", nativeCallbackValue);
+  }
 
-	@Test
-	public void testHandleCallbackShouldSucceed () throws Exception {
-		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-		Method m = getClass().getMethod("staticTestHandleCallback", CallbackStatus.class);
-		NativeCallback callback = new NativeCallback(m);
-		WebViewApp.getCurrentApp().addCallback(callback);
-		webInterface.handleCallback(callback.getId(), "OK", "[]");
-		assertTrue("NativeCallback -method should have been invoked but wasn't", nativeCallbackInvoked);
-		assertEquals("NativeCallback status wasn't OK", CallbackStatus.OK, nativeCallbackStatus);
-	}
+  public void instanceTestHandleCallback(CallbackStatus status) {
+    nativeCallbackInvoked = true;
+    nativeCallbackStatus = status;
+  }
 
-	@Test
-	public void testHandleCallbackWithParamsShouldSucceed () throws Exception {
-		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
-		Method m = getClass().getMethod("staticTestHandleCallbackStringParam", CallbackStatus.class, String.class);
-		NativeCallback callback = new NativeCallback(m);
-		WebViewApp.getCurrentApp().addCallback(callback);
-		webInterface.handleCallback(callback.getId(), "OK", "[\"test\"]");
+  public static class WebViewBridgeTestApi {
+    private static boolean invoked = false;
+    private static String value = null;
+    private static WebViewCallback callback = null;
+    private static int callbackCount = 0;
 
-		assertTrue("NativeCallback -method should have been invoked but wasn't", nativeCallbackInvoked);
-		assertEquals("NativeCallback status wasn't OK", CallbackStatus.OK, nativeCallbackStatus);
-		assertNotNull("Received value should not be null", nativeCallbackValue);
-		assertEquals("The value received wasn't the same than was originally given", "test", nativeCallbackValue);
-	}
+    @WebViewExposed
+    public static void apiTestMethod(String value, WebViewCallback callback) {
+      invoked = true;
+      WebViewBridgeTestApi.value = value;
+      WebViewBridgeTestApi.callback = callback;
+      callbackCount++;
 
-	public static void staticTestHandleCallback (CallbackStatus status) {
-		nativeCallbackInvoked = true;
-		nativeCallbackStatus = status;
-	}
-	public static void staticTestHandleCallbackStringParam (CallbackStatus status, String value) {
-		nativeCallbackInvoked = true;
-		nativeCallbackStatus = status;
-		nativeCallbackValue = value;
-	}
-	public void instanceTestHandleCallback (CallbackStatus status) {
-		nativeCallbackInvoked = true;
-		nativeCallbackStatus = status;
-	}
+      callback.invoke(value);
+    }
+
+    @WebViewExposed
+    public static void apiTestMethodNoParams(WebViewCallback callback) {
+      invoked = true;
+      value = null;
+      WebViewBridgeTestApi.callback = callback;
+      callbackCount++;
+
+      callback.invoke();
+    }
+  }
 }

@@ -19,12 +19,12 @@ public class MetaData {
 		_context = context.getApplicationContext();
 	}
 
-	public void setCategory (String category) {
-		_category = category;
-	}
-
 	public String getCategory () {
 		return _category;
+	}
+
+	public void setCategory(String category) {
+		_category = category;
 	}
 
 	public void set (String key, Object value) {

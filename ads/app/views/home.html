@@ -1,0 +1,18 @@
+<header>
+  <span class="empty"></span>
+  <button class="plain close" ng-show="home.showClose" ng-click="close()" ng-class="{ 'float-left': home.config.rtl }">x</button>
+</header>
+<div class="verse" ng-class="{ rtl: home.config.rtl }" scroll>
+  <h1>{{ home.word.title }}</h1>
+  <h2>{{ home.word.subtitle }}</h2>
+  <span>{{ home.word.verse }}</span>
+</div>
+<div class="flex">
+  <img ng-src="{{ home.prefix }}images/{{ home.image }}.jpg"/>
+</div>
+<footer>
+  <span class="barely-visible" ng-hide="home.showClose">{{ home.timer }}</span>
+  <a target="_blank" class="primary more" ng-href="{{ home.isWebView ? '' : home.readUrl }}" ng-click="read(home.element)">
+    {{ home.config.more }}
+  </a>
+</footer>

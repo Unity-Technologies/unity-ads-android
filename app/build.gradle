@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 
 android {
   compileSdkVersion 24
-  buildToolsVersion "24.0.2"
+  buildToolsVersion "24.0.3"
 
   defaultConfig {
-    applicationId "com.unity3d.ads.example"
-    minSdkVersion 9
-    targetSdkVersion 23
-    versionCode = 2005
-    versionName = "2.0.5"
+    applicationId "com.wds.unity3d.example"
+    minSdkVersion 12
+    targetSdkVersion 24
+    versionCode = 2011
+    versionName = "2.0.11"
   }
   buildTypes {
     release {

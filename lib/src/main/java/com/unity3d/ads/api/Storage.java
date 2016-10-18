@@ -9,7 +9,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.List;
-import java.util.Objects;
 
 public class Storage {
 	@WebViewExposed
@@ -166,7 +165,7 @@ public class Storage {
 		}
 	}
 
-	private static com.unity3d.ads.device.Storage getStorage (String type) {
+	private static com.unity3d.ads.device.Storage getStorage(String type) {
 		StorageManager.StorageType storageType = StorageManager.StorageType.valueOf(type);
 
 		return StorageManager.getStorage(storageType);

@@ -1,12 +1,13 @@
 package com.unity3d.ads.test;
 
-import com.unity3d.ads.test.environment.*;
+import com.unity3d.ads.test.environment.EnvironmentTest;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-		EnvironmentTest.class
+  EnvironmentTest.class
 })
-public class EnvironmentTestSuite {}
+public class EnvironmentTestSuite {
+}

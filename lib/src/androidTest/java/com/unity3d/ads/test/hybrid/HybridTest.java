@@ -40,12 +40,18 @@ public class HybridTest {
   @Rule
   public final ActivityTestRule<HybridTestActivity> _activityRule = new ActivityTestRule<>(HybridTestActivity.class);
 
+  @WebViewExposed
+  public static void onTestResult(Integer failures, @SuppressWarnings("unused") WebViewCallback callback) {
+    _failures = failures;
+    _resultSemaphore.release();
+  }
+
   @Test
   public void hybridTest() throws MalformedURLException, URISyntaxException, InterruptedException {
     Utilities.runOnUiThread(new Runnable() {
       @Override
       public void run() {
-        if(Build.VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
           WebView.setWebContentsDebuggingEnabled(true);
         }
       }
@@ -54,7 +60,8 @@ public class HybridTest {
     UnityAds.setDebugMode(_debugMode);
 
     ClientProperties.setGameId(_gameId);
-    ClientProperties.setApplicationContext(_activityRule.getActivity().getApplicationContext());
+    ClientProperties.setApplicationContext(_activityRule.getActivity()
+      .getApplicationContext());
     SdkProperties.setTestMode(_testMode);
     SdkProperties.setConfigUrl(SdkProperties.getDefaultConfigUrl("test"));
 
@@ -79,17 +86,11 @@ public class HybridTest {
     configuration.setWebAppApiClassList(apiClassList);
     InitializeThread.initialize(configuration);
 
-    if(!_resultSemaphore.tryAcquire(5, TimeUnit.MINUTES)) {
+    if (!_resultSemaphore.tryAcquire(5, TimeUnit.MINUTES)) {
       fail("onHybridTestResult did not arrive");
     }
 
     assertEquals("Hybrid test had failures, check device log for details", Integer.valueOf(0), _failures);
-  }
-
-  @WebViewExposed
-  public static void onTestResult(Integer failures, @SuppressWarnings("unused") WebViewCallback callback) {
-    _failures = failures;
-    _resultSemaphore.release();
   }
 
 }

@@ -1,6 +1,5 @@
 package com.unity3d.ads.api;
 
-import com.unity3d.ads.connectivity.ConnectivityMonitor;
 import com.unity3d.ads.device.Device;
 import com.unity3d.ads.device.DeviceError;
 import com.unity3d.ads.log.DeviceLog;
@@ -17,8 +16,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public class DeviceInfo {
-	public enum StorageType { EXTERNAL, INTERNAL }
-
 	@WebViewExposed
 	public static void getAndroidId (WebViewCallback callback) {
 		callback.invoke(Device.getAndroidId());
@@ -264,5 +261,7 @@ public class DeviceInfo {
 	public static void getTotalMemory(WebViewCallback callback) {
 		callback.invoke(Device.getTotalMemory());
 	}
+
+	public enum StorageType {EXTERNAL, INTERNAL}
 
 }

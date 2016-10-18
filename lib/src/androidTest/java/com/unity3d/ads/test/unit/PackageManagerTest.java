@@ -18,35 +18,35 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class PackageManagerTest {
-	private final String existingPkg = "com.example.package.exists";
-	private final String nonExistingPkg = "com.example.package.does.not.exist";
+  private final String existingPkg = "com.example.package.exists";
+  private final String nonExistingPkg = "com.example.package.does.not.exist";
 
-	@Before
-	public void setup() {
-		ClientProperties.setApplicationContext(new MockContext() {
-			@Override
-			public PackageManager getPackageManager() {
-				return new TestPackageManager();
-			}
-		});
-	}
+  @Before
+  public void setup() {
+    ClientProperties.setApplicationContext(new MockContext() {
+      @Override
+      public PackageManager getPackageManager() {
+        return new TestPackageManager();
+      }
+    });
+  }
 
-	@Test
-	public void testIsAppInstalled() {
-		assertTrue("Package manager test: existing app was not found in installed apps", Device.isAppInstalled(existingPkg));
-		assertFalse("Package manager test: non-exisiting app was found in installed apps", Device.isAppInstalled(nonExistingPkg));
-	}
+  @Test
+  public void testIsAppInstalled() {
+    assertTrue("Package manager test: existing app was not found in installed apps", Device.isAppInstalled(existingPkg));
+    assertFalse("Package manager test: non-exisiting app was found in installed apps", Device.isAppInstalled(nonExistingPkg));
+  }
 
-	private class TestPackageManager extends MockPackageManager {
-		@Override
-		public PackageInfo getPackageInfo(String packageName, int flags) {
-			if(existingPkg.equals(packageName)) {
-				PackageInfo info = new PackageInfo();
-				info.packageName = existingPkg;
-				return info;
-			} else {
-				return null;
-			}
-		}
-	}
+  private class TestPackageManager extends MockPackageManager {
+    @Override
+    public PackageInfo getPackageInfo(String packageName, int flags) {
+      if (existingPkg.equals(packageName)) {
+        PackageInfo info = new PackageInfo();
+        info.packageName = existingPkg;
+        return info;
+      } else {
+        return null;
+      }
+    }
+  }
 }

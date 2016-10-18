@@ -1,0 +1,128 @@
+@import 'vars';
+@import 'typography';
+
+$blue-200: #90CAF9;
+$blue-300: #64B5F6;
+$blue-400: #42A5F5;
+$blue-500: #2196F3;
+
+$grey-200: #EEEEEE;
+$grey-300: #E0E0E0;
+$grey-400: #BDBDBD;
+$grey-500: #9E9E9E;
+$grey-600: #757575;
+
+@mixin default-button($background, $background-hover, $border-hover, $border-active) {
+  background-color: $background;
+  font-size: 1.2em;
+  border: 2px solid transparent;
+  transition: background-color 0.25s, border 0.25s;
+  &:hover {
+    background-color: $background-hover;
+    border: 2px solid $border-hover;
+  }
+  &:active {
+    background-color: $border-hover;
+    border: 2px solid $border-active;
+  }
+}
+
+html {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: "Helvetica Neue",Verdana,Helvetica,Arial,sans-serif;
+  color: $font-color--dark;
+  background-color: $background--light;
+}
+
+img {
+  display: block;
+  max-width: 95%;
+  max-height: 55vh;
+  margin: auto;
+  padding: 8px;
+}
+
+h1 {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 2px 0;
+}
+
+h2 {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin: 2px 0;
+}
+
+button {
+  &:focus {
+    outline: none;
+  }
+}
+
+.flex {
+  display: flex;
+}
+
+.left {
+  float: left;
+}
+
+.verse {
+  padding: 0 8px 0 0;
+  height: 38vh;
+  overflow: auto;
+  margin-right: 32px;
+}
+
+.rtl {
+  direction: rtl;
+}
+
+.primary {
+  color: #fff;
+  padding: 2px 8px;
+  @include default-button($blue-500, $blue-400, $blue-300, $blue-200);
+}
+
+.plain {
+  color: #fff;
+  padding: 0px 8px;
+  @include default-button($grey-400, $grey-400, $grey-300, $grey-200);
+}
+
+.close {
+  margin-left: 4px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  height: auto;
+}
+
+.float-left {
+  left: 10px;
+}
+
+a {
+  text-decoration: none;
+}
+
+.barely-visible {
+  color: #999;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  padding: 12px;
+}
+
+.more {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 12px;
+}

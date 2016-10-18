@@ -1,11 +1,9 @@
 package com.unity3d.ads.properties;
 
 import android.content.Context;
-import android.os.Build;
 
 import com.unity3d.ads.BuildConfig;
 import com.unity3d.ads.cache.CacheDirectory;
-import com.unity3d.ads.log.DeviceLog;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -13,11 +11,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 public class SdkProperties {
-	private static String _configUrl = getDefaultConfigUrl("release");
-	private static CacheDirectory _cacheDirectory = null;
 	private static final String CACHE_DIR_NAME = "UnityAdsCache";
 	private static final String LOCAL_CACHE_FILE_PREFIX = "UnityAdsCache-";
 	private static final String LOCAL_STORAGE_FILE_PREFIX = "UnityAdsStorage-";
+	private static String _configUrl = getDefaultConfigUrl("release");
+	private static CacheDirectory _cacheDirectory = null;
 	private static int _showTimeout = 5000;
 
 	private static boolean _initialized = false;
@@ -57,6 +55,10 @@ public class SdkProperties {
 		return LOCAL_STORAGE_FILE_PREFIX;
 	}
 
+	public static String getConfigUrl() {
+		return _configUrl;
+	}
+
 	public static void setConfigUrl (String url) throws URISyntaxException, MalformedURLException {
 		if (url == null) {
 			throw new MalformedURLException();
@@ -69,10 +71,6 @@ public class SdkProperties {
 		u.toURI();
 
 		_configUrl = url;
-	}
-
-	public static String getConfigUrl() {
-		return _configUrl;
 	}
 
 	public static String getDefaultConfigUrl(String flavor) {
@@ -102,11 +100,11 @@ public class SdkProperties {
 		return _cacheDirectory.getCacheDirectory(context);
 	}
 
-	public static void setShowTimeout(int timeout) {
-		_showTimeout = timeout;
-	}
-
 	public static int getShowTimeout() {
 		return _showTimeout;
+	}
+
+	public static void setShowTimeout(int timeout) {
+		_showTimeout = timeout;
 	}
 }

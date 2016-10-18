@@ -24,226 +24,223 @@ import com.unity3d.ads.properties.SdkProperties;
 
 public class UnityAdsExample extends Activity {
 
-	final private String defaultGameId = "14851";
+  private static int ordinal = 1;
+  final private String defaultGameId = "14851";
+  private String interstitialPlacementId;
+  private String incentivizedPlacementId;
 
-	private String interstitialPlacementId;
-	private String incentivizedPlacementId;
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.unityads_example_layout);
+    final UnityAdsExample self = this;
+    final UnityAdsListener unityAdsListener = new UnityAdsListener();
 
-	private static int ordinal = 1;
+    UnityAds.setListener(unityAdsListener);
+    UnityAds.setDebugMode(true);
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.unityads_example_layout);
-		final UnityAdsExample self = this;
-		final UnityAdsListener unityAdsListener = new UnityAdsListener();
+    MediationMetaData mediationMetaData = new MediationMetaData(this);
+    mediationMetaData.setName("mediationPartner");
+    mediationMetaData.setVersion("v12345");
+    mediationMetaData.commit();
 
-		UnityAds.setListener(unityAdsListener);
-		UnityAds.setDebugMode(true);
+    MetaData debugMetaData = new MetaData(this);
+    debugMetaData.set("test.debugOverlayEnabled", true);
+    debugMetaData.commit();
 
-		MediationMetaData mediationMetaData = new MediationMetaData(this);
-		mediationMetaData.setName("mediationPartner");
-		mediationMetaData.setVersion("v12345");
-		mediationMetaData.commit();
+    final Button interstitialButton = (Button) findViewById(R.id.unityads_example_interstitial_button);
+    disableButton(interstitialButton);
+    interstitialButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        disableButton(interstitialButton);
 
-		MetaData debugMetaData = new MetaData(this);
-		debugMetaData.set("test.debugOverlayEnabled", true);
-		debugMetaData.commit();
+        PlayerMetaData playerMetaData = new PlayerMetaData(self);
+        playerMetaData.setServerId("rikshot");
+        playerMetaData.commit();
 
-		final Button interstitialButton = (Button) findViewById(R.id.unityads_example_interstitial_button);
-		disableButton(interstitialButton);
-		interstitialButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				disableButton(interstitialButton);
+        MediationMetaData ordinalMetaData = new MediationMetaData(self);
+        ordinalMetaData.setOrdinal(ordinal++);
+        ordinalMetaData.commit();
 
-				PlayerMetaData playerMetaData = new PlayerMetaData(self);
-				playerMetaData.setServerId("rikshot");
-				playerMetaData.commit();
+        UnityAds.show(self, interstitialPlacementId);
+      }
+    });
 
-				MediationMetaData ordinalMetaData = new MediationMetaData(self);
-				ordinalMetaData.setOrdinal(ordinal++);
-				ordinalMetaData.commit();
+    final Button incentivizedButton = (Button) findViewById(R.id.unityads_example_incentivized_button);
+    disableButton(incentivizedButton);
+    incentivizedButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        disableButton(incentivizedButton);
 
-				UnityAds.show(self, interstitialPlacementId);
-			}
-		});
+        PlayerMetaData playerMetaData = new PlayerMetaData(self);
+        playerMetaData.setServerId("rikshot");
+        playerMetaData.commit();
 
-		final Button incentivizedButton = (Button) findViewById(R.id.unityads_example_incentivized_button);
-		disableButton(incentivizedButton);
-		incentivizedButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				disableButton(incentivizedButton);
+        MediationMetaData ordinalMetaData = new MediationMetaData(self);
+        ordinalMetaData.setOrdinal(ordinal++);
+        ordinalMetaData.commit();
 
-				PlayerMetaData playerMetaData = new PlayerMetaData(self);
-				playerMetaData.setServerId("rikshot");
-				playerMetaData.commit();
+        UnityAds.show(self, incentivizedPlacementId);
+      }
+    });
 
-				MediationMetaData ordinalMetaData = new MediationMetaData(self);
-				ordinalMetaData.setOrdinal(ordinal++);
-				ordinalMetaData.commit();
+    final Button initializeButton = (Button) findViewById(R.id.unityads_example_initialize_button);
+    final EditText gameIdEdit = (EditText) findViewById(R.id.unityads_example_gameid_edit);
+    final CheckBox testModeCheckbox = (CheckBox) findViewById(R.id.unityads_example_testmode_checkbox);
+    final TextView statusText = (TextView) findViewById(R.id.unityads_example_statustext);
 
-				UnityAds.show(self, incentivizedPlacementId);
-			}
-		});
+    SharedPreferences preferences = getSharedPreferences("Settings", MODE_PRIVATE);
+    gameIdEdit.setText(preferences.getString("gameId", defaultGameId));
+    testModeCheckbox.setChecked(true);
 
-		final Button initializeButton = (Button) findViewById(R.id.unityads_example_initialize_button);
-		final EditText gameIdEdit = (EditText) findViewById(R.id.unityads_example_gameid_edit);
-		final CheckBox testModeCheckbox = (CheckBox) findViewById(R.id.unityads_example_testmode_checkbox);
-		final TextView statusText = (TextView) findViewById(R.id.unityads_example_statustext);
+    initializeButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        String gameId = gameIdEdit.getText()
+          .toString();
+        if (gameId.isEmpty()) {
+          Toast.makeText(getApplicationContext(), "Missing game id", Toast.LENGTH_SHORT)
+            .show();
+          return;
+        }
 
-		SharedPreferences preferences = getSharedPreferences("Settings", MODE_PRIVATE);
-		gameIdEdit.setText(preferences.getString("gameId", defaultGameId));
-               testModeCheckbox.setChecked(true);
+        disableButton(initializeButton);
+        gameIdEdit.setEnabled(false);
+        testModeCheckbox.setEnabled(false);
 
-		initializeButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String gameId = gameIdEdit.getText().toString();
-				if (gameId.isEmpty()) {
-					Toast.makeText(getApplicationContext(), "Missing game id", Toast.LENGTH_SHORT).show();
-					return;
-				}
+        statusText.setText("Initializing...");
+        UnityAds.initialize(self, gameId, unityAdsListener, testModeCheckbox.isChecked());
 
-				disableButton(initializeButton);
-				gameIdEdit.setEnabled(false);
-				testModeCheckbox.setEnabled(false);
+        // store entered gameid in app settings
+        SharedPreferences preferences = getSharedPreferences("Settings", MODE_PRIVATE);
+        SharedPreferences.Editor preferencesEdit = preferences.edit();
+        preferencesEdit.putString("gameId", gameId);
+        preferencesEdit.commit();
+      }
+    });
 
-				statusText.setText("Initializing...");
-				UnityAds.initialize(self, gameId, unityAdsListener, testModeCheckbox.isChecked());
+    LinearLayout layout = (LinearLayout) findViewById(R.id.unityads_example_button_container);
 
-				// store entered gameid in app settings
-				SharedPreferences preferences = getSharedPreferences("Settings", MODE_PRIVATE);
-				SharedPreferences.Editor preferencesEdit = preferences.edit();
-				preferencesEdit.putString("gameId", gameId);
-				preferencesEdit.commit();
-			}
-		});
+    if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      layout.setOrientation(LinearLayout.HORIZONTAL);
 
-		LinearLayout layout = (LinearLayout)findViewById(R.id.unityads_example_button_container);
+    } else {
+      layout.setOrientation(LinearLayout.VERTICAL);
+    }
+  }
 
-		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			layout.setOrientation(LinearLayout.HORIZONTAL);
+  @Override
+  protected void onResume() {
+    super.onResume();
 
-		}
-		else {
-			layout.setOrientation(LinearLayout.VERTICAL);
-		}
-	}
+    if (SdkProperties.isInitialized()) {
+      disableButton((Button) findViewById(R.id.unityads_example_initialize_button));
 
-	@Override
-	protected void onResume() {
-		super.onResume();
+      if (UnityAds.isReady(interstitialPlacementId)) {
+        enableButton((Button) findViewById(R.id.unityads_example_interstitial_button));
+      } else {
+        disableButton((Button) findViewById(R.id.unityads_example_interstitial_button));
+      }
 
-		if (SdkProperties.isInitialized()) {
-			disableButton((Button) findViewById(R.id.unityads_example_initialize_button));
+      if (UnityAds.isReady(incentivizedPlacementId)) {
+        enableButton((Button) findViewById(R.id.unityads_example_incentivized_button));
+      } else {
+        disableButton((Button) findViewById(R.id.unityads_example_incentivized_button));
+      }
+    }
+  }
 
-			if (UnityAds.isReady(interstitialPlacementId)) {
-				enableButton((Button) findViewById(R.id.unityads_example_interstitial_button));
-			}
-			else {
-				disableButton((Button) findViewById(R.id.unityads_example_interstitial_button));
-			}
+  @Override
+  public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
 
-			if (UnityAds.isReady(incentivizedPlacementId)) {
-				enableButton((Button) findViewById(R.id.unityads_example_incentivized_button));
-			}
-			else {
-				disableButton((Button) findViewById(R.id.unityads_example_incentivized_button));
-			}
-		}
-	}
+    LinearLayout layout = (LinearLayout) findViewById(R.id.unityads_example_button_container);
 
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      layout.setOrientation(LinearLayout.HORIZONTAL);
 
-		LinearLayout layout = (LinearLayout)findViewById(R.id.unityads_example_button_container);
+    } else {
+      layout.setOrientation(LinearLayout.VERTICAL);
+    }
+  }
 
-		if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			layout.setOrientation(LinearLayout.HORIZONTAL);
+  private void enableButton(Button btn) {
+    btn.setEnabled(true);
+    float alpha = 1f;
+    AlphaAnimation alphaUp = new AlphaAnimation(alpha, alpha);
+    alphaUp.setFillAfter(true);
+    btn.startAnimation(alphaUp);
+  }
 
-		}
-		else {
-			layout.setOrientation(LinearLayout.VERTICAL);
-		}
-	}
-
-	private void enableButton (Button btn) {
-		btn.setEnabled(true);
-		float alpha = 1f;
-		AlphaAnimation alphaUp = new AlphaAnimation(alpha, alpha);
-		alphaUp.setFillAfter(true);
-		btn.startAnimation(alphaUp);
-	}
-
-	private void disableButton (Button btn) {
-		float alpha = 0.45f;
-		btn.setEnabled(false);
-		AlphaAnimation alphaUp = new AlphaAnimation(alpha, alpha);
-		alphaUp.setFillAfter(true);
-		btn.startAnimation(alphaUp);
-	}
+  private void disableButton(Button btn) {
+    float alpha = 0.45f;
+    btn.setEnabled(false);
+    AlphaAnimation alphaUp = new AlphaAnimation(alpha, alpha);
+    alphaUp.setFillAfter(true);
+    btn.startAnimation(alphaUp);
+  }
 
 	/* LISTENER */
 
-	private class UnityAdsListener implements IUnityAdsListener {
+  private class UnityAdsListener implements IUnityAdsListener {
 
-		@Override
-		public void onUnityAdsReady(final String zoneId) {
-			TextView statusText = (TextView) findViewById(R.id.unityads_example_statustext);
-			statusText.setText("");
+    @Override
+    public void onUnityAdsReady(final String zoneId) {
+      TextView statusText = (TextView) findViewById(R.id.unityads_example_statustext);
+      statusText.setText("");
 
-			DeviceLog.debug("onUnityAdsReady: " + zoneId);
-			Utilities.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					// look for various default placement ids over time
-					switch (zoneId) {
-						case "video":
-						case "defaultZone":
-						case "defaultVideoAndPictureZone":
-							interstitialPlacementId = zoneId;
-							enableButton((Button) findViewById(R.id.unityads_example_interstitial_button));
-							break;
+      DeviceLog.debug("onUnityAdsReady: " + zoneId);
+      Utilities.runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          // look for various default placement ids over time
+          switch (zoneId) {
+            case "video":
+            case "defaultZone":
+            case "defaultVideoAndPictureZone":
+              interstitialPlacementId = zoneId;
+              enableButton((Button) findViewById(R.id.unityads_example_interstitial_button));
+              break;
 
-						case "rewardedVideo":
-						case "rewardedVideoZone":
-						case "incentivizedZone":
-							incentivizedPlacementId = zoneId;
-							enableButton((Button) findViewById(R.id.unityads_example_incentivized_button));
-							break;
-					}
-				}
-			});
+            case "rewardedVideo":
+            case "rewardedVideoZone":
+            case "incentivizedZone":
+              incentivizedPlacementId = zoneId;
+              enableButton((Button) findViewById(R.id.unityads_example_incentivized_button));
+              break;
+          }
+        }
+      });
 
-			toast("Ready", zoneId);
-		}
+      toast("Ready", zoneId);
+    }
 
-		@Override
-		public void onUnityAdsStart(String zoneId) {
-			DeviceLog.debug("onUnityAdsStart: " + zoneId);
-			toast("Start", zoneId);
-		}
+    @Override
+    public void onUnityAdsStart(String zoneId) {
+      DeviceLog.debug("onUnityAdsStart: " + zoneId);
+      toast("Start", zoneId);
+    }
 
-		@Override
-		public void onUnityAdsFinish(String zoneId, UnityAds.FinishState result) {
-			DeviceLog.debug("onUnityAdsFinish: " + zoneId + " - " + result);
-			toast("Finish", zoneId + " " + result);
-		}
+    @Override
+    public void onUnityAdsFinish(String zoneId, UnityAds.FinishState result) {
+      DeviceLog.debug("onUnityAdsFinish: " + zoneId + " - " + result);
+      toast("Finish", zoneId + " " + result);
+    }
 
-		@Override
-		public void onUnityAdsError(UnityAds.UnityAdsError error, String message) {
-			DeviceLog.debug("onUnityAdsError: " + error + " - " + message);
-			toast("Error", error + " " + message);
+    @Override
+    public void onUnityAdsError(UnityAds.UnityAdsError error, String message) {
+      DeviceLog.debug("onUnityAdsError: " + error + " - " + message);
+      toast("Error", error + " " + message);
 
-			TextView statusText = (TextView) findViewById(R.id.unityads_example_statustext);
-			statusText.setText(error + " - " + message);
-		}
+      TextView statusText = (TextView) findViewById(R.id.unityads_example_statustext);
+      statusText.setText(error + " - " + message);
+    }
 
-		private void toast(String callback, String msg) {
-			Toast.makeText(getApplicationContext(), callback + ": " + msg, Toast.LENGTH_SHORT).show();
-		}
-	}
+    private void toast(String callback, String msg) {
+      Toast.makeText(getApplicationContext(), callback + ": " + msg, Toast.LENGTH_SHORT)
+        .show();
+    }
+  }
 }
