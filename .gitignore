@@ -1,0 +1,10 @@
+.gradle
+local.properties
+.idea
+.DS_Store
+build
+captures
+testServerAddress.txt
+app/app.iml
+lib/lib.iml
+javadoc
