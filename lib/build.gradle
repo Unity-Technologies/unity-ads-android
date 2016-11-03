@@ -39,7 +39,6 @@ android {
       minifyEnabled false
       testCoverageEnabled false
       consumerProguardFiles 'proguard-rules.pro'
-      buildConfigField 'String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"master"')
     }
     coverage {
       testCoverageEnabled true
