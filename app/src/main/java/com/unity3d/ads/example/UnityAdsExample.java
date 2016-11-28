@@ -3,6 +3,7 @@ package com.unity3d.ads.example;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -21,6 +22,7 @@ import com.unity3d.ads.metadata.MetaData;
 import com.unity3d.ads.metadata.PlayerMetaData;
 import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.SdkProperties;
+import com.unity3d.ads.webview.WebView;
 
 public class UnityAdsExample extends Activity {
 
@@ -37,6 +39,10 @@ public class UnityAdsExample extends Activity {
 		setContentView(R.layout.unityads_example_layout);
 		final UnityAdsExample self = this;
 		final UnityAdsListener unityAdsListener = new UnityAdsListener();
+
+		if(Build.VERSION.SDK_INT >= 19) {
+			WebView.setWebContentsDebuggingEnabled(true);
+		}
 
 		UnityAds.setListener(unityAdsListener);
 		UnityAds.setDebugMode(true);

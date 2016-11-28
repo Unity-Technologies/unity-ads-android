@@ -52,6 +52,13 @@ public class WebRequestThread extends Thread {
 		Looper.loop();
 	}
 
+	public static void cancel () {
+		if (_handler != null) {
+			_handler.removeMessages(MSG_REQUEST);
+			_handler.setCancelStatus(true);
+		}
+	}
+
 	public static synchronized void request (String url, WebRequest.RequestType requestType, Map<String, List<String>> headers, Integer connectTimeout, Integer readTimeout, IWebRequestListener listener) {
 		request(url, requestType, headers, null, connectTimeout, readTimeout, listener);
 	}
@@ -89,6 +96,7 @@ public class WebRequestThread extends Thread {
 		msg.what = msgWhat;
 		msg.setData(params);
 
+		_handler.setCancelStatus(false);
 		_handler.sendMessage(msg);
 	}
 

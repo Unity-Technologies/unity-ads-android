@@ -1,6 +1,9 @@
 package com.unity3d.ads.api;
 
 import android.content.Intent;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.unity3d.ads.adunit.AdUnitActivity;
 import com.unity3d.ads.adunit.AdUnitError;
@@ -8,6 +11,7 @@ import com.unity3d.ads.adunit.AdUnitSoftwareActivity;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.ClientProperties;
+import com.unity3d.ads.webview.WebViewApp;
 import com.unity3d.ads.webview.bridge.WebViewCallback;
 import com.unity3d.ads.webview.bridge.WebViewExposed;
 
@@ -16,6 +20,8 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AdUnit {
 	private static AdUnitActivity _adUnitActivity;
@@ -247,6 +253,41 @@ public class AdUnit {
 			catch (Exception e) {
 				DeviceLog.exception("Error parsing views from viewList", e);
 				callback.error(AdUnitError.CORRUPTED_KEYEVENTLIST, keyevents, e.getMessage());
+			}
+		}
+		else {
+			callback.error(AdUnitError.ACTIVITY_NULL);
+		}
+	}
+
+	@WebViewExposed
+	public static void setViewFrame (final String view, final Integer x, final Integer y, final Integer width, final Integer height, final WebViewCallback callback) {
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (getAdUnitActivity() != null) {
+					getAdUnitActivity().setViewFrame(view, x, y, width, height);
+				}
+			}
+		});
+
+		if (getAdUnitActivity() != null) {
+			callback.invoke();
+		}
+		else {
+			callback.error(AdUnitError.ACTIVITY_NULL);
+		}
+	}
+
+	@WebViewExposed
+	public static void getViewFrame (final String view, final WebViewCallback callback) {
+		if (getAdUnitActivity() != null) {
+			if (getAdUnitActivity().getViewFrame(view) != null) {
+				Map<String, Integer> map = getAdUnitActivity().getViewFrame(view);
+				callback.invoke(map.get("x"), map.get("y"), map.get("width"), map.get("height"));
+			}
+			else {
+				callback.error(AdUnitError.UNKNOWN_VIEW);
 			}
 		}
 		else {

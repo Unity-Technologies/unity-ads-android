@@ -18,6 +18,7 @@ import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
@@ -449,5 +450,53 @@ public class AdUnitActivityTest extends AdUnitActivityTestBaseClass {
 		assertEquals("Expected third last event from the AdUnitActivity to be ON_PAUSE: " + printEvents(allEvents), AdUnitEvent.ON_PAUSE, allEvents.get(allEvents.size() - 3));
 		assertEquals("Expected second last event from the AdUnitActivity to be ON_STOP: " + printEvents(allEvents), AdUnitEvent.ON_STOP, allEvents.get(allEvents.size() - 2));
 		assertEquals("Expected last event from the AdUnitActivity to be ON_DESTROY: " + printEvents(allEvents), AdUnitEvent.ON_DESTROY, allEvents.get(allEvents.size() - 1));
+	}
+
+	@Test
+	public void testSetViewFrame() {
+		Intent intent = new Intent();
+		final String[] views = new String[]{VIDEO_PLAYER_VIEW, WEB_VIEW};
+		intent.putExtra(AdUnitActivity.EXTRA_VIEWS, views);
+
+		final Activity activity = waitForActivityStart(intent);
+
+		final ConditionVariable cv = new ConditionVariable();
+		Handler handler = new Handler(Looper.getMainLooper());
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				((AdUnitActivity)activity).setViewFrame("adunit", 50, 60, 510, 520);
+				((AdUnitActivity)activity).setViewFrame("videoplayer", 110, 120, 130, 140);
+				((AdUnitActivity)activity).setViewFrame("webview", 210, 220, 230, 240);
+				cv.open();
+			}
+		});
+		boolean success = cv.block(2000);
+
+		ConditionVariable cv2 = new ConditionVariable();
+		cv2.block(1000);
+
+		assertTrue("Weird ConditionVariable problem", success);
+
+		Map<String, Integer> adunitMap = ((AdUnitActivity)activity).getViewFrame("adunit");
+		Map<String, Integer> videoPlayerMap = ((AdUnitActivity)activity).getViewFrame("videoplayer");
+		Map<String, Integer> webViewMap = ((AdUnitActivity)activity).getViewFrame("webview");
+
+		assertEquals("Unexpected AdUnit x", Integer.valueOf(50), adunitMap.get("x"));
+		assertEquals("Unexpected AdUnit y", Integer.valueOf(60), adunitMap.get("y"));
+		assertEquals("Unexpected AdUnit width", Integer.valueOf(510), adunitMap.get("width"));
+		assertEquals("Unexpected AdUnit height", Integer.valueOf(520), adunitMap.get("height"));
+
+		assertEquals("Unexpected VideoPlayer x",  Integer.valueOf(110), videoPlayerMap.get("x"));
+		assertEquals("Unexpected VideoPlayer y", Integer.valueOf(120), videoPlayerMap.get("y"));
+		assertEquals("Unexpected VideoPlayer width", Integer.valueOf(130), videoPlayerMap.get("width"));
+		assertEquals("Unexpected VideoPlayer height", Integer.valueOf(140), videoPlayerMap.get("height"));
+
+		assertEquals("Unexpected WebView x", Integer.valueOf(210), webViewMap.get("x"));
+		assertEquals("Unexpected WebView y", Integer.valueOf(220), webViewMap.get("y"));
+		assertEquals("Unexpected WebView width", Integer.valueOf(230), webViewMap.get("width"));
+		assertEquals("Unexpected WebView height", Integer.valueOf(240), webViewMap.get("height"));
+
+		assertTrue("Didn't get activity finish", waitForActivityFinish(activity));
 	}
 }

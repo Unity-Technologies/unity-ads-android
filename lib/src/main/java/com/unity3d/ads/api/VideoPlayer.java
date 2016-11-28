@@ -53,13 +53,18 @@ public class VideoPlayer {
 
 	@WebViewExposed
 	public static void prepare (final String url, final Double initialVolume, final WebViewCallback callback) {
+		prepare(url, initialVolume, 0, callback);
+	}
+
+	@WebViewExposed
+	public static void prepare (final String url, final Double initialVolume, final Integer timeout, final WebViewCallback callback) {
 		DeviceLog.debug("Preparing video for playback: " + url);
 
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				if (getVideoPlayerView() != null) {
-					getVideoPlayerView().prepare(url, initialVolume.floatValue());
+					getVideoPlayerView().prepare(url, initialVolume.floatValue(), timeout.intValue());
 				}
 			}
 		});

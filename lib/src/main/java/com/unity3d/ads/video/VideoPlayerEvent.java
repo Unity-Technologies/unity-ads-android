@@ -7,6 +7,7 @@ public enum VideoPlayerEvent {
 	COMPLETED,
 	PREPARED,
 	PREPARE_ERROR,
+	PREPARE_TIMEOUT,
 	PLAY,
 	PAUSE_ERROR,
 	PAUSE,

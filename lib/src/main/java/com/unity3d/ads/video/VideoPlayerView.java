@@ -14,6 +14,7 @@ import java.util.TimerTask;
 public class VideoPlayerView extends VideoView {
 	private String _videoUrl;
 	private Timer _videoTimer;
+	private Timer _prepareTimer;
 	private int _progressEventInterval = 500;
 	private MediaPlayer _mediaPlayer = null;
 	private Float _volume = null;
@@ -50,7 +51,28 @@ public class VideoPlayerView extends VideoView {
 		}
 	}
 
-	public boolean prepare (final String url, final Float initialVolume) {
+	private void startPrepareTimer (long delay) {
+		_prepareTimer = new Timer();
+		_prepareTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				if(!isPlaying()) {
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PREPARE_TIMEOUT, _videoUrl);
+					DeviceLog.error("Video player prepare timeout: " + _videoUrl);
+				}
+			}
+		}, delay);
+	}
+
+	public void stopPrepareTimer () {
+		if (_prepareTimer != null) {
+			_prepareTimer.cancel();
+			_prepareTimer.purge();
+			_prepareTimer = null;
+		}
+	}
+
+	public boolean prepare (final String url, final float initialVolume, final int timeout) {
 		DeviceLog.entered();
 
 		_videoUrl = url;
@@ -58,6 +80,8 @@ public class VideoPlayerView extends VideoView {
 		setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 			@Override
 			public void onPrepared(MediaPlayer mp) {
+				stopPrepareTimer();
+
 				if (mp != null) {
 					_mediaPlayer = mp;
 				}
@@ -70,6 +94,8 @@ public class VideoPlayerView extends VideoView {
 		setOnErrorListener(new MediaPlayer.OnErrorListener() {
 			@Override
 			public boolean onError(MediaPlayer mp, int what, int extra) {
+				stopPrepareTimer();
+
 				if (mp != null) {
 					_mediaPlayer = mp;
 				}
@@ -81,6 +107,10 @@ public class VideoPlayerView extends VideoView {
 		});
 
 		setInfoListenerEnabled(_infoListenerEnabled);
+
+		if(timeout > 0) {
+			startPrepareTimer((long) timeout);
+		}
 
 		try {
 			setVideoPath(_videoUrl);

@@ -94,7 +94,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		ConditionVariable prepareCV = new ConditionVariable();
 		mockWebViewApp.CONDITION_VARIABLE = prepareCV;
 		DeviceLog.debug("URL_GIVEN: " + validUrl);
-		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f, 0);
 		success = prepareCV.block(30000);
 
 		assertTrue("Condition Variable was not opened: PREPARE or PREPARE ERROR event was not received", success);
@@ -152,7 +152,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		ConditionVariable cv = new ConditionVariable();
 		mockWebViewApp.CONDITION_VARIABLE = cv;
 		DeviceLog.debug("URL_GIVEN: " + validUrl);
-		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f, 0);
 		success = cv.block(30000);
 
 		assertTrue("Condition Variable was not opened: COMPLETED or PREPARE ERROR event was not received", success);
@@ -213,7 +213,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		ConditionVariable cv = new ConditionVariable();
 		mockWebViewApp.CONDITION_VARIABLE = cv;
 		DeviceLog.debug("URL_GIVEN: " + invalidUrl);
-		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(invalidUrl, 1f);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(invalidUrl, 1f, 0);
 		success = cv.block(30000);
 
 		assertTrue("Condition Variable was not opened: VIDEOPLAYER GENERIC ERROR or PREPARE ERROR was not received", success);
@@ -273,7 +273,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		ConditionVariable cv = new ConditionVariable();
 		mockWebViewApp.CONDITION_VARIABLE = cv;
 		DeviceLog.debug("URL_GIVEN: " + validUrl);
-		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f, 0);
 		success = cv.block(30000);
 
 		assertTrue("Condition Variable was not opened: PROGRESS or PREPARE ERROR event was not received", success);
@@ -332,7 +332,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		final MockWebViewApp mockWebViewApp = (MockWebViewApp)WebViewApp.getCurrentApp();
 		ConditionVariable cv = new ConditionVariable();
 		mockWebViewApp.CONDITION_VARIABLE = cv;
-		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f, 0);
 		success = cv.block(30000);
 
 		assertTrue("Condition Variable was not opened: PREPARED or PREPARE ERROR event was not received", success);
@@ -389,7 +389,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		final MockWebViewApp mockWebViewApp = (MockWebViewApp)WebViewApp.getCurrentApp();
 		ConditionVariable cv = new ConditionVariable();
 		mockWebViewApp.CONDITION_VARIABLE = cv;
-		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f, 0);
 		success = cv.block(30000);
 
 		assertTrue("Condition Variable was not opened: PREPARED or PREPARE ERROR event was not received", success);
@@ -453,7 +453,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		ConditionVariable cv = new ConditionVariable();
 		mockWebViewApp.CONDITION_VARIABLE = cv;
 		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.setProgressEventInterval(300);
-		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f, 0);
 		success = cv.block(30000);
 
 		assertTrue("Condition Variable was not opened: VIDEO PROGRESS or PREPARE ERROR event was not received", success);
@@ -527,7 +527,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		final MockWebViewApp mockWebViewApp = (MockWebViewApp)WebViewApp.getCurrentApp();
 		ConditionVariable cv = new ConditionVariable();
 		mockWebViewApp.CONDITION_VARIABLE = cv;
-		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f, 0);
 		success = cv.block(30000);
 
 		assertTrue("Condition Variable was not opened: VIDEO PROGRESS or PREPARE ERROR event was not received", success);
@@ -584,7 +584,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		final MockWebViewApp mockWebViewApp = (MockWebViewApp)WebViewApp.getCurrentApp();
 		ConditionVariable cv = new ConditionVariable();
 		mockWebViewApp.CONDITION_VARIABLE = cv;
-		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f, 0);
 		success = cv.block(30000);
 
 		assertTrue("Condition Variable was not opened: COMPLETED or PREPARE ERROR event was not received", success);
@@ -647,7 +647,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		mockWebViewApp.CONDITION_VARIABLE = cv;
 		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.setInfoListenerEnabled(true);
 		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.setInfoListenerEnabled(false);
-		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f, 0);
 		success = cv.block(30000);
 
 		assertTrue("Condition Variable was not opened: COMPLETED or PREPARE ERROR event was not received", success);
@@ -709,7 +709,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		mockWebViewApp.CONDITION_VARIABLE = cv;
 		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.setInfoListenerEnabled(false);
 		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.setInfoListenerEnabled(true);
-		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f, 0);
 		success = cv.block(30000);
 
 		assertTrue("Condition Variable was not opened: COMPLETED or PREPARE ERROR event was not received", success);

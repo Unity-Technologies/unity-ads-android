@@ -20,6 +20,8 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -332,6 +334,39 @@ public class WebRequestTest {
 		assertTrue("Error message was different than expected", ERROR.startsWith("Invalid resultCode"));
 	}
 
+	@Test
+	public void testCancelRequests () throws Exception {
+		WebRequestThread.request(validUrl, WebRequest.RequestType.GET, null, connectTimeout, readTimeout, new IWebRequestListener() {
+			@Override
+			public void onComplete(String url, String response, int responseCode, Map<String, List<String>> headers) {
+				SUCCESS = true;
+				RESPONSE_CODE = responseCode;
+				RESPONSE = response;
+			}
+
+			@Override
+			public void onFailed(String url, String error) {
+				SUCCESS = false;
+				ERROR = error;
+			}
+		});
+
+		Timer t = new Timer();
+		t.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				WebRequestThread.cancel();
+			}
+		}, 10);
+
+		final ConditionVariable cv = new ConditionVariable();
+		boolean success = cv.block(500);
+
+		assertEquals("Shouldn't have received a responseCode", -1, RESPONSE_CODE);
+		assertNull("Shouldn't have received a repsonse", RESPONSE);
+		assertFalse("Shouldn't have received success", SUCCESS);
+		assertNull("Shouldn't have received and error", ERROR);
+	}
 
 	@Test
 	public void testResolveHost () throws Exception {

@@ -10,9 +10,12 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+import android.widget.VideoView;
 
 import com.unity3d.ads.api.AdUnit;
+import com.unity3d.ads.device.Device;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.misc.ViewUtilities;
 import com.unity3d.ads.api.VideoPlayer;
@@ -22,6 +25,10 @@ import com.unity3d.ads.webview.WebViewEventCategory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class AdUnitActivity extends Activity {
 
@@ -33,6 +40,7 @@ public class AdUnitActivity extends Activity {
 	public static final String EXTRA_KEEP_SCREEN_ON = "keepScreenOn";
 
 	private RelativeLayout _layout;
+	private RelativeLayout _videoContainer;
 	private String[] _views;
 	private int _orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 	private int _systemUiVisibility;
@@ -187,7 +195,6 @@ public class AdUnitActivity extends Activity {
 			return;
 		}
 
-		AdUnit.setAdUnitActivity(null);
 		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_DESTROY, isFinishing(), _activityId);
 
 		if (AdUnit.getCurrentAdUnitActivityId() == _activityId) {
@@ -208,6 +215,60 @@ public class AdUnitActivity extends Activity {
 	}
 
 	/* API */
+
+	public void setViewFrame (String view, int x, int y, int width, int height) {
+		View targetView = null;
+
+		if (view.equals("adunit")) {
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(width, height);
+			params.setMargins(x, y, 0, 0);
+			_layout.setLayoutParams(params);
+		}
+		else if (view.equals("videoplayer")) {
+			targetView = _videoContainer;
+		}
+		else if (view.equals("webview")) {
+			targetView = WebViewApp.getCurrentApp().getWebView();
+		}
+
+		if (targetView != null) {
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
+			params.setMargins(x, y, 0, 0);
+			targetView.setLayoutParams(params);
+		}
+	}
+
+	public Map<String, Integer> getViewFrame (String view) {
+		View targetView = null;
+
+		if (view.equals("adunit")) {
+			FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)_layout.getLayoutParams();
+			HashMap<String, Integer> map = new HashMap<>();
+			map.put("x", params.leftMargin);
+			map.put("y", params.topMargin);
+			map.put("width", _layout.getWidth());
+			map.put("height", _layout.getHeight());
+			return map;
+		}
+		else if (view.equals("videoplayer")) {
+			targetView = _videoContainer;
+		}
+		else if (view.equals("webview")) {
+			targetView = WebViewApp.getCurrentApp().getWebView();
+		}
+
+		if (targetView != null) {
+			RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)targetView.getLayoutParams();
+			HashMap<String, Integer> map = new HashMap<>();
+			map.put("x", params.leftMargin);
+			map.put("y", params.topMargin);
+			map.put("width", targetView.getWidth());
+			map.put("height", targetView.getHeight());
+			return map;
+		}
+
+		return null;
+	}
 
 	public void setViews (String[] views) {
 		String[] actualViews;
@@ -247,7 +308,7 @@ public class AdUnitActivity extends Activity {
 			}
 			if (view.equals("videoplayer")) {
 				createVideoPlayer();
-				handleViewPlacement(VideoPlayer.getVideoPlayerView());
+				handleViewPlacement(_videoContainer);
 			}
 			else if (view.equals("webview")) {
 				if (WebViewApp.getCurrentApp() != null) {
@@ -333,13 +394,22 @@ public class AdUnitActivity extends Activity {
 		_layout = new RelativeLayout(this);
 		_layout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		ViewUtilities.setBackground(_layout, new ColorDrawable(Color.BLACK));
+
 	}
 
 	/* VIDEOPLAYER */
 
 	private void createVideoPlayer () {
+		if (_videoContainer == null) {
+			_videoContainer = new RelativeLayout(this);
+		}
+
 		if (VideoPlayer.getVideoPlayerView() == null) {
 			VideoPlayer.setVideoPlayerView(new VideoPlayerView(this));
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+			params.addRule(RelativeLayout.CENTER_IN_PARENT);
+			VideoPlayer.getVideoPlayerView().setLayoutParams(params);
+			_videoContainer.addView(VideoPlayer.getVideoPlayerView());
 		}
 	}
 
@@ -351,5 +421,10 @@ public class AdUnitActivity extends Activity {
 		}
 
 		VideoPlayer.setVideoPlayerView(null);
+
+		if (_videoContainer != null) {
+			ViewUtilities.removeViewFromParent(_videoContainer);
+			_videoContainer = null;
+		}
 	}
 }

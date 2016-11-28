@@ -16,6 +16,7 @@ import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.ClientProperties;
 import com.unity3d.ads.properties.SdkProperties;
 import com.unity3d.ads.request.WebRequest;
+import com.unity3d.ads.request.WebRequestThread;
 import com.unity3d.ads.webview.WebViewApp;
 
 import java.io.File;
@@ -103,6 +104,7 @@ public class InitializeThread extends Thread  {
 			Placement.reset();
 			BroadcastMonitor.removeAllBroadcastListeners();
 			CacheThread.cancel();
+			WebRequestThread.cancel();
 			ConnectivityMonitor.stopAll();
 			StorageManager.init(ClientProperties.getApplicationContext());
 			AdvertisingId.init(ClientProperties.getApplicationContext());
@@ -172,8 +174,8 @@ public class InitializeThread extends Thread  {
 
 	public static class InitializeStateConfig extends InitializeState {
 		private int _retries = 0;
-		private int _maxRetries = 2;
-		private int _retryDelay = 10; // seconds
+		private int _maxRetries = 6;
+		private int _retryDelay = 5; // seconds
 		private Configuration _configuration;
 
 		public InitializeStateConfig(Configuration configuration) {
@@ -188,6 +190,7 @@ public class InitializeThread extends Thread  {
 				_configuration.makeRequest();
 			} catch (Exception e) {
 				if (_retries < _maxRetries) {
+					_retryDelay = _retryDelay * 2;
 					_retries++;
 					return new InitializeStateRetry(this, _retryDelay);
 				}
@@ -245,8 +248,8 @@ public class InitializeThread extends Thread  {
 	public static class InitializeStateLoadWeb extends InitializeState {
 		private Configuration _configuration;
 		private int _retries = 0;
-		private int _maxRetries = 2;
-		private int _retryDelay = 10; // seconds
+		private int _maxRetries = 6;
+		private int _retryDelay = 5; // seconds
 
 		public InitializeStateLoadWeb(Configuration configuration) {
 			_configuration = configuration;
@@ -276,6 +279,7 @@ public class InitializeThread extends Thread  {
 				webViewData = request.makeRequest();
 			} catch (Exception e) {
 				if (_retries < _maxRetries) {
+					_retryDelay = _retryDelay * 2;
 					_retries++;
 					return new InitializeStateRetry(this, _retryDelay);
 				}

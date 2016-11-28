@@ -17,7 +17,7 @@ test-hosted: push-test-server-address-hosted exec-tests
 
 test-usb: push-test-server-address-local setup-adb-reverse start-test-server exec-only-unit-tests stop-test-server dismantle-adb-reverse
 
-exec-tests: exec-unit-tests exec-hybrid-tests exec-integration-tests
+exec-tests: exec-unit-tests exec-hybrid-tests
 
 exec-unit-tests: clean
 	adb shell input keyevent 82
@@ -26,10 +26,6 @@ exec-unit-tests: clean
 exec-hybrid-tests: clean
 	adb shell input keyevent 82
 	./gradlew :lib:connectedCheck --full-stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.HybridTestSuite
-
-exec-integration-tests: clean
-	adb shell input keyevent 82
-	./gradlew :lib:connectedCheck --full-stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.IntegrationTestSuite
 
 push-test-server-address:
 	echo http://$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8080 > testServerAddress.txt

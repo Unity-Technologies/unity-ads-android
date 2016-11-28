@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class WebRequestHandler extends Handler {
+	private WebRequest _currentRequest;
+	private boolean _canceled = false;
+
 	@Override
 	public void handleMessage (Message msg) {
 		Bundle data = msg.getData();
@@ -60,41 +63,55 @@ public class WebRequestHandler extends Handler {
 		}
 	}
 
+	public void setCancelStatus (boolean canceled) {
+		_canceled = canceled;
+
+		if (_canceled && _currentRequest != null) {
+			_currentRequest.cancel();
+		}
+	}
+
 	private void makeRequest (String url, String type, HashMap<String, List<String>> headers, String body, int connectTimeout, int readTimeout, WebRequestResultReceiver receiver) throws MalformedURLException {
-		WebRequest request = new WebRequest(url, type, headers, connectTimeout, readTimeout);
+		if (_canceled) {
+			return;
+		}
+
+		_currentRequest = new WebRequest(url, type, headers, connectTimeout, readTimeout);
 
 		if (body != null) {
-			request.setBody(body);
+			_currentRequest.setBody(body);
 		}
 
 		String response;
 		try {
-			response = request.makeRequest();
+			response = _currentRequest.makeRequest();
 		} catch (IOException e) {
 			DeviceLog.exception("Error completing request", e);
 			receiver.send(WebRequestResultReceiver.RESULT_FAILED, getBundleForFailResult(url, e.getMessage(), type, body));
 			return;
 		}
 
-		Bundle data = new Bundle();
-		data.putString("response", response);
-		data.putString("url", url);
-		data.putInt("responseCode", request.getResponseCode());
+		if (!_currentRequest.isCanceled()) {
+			Bundle data = new Bundle();
+			data.putString("response", response);
+			data.putString("url", url);
+			data.putInt("responseCode", _currentRequest.getResponseCode());
 
-		for (String key : request.getResponseHeaders().keySet()) {
-			if (key == null || key.contentEquals("null")) {
-				continue;
+			for (String key : _currentRequest.getResponseHeaders().keySet()) {
+				if (key == null || key.contentEquals("null")) {
+					continue;
+				}
+
+				String[] values = new String[_currentRequest.getResponseHeaders().get(key).size()];
+				for (int valueidx = 0; valueidx < _currentRequest.getResponseHeaders().get(key).size(); valueidx++) {
+					values[valueidx] = _currentRequest.getResponseHeaders().get(key).get(valueidx);
+				}
+
+				data.putStringArray(key, values);
 			}
 
-			String[] values = new String[request.getResponseHeaders().get(key).size()];
-			for (int valueidx = 0; valueidx < request.getResponseHeaders().get(key).size(); valueidx++) {
-				values[valueidx] = request.getResponseHeaders().get(key).get(valueidx);
-			}
-
-			data.putStringArray(key, values);
+			receiver.send(WebRequestResultReceiver.RESULT_SUCCESS, data);
 		}
-
-		receiver.send(WebRequestResultReceiver.RESULT_SUCCESS, data);
 	}
 
 	private Bundle getBundleForFailResult (String url, String error, String type, String body) {
