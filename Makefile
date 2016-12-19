@@ -58,3 +58,8 @@ sonar:
 
 javadoc:
 	./gradlew :lib:generateReleaseJavadoc
+
+zip: release
+	cp lib/build/outputs/aar/unity-ads-release.aar unity-ads.aar
+	zip -9r builds.zip unity-ads.aar
+	rm unity-ads.aar

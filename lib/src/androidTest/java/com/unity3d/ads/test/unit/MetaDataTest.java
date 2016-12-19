@@ -14,8 +14,8 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
 import java.util.HashMap;
 
 @RunWith(AndroidJUnit4.class)
@@ -108,6 +108,17 @@ public class MetaDataTest {
 			assertEquals("Metadata key " + k + " doesn't contain value: " + params.get(k), metadataEntries.get(k), params.get(k));
 		}
 	}
+
+	@Test
+	public void testCommitWithoutMetaDataSet () throws Exception {
+		WebViewApp.setCurrentApp(new MetaDataWebApp());
+		MetaData metaData = new MetaData(ClientProperties.getApplicationContext());
+		metaData.setCategory("test");
+		metaData.commit();
+
+		assertNull("Entries should still be null", metaData.getEntries());
+	}
+
 
 	private class MetaDataWebApp extends WebViewApp {
 		public Object[] PARAMS = null;

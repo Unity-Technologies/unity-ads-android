@@ -49,17 +49,20 @@ public class MetaData {
 		if (StorageManager.init(_context)) {
 			Storage storage = StorageManager.getStorage(StorageManager.StorageType.PUBLIC);
 
-			for (String key : _metaData.keySet()) {
+			if (_metaData != null) {
+				for (String key : _metaData.keySet()) {
+					if (storage != null) {
+						storage.set(key, _metaData.get(key));
+					}
+				}
+
 				if (storage != null) {
-					storage.set(key, _metaData.get(key));
+					storage.writeStorage();
+					storage.sendEvent(StorageEvent.SET, _metaData);
 				}
 			}
-
-			if (storage != null) {
-				storage.writeStorage();
-				storage.sendEvent(StorageEvent.SET, _metaData);
-			}
-		} else {
+		}
+		else {
 			DeviceLog.error("Unity Ads could not commit metadata due to storage error");
 		}
 	}
