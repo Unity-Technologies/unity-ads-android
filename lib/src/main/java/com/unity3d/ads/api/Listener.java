@@ -13,7 +13,9 @@ public class Listener {
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					UnityAds.getListener().onUnityAdsReady(placementId);
+					if(UnityAds.getListener() != null) {
+						UnityAds.getListener().onUnityAdsReady(placementId);
+					}
 				}
 			});
 		}
@@ -26,7 +28,9 @@ public class Listener {
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					UnityAds.getListener().onUnityAdsStart(placementId);
+					if(UnityAds.getListener() != null) {
+						UnityAds.getListener().onUnityAdsStart(placementId);
+					}
 				}
 			});
 		}
@@ -39,7 +43,9 @@ public class Listener {
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					UnityAds.getListener().onUnityAdsFinish(placementId, UnityAds.FinishState.valueOf(result));
+					if(UnityAds.getListener() != null) {
+						UnityAds.getListener().onUnityAdsFinish(placementId, UnityAds.FinishState.valueOf(result));
+					}
 				}
 			});
 		}
@@ -52,7 +58,9 @@ public class Listener {
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					((IUnityAdsExtendedListener)UnityAds.getListener()).onUnityAdsClick(placementId);
+					if(UnityAds.getListener() != null && UnityAds.getListener() instanceof IUnityAdsExtendedListener) {
+						((IUnityAdsExtendedListener)UnityAds.getListener()).onUnityAdsClick(placementId);
+					}
 				}
 			});
 		}
@@ -65,7 +73,9 @@ public class Listener {
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					UnityAds.getListener().onUnityAdsError(UnityAds.UnityAdsError.valueOf(error), message);
+					if(UnityAds.getListener() != null) {
+						UnityAds.getListener().onUnityAdsError(UnityAds.UnityAdsError.valueOf(error), message);
+					}
 				}
 			});
 		}
