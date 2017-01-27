@@ -9,66 +9,71 @@ import com.unity3d.ads.webview.bridge.WebViewExposed;
 public class Listener {
 	@WebViewExposed
 	public static void sendReadyEvent(final String placementId, WebViewCallback callback) {
-		if(UnityAds.getListener() != null) {
-			Utilities.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (UnityAds.getListener() != null) {
 					UnityAds.getListener().onUnityAdsReady(placementId);
 				}
-			});
-		}
+			}
+		});
+
 		callback.invoke();
 	}
 
 	@WebViewExposed
 	public static void sendStartEvent(final String placementId, WebViewCallback callback) {
-		if(UnityAds.getListener() != null) {
-			Utilities.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (UnityAds.getListener() != null) {
 					UnityAds.getListener().onUnityAdsStart(placementId);
 				}
-			});
-		}
+			}
+		});
+
 		callback.invoke();
 	}
 
 	@WebViewExposed
 	public static void sendFinishEvent(final String placementId, final String result, WebViewCallback callback) {
-		if(UnityAds.getListener() != null) {
-			Utilities.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (UnityAds.getListener() != null) {
 					UnityAds.getListener().onUnityAdsFinish(placementId, UnityAds.FinishState.valueOf(result));
 				}
-			});
-		}
+			}
+		});
+
 		callback.invoke();
 	}
 
 	@WebViewExposed
 	public static void sendClickEvent(final String placementId, WebViewCallback callback) {
-		if(UnityAds.getListener() != null && UnityAds.getListener() instanceof IUnityAdsExtendedListener) {
-			Utilities.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (UnityAds.getListener() != null && UnityAds.getListener() instanceof IUnityAdsExtendedListener) {
 					((IUnityAdsExtendedListener)UnityAds.getListener()).onUnityAdsClick(placementId);
 				}
-			});
-		}
+			}
+		});
+
 		callback.invoke();
 	}
 
 	@WebViewExposed
 	public static void sendErrorEvent(final String error, final String message, WebViewCallback callback) {
-		if(UnityAds.getListener() != null) {
-			Utilities.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (UnityAds.getListener() != null) {
 					UnityAds.getListener().onUnityAdsError(UnityAds.UnityAdsError.valueOf(error), message);
 				}
-			});
-		}
+			}
+		});
+
 		callback.invoke();
 	}
 }

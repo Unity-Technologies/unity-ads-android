@@ -116,7 +116,7 @@ public class WebRequest {
 		_progressListener = listener;
 	}
 
-	public long makeStreamRequest(OutputStream outputStream) throws IOException {
+	public long makeStreamRequest(OutputStream outputStream) throws IOException, IllegalStateException {
 		HttpURLConnection connection = getHttpUrlConnectionWithHeaders();
 		connection.setDoInput(true);
 
@@ -194,7 +194,7 @@ public class WebRequest {
 		return total;
 	}
 
-	public String makeRequest () throws IOException {
+	public String makeRequest () throws IOException, IllegalStateException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		makeStreamRequest(baos);
 		return new String(baos.toByteArray());

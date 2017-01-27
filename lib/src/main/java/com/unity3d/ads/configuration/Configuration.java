@@ -75,7 +75,7 @@ public class Configuration {
 		return queryString;
 	}
 
-	protected void makeRequest () throws IOException, JSONException {
+	protected void makeRequest () throws IOException, JSONException, IllegalStateException {
 		if (_url == null) {
 			throw new MalformedURLException("Base URL is null");
 		}

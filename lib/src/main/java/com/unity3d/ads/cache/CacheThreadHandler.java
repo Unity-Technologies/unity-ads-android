@@ -124,7 +124,7 @@ class 	CacheThreadHandler extends Handler {
 			_active = false;
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.MALFORMED_URL, source, e.getMessage());
 		}
-		catch (IOException e) {
+		catch (IOException | IllegalStateException e) {
 			DeviceLog.exception("Couldn't request stream", e);
 			_active = false;
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_IO_ERROR, source, e.getMessage());
