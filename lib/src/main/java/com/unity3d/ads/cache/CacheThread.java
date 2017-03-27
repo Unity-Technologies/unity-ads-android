@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.Message;
 
+import java.util.HashMap;
+import java.util.List;
+
 public class CacheThread extends Thread {
 	private static CacheThreadHandler _handler = null;
 	private static boolean _ready = false;
@@ -44,7 +47,7 @@ public class CacheThread extends Thread {
 		Looper.loop();
 	}
 
-	public static synchronized void download(String source, String target) {
+	public static synchronized void download(String source, String target, HashMap<String, List<String>> headers) {
 		if(!_ready) {
 			init();
 		}
@@ -55,6 +58,13 @@ public class CacheThread extends Thread {
 		params.putInt("connectTimeout", _connectTimeout);
 		params.putInt("readTimeout", _readTimeout);
 		params.putInt("progressInterval", _progressInterval);
+
+		if (headers != null) {
+			for (String s : headers.keySet()) {
+				String[] h = new String[headers.get(s).size()];
+				params.putStringArray(s, headers.get(s).toArray(h));
+			}
+		}
 
 		Message msg = new Message();
 		msg.what = MSG_DOWNLOAD;

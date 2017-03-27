@@ -58,7 +58,7 @@ public class EnvironmentTest extends ActivityInstrumentationTestCase2<AdUnitActi
 	}
 
 	@Test
-	public void testRequest () throws IOException, IllegalStateException{
+	public void testRequest () throws Exception {
 		WebRequest request = new WebRequest(TestUtilities.getTestServerAddress() + "/testconfig.json", "GET", null);
 		String data = request.makeRequest();
 

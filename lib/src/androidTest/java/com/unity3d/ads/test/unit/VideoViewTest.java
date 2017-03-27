@@ -219,7 +219,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		assertTrue("Condition Variable was not opened: VIDEOPLAYER GENERIC ERROR or PREPARE ERROR was not received", success);
 		assertEquals("Event category should be videoplayer category", WebViewEventCategory.VIDEOPLAYER, mockWebViewApp.EVENT_CATEGORIES.get(0));
 		assertEquals("Event ID should be generic error", VideoPlayerEvent.GENERIC_ERROR, mockWebViewApp.EVENTS.get(0));
-		assertEquals("The video url and the url received from the completed event should be the same", invalidUrl, mockWebViewApp.EVENT_PARAMS[2]);
+		assertEquals("The video url and the url received from the completed event should be the same", invalidUrl, mockWebViewApp.EVENT_PARAMS[0]);
 		assertTrue("Didn't get activity finish", waitForActivityFinish(activity));
 	}
 
@@ -556,7 +556,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 				}
 				if (eventCategory.equals(WebViewEventCategory.VIDEOPLAYER) && eventId.equals(VideoPlayerEvent.INFO)) {
 					INFO_EVENTS = new ArrayList<>();
-					INFO_EVENTS.add((Integer) params[0]);
+					INFO_EVENTS.add((Integer) params[1]);
 				}
 				if (eventCategory.equals(WebViewEventCategory.VIDEOPLAYER) && eventId.equals(VideoPlayerEvent.COMPLETED)) {
 					CONDITION_VARIABLE.open();
@@ -617,7 +617,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 				}
 				if (eventCategory.equals(WebViewEventCategory.VIDEOPLAYER) && eventId.equals(VideoPlayerEvent.INFO)) {
 					INFO_EVENTS = new ArrayList<>();
-					INFO_EVENTS.add((Integer) params[0]);
+					INFO_EVENTS.add((Integer) params[1]);
 				}
 				if (eventCategory.equals(WebViewEventCategory.VIDEOPLAYER) && eventId.equals(VideoPlayerEvent.COMPLETED)) {
 					CONDITION_VARIABLE.open();
@@ -679,7 +679,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 				}
 				if (eventCategory.equals(WebViewEventCategory.VIDEOPLAYER) && eventId.equals(VideoPlayerEvent.INFO)) {
 					INFO_EVENTS = new ArrayList<>();
-					INFO_EVENTS.add((Integer) params[0]);
+					INFO_EVENTS.add((Integer) params[1]);
 				}
 				if (eventCategory.equals(WebViewEventCategory.VIDEOPLAYER) && eventId.equals(VideoPlayerEvent.COMPLETED)) {
 					CONDITION_VARIABLE.open();

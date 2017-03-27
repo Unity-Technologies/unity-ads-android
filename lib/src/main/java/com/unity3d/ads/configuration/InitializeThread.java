@@ -1,9 +1,12 @@
 package com.unity3d.ads.configuration;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.ConditionVariable;
 
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.api.Lifecycle;
 import com.unity3d.ads.broadcast.BroadcastMonitor;
 import com.unity3d.ads.placement.Placement;
 import com.unity3d.ads.cache.CacheThread;
@@ -100,6 +103,10 @@ public class InitializeThread extends Thread  {
 				}
 			}
 
+			if (Build.VERSION.SDK_INT > 13) {
+				unregisterLifecycleCallbacks();
+			}
+
 			SdkProperties.setInitialized(false);
 			Placement.reset();
 			BroadcastMonitor.removeAllBroadcastListeners();
@@ -111,6 +118,17 @@ public class InitializeThread extends Thread  {
 
 			_configuration.setConfigUrl(SdkProperties.getConfigUrl());
 			return new InitializeStateAdBlockerCheck(_configuration);
+		}
+
+		@TargetApi(14)
+		private void unregisterLifecycleCallbacks () {
+			if (Lifecycle.getLifecycleListener() != null) {
+				if (ClientProperties.getApplication() != null) {
+					ClientProperties.getApplication().unregisterActivityLifecycleCallbacks(Lifecycle.getLifecycleListener());
+				}
+
+				Lifecycle.setLifecycleListener(null);
+			}
 		}
 	}
 
@@ -337,8 +355,8 @@ public class InitializeThread extends Thread  {
 				return new InitializeStateComplete();
 			}
 			else {
-				DeviceLog.error("Unity Ads webapp creation timeout");
-				return new InitializeStateError("create webapp", new Exception("Creation of WebApp most likely timed out!"));
+				DeviceLog.error("Unity Ads WebApp creation failed!");
+				return new InitializeStateError("create webapp", new Exception("Creation of WebApp failed!"));
 			}
 		}
 	}

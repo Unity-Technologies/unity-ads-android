@@ -105,11 +105,23 @@ public final class UnityAds {
 	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode) {
 		DeviceLog.entered();
 
+
 		// Allow init call only once. Configuration thread will take care of retries in case of network failures.
 		if (_configurationInitialized) {
+			if (ClientProperties.getGameId() != null && !ClientProperties.getGameId().equals(gameId)) {
+				DeviceLog.warning("You are trying to re-initialize with a different gameId");
+			}
+
 			return;
 		}
 		_configurationInitialized = true;
+
+		if(!isSupported()) {
+			DeviceLog.error("Error while initializing Unity Ads: device is not supported");
+			return;
+		}
+
+		SdkProperties.setInitializationTime(System.currentTimeMillis());
 
 		if(gameId == null || gameId.length() == 0) {
 			DeviceLog.error("Error while initializing Unity Ads: empty game ID, halting Unity Ads init");
@@ -138,6 +150,7 @@ public final class UnityAds {
 		ClientProperties.setGameId(gameId);
 		ClientProperties.setListener(listener);
 		ClientProperties.setApplicationContext(activity.getApplicationContext());
+		ClientProperties.setApplication(activity.getApplication());
 		SdkProperties.setTestMode(testMode);
 
 		if(EnvironmentCheck.isEnvironmentOk()) {
@@ -165,6 +178,7 @@ public final class UnityAds {
 			com.unity3d.ads.api.VideoPlayer.class,
 			com.unity3d.ads.api.Placement.class,
 			com.unity3d.ads.api.Intent.class,
+			com.unity3d.ads.api.Lifecycle.class
 		};
 
 		configuration.setWebAppApiClassList(apiClassList);
@@ -204,7 +218,7 @@ public final class UnityAds {
 	 * @return If true, device supports Unity Ads. If false, device can't initialize or show Unity Ads.
 	 */
 	public static boolean isSupported() {
-		return Build.VERSION.SDK_INT >= 9;
+		return Build.VERSION.SDK_INT >= 16;
 	}
 
 	/**

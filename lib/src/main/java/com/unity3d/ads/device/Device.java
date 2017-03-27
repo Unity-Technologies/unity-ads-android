@@ -1,11 +1,17 @@
 package com.unity3d.ads.device;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ConfigurationInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -19,10 +25,11 @@ import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.ClientProperties;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -410,4 +417,81 @@ public class Device {
 		return false;
 	}
 
+	public static String getGLVersion () {
+		if (ClientProperties.getApplicationContext() != null) {
+			final ActivityManager activityManager =	(ActivityManager)ClientProperties.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+
+			if (activityManager != null) {
+				final ConfigurationInfo configurationInfo =	activityManager.getDeviceConfigurationInfo();
+
+				if (configurationInfo != null) {
+					return configurationInfo.getGlEsVersion();
+				}
+			}
+		}
+
+		return null;
+	}
+
+	public static String getBoard () {
+		return Build.BOARD;
+	}
+
+	public static String getBootloader () {
+		return Build.BOOTLOADER;
+	}
+
+	public static String getBrand () {
+		return Build.BRAND;
+	}
+
+	public static String getDevice () {
+		return Build.DEVICE;
+	}
+
+	public static String getHardware () {
+		return Build.HARDWARE;
+	}
+
+	public static String getHost () {
+		return Build.HOST;
+	}
+
+	public static String getProduct () {
+		return Build.PRODUCT;
+	}
+
+	public static ArrayList<String> getSupportedAbis () {
+		if (getApiLevel() < 21) {
+			return getOldAbiList();
+		}
+		else {
+			return getNewAbiList();
+		}
+	}
+
+	public static List<Sensor> getSensorList () {
+		if (ClientProperties.getApplicationContext() != null) {
+			SensorManager sensorManager = (SensorManager)ClientProperties.getApplicationContext().getSystemService(Context.SENSOR_SERVICE);
+			return sensorManager.getSensorList(Sensor.TYPE_ALL);
+		}
+
+		return null;
+	}
+
+	private static ArrayList<String> getOldAbiList () {
+		ArrayList<String> abiList = new ArrayList<>();
+		abiList.add(Build.CPU_ABI);
+		abiList.add(Build.CPU_ABI2);
+
+		return abiList;
+	}
+
+	@TargetApi(21)
+	private static ArrayList<String> getNewAbiList () {
+		ArrayList<String> abiList = new ArrayList<>();
+		abiList.addAll(Arrays.asList(Build.SUPPORTED_ABIS));
+
+		return abiList;
+	}
 }

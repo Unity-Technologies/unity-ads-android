@@ -1,11 +1,17 @@
 package com.unity3d.ads.api;
 
+import android.annotation.TargetApi;
+import android.media.MediaMetadataRetriever;
+import android.util.Base64;
+import android.util.SparseArray;
+
 import com.unity3d.ads.cache.CacheError;
 import com.unity3d.ads.cache.CacheThread;
 import com.unity3d.ads.device.Device;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.SdkProperties;
+import com.unity3d.ads.request.WebRequestError;
 import com.unity3d.ads.webview.bridge.WebViewCallback;
 import com.unity3d.ads.webview.bridge.WebViewExposed;
 
@@ -15,11 +21,15 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
 
 public class Cache {
 
 	@WebViewExposed
-	public static void download(String url, String fileId, WebViewCallback callback) {
+	public static void download(String url, String fileId, JSONArray headers, WebViewCallback callback) {
 		if(CacheThread.isActive()) {
 			callback.error(CacheError.FILE_ALREADY_CACHING);
 			return;
@@ -30,7 +40,17 @@ public class Cache {
 			return;
 		}
 
-		CacheThread.download(url, fileIdToFilename(fileId));
+		HashMap<String, List<String>> mappedHeaders;
+		try {
+			mappedHeaders = Request.getHeadersMap(headers);
+		}
+		catch (Exception e) {
+			DeviceLog.exception("Error mapping headers for the request", e);
+			callback.error(WebRequestError.MAPPING_HEADERS_FAILED, url, fileId);
+			return;
+		}
+
+		CacheThread.download(url, fileIdToFilename(fileId), mappedHeaders);
 		callback.invoke();
 	}
 
@@ -47,6 +67,50 @@ public class Cache {
 	@WebViewExposed
 	public static void isCaching(WebViewCallback callback) {
 		callback.invoke(CacheThread.isActive());
+	}
+
+	@WebViewExposed
+	public static void getFileContent(String fileId, String encoding, WebViewCallback callback) {
+		String fileName = fileIdToFilename(fileId);
+		File f = new File(fileName);
+
+		if (f.exists()) {
+			byte[] byteData;
+
+			try {
+				byteData = Utilities.readFileBytes(f);
+			}
+			catch (IOException e) {
+				callback.error(CacheError.FILE_IO_ERROR, fileId, fileName, e.getMessage() + ", " + e.getClass().getName());
+				return;
+			}
+
+			String fileContents = new String(byteData);
+
+			if (encoding != null && encoding.length() > 0) {
+				if (encoding.equals("UTF-8")) {
+					try {
+						fileContents = new String(byteData, "UTF-8");
+					}
+					catch (UnsupportedEncodingException e) {
+						callback.error(CacheError.UNSUPPORTED_ENCODING, fileId, fileName, encoding);
+						return;
+					}
+				}
+				else if (encoding.equals("Base64")) {
+					fileContents = Base64.encodeToString(byteData, Base64.NO_WRAP);
+				}
+				else {
+					callback.error(CacheError.UNSUPPORTED_ENCODING, fileId, fileName, encoding);
+					return;
+				}
+			}
+
+			callback.invoke(fileContents);
+		}
+		else {
+			callback.error(CacheError.FILE_NOT_FOUND, fileId, fileName);
+		}
 	}
 
 	@WebViewExposed
@@ -156,6 +220,64 @@ public class Cache {
 	@WebViewExposed
 	public static void getTotalSpace(WebViewCallback callback) {
 		callback.invoke(Device.getTotalSpace(SdkProperties.getCacheDirectory()));
+	}
+
+	@WebViewExposed
+	public static void getMetaData (final String fileId, JSONArray requestedMetaDatas, final WebViewCallback callback) {
+		SparseArray<String> returnValues;
+		String videoFile = fileIdToFilename(fileId);
+
+		try {
+			returnValues = getMetaData(videoFile, requestedMetaDatas);
+		}
+		catch (JSONException e) {
+			callback.error(CacheError.JSON_ERROR, e.getMessage());
+			return;
+		}
+		catch (RuntimeException e) {
+			callback.error(CacheError.INVALID_ARGUMENT, e.getMessage());
+			return;
+		}
+		catch (IOException e) {
+			callback.error(CacheError.FILE_IO_ERROR, e.getMessage());
+			return;
+		}
+
+		JSONArray returnJsonArray = new JSONArray();
+
+		for (int i = 0; i < returnValues.size(); i++) {
+			JSONArray entryJsonArray = new JSONArray();
+			entryJsonArray.put(returnValues.keyAt(i));
+			entryJsonArray.put(returnValues.valueAt(i));
+			returnJsonArray.put(entryJsonArray);
+		}
+
+		callback.invoke(returnJsonArray);
+	}
+
+	@TargetApi(10)
+	private static SparseArray<String> getMetaData (final String videoFile, JSONArray requestedMetaDatas) throws JSONException, IOException, RuntimeException {
+		File f = new File(videoFile);
+		SparseArray<String> returnArray = new SparseArray<>();
+
+		if (f.exists()) {
+			MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
+			metadataRetriever.setDataSource(f.getAbsolutePath());
+
+			for (int i = 0; i < requestedMetaDatas.length(); i++) {
+				int metaDataKey = requestedMetaDatas.getInt(i);
+				String metaDataValue = metadataRetriever.extractMetadata(metaDataKey);
+
+				if (metaDataValue != null) {
+					returnArray.put(metaDataKey, metaDataValue);
+				}
+			}
+		}
+		else {
+			throw new IOException("File: " + f.getAbsolutePath() + " doesn't exist");
+		}
+
+		return returnArray;
 	}
 
 	private static String fileIdToFilename(String fileId) {

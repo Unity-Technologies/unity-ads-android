@@ -244,7 +244,16 @@ public class WebViewApp extends WebViewClient {
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				WebViewApp webViewApp = new WebViewApp(configuration);
+				WebViewApp webViewApp;
+
+				try {
+					webViewApp = new WebViewApp(configuration);
+				}
+				catch (Exception e) {
+					DeviceLog.error("Couldn't construct WebViewApp");
+					_conditionVariable.open();
+					return;
+				}
 
 				String queryString = "?platform=android";
 
@@ -271,7 +280,7 @@ public class WebViewApp extends WebViewClient {
 		});
 
 		_conditionVariable = new ConditionVariable();
-		return _conditionVariable.block(60000);
+		return _conditionVariable.block(60000) && WebViewApp.getCurrentApp() != null;
 	}
 
 	/* PRIVATE CLASSES */

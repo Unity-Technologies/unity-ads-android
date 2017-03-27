@@ -1,16 +1,15 @@
 package com.unity3d.ads.cache;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 
-import com.unity3d.ads.api.Cache;
 import com.unity3d.ads.api.Request;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.device.Device;
 import com.unity3d.ads.request.IWebRequestProgressListener;
+import com.unity3d.ads.request.NetworkIOException;
 import com.unity3d.ads.request.WebRequest;
 import com.unity3d.ads.webview.WebViewApp;
 import com.unity3d.ads.webview.WebViewEventCategory;
@@ -35,15 +34,32 @@ class 	CacheThreadHandler extends Handler {
 	public void handleMessage(Message msg) {
 		Bundle data = msg.getData();
 		String source = data.getString("source");
+		data.remove("source");
 		String target = data.getString("target");
+		data.remove("target");
 		int connectTimeout = data.getInt("connectTimeout");
+		data.remove("connectTimeout");
 		int readTimeout = data.getInt("readTimeout");
+		data.remove("readTimeout");
 		int progressInterval = data.getInt("progressInterval");
+		data.remove("progressInterval");
+
+		HashMap<String, List<String>> headers = null;
+		if (data.size() > 0) {
+			DeviceLog.debug("There are headers left in data, reading them");
+			headers = new HashMap<>();
+			List<String> values;
+
+			for (String k : data.keySet()) {
+				values = Arrays.asList(data.getStringArray(k));
+				headers.put(k, values);
+			}
+		}
 
 		switch (msg.what) {
 			case CacheThread.MSG_DOWNLOAD:
 				File targetFile = new File(target);
-				downloadFile(source, target, targetFile.length(), connectTimeout, readTimeout, progressInterval);
+				downloadFile(source, target, targetFile.length(), connectTimeout, readTimeout, progressInterval, headers);
 				break;
 
 			default:
@@ -64,7 +80,7 @@ class 	CacheThreadHandler extends Handler {
 		return _active;
 	}
 
-	private void downloadFile(String source, String target, final long position, int connectTimeout, int readTimeout, final int progressInterval) {
+	private void downloadFile(String source, String target, final long position, int connectTimeout, int readTimeout, final int progressInterval, HashMap<String, List<String>> headers) {
 		if (_canceled || source == null || target == null) {
 			return;
 		}
@@ -90,13 +106,13 @@ class 	CacheThreadHandler extends Handler {
 
 		try {
 			fileOutput = new FileOutputStream(targetFile, position > 0);
-			_currentRequest = getWebRequest(source, position, connectTimeout, readTimeout);
+			_currentRequest = getWebRequest(source, position, connectTimeout, readTimeout, headers);
 			_currentRequest.setProgressListener(new IWebRequestProgressListener() {
 				private long lastProgressEventTime = System.currentTimeMillis();
 
 				@Override
 				public void onRequestStart(String url, long total, int responseCode, Map<String, List<String>> headers) {
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_STARTED, url, position, total, responseCode, Request.getResponseHeadersMap(headers));
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_STARTED, url, position, (total + position), responseCode, Request.getResponseHeadersMap(headers));
 				}
 
 				@Override
@@ -124,10 +140,20 @@ class 	CacheThreadHandler extends Handler {
 			_active = false;
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.MALFORMED_URL, source, e.getMessage());
 		}
-		catch (IOException | IllegalStateException e) {
+		catch (IOException e) {
 			DeviceLog.exception("Couldn't request stream", e);
 			_active = false;
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_IO_ERROR, source, e.getMessage());
+		}
+		catch (IllegalStateException e) {
+			DeviceLog.exception("Illegal state", e);
+			_active = false;
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.ILLEGAL_STATE, source, e.getMessage());
+		}
+		catch (NetworkIOException e) {
+			DeviceLog.exception("Network error", e);
+			_active = false;
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.NETWORK_ERROR, source, e.getMessage());
 		}
 		finally {
 			_currentRequest = null;
@@ -160,13 +186,17 @@ class 	CacheThreadHandler extends Handler {
 		}
 	}
 
-	private WebRequest getWebRequest(String source, long position, int connectTimeout, int readTimeout) throws MalformedURLException {
-		HashMap<String, List<String>> headers = new HashMap<>();
-		if (position > 0) {
-			ArrayList list = new ArrayList(Arrays.asList(new String[]{"bytes=" + position + "-"}));
-			headers.put("Range", list);
+	private WebRequest getWebRequest(String source, long position, int connectTimeout, int readTimeout, HashMap<String, List<String>> headers) throws MalformedURLException {
+		HashMap<String, List<String>> requestHeaders = new HashMap<>();
+		if (headers != null) {
+			requestHeaders.putAll(headers);
 		}
 
-		return new WebRequest(source, "GET", headers, connectTimeout, readTimeout);
+		if (position > 0) {
+			ArrayList list = new ArrayList(Arrays.asList(new String[]{"bytes=" + position + "-"}));
+			requestHeaders.put("Range", list);
+		}
+
+		return new WebRequest(source, "GET", requestHeaders, connectTimeout, readTimeout);
 	}
 }

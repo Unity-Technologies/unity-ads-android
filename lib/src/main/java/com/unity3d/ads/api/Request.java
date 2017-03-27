@@ -166,7 +166,7 @@ public class Request {
 		return retObj;
 	}
 
-	private static HashMap<String, List<String>> getHeadersMap (JSONArray headers) throws JSONException {
+	public static HashMap<String, List<String>> getHeadersMap (JSONArray headers) throws JSONException {
 		HashMap<String, List<String>> mappedHeaders = null;
 
 		if (headers != null) {

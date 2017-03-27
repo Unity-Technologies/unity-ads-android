@@ -19,8 +19,10 @@ public class SdkProperties {
 	private static final String LOCAL_CACHE_FILE_PREFIX = "UnityAdsCache-";
 	private static final String LOCAL_STORAGE_FILE_PREFIX = "UnityAdsStorage-";
 	private static int _showTimeout = 5000;
+	private static long _initializationTime = 0;
 
 	private static boolean _initialized = false;
+	private static boolean _reinitialized = false;
 	private static boolean _testMode = false;
 
 	public static boolean isInitialized () {
@@ -108,5 +110,21 @@ public class SdkProperties {
 
 	public static int getShowTimeout() {
 		return _showTimeout;
+	}
+
+	public static void setInitializationTime (long milliseconds) {
+		_initializationTime = milliseconds;
+	}
+
+	public static long getInitializationTime () {
+		return _initializationTime;
+	}
+
+	public static void setReinitialized (boolean status) {
+		_reinitialized = status;
+	}
+
+	public static boolean isReinitialized () {
+		return _reinitialized;
 	}
 }

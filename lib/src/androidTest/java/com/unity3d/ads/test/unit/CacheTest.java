@@ -186,7 +186,7 @@ public class CacheTest {
 
 		Invocation invocation = new Invocation();
 		WebViewCallback callback = new WebViewCallback("1234", invocation.getId());
-		Cache.download(REMOTE_IMG, REMOTE_IMG_FILE_ID, callback);
+		Cache.download(REMOTE_IMG, REMOTE_IMG_FILE_ID, new JSONArray(), callback);
 		invocation.sendInvocationCallback();
 
 		boolean success = cacheCv.block(30000);
@@ -394,6 +394,10 @@ public class CacheTest {
 				switch(eventId) {
 					case DOWNLOAD_STARTED:
 						// params: url, position, total, responseCode, responseHeaders
+						DeviceLog.debug("REMOTE_VIDEO_SIZE: " + (Long)params[2] + ", " + REMOTE_VIDEO_SIZE);
+						DeviceLog.debug("REMOTE_VIDEO: " + REMOTE_VIDEO + ", " + params[0]);
+						DeviceLog.debug("RESPONSE_CODE: " + (Integer)params[3]);
+						DeviceLog.debug("POSITION: " + (Long)params[1]);
 						if(REMOTE_VIDEO.equals(params[0]) && (Long)params[1] == 0 && (Long)params[2] == REMOTE_VIDEO_SIZE && (Integer)params[3] == 200) {
 							setFlag("startEventReceived");
 						}
@@ -439,7 +443,7 @@ public class CacheTest {
 		Invocation invocation = new Invocation();
 		WebViewCallback callback = new WebViewCallback("1234", invocation.getId());
 		CacheThread.setProgressInterval(2);
-		Cache.download(REMOTE_VIDEO, REMOTE_VIDEO_FILE_ID, callback);
+		Cache.download(REMOTE_VIDEO, REMOTE_VIDEO_FILE_ID, new JSONArray(), callback);
 		invocation.sendInvocationCallback();
 
 		boolean success = cacheCv.block(30000);
@@ -468,8 +472,15 @@ public class CacheTest {
 
 				switch(eventId) {
 					case DOWNLOAD_STARTED:
-						// params: url, position, total, responseCode, responseHeaders
-						if(REMOTE_VIDEO.equals(params[0]) && downloadPosition == (Long)params[1] && remainingBytes == (Long)params[2] && (Integer)params[3] == 206) {
+						// params: url, pos
+						// ition, total, responseCode, responseHeaders
+
+						DeviceLog.debug("REMAINING_VIDEO_SIZE: " + (Long)params[2] + ", " + REMOTE_VIDEO_SIZE);
+						DeviceLog.debug("REMOTE_VIDEO: " + REMOTE_VIDEO + ", " + params[0]);
+						DeviceLog.debug("RESPONSE_CODE: " + (Integer)params[3]);
+						DeviceLog.debug("POSITION: " + (Long)params[1]);
+
+						if(REMOTE_VIDEO.equals(params[0]) && downloadPosition == (Long)params[1] && REMOTE_VIDEO_SIZE == (Long)params[2] && (Integer)params[3] == 206) {
 							setFlag("startEventReceived");
 						}
 						break;
@@ -494,7 +505,7 @@ public class CacheTest {
 
 		Invocation invocation2 = new Invocation();
 		WebViewCallback callback2 = new WebViewCallback("1234", invocation2.getId());
-		Cache.download(REMOTE_VIDEO, REMOTE_VIDEO_FILE_ID, callback2);
+		Cache.download(REMOTE_VIDEO, REMOTE_VIDEO_FILE_ID, new JSONArray(), callback2);
 		invocation2.sendInvocationCallback();
 
 		boolean success2 = cacheCv2.block(30000);

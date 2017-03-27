@@ -1,6 +1,7 @@
 package com.unity3d.ads.properties;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -22,6 +23,7 @@ public class ClientProperties {
 	private static final X500Principal DEBUG_CERT = new X500Principal("CN=Android Debug,O=Android,C=US");
 	private static WeakReference<Activity> _activity;
 	private static Context _applicationContext;
+	private static Application _application;
 	private static IUnityAdsListener _listener;
 	private static String _gameId;
 
@@ -39,6 +41,14 @@ public class ClientProperties {
 
 	public static void setApplicationContext (Context context) {
 		_applicationContext = context;
+	}
+
+	public static Application getApplication () {
+		return _application;
+	}
+
+	public static void setApplication (Application application) {
+		_application = application;
 	}
 
 	public static IUnityAdsListener getListener () {

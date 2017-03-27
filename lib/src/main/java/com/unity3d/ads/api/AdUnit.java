@@ -1,9 +1,6 @@
 package com.unity3d.ads.api;
 
 import android.content.Intent;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 
 import com.unity3d.ads.adunit.AdUnitActivity;
 import com.unity3d.ads.adunit.AdUnitError;
@@ -11,7 +8,6 @@ import com.unity3d.ads.adunit.AdUnitSoftwareActivity;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.webview.WebViewApp;
 import com.unity3d.ads.webview.bridge.WebViewCallback;
 import com.unity3d.ads.webview.bridge.WebViewExposed;
 
@@ -20,7 +16,6 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 public class AdUnit {
@@ -123,7 +118,7 @@ public class AdUnit {
 			callback.invoke();
 		}
 		else {
-			callback.error(AdUnitError.ACTIVITY_NULL);
+			callback.error(AdUnitError.ADUNIT_NULL);
 		}
 	}
 
@@ -158,7 +153,7 @@ public class AdUnit {
 				callback.invoke(views);
 		}
 		else {
-			callback.error(AdUnitError.ACTIVITY_NULL);
+			callback.error(AdUnitError.ADUNIT_NULL);
 		}
 
 	}
@@ -170,7 +165,7 @@ public class AdUnit {
 			callback.invoke(new JSONArray(Arrays.asList(views)));
 		}
 		else {
-			callback.error(AdUnitError.ACTIVITY_NULL);
+			callback.error(AdUnitError.ADUNIT_NULL);
 		}
 	}
 
@@ -189,7 +184,7 @@ public class AdUnit {
 			callback.invoke(orientation);
 		}
 		else {
-			callback.error(AdUnitError.ACTIVITY_NULL);
+			callback.error(AdUnitError.ADUNIT_NULL);
 		}
 
 	}
@@ -200,7 +195,7 @@ public class AdUnit {
 			callback.invoke(getAdUnitActivity().getRequestedOrientation());
 		}
 		else {
-			callback.error(AdUnitError.ACTIVITY_NULL);
+			callback.error(AdUnitError.ADUNIT_NULL);
 		}
 	}
 
@@ -218,7 +213,7 @@ public class AdUnit {
 		if(getAdUnitActivity() != null) {
 			callback.invoke();
 		} else {
-			callback.error(AdUnitError.ACTIVITY_NULL);
+			callback.error(AdUnitError.ADUNIT_NULL);
 		}
 
 	}
@@ -238,7 +233,7 @@ public class AdUnit {
 			callback.invoke(systemUiVisibility);
 		}
 		else {
-			callback.error(AdUnitError.ACTIVITY_NULL);
+			callback.error(AdUnitError.ADUNIT_NULL);
 		}
 
 	}
@@ -256,7 +251,7 @@ public class AdUnit {
 			}
 		}
 		else {
-			callback.error(AdUnitError.ACTIVITY_NULL);
+			callback.error(AdUnitError.ADUNIT_NULL);
 		}
 	}
 
@@ -275,7 +270,7 @@ public class AdUnit {
 			callback.invoke();
 		}
 		else {
-			callback.error(AdUnitError.ACTIVITY_NULL);
+			callback.error(AdUnitError.ADUNIT_NULL);
 		}
 	}
 
@@ -291,7 +286,7 @@ public class AdUnit {
 			}
 		}
 		else {
-			callback.error(AdUnitError.ACTIVITY_NULL);
+			callback.error(AdUnitError.ADUNIT_NULL);
 		}
 	}
 

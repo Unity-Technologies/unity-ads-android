@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MetaData {
-	private Context _context;
-	private Map<String, Object> _metaData;
+	protected Context _context;
+	protected Map<String, Object> _metaData;
 	private String _category;
 
 	public MetaData (Context context) {

@@ -205,7 +205,7 @@ public class VideoPlayer {
 			}
 		}
 		else {
-			callback.error(VideoPlayerError.API_LEVEL_ERROR, Build.VERSION.SDK_INT, 17, enabled);
+			callback.error(VideoPlayerError.API_LEVEL_ERROR, Build.VERSION.SDK_INT, enabled);
 		}
 	}
 }

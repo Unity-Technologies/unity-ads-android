@@ -34,6 +34,7 @@ import org.junit.runners.Suite;
   WebViewAppTest.class,
   WebViewBridgeInterfaceTest.class,
   WebViewBridgeTest.class,
-  WebViewCallbackTest.class
+  WebViewCallbackTest.class,
+  LifecycleListenerTest.class
 })
 public class UnitTestSuite {}

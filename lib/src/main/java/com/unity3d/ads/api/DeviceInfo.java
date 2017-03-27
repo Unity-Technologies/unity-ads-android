@@ -1,6 +1,7 @@
 package com.unity3d.ads.api;
 
-import com.unity3d.ads.connectivity.ConnectivityMonitor;
+import android.hardware.Sensor;
+
 import com.unity3d.ads.device.Device;
 import com.unity3d.ads.device.DeviceError;
 import com.unity3d.ads.log.DeviceLog;
@@ -9,6 +10,8 @@ import com.unity3d.ads.webview.bridge.WebViewCallback;
 import com.unity3d.ads.webview.bridge.WebViewExposed;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.List;
@@ -265,4 +268,91 @@ public class DeviceInfo {
 		callback.invoke(Device.getTotalMemory());
 	}
 
+	@WebViewExposed
+	public static void getGLVersion (WebViewCallback callback) {
+		String glVersion = Device.getGLVersion();
+
+		if (glVersion != null) {
+			callback.invoke(glVersion);
+		}
+		else {
+			callback.error(DeviceError.COULDNT_GET_GL_VERSION);
+		}
+	}
+
+	@WebViewExposed
+	public static void getBoard (WebViewCallback callback) {
+		callback.invoke(Device.getBoard());
+	}
+
+	@WebViewExposed
+	public static void getBootloader (WebViewCallback callback) {
+		callback.invoke(Device.getBootloader());
+	}
+
+	@WebViewExposed
+	public static void getBrand (WebViewCallback callback) {
+		callback.invoke(Device.getBrand());
+	}
+
+	@WebViewExposed
+	public static void getDevice (WebViewCallback callback) {
+		callback.invoke(Device.getDevice());
+	}
+
+	@WebViewExposed
+	public static void getHardware (WebViewCallback callback) {
+		callback.invoke(Device.getHardware());
+	}
+
+	@WebViewExposed
+	public static void getHost (WebViewCallback callback) {
+		callback.invoke(Device.getHost());
+	}
+
+	@WebViewExposed
+	public static void getProduct (WebViewCallback callback) {
+		callback.invoke(Device.getProduct());
+	}
+
+	@WebViewExposed
+	public static void getSupportedAbis (WebViewCallback callback) {
+		JSONArray abis = new JSONArray();
+
+		for (String abi : Device.getSupportedAbis()) {
+			abis.put(abi);
+		}
+
+		callback.invoke(abis);
+	}
+
+	@WebViewExposed
+	public static void getSensorList (WebViewCallback callback) {
+		JSONArray sensors = new JSONArray();
+		List<Sensor> sensorList = Device.getSensorList();
+
+		if (sensorList != null) {
+			for (Sensor sensor : sensorList) {
+				JSONObject sensorInfo = new JSONObject();
+				try {
+					sensorInfo.put("name", sensor.getName());
+					sensorInfo.put("type", sensor.getType());
+					sensorInfo.put("vendor", sensor.getVendor());
+					sensorInfo.put("maximumRange", sensor.getMaximumRange());
+					sensorInfo.put("power", sensor.getPower());
+					sensorInfo.put("version", sensor.getVersion());
+					sensorInfo.put("resolution", sensor.getResolution());
+					sensorInfo.put("minDelay", sensor.getMinDelay());
+				}
+				catch (JSONException e) {
+					callback.error(DeviceError.JSON_ERROR, e.getMessage());
+					return;
+				}
+
+				sensors.put(sensorInfo);
+			}
+		}
+
+		callback.invoke(sensors);
+	}
 }

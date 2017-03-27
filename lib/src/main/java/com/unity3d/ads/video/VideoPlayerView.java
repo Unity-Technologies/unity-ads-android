@@ -36,7 +36,7 @@ public class VideoPlayerView extends VideoView {
 				}
 				catch (IllegalStateException e) {
 					DeviceLog.exception("Exception while sending current position to webapp", e);
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE, VideoPlayerEvent.PROGRESS, isPlaying);
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE, VideoPlayerEvent.PROGRESS, _videoUrl, isPlaying);
 				}
 			}
 		}, _progressEventInterval, _progressEventInterval);
@@ -87,7 +87,7 @@ public class VideoPlayerView extends VideoView {
 				}
 
 				setVolume(initialVolume);
-				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PREPARED, mp.getDuration(), mp.getVideoWidth(), mp.getVideoHeight(), _videoUrl);
+				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PREPARED, _videoUrl, mp.getDuration(), mp.getVideoWidth(), mp.getVideoHeight());
 			}
 		});
 
@@ -100,7 +100,7 @@ public class VideoPlayerView extends VideoView {
 					_mediaPlayer = mp;
 				}
 
-				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.GENERIC_ERROR, what, extra, _videoUrl);
+				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.GENERIC_ERROR, _videoUrl, what, extra);
 				stopVideoProgressTimer();
 				return true;
 			}
@@ -153,7 +153,7 @@ public class VideoPlayerView extends VideoView {
 				setOnInfoListener(new MediaPlayer.OnInfoListener() {
 					@Override
 					public boolean onInfo(MediaPlayer mp, int what, int extra) {
-						WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.INFO, what, extra, _videoUrl);
+						WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.INFO, _videoUrl, what, extra);
 						return true;
 					}
 				});

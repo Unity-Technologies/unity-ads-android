@@ -26,7 +26,9 @@ public class Sdk {
 			WebViewApp.getCurrentApp().getConfiguration().getConfigUrl(),
 			WebViewApp.getCurrentApp().getConfiguration().getWebViewUrl(),
 			WebViewApp.getCurrentApp().getConfiguration().getWebViewHash(),
-			WebViewApp.getCurrentApp().getConfiguration().getWebViewVersion()
+			WebViewApp.getCurrentApp().getConfiguration().getWebViewVersion(),
+			SdkProperties.getInitializationTime(),
+			SdkProperties.isReinitialized()
 		};
 
 		callback.invoke(parameters);
@@ -83,6 +85,7 @@ public class Sdk {
 
 	@WebViewExposed
 	public static void reinitialize (WebViewCallback callback) {
+		SdkProperties.setReinitialized(true);
 		InitializeThread.initialize(WebViewApp.getCurrentApp().getConfiguration());
 
 		// Callback will not be invoked because reinitialize will destroy webview

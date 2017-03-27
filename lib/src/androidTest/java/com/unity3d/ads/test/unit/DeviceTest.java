@@ -1,19 +1,32 @@
 package com.unity3d.ads.test.unit;
 
 import android.media.AudioManager;
+import android.opengl.GLES11;
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
+import android.os.ConditionVariable;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.SurfaceView;
+import android.view.ViewGroup;
 
+import com.unity3d.ads.adunit.AdUnitActivity;
 import com.unity3d.ads.device.Device;
+import com.unity3d.ads.log.DeviceLog;
+import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.ClientProperties;
 import com.unity3d.ads.properties.SdkProperties;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -134,5 +147,48 @@ public class DeviceTest {
 	@Test
 	public void testScreenBrightness () throws Exception {
 		assertTrue("Screen brightness should be equal or more than 0", Device.getScreenBrightness() >= 0);
+	}
+
+	@Test
+	public void testGetGLVersion () throws Exception {
+		assertNotNull("GLES version should not be null", Device.getGLVersion());
+	}
+
+	@Test
+	public void testGetBoard () throws Exception {
+		assertNotNull("Board should not be null", Device.getBoard());
+	}
+
+	@Test
+	public void testGetBootloader () throws Exception {
+		assertNotNull("Bootloader should not be null", Device.getBootloader());
+	}
+
+	@Test
+	public void testGetDevice () throws Exception {
+		assertNotNull("Device should not be null", Device.getDevice());
+	}
+
+	@Test
+	public void testGetHardware () throws Exception {
+		assertNotNull("Hardware should not be null", Device.getHardware());
+	}
+
+	@Test
+	public void testGetHost () throws Exception {
+		assertNotNull("Host should not be null", Device.getHost());
+	}
+
+	@Test
+	public void testGetProduct () throws Exception {
+		assertNotNull("Product should not be null", Device.getProduct());
+	}
+
+	@Test
+	public void testGetSupportedAbis () throws Exception {
+		ArrayList<String> supportedAbis = Device.getSupportedAbis();
+
+		assertNotNull("List of supported abis should not be null", supportedAbis);
+		assertTrue("Number of supported abis should be larger than 0", supportedAbis.size() > 0);
 	}
 }

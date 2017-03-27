@@ -85,9 +85,9 @@ public class WebRequestHandler extends Handler {
 		String response;
 		try {
 			response = _currentRequest.makeRequest();
-		} catch (IOException | IllegalStateException e) {
+		} catch (IOException | NetworkIOException | IllegalStateException e) {
 			DeviceLog.exception("Error completing request", e);
-			receiver.send(WebRequestResultReceiver.RESULT_FAILED, getBundleForFailResult(url, e.getMessage(), type, body));
+			receiver.send(WebRequestResultReceiver.RESULT_FAILED, getBundleForFailResult(url, e.getClass().getName() + ": " + e.getMessage(), type, body));
 			return;
 		}
 

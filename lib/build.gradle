@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
-  compileSdkVersion 24
-  buildToolsVersion "24.0.3"
+  compileSdkVersion 25
+  buildToolsVersion '25.0.2'
   com.android.ddmlib.DdmPreferences.setLogLevel("verbose")
   com.android.ddmlib.DdmPreferences.setTimeOut(10 * 60000)
 
@@ -12,8 +12,8 @@ android {
   defaultConfig {
     minSdkVersion 9
     targetSdkVersion 23
-    versionCode = 2008
-    versionName = "2.0.8"
+    versionCode = 2100
+    versionName = "2.1.0"
 
     setProperty("archivesBaseName", "unity-ads")
 
@@ -44,7 +44,7 @@ android {
       testCoverageEnabled true
       consumerProguardFiles 'proguard-rules.pro'
       signingConfig signingConfigs.debug
-      buildConfigField 'String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"master"')
+      buildConfigField 'String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"development"')
       sonarqube {
         properties {
           property "sonar.projectKey", "unity-ads-android"

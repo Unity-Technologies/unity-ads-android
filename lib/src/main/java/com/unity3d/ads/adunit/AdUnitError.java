@@ -1,7 +1,7 @@
 package com.unity3d.ads.adunit;
 
 public enum AdUnitError {
-	ACTIVITY_NULL,
+	ADUNIT_NULL,
 	ACTIVITY_ID,
 	GENERIC,
 	ORIENTATION,

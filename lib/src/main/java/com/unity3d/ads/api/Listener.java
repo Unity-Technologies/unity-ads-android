@@ -64,6 +64,20 @@ public class Listener {
 	}
 
 	@WebViewExposed
+	public static void sendPlacementStateChangedEvent(final String placementId, final String oldState, final String newState, WebViewCallback callback) {
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (UnityAds.getListener() != null && UnityAds.getListener() instanceof IUnityAdsExtendedListener) {
+					((IUnityAdsExtendedListener)UnityAds.getListener()).onUnityAdsPlacementStateChanged(placementId, UnityAds.PlacementState.valueOf(oldState), UnityAds.PlacementState.valueOf(newState));
+				}
+			}
+		});
+
+		callback.invoke();
+	}
+
+	@WebViewExposed
 	public static void sendErrorEvent(final String error, final String message, WebViewCallback callback) {
 		Utilities.runOnUiThread(new Runnable() {
 			@Override

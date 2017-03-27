@@ -2,6 +2,7 @@ package com.unity3d.ads.configuration;
 
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.properties.SdkProperties;
+import com.unity3d.ads.request.NetworkIOException;
 import com.unity3d.ads.request.WebRequest;
 
 import org.json.JSONException;
@@ -75,7 +76,7 @@ public class Configuration {
 		return queryString;
 	}
 
-	protected void makeRequest () throws IOException, JSONException, IllegalStateException {
+	protected void makeRequest () throws IOException, JSONException, IllegalStateException, NetworkIOException {
 		if (_url == null) {
 			throw new MalformedURLException("Base URL is null");
 		}

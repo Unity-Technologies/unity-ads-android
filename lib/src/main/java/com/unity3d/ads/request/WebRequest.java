@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +117,7 @@ public class WebRequest {
 		_progressListener = listener;
 	}
 
-	public long makeStreamRequest(OutputStream outputStream) throws IOException, IllegalStateException {
+	public long makeStreamRequest(OutputStream outputStream) throws NetworkIOException, IOException, IllegalStateException {
 		HttpURLConnection connection = getHttpUrlConnectionWithHeaders();
 		connection.setDoInput(true);
 
@@ -135,9 +136,9 @@ public class WebRequest {
 
 				pout.flush();
 			}
-			catch (Exception e) {
+			catch (IOException e) {
 				DeviceLog.exception("Error while writing POST params", e);
-				throw e;
+				throw new NetworkIOException("Error writing POST params: " + e.getMessage());
 			}
 			finally {
 				try {
@@ -153,7 +154,13 @@ public class WebRequest {
 
 		}
 
-		_responseCode = connection.getResponseCode();
+		try {
+			_responseCode = connection.getResponseCode();
+		}
+		catch (IOException e) {
+			throw new NetworkIOException("Response code: " + e.getMessage());
+		}
+
 		_contentLength = connection.getContentLength();
 
 		if (connection.getHeaderFields() != null) {
@@ -166,7 +173,7 @@ public class WebRequest {
 		} catch (IOException e) {
 			input = connection.getErrorStream();
 			if(input == null) {
-				throw new IOException("Can't open error stream");
+				throw new NetworkIOException("Can't open error stream: " + e.getMessage());
 			}
 		}
 
@@ -175,16 +182,25 @@ public class WebRequest {
 		}
 
 		BufferedInputStream binput = new BufferedInputStream(input);
-		int bytesRead;
+		int bytesRead = 0;
 		long total = 0;
 		byte[] readTarget = new byte[4096];
 
-		while (!isCanceled() && (bytesRead = binput.read(readTarget)) != -1) {
-			outputStream.write(readTarget, 0, bytesRead);
-			total += bytesRead;
+		while (!isCanceled() && bytesRead != -1) {
+			try {
+				bytesRead = binput.read(readTarget);
+			}
+			catch (IOException e) {
+				throw new NetworkIOException("Network exception: " + e.getMessage());
+			}
 
-			if(_progressListener != null) {
-				_progressListener.onRequestProgress(getUrl().toString(), total, _contentLength);
+			if (bytesRead > 0) {
+				outputStream.write(readTarget, 0, bytesRead);
+				total += bytesRead;
+
+				if(_progressListener != null) {
+					_progressListener.onRequestProgress(getUrl().toString(), total, _contentLength);
+				}
 			}
 		}
 
@@ -194,26 +210,42 @@ public class WebRequest {
 		return total;
 	}
 
-	public String makeRequest () throws IOException, IllegalStateException {
+	public String makeRequest () throws NetworkIOException, IOException, IllegalStateException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		makeStreamRequest(baos);
 		return new String(baos.toByteArray());
 	}
 
-	private HttpURLConnection getHttpUrlConnectionWithHeaders() throws IOException {
+	private HttpURLConnection getHttpUrlConnectionWithHeaders() throws NetworkIOException {
 		HttpURLConnection connection;
 
 		if (getUrl().toString().startsWith("https://")) {
-			connection = (HttpsURLConnection)getUrl().openConnection();
+			try {
+				connection = (HttpsURLConnection)getUrl().openConnection();
+			}
+			catch (IOException e) {
+				throw new NetworkIOException("Open HTTPS connection: " + e.getMessage());
+			}
 		}
 		else {
-			connection = (HttpURLConnection)getUrl().openConnection();
+			try {
+				connection = (HttpURLConnection)getUrl().openConnection();
+			}
+			catch (IOException e) {
+				throw new NetworkIOException("Open HTTP connection: " + e.getMessage());
+			}
 		}
 
 		connection.setInstanceFollowRedirects(false);
 		connection.setConnectTimeout(getConnectTimeout());
 		connection.setReadTimeout(getReadTimeout());
-		connection.setRequestMethod(getRequestType());
+
+		try {
+			connection.setRequestMethod(getRequestType());
+		}
+		catch (ProtocolException e) {
+			throw new NetworkIOException("Set Request Method: " + getRequestType() + ", " + e.getMessage());
+		}
 
 		if (getHeaders() != null && getHeaders().size() > 0) {
 			for (String k : getHeaders().keySet()) {
