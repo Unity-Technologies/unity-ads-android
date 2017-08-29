@@ -12,6 +12,18 @@
             android:hardwareAccelerated="true" />
 
         <activity
+            android:name="com.unity3d.ads.adunit.AdUnitTransparentActivity"
+            android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+            android:hardwareAccelerated="true" />
+
+        <activity
+            android:name="com.unity3d.ads.adunit.AdUnitTransparentSoftwareActivity"
+            android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+            android:hardwareAccelerated="false" />
+
+        <activity
             android:name="com.unity3d.ads.adunit.AdUnitSoftwareActivity"
             android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"

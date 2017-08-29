@@ -98,10 +98,14 @@ public class SdkProperties {
 
 	public static File getCacheDirectory (Context context) {
 		if(_cacheDirectory == null) {
-			_cacheDirectory = new CacheDirectory(CACHE_DIR_NAME);
+			setCacheDirectory(new CacheDirectory(CACHE_DIR_NAME));
 		}
 
 		return _cacheDirectory.getCacheDirectory(context);
+	}
+
+	public static void setCacheDirectory (CacheDirectory cacheDirectory) {
+		_cacheDirectory = cacheDirectory;
 	}
 
 	public static void setShowTimeout(int timeout) {

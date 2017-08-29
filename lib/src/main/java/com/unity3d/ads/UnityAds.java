@@ -1,7 +1,10 @@
 package com.unity3d.ads;
 
 import android.app.Activity;
+import android.graphics.Point;
 import android.os.Build;
+import android.view.Display;
+import android.view.WindowManager;
 
 import com.unity3d.ads.adunit.AdUnitOpen;
 import com.unity3d.ads.placement.Placement;
@@ -303,9 +306,23 @@ public final class UnityAds {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
+					Display defaultDisplay = ((WindowManager)activity.getSystemService(activity.WINDOW_SERVICE)).getDefaultDisplay();
 					JSONObject options = new JSONObject();
 					try {
 						options.put("requestedOrientation", activity.getRequestedOrientation());
+
+						JSONObject display = new JSONObject();
+						display.put("rotation", defaultDisplay.getRotation());
+						if (Build.VERSION.SDK_INT >= 13) {
+							Point displaySize = new Point();
+							defaultDisplay.getSize(displaySize);
+							display.put("width", displaySize.x);
+							display.put("height", displaySize.y);
+						} else {
+							display.put("width", defaultDisplay.getWidth());
+							display.put("height", defaultDisplay.getHeight());
+						}
+						options.put("display", display);
 					} catch(JSONException e) {
 						DeviceLog.exception("JSON error while constructing show options", e);
 					}

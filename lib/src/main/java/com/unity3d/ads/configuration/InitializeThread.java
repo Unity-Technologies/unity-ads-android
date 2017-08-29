@@ -8,6 +8,7 @@ import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.api.Lifecycle;
 import com.unity3d.ads.broadcast.BroadcastMonitor;
+import com.unity3d.ads.device.VolumeChange;
 import com.unity3d.ads.placement.Placement;
 import com.unity3d.ads.cache.CacheThread;
 import com.unity3d.ads.connectivity.ConnectivityMonitor;
@@ -107,14 +108,22 @@ public class InitializeThread extends Thread  {
 				unregisterLifecycleCallbacks();
 			}
 
+			SdkProperties.setCacheDirectory(null);
+			File cacheDir = SdkProperties.getCacheDirectory();
+			if (cacheDir == null) {
+				return new InitializeStateError("reset webapp", new Exception("Cache directory is NULL"));
+			}
+
 			SdkProperties.setInitialized(false);
 			Placement.reset();
 			BroadcastMonitor.removeAllBroadcastListeners();
 			CacheThread.cancel();
 			WebRequestThread.cancel();
 			ConnectivityMonitor.stopAll();
+
 			StorageManager.init(ClientProperties.getApplicationContext());
 			AdvertisingId.init(ClientProperties.getApplicationContext());
+			VolumeChange.clearAllListeners();
 
 			_configuration.setConfigUrl(SdkProperties.getConfigUrl());
 			return new InitializeStateAdBlockerCheck(_configuration);

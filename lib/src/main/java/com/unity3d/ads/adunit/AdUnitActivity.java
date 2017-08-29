@@ -39,7 +39,7 @@ public class AdUnitActivity extends Activity {
 	public static final String EXTRA_KEY_EVENT_LIST = "keyEvents";
 	public static final String EXTRA_KEEP_SCREEN_ON = "keepScreenOn";
 
-	private RelativeLayout _layout;
+	protected RelativeLayout _layout;
 	private RelativeLayout _videoContainer;
 	private String[] _views;
 	private int _orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -386,7 +386,7 @@ public class AdUnitActivity extends Activity {
 
 	/* LAYOUT */
 
-	private void createLayout () {
+	protected void createLayout () {
 		if (_layout != null) {
 			return;
 		}

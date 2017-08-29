@@ -5,6 +5,8 @@ import android.content.Intent;
 import com.unity3d.ads.adunit.AdUnitActivity;
 import com.unity3d.ads.adunit.AdUnitError;
 import com.unity3d.ads.adunit.AdUnitSoftwareActivity;
+import com.unity3d.ads.adunit.AdUnitTransparentActivity;
+import com.unity3d.ads.adunit.AdUnitTransparentSoftwareActivity;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.ClientProperties;
@@ -53,11 +55,22 @@ public class AdUnit {
 
 	@WebViewExposed
 	public static void open (Integer activityId, JSONArray views, Integer orientation, JSONArray keyevents, Integer systemUiVisibility, Boolean hardwareAcceleration, WebViewCallback callback) {
+		open(activityId, views, orientation, keyevents, systemUiVisibility, hardwareAcceleration, false, callback);
+	}
+
+	@WebViewExposed
+	public static void open (Integer activityId, JSONArray views, Integer orientation, JSONArray keyevents, Integer systemUiVisibility, Boolean hardwareAcceleration, Boolean isTransparent, WebViewCallback callback) {
 		final Intent intent;
 
-		if(hardwareAcceleration) {
+		if(!hardwareAcceleration && isTransparent) {
+			DeviceLog.debug("Unity Ads opening new transparent ad unit activity, hardware acceleration disabled");
+			intent = new Intent(ClientProperties.getActivity(), AdUnitTransparentSoftwareActivity.class);
+		} else if(hardwareAcceleration && !isTransparent) {
 			DeviceLog.debug("Unity Ads opening new hardware accelerated ad unit activity");
 			intent = new Intent(ClientProperties.getActivity(), AdUnitActivity.class);
+		} else if(hardwareAcceleration && isTransparent) {
+			DeviceLog.debug("Unity Ads opening new hardware accelerated transparent ad unit activity");
+			intent = new Intent(ClientProperties.getActivity(), AdUnitTransparentActivity.class);
 		} else {
 			DeviceLog.debug("Unity Ads opening new ad unit activity, hardware acceleration disabled");
 			intent = new Intent(ClientProperties.getActivity(), AdUnitSoftwareActivity.class);

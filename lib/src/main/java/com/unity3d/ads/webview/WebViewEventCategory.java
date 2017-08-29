@@ -9,5 +9,6 @@ public enum WebViewEventCategory {
 	CONNECTIVITY,
 	STORAGE,
 	BROADCAST,
-	LIFECYCLE
+	LIFECYCLE,
+	DEVICEINFO
 }

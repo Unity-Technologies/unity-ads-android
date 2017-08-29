@@ -11,8 +11,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-
 public class InAppPurchaseMetaData extends MetaData {
 	public static final String KEY_PRODUCT_ID = "productId";
 	public static final String KEY_PRICE = "price";
@@ -20,9 +18,10 @@ public class InAppPurchaseMetaData extends MetaData {
 	public static final String KEY_RECEIPT_PURCHASE_DATA = "receiptPurchaseData";
 	public static final String KEY_SIGNATURE = "signature";
 
+	public static final String IAP_KEY = "iap";
+
 	public InAppPurchaseMetaData (Context context) {
 		super(context);
-		setCategory("iap");
 	}
 
 	public void setProductId (String productId) {
@@ -46,12 +45,8 @@ public class InAppPurchaseMetaData extends MetaData {
 	}
 
 	@Override
-	public void set (String key, Object value) {
-		if (_metaData == null) {
-			_metaData = new HashMap<>();
-		}
-
-		_metaData.put(key, value);
+	public synchronized boolean set (String key, Object value) {
+		return setRaw(key, value);
 	}
 
 	@Override
@@ -59,8 +54,8 @@ public class InAppPurchaseMetaData extends MetaData {
 		if (StorageManager.init(_context)) {
 			Storage storage = StorageManager.getStorage(StorageManager.StorageType.PUBLIC);
 
-			if (_metaData != null && storage != null) {
-				Object purchaseObject = storage.get(getCategory() + ".purchases");
+			if (getData() != null && storage != null) {
+				Object purchaseObject = storage.get(IAP_KEY + ".purchases");
 				JSONArray purchases = null;
 
 				if (purchaseObject != null) {
@@ -76,13 +71,9 @@ public class InAppPurchaseMetaData extends MetaData {
 					purchases = new JSONArray();
 				}
 
-				JSONObject purchase = new JSONObject();
+				JSONObject purchase = getData();
 
 				try {
-					for (String key : _metaData.keySet()) {
-						purchase.put(key, _metaData.get(key));
-					}
-
 					purchase.put("ts", System.currentTimeMillis());
 				}
 				catch (JSONException e) {
@@ -91,9 +82,9 @@ public class InAppPurchaseMetaData extends MetaData {
 				}
 
 				purchases.put(purchase);
-				storage.set(getCategory() + ".purchases", purchases);
+				storage.set(IAP_KEY + ".purchases", purchases);
 				storage.writeStorage();
-				storage.sendEvent(StorageEvent.SET, _metaData);
+				storage.sendEvent(StorageEvent.SET, storage.get(IAP_KEY + ".purchases"));
 			}
 		}
 		else {

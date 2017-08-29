@@ -1,11 +1,18 @@
 package com.unity3d.ads.api;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
+import android.util.SparseArray;
 
 import com.unity3d.ads.device.Device;
 import com.unity3d.ads.device.DeviceError;
+import com.unity3d.ads.device.IVolumeChangeListener;
+import com.unity3d.ads.device.VolumeChange;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.properties.ClientProperties;
+import com.unity3d.ads.webview.WebViewApp;
+import com.unity3d.ads.webview.WebViewEventCategory;
 import com.unity3d.ads.webview.bridge.WebViewCallback;
 import com.unity3d.ads.webview.bridge.WebViewExposed;
 
@@ -14,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -21,6 +29,11 @@ import java.util.TimeZone;
 
 public class DeviceInfo {
 	public enum StorageType { EXTERNAL, INTERNAL }
+	public enum DeviceInfoEvent {
+		VOLUME_CHANGED
+	}
+
+	private static SparseArray<IVolumeChangeListener> _volumeChangeListeners;
 
 	@WebViewExposed
 	public static void getAndroidId (WebViewCallback callback) {
@@ -128,6 +141,42 @@ public class DeviceInfo {
 	}
 
 	@WebViewExposed
+	public static void getPackageInfo(String packageName, WebViewCallback callback) {
+		if (ClientProperties.getApplicationContext() != null) {
+			PackageManager pm = ClientProperties.getApplicationContext().getPackageManager();
+			PackageInfo appInfo;
+
+			try {
+				appInfo = pm.getPackageInfo(packageName, 0);
+			}
+			catch (PackageManager.NameNotFoundException e) {
+				callback.error(DeviceError.APPLICATION_INFO_NOT_AVAILABLE, packageName);
+				return;
+			}
+
+			JSONObject data = new JSONObject();
+
+			try {
+				data.put("installer", pm.getInstallerPackageName(packageName));
+				data.put("firstInstallTime", appInfo.firstInstallTime);
+				data.put("lastUpdateTime", appInfo.lastUpdateTime);
+				data.put("versionCode", appInfo.versionCode);
+				data.put("versionName", appInfo.versionName);
+				data.put("packageName", appInfo.packageName);
+			}
+			catch (JSONException e) {
+				callback.error(DeviceError.JSON_ERROR, e.getMessage());
+				return;
+			}
+
+			callback.invoke(data);
+		}
+		else {
+			callback.error(DeviceError.APPLICATION_CONTEXT_NULL);
+		}
+	}
+
+	@WebViewExposed
 	public static void getUniqueEventId(WebViewCallback callback) {
 		callback.invoke(Device.getUniqueEventId());
 	}
@@ -170,7 +219,82 @@ public class DeviceInfo {
 
 	@WebViewExposed
 	public static void getDeviceVolume(Integer streamType, WebViewCallback callback) {
-		callback.invoke(Device.getStreamVolume(streamType));
+		int volume = Device.getStreamVolume(streamType);
+		if (volume > -1) {
+			callback.invoke(volume);
+		}
+		else {
+			switch (volume) {
+				case -1:
+					callback.error(DeviceError.APPLICATION_CONTEXT_NULL, volume);
+					break;
+				case -2:
+					callback.error(DeviceError.AUDIOMANAGER_NULL, volume);
+					break;
+				default:
+					DeviceLog.error("Unhandled deviceVolume error: " + volume);
+					break;
+			}
+		}
+	}
+
+	@WebViewExposed
+	public static void getDeviceMaxVolume(Integer streamType, WebViewCallback callback) {
+		int maxVolume = Device.getStreamMaxVolume(streamType);
+		if (maxVolume > -1) {
+			callback.invoke(maxVolume);
+		}
+		else {
+			switch (maxVolume) {
+				case -1:
+					callback.error(DeviceError.APPLICATION_CONTEXT_NULL, maxVolume);
+					break;
+				case -2:
+					callback.error(DeviceError.AUDIOMANAGER_NULL, maxVolume);
+					break;
+				default:
+					DeviceLog.error("Unhandled deviceMaxVolume error: " + maxVolume);
+					break;
+			}
+		}
+	}
+
+	@WebViewExposed
+	public static void registerVolumeChangeListener(final Integer streamType, WebViewCallback callback) {
+		if (_volumeChangeListeners == null) {
+			_volumeChangeListeners = new SparseArray<>();
+		}
+
+		if (_volumeChangeListeners.get(streamType) == null) {
+			IVolumeChangeListener listener = new IVolumeChangeListener() {
+				private int _streamType = streamType;
+				@Override
+				public void onVolumeChanged(int volume) {
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.DEVICEINFO, DeviceInfoEvent.VOLUME_CHANGED, getStreamType(), volume, Device.getStreamMaxVolume(_streamType));
+				}
+
+				@Override
+				public int getStreamType() {
+					return _streamType;
+				}
+			};
+
+			_volumeChangeListeners.append(streamType, listener);
+			VolumeChange.registerListener(listener);
+		}
+
+		callback.invoke();
+	}
+
+	@WebViewExposed
+	public static void unregisterVolumeChangeListener(final Integer streamType, WebViewCallback callback) {
+		if (_volumeChangeListeners != null && _volumeChangeListeners.get(streamType) != null) {
+			IVolumeChangeListener listener = _volumeChangeListeners.get(streamType);
+			VolumeChange.unregisterListener(listener);
+			_volumeChangeListeners.remove(streamType);
+		}
+
+		callback.invoke();
 	}
 
 	@WebViewExposed

@@ -5,6 +5,9 @@ import android.os.Looper;
 
 import com.unity3d.ads.log.DeviceLog;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Iterator;
 
 public class Utilities {
 	public static void runOnUiThread(Runnable runnable) {
@@ -171,5 +175,34 @@ public class Utilities {
 		inputStream.close();
 
 		return outputStream.toByteArray();
+	}
+
+	public static JSONObject mergeJsonObjects(JSONObject primary, JSONObject secondary) throws JSONException {
+		if (primary == null) {
+			return secondary;
+		}
+		if (secondary == null) {
+			return primary;
+		}
+
+		JSONObject newJsonObject = new JSONObject();
+		Iterator<String> keys = secondary.keys();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			newJsonObject.put(key, secondary.get(key));
+		}
+
+		keys = primary.keys();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			if (newJsonObject.has(key) && newJsonObject.get(key) instanceof JSONObject && primary.get(key) instanceof JSONObject) {
+				newJsonObject.put(key, mergeJsonObjects(primary.getJSONObject(key), newJsonObject.getJSONObject(key)));
+			}
+			else {
+				newJsonObject.put(key, primary.get(key));
+			}
+		}
+
+		return newJsonObject;
 	}
 }

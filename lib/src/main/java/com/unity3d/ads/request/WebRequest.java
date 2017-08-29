@@ -151,13 +151,12 @@ public class WebRequest {
 					throw e;
 				}
 			}
-
 		}
 
 		try {
 			_responseCode = connection.getResponseCode();
 		}
-		catch (IOException e) {
+		catch (IOException | RuntimeException e) {
 			throw new NetworkIOException("Response code: " + e.getMessage());
 		}
 

@@ -41,7 +41,6 @@ public class LifecycleListenerTest {
 	@After
 	public void teardown () {
 		ClientProperties.setActivity(null);
-		WebViewApp.setCurrentApp(null);
 
 		EVENTS = new ArrayList<>();
 		EVENT_PARAMS = new ArrayList<>();

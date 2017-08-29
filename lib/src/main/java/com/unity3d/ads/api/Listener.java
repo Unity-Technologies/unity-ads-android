@@ -3,6 +3,7 @@ package com.unity3d.ads.api;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.mediation.IUnityAdsExtendedListener;
 import com.unity3d.ads.misc.Utilities;
+import com.unity3d.ads.unity.IUnityAdsUnityListener;
 import com.unity3d.ads.webview.bridge.WebViewCallback;
 import com.unity3d.ads.webview.bridge.WebViewExposed;
 
@@ -56,6 +57,20 @@ public class Listener {
 			public void run() {
 				if (UnityAds.getListener() != null && UnityAds.getListener() instanceof IUnityAdsExtendedListener) {
 					((IUnityAdsExtendedListener)UnityAds.getListener()).onUnityAdsClick(placementId);
+				}
+			}
+		});
+
+		callback.invoke();
+	}
+
+	@WebViewExposed
+	public static void sendInitiatePurchaseEvent(final String eventString, WebViewCallback callback) {
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (UnityAds.getListener() != null && UnityAds.getListener() instanceof IUnityAdsUnityListener) {
+					((IUnityAdsUnityListener)UnityAds.getListener()).onUnityAdsInitiatePurchase(eventString);
 				}
 			}
 		});

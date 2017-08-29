@@ -6,13 +6,15 @@ import com.unity3d.ads.device.Storage;
 import com.unity3d.ads.device.StorageEvent;
 import com.unity3d.ads.device.StorageManager;
 import com.unity3d.ads.log.DeviceLog;
+import com.unity3d.ads.misc.JsonStorage;
+import com.unity3d.ads.misc.Utilities;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.json.JSONObject;
 
-public class MetaData {
+import java.util.Iterator;
+
+public class MetaData extends JsonStorage {
 	protected Context _context;
-	protected Map<String, Object> _metaData;
 	private String _category;
 
 	public MetaData (Context context) {
@@ -27,43 +29,65 @@ public class MetaData {
 		return _category;
 	}
 
-	public void set (String key, Object value) {
-		if (_metaData == null) {
-			_metaData = new HashMap<>();
+	public synchronized boolean set (String key, Object value) {
+		initData();
+
+		boolean success = false;
+		if (super.set(getActualKey(key) + ".value", value) && super.set(getActualKey(key) + ".ts", System.currentTimeMillis())) {
+			success = true;
 		}
 
-		String finalKey = key;
-		if (getCategory() != null) {
-			finalKey = getCategory() + "." + key;
-		}
-
-		_metaData.put(finalKey + ".value", value);
-		_metaData.put(finalKey + ".ts", System.currentTimeMillis());
+		return success;
 	}
 
-	public Map<String, Object> getEntries () {
-		return _metaData;
+	protected synchronized boolean setRaw (String key, Object value) {
+		initData();
+
+		boolean success = false;
+		if (super.set(getActualKey(key), value)) {
+			success = true;
+		}
+
+		return success;
 	}
 
 	public void commit () {
 		if (StorageManager.init(_context)) {
 			Storage storage = StorageManager.getStorage(StorageManager.StorageType.PUBLIC);
 
-			if (_metaData != null) {
-				for (String key : _metaData.keySet()) {
-					if (storage != null) {
-						storage.set(key, _metaData.get(key));
+			if (getData() != null && storage != null) {
+				JSONObject data = getData();
+
+				Iterator<String> keys = data.keys();
+				while (keys.hasNext()) {
+					String key = keys.next();
+					Object value = get(key);
+					if (storage.get(key) != null && storage.get(key) instanceof JSONObject && get(key) instanceof JSONObject) {
+						try {
+							value = Utilities.mergeJsonObjects((JSONObject)value, (JSONObject)storage.get(key));
+						}
+						catch (Exception e) {
+							DeviceLog.exception("Exception merging JSONs", e);
+						}
 					}
+					storage.set(key, value);
 				}
 
-				if (storage != null) {
-					storage.writeStorage();
-					storage.sendEvent(StorageEvent.SET, _metaData);
-				}
+				storage.writeStorage();
+				storage.sendEvent(StorageEvent.SET, getData());
 			}
 		}
 		else {
 			DeviceLog.error("Unity Ads could not commit metadata due to storage error");
 		}
+	}
+
+	private String getActualKey (String key) {
+		String finalKey = key;
+		if (getCategory() != null) {
+			finalKey = getCategory() + "." + key;
+		}
+
+		return finalKey;
 	}
 }

@@ -186,7 +186,6 @@ public class Device {
 					return true;
 				}
 			} catch(PackageManager.NameNotFoundException e) {
-				DeviceLog.exception("Couldn't find package: " + pkgname, e);
 				return false;
 			}
 		}
@@ -271,6 +270,19 @@ public class Device {
 
 			if (am != null)
 				return am.getStreamVolume(streamType);
+			else
+				return -2;
+		}
+
+		return -1;
+	}
+
+	public static int getStreamMaxVolume(int streamType) {
+		if (ClientProperties.getApplicationContext() != null) {
+			AudioManager am = (AudioManager)ClientProperties.getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+
+			if (am != null)
+				return am.getStreamMaxVolume(streamType);
 			else
 				return -2;
 		}

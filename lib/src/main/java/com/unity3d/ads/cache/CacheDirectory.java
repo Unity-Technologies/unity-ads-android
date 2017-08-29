@@ -29,7 +29,14 @@ public class CacheDirectory {
 
 			if(Build.VERSION.SDK_INT > 18) {
 				if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-					File externalCache = createCacheDirectory(context.getExternalCacheDir(), _cacheDirName);
+					File externalCache = null;
+					try {
+						externalCache = createCacheDirectory(context.getExternalCacheDir(), _cacheDirName);
+					}
+					catch (Exception e) {
+						DeviceLog.exception("Creating external cache directory failed", e);
+					}
+
 					if(testCacheDirectory(externalCache)) {
 						_cacheDirectory = externalCache;
 						DeviceLog.debug("Unity Ads is using external cache directory: " + externalCache.getAbsolutePath());
