@@ -33,6 +33,7 @@ public class WebViewApp extends WebViewClient {
 
 	private static WebViewApp _currentApp;
 	private static ConditionVariable _conditionVariable;
+	private static final int INVOKE_JS_CHARS_LENGTH = 22;
 
 	private boolean _webAppLoaded = false;
 	private WebView _webView;
@@ -84,7 +85,17 @@ public class WebViewApp extends WebViewClient {
 	}
 
 	private void invokeJavascriptMethod(String className, String methodName, JSONArray params) throws JSONException {
-		String javaScriptString = "javascript:window." + className + "." + methodName + "(" + params.toString() + ");";
+		String paramsString = params.toString();
+		int stringLength = INVOKE_JS_CHARS_LENGTH + className.length() + methodName.length() + paramsString.length();
+		StringBuilder sb = new StringBuilder(stringLength);
+		sb.append("javascript:window.");
+		sb.append(className);
+		sb.append(".");
+		sb.append(methodName);
+		sb.append("(");
+		sb.append(paramsString);
+		sb.append(");");
+		String javaScriptString = sb.toString();
 		DeviceLog.debug("Invoking javascript: " + javaScriptString);
 		getWebView().invokeJavascript(javaScriptString);
 	}

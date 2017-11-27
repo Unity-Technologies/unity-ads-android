@@ -14,6 +14,7 @@ public class DeviceLog {
 	private static boolean LOG_DEBUG = true;
 	private static boolean FORCE_DEBUG_LOG = false;
 
+	private static final int MAX_DEBUG_MSG_LENGTH = 3072;
 	private static final int LOGLEVEL_ERROR = 1;
 	private static final int LOGLEVEL_WARNING = 2;
 	public static final int LOGLEVEL_INFO = 4;
@@ -84,13 +85,15 @@ public class DeviceLog {
 	}
 
 	public static void debug(String message) {
-		int maxDebugMsgLength = 3072;
+		if(!LOG_DEBUG && !FORCE_DEBUG_LOG) {
+			return;
+		}
 
-		if(message.length() > maxDebugMsgLength) {
-			debug(message.substring(0,maxDebugMsgLength));
+		if(message.length() > MAX_DEBUG_MSG_LENGTH) {
+			debug(message.substring(0, MAX_DEBUG_MSG_LENGTH));
 
-			if(message.length() < 10 * maxDebugMsgLength) {
-				debug(message.substring(maxDebugMsgLength));
+			if(message.length() < 10 * MAX_DEBUG_MSG_LENGTH) {
+				debug(message.substring(MAX_DEBUG_MSG_LENGTH));
 			}
 
 			return;

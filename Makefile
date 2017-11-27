@@ -45,9 +45,6 @@ setup-adb-reverse:
 dismantle-adb-reverse:
 	adb reverse --remove-all
 
-sonar:
-	./gradlew sonarqube --info
-
 javadoc:
 	./gradlew :lib:generateReleaseJavadoc
 

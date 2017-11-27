@@ -7,6 +7,7 @@ import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.test.filters.RequiresDevice;
+import android.support.test.filters.SdkSuppress;
 import android.view.ViewGroup;
 
 import com.unity3d.ads.api.DeviceInfo;
@@ -31,6 +32,7 @@ public class VolumeChangeTest extends AdUnitActivityTestBaseClass {
 
 	@Test
 	@RequiresDevice
+	@SdkSuppress(minSdkVersion = 21)
 	public void testVolumeChange() throws Exception {
 		final Activity activity = waitForActivityStart(null);
 
@@ -100,6 +102,7 @@ public class VolumeChangeTest extends AdUnitActivityTestBaseClass {
 		IVolumeChangeListener vcl = new IVolumeChangeListener() {
 			@Override
 			public void onVolumeChanged(int volume) {
+				DeviceLog.debug("VOLUME_CHANGED: " + volume);
 				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.DEVICEINFO, DeviceInfo.DeviceInfoEvent.VOLUME_CHANGED, volume);
 			}
 
@@ -118,6 +121,9 @@ public class VolumeChangeTest extends AdUnitActivityTestBaseClass {
 		mockWebViewApp.CONDITION_VARIABLE = cv;
 		success = cv.block(3000);
 
+		assertNotNull("WebViewApp NULL", mockWebViewApp);
+		assertNotNull("EVENT_PARAMS NULL (params never received?)", mockWebViewApp.EVENT_PARAMS);
+		assertNotNull("First EVENT_PARAMS NULL", mockWebViewApp.EVENT_PARAMS[0]);
 		assertEquals("Volume not what was expected", 1, (int)mockWebViewApp.EVENT_PARAMS[0]);
 
 		VolumeChange.unregisterListener(vcl);

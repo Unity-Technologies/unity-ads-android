@@ -20,9 +20,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 
@@ -74,42 +79,92 @@ public class Cache {
 		String fileName = fileIdToFilename(fileId);
 		File f = new File(fileName);
 
-		if (f.exists()) {
-			byte[] byteData;
+		if (!f.exists()) {
+			callback.error(CacheError.FILE_NOT_FOUND, fileId, fileName);
+			return;
+		}
+		byte[] byteData;
 
-			try {
-				byteData = Utilities.readFileBytes(f);
-			}
-			catch (IOException e) {
-				callback.error(CacheError.FILE_IO_ERROR, fileId, fileName, e.getMessage() + ", " + e.getClass().getName());
-				return;
-			}
+		try {
+			byteData = Utilities.readFileBytes(f);
+		}
+		catch (IOException e) {
+			callback.error(CacheError.FILE_IO_ERROR, fileId, fileName, e.getMessage() + ", " + e.getClass().getName());
+			return;
+		}
 
-			String fileContents = new String(byteData);
+		String fileContents;
+		if (encoding == null) {
+			callback.error(CacheError.UNSUPPORTED_ENCODING, fileId, fileName, encoding);
+			return;
+		}
 
-			if (encoding != null && encoding.length() > 0) {
-				if (encoding.equals("UTF-8")) {
-					try {
-						fileContents = new String(byteData, "UTF-8");
-					}
-					catch (UnsupportedEncodingException e) {
-						callback.error(CacheError.UNSUPPORTED_ENCODING, fileId, fileName, encoding);
-						return;
-					}
-				}
-				else if (encoding.equals("Base64")) {
-					fileContents = Base64.encodeToString(byteData, Base64.NO_WRAP);
-				}
-				else {
-					callback.error(CacheError.UNSUPPORTED_ENCODING, fileId, fileName, encoding);
-					return;
-				}
-			}
-
-			callback.invoke(fileContents);
+		if (encoding.equals("UTF-8")) {
+			ByteBuffer buf = ByteBuffer.wrap(byteData);
+			CharBuffer charbuffer = Charset.forName("UTF-8").decode(buf);
+			fileContents = charbuffer.toString();
+		}
+		else if (encoding.equals("Base64")) {
+			fileContents = Base64.encodeToString(byteData, Base64.NO_WRAP);
 		}
 		else {
-			callback.error(CacheError.FILE_NOT_FOUND, fileId, fileName);
+			callback.error(CacheError.UNSUPPORTED_ENCODING, fileId, fileName, encoding);
+			return;
+		}
+		callback.invoke(fileContents);
+	}
+
+	@WebViewExposed
+	public static void setFileContent(String fileId, String encoding, String content, WebViewCallback callback) {
+		String targetFileName = fileIdToFilename(fileId);
+		FileOutputStream fileOutput = null;
+		byte[] fileContents;
+		boolean success = false;
+
+		try {
+			fileContents = content.getBytes("UTF-8");
+		}
+		catch (UnsupportedEncodingException e) {
+			callback.error(CacheError.UNSUPPORTED_ENCODING, fileId, targetFileName, encoding);
+			return;
+		}
+
+		if (encoding != null && encoding.length() > 0) {
+			if (encoding.equals("Base64")) {
+				fileContents = Base64.decode(content, Base64.NO_WRAP);
+			}
+			else if (encoding.equals("UTF-8")) {
+				// UTF-8 handled by default
+			}
+			else {
+				callback.error(CacheError.UNSUPPORTED_ENCODING, fileId, targetFileName, encoding);
+				return;
+			}
+		}
+
+		try {
+			fileOutput = new FileOutputStream(targetFileName);
+			fileOutput.write(fileContents);
+			fileOutput.flush();
+			success = true;
+		}
+		catch (FileNotFoundException e) {
+			callback.error(CacheError.FILE_NOT_FOUND, fileId, targetFileName, encoding);
+		}
+		catch (IOException e) {
+			callback.error(CacheError.FILE_IO_ERROR, fileId, targetFileName, encoding);
+		}
+		finally {
+			try {
+				if (fileOutput != null)
+					fileOutput.close();
+			}
+			catch (Exception e) {
+				DeviceLog.exception("Error closing FileOutputStream", e);
+			}
+		}
+		if (success) {
+			callback.invoke();
 		}
 	}
 

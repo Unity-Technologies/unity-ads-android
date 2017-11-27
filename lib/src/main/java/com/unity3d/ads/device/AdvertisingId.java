@@ -50,14 +50,22 @@ public class AdvertisingId {
 		GoogleAdvertisingServiceConnection connection = new GoogleAdvertisingServiceConnection();
 		Intent localIntent = new Intent("com.google.android.gms.ads.identifier.service.START");
 		localIntent.setPackage("com.google.android.gms");
-		if (context.bindService(localIntent, connection, Context.BIND_AUTO_CREATE)) {
-			try {
+		boolean didBind = false;
+		try {
+			didBind = context.bindService(localIntent, connection, Context.BIND_AUTO_CREATE);
+		} catch (Exception e) {
+			DeviceLog.exception("Couldn't bind to identifier service intent", e);
+		}
+		try {
+			if (didBind) {
 				GoogleAdvertisingInfo advertisingInfo = GoogleAdvertisingInfo.GoogleAdvertisingInfoBinder.create(connection.getBinder());
 				advertisingIdentifier = advertisingInfo.getId();
 				limitedAdvertisingTracking = advertisingInfo.getEnabled(true);
-			} catch (Exception e) {
-				DeviceLog.exception("Couldn't get advertising info", e);
-			} finally {
+			}
+		} catch (Exception e) {
+			DeviceLog.exception("Couldn't get advertising info", e);
+		} finally {
+			if (didBind) {
 				context.unbindService(connection);
 			}
 		}

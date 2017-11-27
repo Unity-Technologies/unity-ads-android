@@ -120,6 +120,9 @@ public class AdUnitActivityTestBaseClass extends ActivityInstrumentationTestCase
 					private boolean allowEvents = true;
 					@Override
 					public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
+						if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+							return true;
+						}
 						if (allowEvents) {
 							EVENT_CATEGORIES.add(eventCategory);
 							EVENTS.add(eventId);
@@ -152,6 +155,9 @@ public class AdUnitActivityTestBaseClass extends ActivityInstrumentationTestCase
 
 			@Override
 			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
+				if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+					return true;
+				}
 				if (allowEvents) {
 
 					DeviceLog.debug(eventId.name());

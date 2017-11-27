@@ -8,6 +8,8 @@ public enum AdUnitEvent {
 	ON_PAUSE,
 	KEY_DOWN,
 	ON_RESTORE,
-	ON_STOP
+	ON_STOP,
+	ON_FOCUS_GAINED,
+	ON_FOCUS_LOST
 
 }

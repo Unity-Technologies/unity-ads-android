@@ -214,6 +214,15 @@ public class AdUnitActivity extends Activity {
 		return false;
 	}
 
+	@Override public void onWindowFocusChanged(boolean hasFocus) {
+		if (hasFocus) {
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_FOCUS_GAINED, _activityId);
+		} else {
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_FOCUS_LOST, _activityId);
+		}
+		super.onWindowFocusChanged(hasFocus);
+	}
+
 	/* API */
 
 	public void setViewFrame (String view, int x, int y, int width, int height) {

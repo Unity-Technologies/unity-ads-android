@@ -111,7 +111,9 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 			@Override
 			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
 				super.sendEvent(eventCategory, eventId, params);
-
+				if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+					return true;
+				}
 				if (allowEvents) {
 					EVENT_CATEGORIES.add(eventCategory);
 					EVENTS.add(eventId);
@@ -172,7 +174,9 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 			@Override
 			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
 				super.sendEvent(eventCategory, eventId, params);
-
+				if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+					return true;
+				}
 				if (allowEvents) {
 					EVENT_CATEGORIES.add(eventCategory);
 					EVENTS.add(eventId);
@@ -235,6 +239,10 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
 				super.sendEvent(eventCategory, eventId, params);
 
+				if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+					return true;
+				}
+
 				EVENT_CATEGORIES.add(eventCategory);
 				EVENTS.add(eventId);
 				EVENT_PARAMS = params;
@@ -294,6 +302,10 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
 				super.sendEvent(eventCategory, eventId, params);
 
+				if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+					return true;
+				}
+
 				EVENT_CATEGORIES.add(eventCategory);
 				EVENTS.add(eventId);
 				EVENT_PARAMS = params;
@@ -349,6 +361,10 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 			@Override
 			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
 				super.sendEvent(eventCategory, eventId, params);
+
+				if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+					return true;
+				}
 
 				EVENT_CATEGORIES.add(eventCategory);
 				EVENTS.add(eventId);
@@ -409,6 +425,10 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 			@Override
 			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
 				super.sendEvent(eventCategory, eventId, params);
+
+				if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+					return true;
+				}
 
 				EVENT_CATEGORIES.add(eventCategory);
 				EVENTS.add(eventId);
@@ -489,6 +509,10 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
 				super.sendEvent(eventCategory, eventId, params);
 
+				if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+					return true;
+				}
+
 				EVENT_CATEGORIES.add(eventCategory);
 				EVENTS.add(eventId);
 				EVENT_PARAMS = params;
@@ -545,6 +569,10 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 			@Override
 			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
 				super.sendEvent(eventCategory, eventId, params);
+
+				if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+					return true;
+				}
 
 				EVENT_CATEGORIES.add(eventCategory);
 				EVENTS.add(eventId);
@@ -607,6 +635,10 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
 				super.sendEvent(eventCategory, eventId, params);
 
+				if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+					return true;
+				}
+
 				EVENT_CATEGORIES.add(eventCategory);
 				EVENTS.add(eventId);
 				EVENT_PARAMS = params;
@@ -668,6 +700,10 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 			@Override
 			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
 				super.sendEvent(eventCategory, eventId, params);
+
+				if ("ON_FOCUS_GAINED".equals(eventId.name()) || "ON_FOCUS_LOST".equals(eventId.name())) {
+					return true;
+				}
 
 				EVENT_CATEGORIES.add(eventCategory);
 				EVENTS.add(eventId);
