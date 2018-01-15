@@ -1,6 +1,8 @@
 package com.unity3d.ads;
 
 import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
 import android.view.Display;
@@ -89,23 +91,23 @@ public final class UnityAds {
 	/**
 	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
 	 *
-	 * @param activity Current Android activity of calling app
+	 * @param application Current Android activity of calling app
 	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
 	 * @param listener Listener for IUnityAdsListener callbacks
 	 */
-	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener) {
-		initialize(activity, gameId, listener, false);
+	public static void initialize(final Application application, final String gameId, final IUnityAdsListener listener) {
+		initialize(application, gameId, listener, false);
 	}
 
 	/**
 	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
 	 *
-	 * @param activity Current Android activity of calling app
+	 * @param application Current Android activity of calling app
 	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
 	 * @param listener Listener for IUnityAdsListener callbacks
 	 * @param testMode If true, only test ads are shown
 	 */
-	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode) {
+	public static void initialize(final Application application, final String gameId, final IUnityAdsListener listener, final boolean testMode) {
 		DeviceLog.entered();
 
 
@@ -134,7 +136,7 @@ public final class UnityAds {
 			return;
 		}
 
-		if(activity == null) {
+		if(application == null) {
 			DeviceLog.error("Error while initializing Unity Ads: null activity, halting Unity Ads init");
 			if(listener != null) {
 				listener.onUnityAdsError(UnityAdsError.INVALID_ARGUMENT, "Null activity");
@@ -152,8 +154,8 @@ public final class UnityAds {
 
 		ClientProperties.setGameId(gameId);
 		ClientProperties.setListener(listener);
-		ClientProperties.setApplicationContext(activity.getApplicationContext());
-		ClientProperties.setApplication(activity.getApplication());
+		ClientProperties.setApplicationContext(application.getApplicationContext());
+		ClientProperties.setApplication(application);
 		SdkProperties.setTestMode(testMode);
 
 		if(EnvironmentCheck.isEnvironmentOk()) {
