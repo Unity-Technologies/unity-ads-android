@@ -117,7 +117,7 @@ public class UnityAdsExample extends Activity {
 				testModeCheckbox.setEnabled(false);
 
 				statusText.setText("Initializing...");
-				UnityAds.initialize(self, gameId, unityAdsListener, testModeCheckbox.isChecked());
+				UnityAds.initialize(self.getApplication(), gameId, unityAdsListener, testModeCheckbox.isChecked());
 
 				// store entered gameid in app settings
 				SharedPreferences preferences = getSharedPreferences("Settings", MODE_PRIVATE);
