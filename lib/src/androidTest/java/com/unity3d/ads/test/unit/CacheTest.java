@@ -186,7 +186,7 @@ public class CacheTest {
 
 		Invocation invocation = new Invocation();
 		WebViewCallback callback = new WebViewCallback("1234", invocation.getId());
-		Cache.download(REMOTE_IMG, REMOTE_IMG_FILE_ID, new JSONArray(), callback);
+		Cache.download(REMOTE_IMG, REMOTE_IMG_FILE_ID, new JSONArray(), false, callback);
 		invocation.sendInvocationCallback();
 
 		boolean success = cacheCv.block(30000);
@@ -372,7 +372,7 @@ public class CacheTest {
 	private static long downloadPosition;
 
 	@Test
-	public void testStopResumeDownload() {
+	public void testStopResumeDownload() throws Exception {
 		final long minDownloadBytes = 12345;
 		final ConditionVariable cacheCv = new ConditionVariable();
 		final ConditionVariable cacheCv2 = new ConditionVariable();
@@ -443,7 +443,7 @@ public class CacheTest {
 		Invocation invocation = new Invocation();
 		WebViewCallback callback = new WebViewCallback("1234", invocation.getId());
 		CacheThread.setProgressInterval(2);
-		Cache.download(REMOTE_VIDEO, REMOTE_VIDEO_FILE_ID, new JSONArray(), callback);
+		Cache.download(REMOTE_VIDEO, REMOTE_VIDEO_FILE_ID, new JSONArray(), false, callback);
 		invocation.sendInvocationCallback();
 
 		boolean success = cacheCv.block(30000);
@@ -505,7 +505,7 @@ public class CacheTest {
 
 		Invocation invocation2 = new Invocation();
 		WebViewCallback callback2 = new WebViewCallback("1234", invocation2.getId());
-		Cache.download(REMOTE_VIDEO, REMOTE_VIDEO_FILE_ID, new JSONArray(), callback2);
+		Cache.download(REMOTE_VIDEO, REMOTE_VIDEO_FILE_ID, new JSONArray("[[\"Range\", \"bytes=" + downloadPosition + "-\"]]"), true, callback2);
 		invocation2.sendInvocationCallback();
 
 		boolean success2 = cacheCv2.block(30000);

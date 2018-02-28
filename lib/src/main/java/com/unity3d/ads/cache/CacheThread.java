@@ -47,7 +47,7 @@ public class CacheThread extends Thread {
 		Looper.loop();
 	}
 
-	public static synchronized void download(String source, String target, HashMap<String, List<String>> headers) {
+	public static synchronized void download(String source, String target, HashMap<String, List<String>> headers, boolean append) {
 		if(!_ready) {
 			init();
 		}
@@ -58,6 +58,7 @@ public class CacheThread extends Thread {
 		params.putInt("connectTimeout", _connectTimeout);
 		params.putInt("readTimeout", _readTimeout);
 		params.putInt("progressInterval", _progressInterval);
+		params.putBoolean("append", append);
 
 		if (headers != null) {
 			for (String s : headers.keySet()) {

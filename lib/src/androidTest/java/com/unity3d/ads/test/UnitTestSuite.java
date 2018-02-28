@@ -37,6 +37,9 @@ import org.junit.runners.Suite;
   WebViewCallbackTest.class,
   LifecycleListenerTest.class,
   VolumeChangeTest.class,
-  UtilitiesTest.class
+  UtilitiesTest.class,
+  WebPlayerTest.class,
+  PreferencesTest.class
 })
+
 public class UnitTestSuite {}

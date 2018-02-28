@@ -10,6 +10,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
@@ -17,17 +18,23 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.os.Build;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.SparseArray;
 
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.ClientProperties;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
+import java.security.MessageDigest;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -411,6 +418,39 @@ public class Device {
 		}
 	}
 
+	public static Boolean isAdbEnabled () {
+		Boolean debugBridgeEnabled = null;
+		if (getApiLevel() < 17) {
+			debugBridgeEnabled = oldAdbStatus();
+		} else {
+			debugBridgeEnabled = newAdbStatus();
+		}
+		return debugBridgeEnabled;
+	}
+
+	private static Boolean oldAdbStatus () {
+		Boolean status = null;
+		try {
+			status = 1 == Settings.Secure.getInt(ClientProperties.getApplicationContext().getContentResolver(), Settings.Secure.ADB_ENABLED, 0);
+		}
+		catch (Exception e) {
+			DeviceLog.exception("Problems fetching adb enabled status", e);
+		}
+		return status;
+	}
+
+	@TargetApi(17)
+	private static Boolean newAdbStatus () {
+		Boolean status = null;
+		try {
+			status = 1 == Settings.Global.getInt(ClientProperties.getApplicationContext().getContentResolver(), Settings.Global.ADB_ENABLED, 0);
+		}
+		catch (Exception e) {
+			DeviceLog.exception("Problems fetching adb enabled status", e);
+		}
+		return status;
+	}
+
 	private static boolean searchPathForBinary(String binary) {
 		String[] paths = System.getenv("PATH").split(":");
 		for(String path : paths) {
@@ -445,6 +485,38 @@ public class Device {
 		return null;
 	}
 
+	public static String getApkDigest() {
+		String apkDigest = null;
+		String apkPath = ClientProperties.getApplicationContext().getPackageCodePath();
+		try {
+			apkDigest = Utilities.Sha256(Utilities.readFileBytes(new File(apkPath)));
+		} catch (IOException e) {
+			DeviceLog.exception("Exception when getting APK digest", e);
+		}
+		return apkDigest;
+	}
+
+	public static String getCertificateFingerprint() {
+		String fingerprint = null;
+		PackageManager pm = ClientProperties.getApplicationContext().getPackageManager();
+		String pkgName = ClientProperties.getApplicationContext().getPackageName();
+		try {
+			PackageInfo pinfo = pm.getPackageInfo(pkgName, PackageManager.GET_SIGNATURES);
+			Signature[] signatures = pinfo.signatures;
+			if (signatures != null && signatures.length >= 1) {
+				CertificateFactory cf = CertificateFactory.getInstance("X.509");
+				ByteArrayInputStream stream = new ByteArrayInputStream(signatures[0].toByteArray());
+				X509Certificate cert = (X509Certificate) cf.generateCertificate(stream);
+				MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+				byte[] publicKey = messageDigest.digest(cert.getEncoded());
+				fingerprint = Utilities.toHexString(publicKey);
+			}
+		} catch (Exception e) {
+			DeviceLog.exception("Exception when signing certificate fingerprint", e);
+		}
+		return fingerprint;
+	}
+
 	public static String getBoard () {
 		return Build.BOARD;
 	}
@@ -473,6 +545,10 @@ public class Device {
 		return Build.PRODUCT;
 	}
 
+	public static String getFingerprint() {
+		return Build.FINGERPRINT;
+	}
+
 	public static ArrayList<String> getSupportedAbis () {
 		if (getApiLevel() < 21) {
 			return getOldAbiList();
@@ -491,6 +567,36 @@ public class Device {
 		return null;
 	}
 
+	public static boolean isUSBConnected() {
+		if (ClientProperties.getApplicationContext() != null) {
+		    Intent intent = ClientProperties.getApplicationContext().registerReceiver(null, new IntentFilter("android.hardware.usb.action.USB_STATE"));
+		    if (intent != null) {
+				return intent.getBooleanExtra("connected", false);
+			}
+		}
+		return false;
+	}
+
+	public static long getCPUCount() {
+		return Runtime.getRuntime().availableProcessors();
+	}
+
+	public static long getUptime() {
+		return SystemClock.uptimeMillis();
+	}
+
+	public static long getElapsedRealtime() {
+		return SystemClock.elapsedRealtime();
+	}
+
+	public static String getBuildId() {
+		return Build.ID;
+	}
+
+	public static String getBuildVersionIncremental() {
+		return Build.VERSION.INCREMENTAL;
+	}
+
 	private static ArrayList<String> getOldAbiList () {
 		ArrayList<String> abiList = new ArrayList<>();
 		abiList.add(Build.CPU_ABI);
@@ -505,5 +611,40 @@ public class Device {
 		abiList.addAll(Arrays.asList(Build.SUPPORTED_ABIS));
 
 		return abiList;
+	}
+
+	public static Map<String, String> getProcessInfo () {
+		HashMap<String, String> retData = new HashMap<>();
+		RandomAccessFile reader = null;
+
+		try {
+			reader = new RandomAccessFile("/proc/self/stat", "r");
+			String statContent = reader.readLine();
+			retData.put("stat", statContent);
+		} catch (IOException e) {
+			DeviceLog.exception("Error while reading processor info: ", e);
+		} finally {
+			try {
+				reader.close();
+			} catch (IOException e) {
+				DeviceLog.exception("Error closing RandomAccessFile", e);
+			}
+		}
+
+		try {
+			reader = new RandomAccessFile("/proc/uptime", "r");
+			String uptimeContent = reader.readLine();
+			retData.put("uptime", uptimeContent);
+		} catch (IOException e) {
+			DeviceLog.exception("Error while reading processor info: ", e);
+		} finally {
+			try {
+				reader.close();
+			} catch (IOException e) {
+				DeviceLog.exception("Error closing RandomAccessFile", e);
+			}
+		}
+
+		return retData;
 	}
 }

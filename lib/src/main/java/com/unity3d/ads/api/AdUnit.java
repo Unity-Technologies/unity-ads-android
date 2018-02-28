@@ -1,9 +1,12 @@
 package com.unity3d.ads.api;
 
 import android.content.Intent;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.unity3d.ads.adunit.AdUnitActivity;
 import com.unity3d.ads.adunit.AdUnitError;
+import com.unity3d.ads.adunit.AdUnitMotionEvent;
 import com.unity3d.ads.adunit.AdUnitSoftwareActivity;
 import com.unity3d.ads.adunit.AdUnitTransparentActivity;
 import com.unity3d.ads.adunit.AdUnitTransparentSoftwareActivity;
@@ -15,9 +18,11 @@ import com.unity3d.ads.webview.bridge.WebViewExposed;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
 
 public class AdUnit {
@@ -296,6 +301,207 @@ public class AdUnit {
 			}
 			else {
 				callback.error(AdUnitError.UNKNOWN_VIEW);
+			}
+		}
+		else {
+			callback.error(AdUnitError.ADUNIT_NULL);
+		}
+	}
+
+	@WebViewExposed
+	public static void startMotionEventCapture (final Integer maxEvents, final WebViewCallback callback) {
+		if (getAdUnitActivity() != null) {
+			if (getAdUnitActivity().getLayout() != null) {
+				getAdUnitActivity().getLayout().startCapture(maxEvents);
+				callback.invoke();
+			}
+			else {
+				callback.error(AdUnitError.LAYOUT_NULL);
+			}
+		}
+		else {
+			callback.error(AdUnitError.ADUNIT_NULL);
+		}
+	}
+
+	@WebViewExposed
+	public static void endMotionEventCapture (final WebViewCallback callback) {
+		if (getAdUnitActivity() != null) {
+			if (getAdUnitActivity().getLayout() != null) {
+				getAdUnitActivity().getLayout().endCapture();
+				callback.invoke();
+			}
+			else {
+				callback.error(AdUnitError.LAYOUT_NULL);
+			}
+		}
+		else {
+			callback.error(AdUnitError.ADUNIT_NULL);
+		}
+	}
+
+	@WebViewExposed
+	public static void clearMotionEventCapture (final WebViewCallback callback) {
+		if (getAdUnitActivity() != null) {
+			if (getAdUnitActivity().getLayout() != null) {
+				getAdUnitActivity().getLayout().clearCapture();
+				callback.invoke();
+			}
+			else {
+				callback.error(AdUnitError.LAYOUT_NULL);
+			}
+		}
+		else {
+			callback.error(AdUnitError.ADUNIT_NULL);
+		}
+	}
+
+	@WebViewExposed
+	public static void getMotionEventCount (final JSONArray eventTypes, final WebViewCallback callback) {
+		ArrayList<Integer> requestedEventTypes = new ArrayList<>();
+
+		for (int i = 0; i < eventTypes.length(); i++) {
+			try {
+				requestedEventTypes.add(eventTypes.getInt(i));
+			}
+			catch (Exception e) {
+				DeviceLog.exception("Error retrieving int from eventTypes", e);
+			}
+		}
+
+		if (getAdUnitActivity() != null) {
+			if (getAdUnitActivity().getLayout() != null) {
+				if (getAdUnitActivity().getLayout().getCurrentEventCount() >= getAdUnitActivity().getLayout().getMaxEventCount()) {
+					callback.error(AdUnitError.MAX_MOTION_EVENT_COUNT_REACHED);
+					return;
+				}
+
+				SparseIntArray counts = getAdUnitActivity().getLayout().getEventCount(requestedEventTypes);
+				JSONObject retObj = new JSONObject();
+
+				for (int i = 0; i < counts.size(); i++) {
+					int key = counts.keyAt(i);
+					int value = counts.get(key);
+
+					try {
+						retObj.put(Integer.toString(key), value);
+					}
+					catch (Exception e) {
+						DeviceLog.exception("Error building response JSON", e);
+					}
+				}
+
+				callback.invoke(retObj);
+			}
+			else {
+				callback.error(AdUnitError.LAYOUT_NULL);
+			}
+		}
+		else {
+			callback.error(AdUnitError.ADUNIT_NULL);
+		}
+	}
+
+	@WebViewExposed
+	public static void getMotionEventData (final JSONObject infoIndices, final WebViewCallback callback) {
+		Iterator<String> infoIterator = infoIndices.keys();
+		SparseArray<ArrayList<Integer>> requestedInfos = new SparseArray<>();
+
+		while (infoIterator.hasNext()) {
+			String key = infoIterator.next();
+			int keyInt = Integer.parseInt(key);
+			if (requestedInfos.get(keyInt) == null) {
+				requestedInfos.put(keyInt, new ArrayList<Integer>());
+			}
+
+			JSONArray keyIndices = null;
+
+			try {
+				keyIndices = infoIndices.getJSONArray(key);
+			}
+			catch (Exception e) {
+				DeviceLog.exception("Couldn't fetch keyIndices", e);
+			}
+
+			if (keyIndices != null) {
+				for (int i = 0; i < keyIndices.length(); i++) {
+					try {
+						requestedInfos.get(keyInt).add(keyIndices.getInt(i));
+					}
+					catch (Exception e) {
+						DeviceLog.exception("Couldn't add value to requested infos", e);
+					}
+				}
+			}
+		}
+
+		if (getAdUnitActivity() != null) {
+			if (getAdUnitActivity().getLayout() != null) {
+				if (getAdUnitActivity().getLayout().getCurrentEventCount() >= getAdUnitActivity().getLayout().getMaxEventCount()) {
+					callback.error(AdUnitError.MAX_MOTION_EVENT_COUNT_REACHED);
+					return;
+				}
+
+				SparseArray<SparseArray<AdUnitMotionEvent>> eventInfos = getAdUnitActivity().getLayout().getEvents(requestedInfos);
+
+				JSONObject infoObj = new JSONObject();
+
+				for (int eventTypeIndex = 0; eventTypeIndex < eventInfos.size(); eventTypeIndex++) {
+					int key = eventInfos.keyAt(eventTypeIndex);
+					SparseArray<AdUnitMotionEvent> values = eventInfos.get(key);
+
+					JSONObject typeObj = new JSONObject();
+
+					for (int motionEventIndex = 0; motionEventIndex < values.size(); motionEventIndex++) {
+						JSONObject eventObj = new JSONObject();
+						int eventKey = values.keyAt(motionEventIndex);
+						AdUnitMotionEvent motionEvent = values.get(eventKey);
+						try {
+							eventObj.put("action", motionEvent.getAction());
+							eventObj.put("isObscured", motionEvent.isObscured());
+							eventObj.put("toolType", motionEvent.getToolType());
+							eventObj.put("source", motionEvent.getSource());
+							eventObj.put("deviceId", motionEvent.getDeviceId());
+							eventObj.put("x" , motionEvent.getX());
+							eventObj.put("y", motionEvent.getY());
+							eventObj.put("eventTime", motionEvent.getEventTime());
+							eventObj.put("pressure", motionEvent.getPressure());
+							eventObj.put("size", motionEvent.getSize());
+
+							typeObj.put(Integer.toString(eventKey), eventObj);
+						}
+						catch (Exception e) {
+							DeviceLog.debug("Couldn't construct event info", e);
+						}
+					}
+
+					try {
+						infoObj.put(Integer.toString(key), typeObj);
+					}
+					catch (Exception e) {
+						DeviceLog.debug("Couldn't construct info object", e);
+					}
+				}
+
+				callback.invoke(infoObj);
+			}
+			else {
+				callback.error(AdUnitError.LAYOUT_NULL);
+			}
+		}
+		else {
+			callback.error(AdUnitError.ADUNIT_NULL);
+		}
+	}
+
+	@WebViewExposed
+	public static void getCurrentMotionEventCount (final WebViewCallback callback) {
+		if (getAdUnitActivity() != null) {
+			if (getAdUnitActivity().getLayout() != null) {
+				callback.invoke(getAdUnitActivity().getLayout().getCurrentEventCount());
+			}
+			else {
+				callback.error(AdUnitError.LAYOUT_NULL);
 			}
 		}
 		else {

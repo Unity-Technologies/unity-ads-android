@@ -181,7 +181,11 @@ public final class UnityAds {
 			com.unity3d.ads.api.VideoPlayer.class,
 			com.unity3d.ads.api.Placement.class,
 			com.unity3d.ads.api.Intent.class,
-			com.unity3d.ads.api.Lifecycle.class
+			com.unity3d.ads.api.Lifecycle.class,
+			com.unity3d.ads.api.WebPlayer.class,
+			com.unity3d.ads.api.Preferences.class,
+			com.unity3d.ads.api.Purchasing.class,
+			com.unity3d.ads.api.SensorInfo.class
 		};
 
 		configuration.setWebAppApiClassList(apiClassList);

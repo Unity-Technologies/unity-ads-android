@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -96,6 +97,11 @@ public class DeviceInfo {
 	}
 
 	@WebViewExposed
+	public static void getTimeZoneOffset(WebViewCallback callback) {
+		callback.invoke(TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 1000);
+	}
+
+	@WebViewExposed
 	public static void getConnectionType(WebViewCallback callback) {
 		String connectionType;
 		if(Device.isUsingWifi()) {
@@ -131,6 +137,16 @@ public class DeviceInfo {
 	@WebViewExposed
 	public static void isRooted(WebViewCallback callback) {
 		callback.invoke(Device.isRooted());
+	}
+	
+	@WebViewExposed
+	public static void isAdbEnabled(WebViewCallback callback) {
+		Boolean adbEnabled = Device.isAdbEnabled();
+		if (adbEnabled != null) {
+			callback.invoke(adbEnabled);
+		} else {
+			callback.error(DeviceError.COULDNT_GET_ADB_STATUS);
+		}
 	}
 
 	@WebViewExposed
@@ -405,6 +421,30 @@ public class DeviceInfo {
 	}
 
 	@WebViewExposed
+	public static void getApkDigest (WebViewCallback callback) {
+		String digest = Device.getApkDigest();
+
+		if (digest != null) {
+			callback.invoke(digest);
+		}
+		else {
+			callback.error(DeviceError.COULDNT_GET_DIGEST);
+		}
+	}
+
+	@WebViewExposed
+	public static void getCertificateFingerprint (WebViewCallback callback) {
+		String fingerprint = Device.getCertificateFingerprint();
+
+		if (fingerprint != null) {
+			callback.invoke(fingerprint);
+		}
+		else {
+			callback.error(DeviceError.COULDNT_GET_FINGERPRINT);
+		}
+	}
+
+	@WebViewExposed
 	public static void getBoard (WebViewCallback callback) {
 		callback.invoke(Device.getBoard());
 	}
@@ -437,6 +477,11 @@ public class DeviceInfo {
 	@WebViewExposed
 	public static void getProduct (WebViewCallback callback) {
 		callback.invoke(Device.getProduct());
+	}
+
+	@WebViewExposed
+	public static void getFingerprint(WebViewCallback callback) {
+		callback.invoke(Device.getFingerprint());
 	}
 
 	@WebViewExposed
@@ -479,4 +524,57 @@ public class DeviceInfo {
 
 		callback.invoke(sensors);
 	}
+
+	@WebViewExposed
+	public static void getProcessInfo (WebViewCallback callback) {
+		JSONObject retObj = new JSONObject();
+		Map<String, String> processInfo = Device.getProcessInfo();
+
+		if (processInfo != null) {
+			try {
+				if (processInfo.containsKey("stat")) {
+					retObj.put("stat", processInfo.get("stat"));
+				}
+				if (processInfo.containsKey("uptime")) {
+					retObj.put("uptime", processInfo.get("uptime"));
+				}
+			}
+			catch (Exception e) {
+				DeviceLog.exception("Error while constructing process info", e);
+			}
+		}
+
+		callback.invoke(retObj);
+	}
+
+	@WebViewExposed
+	public static void isUSBConnected(WebViewCallback callback) {
+		callback.invoke(Device.isUSBConnected());
+	}
+
+	@WebViewExposed
+	public static void getCPUCount(WebViewCallback callback) {
+		callback.invoke(Device.getCPUCount());
+	}
+
+	@WebViewExposed
+	public static void getUptime(WebViewCallback callback) {
+		callback.invoke(Device.getUptime());
+	}
+
+	@WebViewExposed
+	public static void getElapsedRealtime(WebViewCallback callback) {
+		callback.invoke(Device.getElapsedRealtime());
+	}
+
+	@WebViewExposed
+	public static void getBuildId(WebViewCallback callback) {
+		callback.invoke(Device.getBuildId());
+	}
+
+	@WebViewExposed
+	public static void getBuildVersionIncremental(WebViewCallback callback) {
+		callback.invoke(Device.getBuildVersionIncremental());
+	}
 }
+

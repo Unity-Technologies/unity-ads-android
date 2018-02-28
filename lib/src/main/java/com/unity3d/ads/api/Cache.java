@@ -5,11 +5,14 @@ import android.media.MediaMetadataRetriever;
 import android.util.Base64;
 import android.util.SparseArray;
 
+import com.unity3d.ads.cache.CacheDirectory;
+import com.unity3d.ads.cache.CacheDirectoryType;
 import com.unity3d.ads.cache.CacheError;
 import com.unity3d.ads.cache.CacheThread;
 import com.unity3d.ads.device.Device;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.misc.Utilities;
+import com.unity3d.ads.properties.ClientProperties;
 import com.unity3d.ads.properties.SdkProperties;
 import com.unity3d.ads.request.WebRequestError;
 import com.unity3d.ads.webview.bridge.WebViewCallback;
@@ -34,7 +37,7 @@ import java.util.List;
 public class Cache {
 
 	@WebViewExposed
-	public static void download(String url, String fileId, JSONArray headers, WebViewCallback callback) {
+	public static void download(String url, String fileId, JSONArray headers, Boolean append, WebViewCallback callback) {
 		if(CacheThread.isActive()) {
 			callback.error(CacheError.FILE_ALREADY_CACHING);
 			return;
@@ -55,7 +58,7 @@ public class Cache {
 			return;
 		}
 
-		CacheThread.download(url, fileIdToFilename(fileId), mappedHeaders);
+		CacheThread.download(url, fileIdToFilename(fileId), mappedHeaders, append);
 		callback.invoke();
 	}
 
@@ -308,6 +311,58 @@ public class Cache {
 		}
 
 		callback.invoke(returnJsonArray);
+	}
+
+	@WebViewExposed
+	public static void getCacheDirectoryType (final WebViewCallback callback) {
+		CacheDirectory cacheDir = SdkProperties.getCacheDirectoryObject();
+		if (cacheDir == null || cacheDir.getCacheDirectory(ClientProperties.getApplicationContext()) == null) {
+			callback.error(CacheError.CACHE_DIRECTORY_NULL);
+			return;
+		}
+
+		if (!cacheDir.getCacheDirectory(ClientProperties.getApplicationContext()).exists()) {
+			callback.error(CacheError.CACHE_DIRECTORY_DOESNT_EXIST);
+			return;
+		}
+
+		CacheDirectoryType cacheDirType = cacheDir.getType();
+
+		if (cacheDirType == null) {
+			callback.error(CacheError.CACHE_DIRECTORY_TYPE_NULL);
+			return;
+		}
+
+		callback.invoke(cacheDirType.name());
+	}
+
+	@WebViewExposed
+	public static void getCacheDirectoryExists (final WebViewCallback callback) {
+		File cacheDir = SdkProperties.getCacheDirectory();
+		if (cacheDir == null) {
+			callback.error(CacheError.CACHE_DIRECTORY_NULL);
+			return;
+		}
+
+		callback.invoke(cacheDir.exists());
+	}
+
+	@WebViewExposed
+	public static void recreateCacheDirectory (final WebViewCallback callback) {
+		File cacheDir = SdkProperties.getCacheDirectory();
+		if (cacheDir.exists()) {
+			callback.error(CacheError.CACHE_DIRECTORY_EXISTS);
+			return;
+		}
+
+		SdkProperties.setCacheDirectory(null);
+		cacheDir = SdkProperties.getCacheDirectory();
+		if (cacheDir == null) {
+			callback.error(CacheError.CACHE_DIRECTORY_NULL);
+			return;
+		}
+
+		callback.invoke();
 	}
 
 	@TargetApi(10)

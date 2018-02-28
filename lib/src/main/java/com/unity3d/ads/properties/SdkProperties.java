@@ -108,6 +108,10 @@ public class SdkProperties {
 		_cacheDirectory = cacheDirectory;
 	}
 
+	public static CacheDirectory getCacheDirectoryObject () {
+		return _cacheDirectory;
+	}
+
 	public static void setShowTimeout(int timeout) {
 		_showTimeout = timeout;
 	}

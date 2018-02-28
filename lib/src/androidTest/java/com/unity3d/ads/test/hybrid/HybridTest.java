@@ -73,13 +73,19 @@ public class HybridTest {
       com.unity3d.ads.api.VideoPlayer.class,
       com.unity3d.ads.api.Placement.class,
       com.unity3d.ads.api.Intent.class,
+      com.unity3d.ads.api.WebPlayer.class,
       com.unity3d.ads.test.hybrid.HybridTest.class,
+      com.unity3d.ads.api.Lifecycle.class,
+      com.unity3d.ads.api.Preferences.class,
+      com.unity3d.ads.api.Purchasing.class,
+      com.unity3d.ads.api.SensorInfo.class,
+      com.unity3d.ads.test.hybrid.HybridTest.class
     };
 
     configuration.setWebAppApiClassList(apiClassList);
     InitializeThread.initialize(configuration);
 
-    if(!_resultSemaphore.tryAcquire(5, TimeUnit.MINUTES)) {
+    if(!_resultSemaphore.tryAcquire(10, TimeUnit.MINUTES)) {
       fail("onHybridTestResult did not arrive");
     }
 

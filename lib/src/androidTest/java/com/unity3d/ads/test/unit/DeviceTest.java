@@ -150,6 +150,11 @@ public class DeviceTest {
 	}
 
 	@Test
+	public void testGetAdbStatus () throws Exception {
+		assertTrue("Adb status should be true", Device.isAdbEnabled());
+	}
+
+	@Test
 	public void testGetGLVersion () throws Exception {
 		assertNotNull("GLES version should not be null", Device.getGLVersion());
 	}
@@ -185,10 +190,51 @@ public class DeviceTest {
 	}
 
 	@Test
+	public void testGetFingerprint () throws Exception {
+		assertNotNull("Fingerprint should not be null", Device.getFingerprint());
+	}
+
+	@Test
+	public void testGetApkDigest () throws Exception {
+		assertNotNull("Host should not be null", Device.getApkDigest());
+	}
+
+	@Test
+	public void testGetCertificateFingerprint () throws Exception {
+		assertNotNull("Certificate fingerprint should not be null", Device.getCertificateFingerprint());
+	}
+
+	@Test
 	public void testGetSupportedAbis () throws Exception {
 		ArrayList<String> supportedAbis = Device.getSupportedAbis();
 
 		assertNotNull("List of supported abis should not be null", supportedAbis);
 		assertTrue("Number of supported abis should be larger than 0", supportedAbis.size() > 0);
+	}
+
+	@Test
+	public void testGetProcessInfo () throws Exception {
+		Map<String, String> data = Device.getProcessInfo();
+
+		assertNotNull("Stats should not be null", data.get("stat"));
+		assertNotEquals("Stats should not be empty", data.get("stat"), "");
+
+		assertNotNull("Uptime should not be null", data.get("uptime"));
+		assertNotEquals("Uptime should not be empty", data.get("uptime"), "");
+	}
+
+	@Test
+	public void testGetCPUCount() {
+		assertTrue("Number of CPUs should be greater than 0", Device.getCPUCount() > 0);
+	}
+
+	@Test
+	public void testGetUptime() {
+		assertTrue("Uptime should be greater than 0", Device.getUptime() > 0);
+	}
+
+	@Test
+	public void testGetElapsedRealtime() {
+		assertTrue("Elapsed realtime should be greater than 0", Device.getElapsedRealtime() > 0);
 	}
 }

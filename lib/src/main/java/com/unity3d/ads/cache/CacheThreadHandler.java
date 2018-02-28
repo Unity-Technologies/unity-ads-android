@@ -43,6 +43,8 @@ class 	CacheThreadHandler extends Handler {
 		data.remove("readTimeout");
 		int progressInterval = data.getInt("progressInterval");
 		data.remove("progressInterval");
+		boolean append = data.getBoolean("append", false);
+		data.remove("append");
 
 		HashMap<String, List<String>> headers = null;
 		if (data.size() > 0) {
@@ -56,10 +58,17 @@ class 	CacheThreadHandler extends Handler {
 			}
 		}
 
+		File targetFile = new File(target);
+
+		if ((append && !targetFile.exists()) || (!append && targetFile.exists())) {
+			_active = false;
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_STATE_WRONG, source, target, append, targetFile.exists());
+			return;
+		}
+
 		switch (msg.what) {
 			case CacheThread.MSG_DOWNLOAD:
-				File targetFile = new File(target);
-				downloadFile(source, target, targetFile.length(), connectTimeout, readTimeout, progressInterval, headers);
+				downloadFile(source, target, connectTimeout, readTimeout, progressInterval, headers, append);
 				break;
 
 			default:
@@ -80,13 +89,15 @@ class 	CacheThreadHandler extends Handler {
 		return _active;
 	}
 
-	private void downloadFile(String source, String target, final long position, int connectTimeout, int readTimeout, final int progressInterval, HashMap<String, List<String>> headers) {
+	private void downloadFile(String source, String target, int connectTimeout, int readTimeout, final int progressInterval, HashMap<String, List<String>> headers, boolean append) {
 		if (_canceled || source == null || target == null) {
 			return;
 		}
 
-		if (position > 0) {
-			DeviceLog.debug("Unity Ads cache: resuming download " + source + " to " + target + " at " + position + " bytes");
+		final File targetFile = new File(target);
+
+		if (append) {
+			DeviceLog.debug("Unity Ads cache: resuming download " + source + " to " + target + " at " + targetFile.length() + " bytes");
 		}
 		else {
 			DeviceLog.debug("Unity Ads cache: start downloading " + source + " to " + target);
@@ -101,18 +112,17 @@ class 	CacheThreadHandler extends Handler {
 		_active = true;
 
 		long startTime = SystemClock.elapsedRealtime();
-		File targetFile = new File(target);
 		FileOutputStream fileOutput = null;
 
 		try {
-			fileOutput = new FileOutputStream(targetFile, position > 0);
-			_currentRequest = getWebRequest(source, position, connectTimeout, readTimeout, headers);
+			fileOutput = new FileOutputStream(targetFile, append);
+			_currentRequest = getWebRequest(source, connectTimeout, readTimeout, headers);
 			_currentRequest.setProgressListener(new IWebRequestProgressListener() {
 				private long lastProgressEventTime = System.currentTimeMillis();
 
 				@Override
 				public void onRequestStart(String url, long total, int responseCode, Map<String, List<String>> headers) {
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_STARTED, url, position, (total + position), responseCode, Request.getResponseHeadersMap(headers));
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_STARTED, url, targetFile.length(), (total + targetFile.length()), responseCode, Request.getResponseHeadersMap(headers));
 				}
 
 				@Override
@@ -186,15 +196,10 @@ class 	CacheThreadHandler extends Handler {
 		}
 	}
 
-	private WebRequest getWebRequest(String source, long position, int connectTimeout, int readTimeout, HashMap<String, List<String>> headers) throws MalformedURLException {
+	private WebRequest getWebRequest(String source, int connectTimeout, int readTimeout, HashMap<String, List<String>> headers) throws MalformedURLException {
 		HashMap<String, List<String>> requestHeaders = new HashMap<>();
 		if (headers != null) {
 			requestHeaders.putAll(headers);
-		}
-
-		if (position > 0) {
-			ArrayList list = new ArrayList(Arrays.asList(new String[]{"bytes=" + position + "-"}));
-			requestHeaders.put("Range", list);
 		}
 
 		return new WebRequest(source, "GET", requestHeaders, connectTimeout, readTimeout);

@@ -12,14 +12,14 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-import android.widget.VideoView;
 
 import com.unity3d.ads.api.AdUnit;
-import com.unity3d.ads.device.Device;
 import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.misc.ViewUtilities;
 import com.unity3d.ads.api.VideoPlayer;
 import com.unity3d.ads.video.VideoPlayerView;
+import com.unity3d.ads.webplayer.WebPlayer;
+import com.unity3d.ads.webview.WebView;
 import com.unity3d.ads.webview.WebViewApp;
 import com.unity3d.ads.webview.WebViewEventCategory;
 
@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class AdUnitActivity extends Activity {
 
@@ -39,7 +37,8 @@ public class AdUnitActivity extends Activity {
 	public static final String EXTRA_KEY_EVENT_LIST = "keyEvents";
 	public static final String EXTRA_KEEP_SCREEN_ON = "keepScreenOn";
 
-	protected RelativeLayout _layout;
+	private WebPlayer _webPlayer;
+	protected AdUnitRelativeLayout _layout;
 	private RelativeLayout _videoContainer;
 	private String[] _views;
 	private int _orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -102,6 +101,10 @@ public class AdUnitActivity extends Activity {
 		}
 
 		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, event, _activityId);
+	}
+
+	public AdUnitRelativeLayout getLayout() {
+		return _layout;
 	}
 
 	@Override
@@ -214,7 +217,8 @@ public class AdUnitActivity extends Activity {
 		return false;
 	}
 
-	@Override public void onWindowFocusChanged(boolean hasFocus) {
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
 		if (hasFocus) {
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, AdUnitEvent.ON_FOCUS_GAINED, _activityId);
 		} else {
@@ -224,6 +228,10 @@ public class AdUnitActivity extends Activity {
 	}
 
 	/* API */
+
+	public WebPlayer getWebPlayer() {
+		return _webPlayer;
+	}
 
 	public void setViewFrame (String view, int x, int y, int width, int height) {
 		View targetView = null;
@@ -238,6 +246,8 @@ public class AdUnitActivity extends Activity {
 		}
 		else if (view.equals("webview")) {
 			targetView = WebViewApp.getCurrentApp().getWebView();
+		} else if (view.equals("webplayer")) {
+			targetView = _webPlayer;
 		}
 
 		if (targetView != null) {
@@ -304,6 +314,8 @@ public class AdUnitActivity extends Activity {
 				case "webview":
 					ViewUtilities.removeViewFromParent(WebViewApp.getCurrentApp().getWebView());
 					break;
+				case "webplayer":
+					destroyWebPlayer();
 				default:
 					break;
 			}
@@ -328,6 +340,10 @@ public class AdUnitActivity extends Activity {
 					DeviceLog.error("WebApp IS NULL!");
 					throw new NullPointerException();
 				}
+			}
+			else if (view.equals("webplayer")) {
+				createWebPlayer();
+				handleViewPlacement(_webPlayer);
 			}
 		}
 	}
@@ -400,10 +416,26 @@ public class AdUnitActivity extends Activity {
 			return;
 		}
 
-		_layout = new RelativeLayout(this);
+		_layout = new AdUnitRelativeLayout(this);
 		_layout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		ViewUtilities.setBackground(_layout, new ColorDrawable(Color.BLACK));
+	}
 
+	/* WEBPLAYER */
+
+	private void createWebPlayer() {
+		if (_webPlayer == null) {
+			_webPlayer = new WebPlayer(this, com.unity3d.ads.api.WebPlayer.getWebSettings(), com.unity3d.ads.api.WebPlayer.getWebPlayerSettings());
+			_webPlayer.setEventSettings(com.unity3d.ads.api.WebPlayer.getWebPlayerEventSettings());
+		}
+	}
+
+	private void destroyWebPlayer() {
+		if (_webPlayer != null) {
+			ViewUtilities.removeViewFromParent(_webPlayer);
+		}
+
+		_webPlayer = null;
 	}
 
 	/* VIDEOPLAYER */

@@ -10,6 +10,7 @@ import com.unity3d.ads.webview.bridge.WebViewCallback;
 import com.unity3d.ads.webview.bridge.WebViewExposed;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Intent {
@@ -17,6 +18,7 @@ public class Intent {
 		COULDNT_PARSE_EXTRAS,
 		COULDNT_PARSE_CATEGORIES,
 		INTENT_WAS_NULL,
+		JSON_EXCEPTION,
 		ACTIVITY_WAS_NULL
 	}
 
@@ -153,4 +155,109 @@ public class Intent {
 
 		return act;
 	}
+
+	@WebViewExposed
+	public static void canOpenIntent(JSONObject intentData, WebViewCallback callback) {
+	    try {
+			android.content.Intent intent = intentFromMetadata(intentData);
+			boolean resolvable = checkIntentResolvable(intent);
+			callback.invoke(resolvable);
+		} catch (IntentException e) {
+			DeviceLog.exception("Couldn't resolve intent", e);
+			callback.error(e.getError(), e.getField());
+		}
+	}
+
+	@WebViewExposed
+	public static void canOpenIntents(JSONArray intents, WebViewCallback callback) {
+		JSONObject results = new JSONObject();
+		int len = intents.length();
+		for (int i = 0; i < len; i++) {
+			JSONObject intentData = intents.optJSONObject(i);
+			String id = intentData.optString("id");
+			try {
+			    android.content.Intent intent = intentFromMetadata(intentData);
+			    boolean resolvable = checkIntentResolvable(intent);
+                results.put(id, resolvable);
+			} catch (IntentException e) {
+				DeviceLog.exception("Exception parsing intent", e);
+				callback.error(e.getError(), e.getField());
+				return;
+			} catch (JSONException e) {
+                callback.error(IntentError.JSON_EXCEPTION, e.getMessage());
+                return;
+            }
+		}
+		callback.invoke(results);
+	}
+
+	private static boolean checkIntentResolvable(android.content.Intent intent) {
+		PackageManager packageManager = ClientProperties.getApplicationContext().getPackageManager();
+		return packageManager.resolveActivity(intent, 0) != null;
+	}
+
+	private static android.content.Intent intentFromMetadata(JSONObject json) throws IntentException {
+		android.content.Intent intent;
+
+		String className = (String)json.opt("className");
+		String packageName = (String)json.opt("packageName");
+		String action = (String)json.opt("action");
+		String uri = (String)json.opt("uri");
+		String mimeType = (String)json.opt("mimeType");
+		JSONArray categories = (JSONArray)json.opt("categories");
+		Integer flags = (Integer)json.opt("flags");
+		JSONArray extras = (JSONArray)json.opt("extras");
+
+		if (packageName != null && className == null && action == null && mimeType == null) {
+			PackageManager pm = ClientProperties.getApplicationContext().getPackageManager();
+			intent = pm.getLaunchIntentForPackage(packageName);
+
+			if (intent != null && flags > -1) {
+				intent.addFlags(flags);
+			}
+		}
+		else {
+			intent = new android.content.Intent();
+
+			if (className != null && packageName != null)
+				intent.setClassName(packageName, className);
+
+			if (action != null)
+				intent.setAction(action);
+
+			if (uri != null)
+				intent.setData(Uri.parse(uri));
+
+			if (mimeType != null)
+				intent.setType(mimeType);
+
+			if (flags != null && flags > -1)
+				intent.setFlags(flags);
+
+			if (!setCategories(intent, categories))
+			    throw new IntentException(IntentError.COULDNT_PARSE_CATEGORIES, categories);
+
+			if (!setExtras(intent, extras))
+				throw new IntentException(IntentError.COULDNT_PARSE_EXTRAS, extras);
+		}
+		return intent;
+	}
+
+	private static class IntentException extends Exception {
+        private IntentError error;
+        private Object field;
+
+        public IntentException(IntentError error, Object field) {
+            this.error = error;
+            this.field = field;
+        }
+
+        public IntentError getError() {
+            return error;
+        }
+
+        public Object getField() {
+            return field;
+        }
+    }
 }

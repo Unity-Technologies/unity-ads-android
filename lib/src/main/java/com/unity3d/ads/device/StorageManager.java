@@ -19,7 +19,7 @@ public class StorageManager {
 	public static boolean init (Context context) {
 		if (context == null) return false;
 
-		File cacheDir = SdkProperties.getCacheDirectory(context);
+		File cacheDir = context.getFilesDir();
 
 		if (cacheDir == null) return false;
 

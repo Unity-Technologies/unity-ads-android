@@ -16,6 +16,7 @@ public class CacheDirectory {
 	private String _cacheDirName;
 	private boolean _initialized = false;
 	private File _cacheDirectory = null;
+	private CacheDirectoryType _type = null;
 
 	public CacheDirectory(String cacheDirName) {
 		_cacheDirName = cacheDirName;
@@ -39,6 +40,7 @@ public class CacheDirectory {
 
 					if(testCacheDirectory(externalCache)) {
 						_cacheDirectory = externalCache;
+						_type = CacheDirectoryType.EXTERNAL;
 						DeviceLog.debug("Unity Ads is using external cache directory: " + externalCache.getAbsolutePath());
 						return _cacheDirectory;
 					}
@@ -50,6 +52,7 @@ public class CacheDirectory {
 			File internalCache = context.getFilesDir();
 			if(testCacheDirectory(internalCache)) {
 				_cacheDirectory = internalCache;
+				_type = CacheDirectoryType.INTERNAL;
 				DeviceLog.debug("Unity Ads is using internal cache directory: " + internalCache.getAbsolutePath());
 				return _cacheDirectory;
 			}
@@ -57,6 +60,10 @@ public class CacheDirectory {
 			DeviceLog.error("Unity Ads failed to initialize cache directory");
 			return null;
 		}
+	}
+
+	public CacheDirectoryType getType() {
+		return _type;
 	}
 
 	public File createCacheDirectory(File baseDir, String newDir) {
