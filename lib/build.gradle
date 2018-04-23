@@ -11,8 +11,8 @@ android {
   defaultConfig {
     minSdkVersion 9
     targetSdkVersion 23
-    versionCode = 2200
-    versionName = "2.2.0"
+    versionCode = 2201
+    versionName = "2.2.1"
 
     setProperty("archivesBaseName", "unity-ads")
 

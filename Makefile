@@ -4,7 +4,9 @@ release:
 clean:
 	./gradlew :lib:clean
 
-test: push-test-server-address exec-tests
+test: test-hosted
+
+test-local: push-test-server-address exec-tests
 
 test-unit-tests: push-test-server-address exec-unit-tests
 
@@ -52,3 +54,10 @@ zip: release
 	cp lib/build/outputs/aar/unity-ads-release.aar unity-ads.aar
 	zip -9r builds.zip unity-ads.aar
 	rm unity-ads.aar
+
+use-local-webview:
+	sed -i '' 's/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/return "new-ip";/' "lib/src/main/java/com/unity3d/ads/properties/SdkProperties.java"
+	sed -i '' 's/return ".*";/return "http:\/\/$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8000\/build\/dev\/config.json";/' "lib/src/main/java/com/unity3d/ads/properties/SdkProperties.java"
+
+use-public-webview:
+	sed -i '' 's/return ".*";/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/' "lib/src/main/java/com/unity3d/ads/properties/SdkProperties.java"

@@ -57,6 +57,29 @@ public class Utilities {
 		return toHexString(m.digest());
 	}
 
+	public static String Sha256(InputStream inputStream) throws IOException {
+		if (inputStream == null) {
+			return null;
+		}
+
+		MessageDigest m;
+		try {
+			m = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			DeviceLog.exception("SHA-256 algorithm not found", e);
+			return null;
+		}
+
+		byte[] buffer = new byte[4096];
+		int read;
+
+		while ((read = inputStream.read(buffer)) != -1) {
+			m.update(buffer, 0, read);
+		}
+
+		return toHexString(m.digest());
+	}
+
 	public static String toHexString(byte[] array) {
 		String output = "";
 		for (byte rawByte : array) {
@@ -162,19 +185,24 @@ public class Utilities {
 			return null;
 		}
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		InputStream inputStream = new FileInputStream(file);
-		byte[] buffer = new byte[4096];
-		int read;
 
-		while ((read = inputStream.read(buffer)) != -1) {
-			outputStream.write(buffer, 0, read);
+		byte[] buffer = new byte[(int)file.length()];
+		int offset = 0;
+		int read;
+		int defaultBufferSize = 4096;
+		int readAmount = file.length() < defaultBufferSize ? (int)file.length() : defaultBufferSize;
+
+		while ((read = inputStream.read(buffer, offset, readAmount)) > 0) {
+			offset += read;
+			if (file.length() - offset < defaultBufferSize) {
+				readAmount = (int)file.length() - offset;
+			}
 		}
 
-		outputStream.close();
 		inputStream.close();
 
-		return outputStream.toByteArray();
+		return buffer;
 	}
 
 	public static JSONObject mergeJsonObjects(JSONObject primary, JSONObject secondary) throws JSONException {

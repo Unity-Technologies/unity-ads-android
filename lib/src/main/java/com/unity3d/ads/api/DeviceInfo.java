@@ -120,6 +120,11 @@ public class DeviceInfo {
 	}
 
 	@WebViewExposed
+	public static void getNetworkMetered(WebViewCallback callback) {
+		callback.invoke(Device.getNetworkMetered());
+	}
+
+	@WebViewExposed
 	public static void getNetworkOperator(WebViewCallback callback) {
 		callback.invoke(Device.getNetworkOperator());
 	}
@@ -422,13 +427,10 @@ public class DeviceInfo {
 
 	@WebViewExposed
 	public static void getApkDigest (WebViewCallback callback) {
-		String digest = Device.getApkDigest();
-
-		if (digest != null) {
-			callback.invoke(digest);
-		}
-		else {
-			callback.error(DeviceError.COULDNT_GET_DIGEST);
+		try {
+			callback.invoke(Device.getApkDigest());
+		} catch(Exception e) {
+			callback.error(DeviceError.COULDNT_GET_DIGEST, e.toString());
 		}
 	}
 

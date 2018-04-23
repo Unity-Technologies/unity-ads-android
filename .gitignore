@@ -8,3 +8,7 @@ testServerAddress.txt
 app/app.iml
 lib/lib.iml
 javadoc
+.settings
+.project
+.vscode
+.classpath

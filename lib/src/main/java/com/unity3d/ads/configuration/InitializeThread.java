@@ -61,6 +61,14 @@ public class InitializeThread extends Thread  {
 		}
 	}
 
+	public static synchronized void reset() {
+		if (_thread == null) {
+			_thread = new InitializeThread(new InitializeStateForceReset());
+			_thread.setName("UnityAdsResetThread");
+			_thread.start();
+		}
+	}
+
 	/* STATE CLASSES */
 
 	private abstract static class InitializeState {
@@ -138,6 +146,19 @@ public class InitializeThread extends Thread  {
 
 				Lifecycle.setLifecycleListener(null);
 			}
+		}
+	}
+
+	public static class InitializeStateForceReset extends InitializeStateReset {
+
+		public InitializeStateForceReset() {
+			super(new Configuration());
+		}
+
+		@Override
+		public InitializeState execute() {
+			super.execute();
+			return null;
 		}
 	}
 

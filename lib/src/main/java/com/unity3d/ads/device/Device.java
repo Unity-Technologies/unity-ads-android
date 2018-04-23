@@ -29,7 +29,10 @@ import com.unity3d.ads.properties.ClientProperties;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
 import java.security.MessageDigest;
@@ -126,6 +129,20 @@ public class Device {
 		}
 
 		return -1;
+	}
+
+	public static boolean getNetworkMetered() {
+		ConnectivityManager mConnectivity;
+
+		if (ClientProperties.getApplicationContext() != null && android.os.Build.VERSION.SDK_INT >= 16) {
+			mConnectivity = (ConnectivityManager) ClientProperties.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+			if (mConnectivity == null) {
+				return false;
+			}
+
+			return mConnectivity.isActiveNetworkMetered();
+		}
+		return false;
 	}
 
 	public static String getNetworkOperator() {
@@ -485,13 +502,21 @@ public class Device {
 		return null;
 	}
 
-	public static String getApkDigest() {
+	public static String getApkDigest() throws Exception {
 		String apkDigest = null;
 		String apkPath = ClientProperties.getApplicationContext().getPackageCodePath();
+		InputStream inputStream = null;
 		try {
-			apkDigest = Utilities.Sha256(Utilities.readFileBytes(new File(apkPath)));
-		} catch (IOException e) {
-			DeviceLog.exception("Exception when getting APK digest", e);
+			inputStream = new FileInputStream(new File(apkPath));
+			apkDigest = Utilities.Sha256(inputStream);
+		}
+		finally {
+			try {
+				if (inputStream != null) {
+					inputStream.close();
+				}
+			} catch (IOException e) {
+			}
 		}
 		return apkDigest;
 	}

@@ -17,6 +17,7 @@ import com.unity3d.ads.log.DeviceLog;
 import com.unity3d.ads.misc.Utilities;
 import com.unity3d.ads.properties.ClientProperties;
 import com.unity3d.ads.properties.SdkProperties;
+import com.unity3d.ads.configuration.InitializeThread;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -334,9 +335,8 @@ public final class UnityAds {
 					try {
 						if(!AdUnitOpen.open(placementId, options)) {
 							handleShowError(placementId, UnityAdsError.INTERNAL_ERROR, "Webapp timeout, shutting down Unity Ads");
-							Placement.reset();
-							CacheThread.cancel();
-							ConnectivityMonitor.stopAll();
+							
+							InitializeThread.reset();
 						}
 					}
 					catch (NoSuchMethodException exception) {
@@ -346,7 +346,10 @@ public final class UnityAds {
 				}
 			}).start();
 		} else {
-			if(!isSupported()) {
+			if (placementId == null) {
+				throw new IllegalArgumentException("PlacementID is null");
+			}
+			else if (!isSupported()) {
 				handleShowError(placementId, UnityAdsError.NOT_INITIALIZED, "Unity Ads is not supported for this device");
 			} else if(!isInitialized()) {
 				handleShowError(placementId, UnityAdsError.NOT_INITIALIZED, "Unity Ads is not initialized");

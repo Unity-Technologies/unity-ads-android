@@ -212,7 +212,7 @@ public class WebRequest {
 	public String makeRequest () throws NetworkIOException, IOException, IllegalStateException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		makeStreamRequest(baos);
-		return new String(baos.toByteArray());
+		return baos.toString("UTF-8");
 	}
 
 	private HttpURLConnection getHttpUrlConnectionWithHeaders() throws NetworkIOException {

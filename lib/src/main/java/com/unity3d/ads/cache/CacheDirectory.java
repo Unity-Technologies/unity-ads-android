@@ -97,11 +97,6 @@ public class CacheDirectory {
 			fos.flush();
 			fos.close();
 
-			if(directory.listFiles() == null) {
-				DeviceLog.debug("Failed to list files in directory " + directory.getAbsolutePath());
-				return false;
-			}
-
 			FileInputStream fis = new FileInputStream(testFile);
 			int readCount = fis.read(outData, 0, outData.length);
 			fis.close();

@@ -97,6 +97,11 @@ public class DeviceTest {
 	}
 
 	@Test
+	public void testIsNetworkMetered () {
+		assertNotNull("Metered network should not be null", Device.getNetworkMetered());
+	}
+
+	@Test
 	public void testNetworkOperatorName () {
 		assertNotNull("Expected network operator name to be something else than null", Device.getNetworkOperatorName());
 	}
@@ -196,7 +201,11 @@ public class DeviceTest {
 
 	@Test
 	public void testGetApkDigest () throws Exception {
-		assertNotNull("Host should not be null", Device.getApkDigest());
+		String digest = Device.getApkDigest();
+
+		assertNotNull("Apk Digest should not be null", digest);
+		assertEquals("Wrong size", 64, digest.length());
+		assertTrue("Contains illegal characters", digest.matches("^[0-9a-fA-F]+$"));
 	}
 
 	@Test

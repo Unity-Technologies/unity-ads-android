@@ -9,7 +9,8 @@ public class Purchasing {
         COMMAND,
         VERSION,
         CATALOG,
-        INITIALIZATION
+        INITIALIZATION,
+        EVENT
     }
 
     public static void initialize(IPurchasing purchasingInterface) {

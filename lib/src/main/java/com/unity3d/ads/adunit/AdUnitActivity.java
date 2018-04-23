@@ -96,8 +96,14 @@ public class AdUnitActivity extends Activity {
 		setOrientation(_orientation);
 		setSystemUiVisibility(_systemUiVisibility);
 
-		if (_views != null && Arrays.asList(_views).contains("videoplayer")) {
-			createVideoPlayer();
+		if(_views != null) {
+			if(Arrays.asList(_views).contains("videoplayer")) {
+				createVideoPlayer();
+			}
+
+			if(Arrays.asList(_views).contains("webplayer")) {
+				createWebPlayer();
+			}
 		}
 
 		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.ADUNIT, event, _activityId);
