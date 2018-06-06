@@ -222,7 +222,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 
 		assertTrue("Condition Variable was not opened: VIDEOPLAYER GENERIC ERROR or PREPARE ERROR was not received", success);
 		assertEquals("Event category should be videoplayer category", WebViewEventCategory.VIDEOPLAYER, mockWebViewApp.EVENT_CATEGORIES.get(0));
-		assertTrue("Events should contain GENERIC_ERROR", mockWebViewApp.EVENTS.contains(VideoPlayerEvent.GENERIC_ERROR));
+		assertEquals("Event ID should be generic error", VideoPlayerEvent.GENERIC_ERROR, mockWebViewApp.EVENTS.get(0));
 		assertEquals("The video url and the url received from the completed event should be the same", invalidUrl, mockWebViewApp.EVENT_PARAMS[0]);
 		assertTrue("Didn't get activity finish", waitForActivityFinish(activity));
 	}
