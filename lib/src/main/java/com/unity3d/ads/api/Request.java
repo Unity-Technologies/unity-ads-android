@@ -1,10 +1,7 @@
 package com.unity3d.ads.api;
 
 import com.unity3d.ads.log.DeviceLog;
-import com.unity3d.ads.request.IResolveHostListener;
 import com.unity3d.ads.request.IWebRequestListener;
-import com.unity3d.ads.request.ResolveHostError;
-import com.unity3d.ads.request.ResolveHostEvent;
 import com.unity3d.ads.request.WebRequest;
 import com.unity3d.ads.request.WebRequestError;
 import com.unity3d.ads.request.WebRequestEvent;
@@ -144,6 +141,24 @@ public class Request {
 		});
 
 		callback.invoke(id);
+	}
+
+	@WebViewExposed
+	public static void setConcurrentRequestCount(Integer count, final WebViewCallback callback) {
+		WebRequestThread.setConcurrentRequestCount(count);
+		callback.invoke();
+	}
+
+	@WebViewExposed
+	public static void setMaximumPoolSize(Integer count, final WebViewCallback callback) {
+		WebRequestThread.setMaximumPoolSize(count);
+		callback.invoke();
+	}
+
+	@WebViewExposed
+	public static void setKeepAliveTime(Integer milliseconds, final WebViewCallback callback) {
+		WebRequestThread.setKeepAliveTime(milliseconds.longValue());
+		callback.invoke();
 	}
 
 	public static JSONArray getResponseHeadersMap (Map<String, List<String>> responseHeaders) {

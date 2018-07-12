@@ -8,8 +8,8 @@ android {
     applicationId "com.unity3d.ads.example"
     minSdkVersion 9
     targetSdkVersion 23
-    versionCode = 2201
-    versionName = "2.2.1"
+    versionCode = 2300
+    versionName = "2.3.0"
   }
   buildTypes {
     release {

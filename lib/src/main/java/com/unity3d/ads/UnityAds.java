@@ -290,7 +290,11 @@ public final class UnityAds {
 	 * @param activity Current Android activity of calling app
 	 */
 	public static void show(final Activity activity) {
-		show(activity, Placement.getDefaultPlacement());
+		if(Placement.getDefaultPlacement() != null) {
+			show(activity, Placement.getDefaultPlacement());
+		} else {
+			handleShowError("", UnityAdsError.NOT_INITIALIZED, "Unity Ads default placement is not initialized");
+		}
 	}
 
 	/**
@@ -346,10 +350,7 @@ public final class UnityAds {
 				}
 			}).start();
 		} else {
-			if (placementId == null) {
-				throw new IllegalArgumentException("PlacementID is null");
-			}
-			else if (!isSupported()) {
+			if (!isSupported()) {
 				handleShowError(placementId, UnityAdsError.NOT_INITIALIZED, "Unity Ads is not supported for this device");
 			} else if(!isInitialized()) {
 				handleShowError(placementId, UnityAdsError.NOT_INITIALIZED, "Unity Ads is not initialized");
@@ -369,7 +370,12 @@ public final class UnityAds {
 				@Override
 				public void run() {
 					listener.onUnityAdsError(error, errorMessage);
-					listener.onUnityAdsFinish(placementId, FinishState.ERROR);
+
+					if(placementId != null) {
+						listener.onUnityAdsFinish(placementId, FinishState.ERROR);
+					} else {
+						listener.onUnityAdsFinish("", FinishState.ERROR);
+					}
 				}
 			});
 		}

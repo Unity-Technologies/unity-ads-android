@@ -656,20 +656,6 @@ public class Device {
 			}
 		}
 
-		try {
-			reader = new RandomAccessFile("/proc/uptime", "r");
-			String uptimeContent = reader.readLine();
-			retData.put("uptime", uptimeContent);
-		} catch (IOException e) {
-			DeviceLog.exception("Error while reading processor info: ", e);
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				DeviceLog.exception("Error closing RandomAccessFile", e);
-			}
-		}
-
 		return retData;
 	}
 }

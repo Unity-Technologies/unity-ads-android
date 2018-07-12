@@ -7,7 +7,6 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.unity3d.ads.api.Request;
 import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.request.WebRequest;
 import com.unity3d.ads.request.WebRequestError;
 import com.unity3d.ads.request.WebRequestEvent;
 import com.unity3d.ads.test.TestUtilities;

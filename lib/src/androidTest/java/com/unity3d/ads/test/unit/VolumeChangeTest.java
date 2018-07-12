@@ -38,6 +38,9 @@ public class VolumeChangeTest extends AdUnitActivityTestBaseClass {
 
 		ClientProperties.setApplicationContext(getInstrumentation().getTargetContext());
 
+		AudioManager am = (AudioManager)ClientProperties.getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+		am.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+
 		WebViewApp.setCurrentApp(new MockWebViewApp() {
 			private boolean allowEvents = true;
 			@Override
@@ -114,7 +117,6 @@ public class VolumeChangeTest extends AdUnitActivityTestBaseClass {
 
 		VolumeChange.registerListener(vcl);
 
-		AudioManager am = (AudioManager)ClientProperties.getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
 		am.setStreamVolume(AudioManager.STREAM_MUSIC, 1, 0);
 
 		cv = new ConditionVariable();

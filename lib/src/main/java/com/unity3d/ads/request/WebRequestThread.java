@@ -9,20 +9,41 @@ import com.unity3d.ads.log.DeviceLog;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-public class WebRequestThread extends Thread {
+public class WebRequestThread {
 
-	protected static final int MSG_REQUEST = 1;
-	private static WebRequestHandler _handler;
 	private static boolean _ready = false;
+	private static LinkedBlockingQueue<Runnable> _queue;
+	private static CancelableThreadPoolExecutor _pool;
+	private static int _corePoolSize = 1;
+	private static int _maximumPoolSize = 1;
+	private static long _keepAliveTime = 1000;
 	private static final Object _readyLock = new Object();
 
-	private static void init() {
-		WebRequestThread thread = new WebRequestThread();
-		thread.setName("UnityAdsWebRequestThread");
-		thread.start();
+	private static synchronized void init() {
+		_queue = new LinkedBlockingQueue<>();
+		_pool = new CancelableThreadPoolExecutor(_corePoolSize, _maximumPoolSize, _keepAliveTime, TimeUnit.MILLISECONDS, _queue);
+		_pool.prestartAllCoreThreads();
+
+		_queue.add(new Runnable() {
+			@Override
+			public void run() {
+				_ready = true;
+
+				synchronized(_readyLock) {
+					_readyLock.notify();
+				}
+			}
+		});
 
 		while(!_ready) {
 			try {
@@ -31,31 +52,36 @@ public class WebRequestThread extends Thread {
 				}
 			} catch (InterruptedException e) {
 				DeviceLog.debug("Couldn't synchronize thread");
+				return;
 			}
 		}
 	}
 
-	@Override
-	public void run() {
-		Looper.prepare();
+	public static synchronized void reset() {
+		cancel();
 
-		if (_handler == null) {
-			_handler = new WebRequestHandler();
+		if (_pool != null) {
+			_pool.shutdown();
+			try {
+				_pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+			} catch (InterruptedException e) {
+			}
+			_queue.clear();
+			_pool = null;
+			_queue = null;
+			_ready = false;
 		}
-
-		_ready = true;
-
-		synchronized(_readyLock) {
-			_readyLock.notify();
-		}
-
-		Looper.loop();
 	}
 
-	public static void cancel () {
-		if (_handler != null) {
-			_handler.removeMessages(MSG_REQUEST);
-			_handler.setCancelStatus(true);
+	public static synchronized void cancel () {
+		if (_pool != null) {
+			_pool.cancel();
+			for(Runnable runnable: _queue) {
+				if (runnable instanceof WebRequestRunnable)
+					((WebRequestRunnable)runnable).setCancelStatus(true);
+			}
+			_queue.clear();
+			_pool.purge();
 		}
 	}
 
@@ -64,10 +90,6 @@ public class WebRequestThread extends Thread {
 	}
 
 	public static synchronized void request (String url, WebRequest.RequestType requestType, Map<String, List<String>> headers, String requestBody, Integer connectTimeout, Integer readTimeout, IWebRequestListener listener) {
-		request(MSG_REQUEST, url, requestType, headers, requestBody, connectTimeout, readTimeout, listener, new WebRequestResultReceiver(_handler, listener));
-	}
-
-	public static synchronized void request (int msgWhat, String url, WebRequest.RequestType requestType, Map<String, List<String>> headers, String requestBody, Integer connectTimeout, Integer readTimeout, IWebRequestListener listener, WebRequestResultReceiver receiver) {
 		if(!_ready) {
 			init();
 		}
@@ -77,27 +99,33 @@ public class WebRequestThread extends Thread {
 			return;
 		}
 
-		Bundle params = new Bundle();
-		params.putString("url", url);
-		params.putString("type", requestType.name());
-		params.putString("body", requestBody);
-		params.putParcelable("receiver", receiver);
-		params.putInt("connectTimeout", connectTimeout);
-		params.putInt("readTimeout", readTimeout);
+		_queue.add(new WebRequestRunnable(url, requestType.name(), requestBody, connectTimeout, readTimeout, headers, listener));
+	}
 
-		if (headers != null) {
-			for (String s : headers.keySet()) {
-				String[] h = new String[headers.get(s).size()];
-				params.putStringArray(s, headers.get(s).toArray(h));
-			}
+	public static synchronized void setConcurrentRequestCount(int count) {
+		_corePoolSize = count;
+		_maximumPoolSize = _corePoolSize;
+
+		if (_pool != null) {
+			_pool.setCorePoolSize(_corePoolSize);
+			_pool.setMaximumPoolSize(_maximumPoolSize);
 		}
+	}
 
-		Message msg = new Message();
-		msg.what = msgWhat;
-		msg.setData(params);
+	public static synchronized void setMaximumPoolSize(int count) {
+		_maximumPoolSize = count;
 
-		_handler.setCancelStatus(false);
-		_handler.sendMessage(msg);
+		if (_pool != null) {
+			_pool.setMaximumPoolSize(_maximumPoolSize);
+		}
+	}
+
+	public static synchronized void setKeepAliveTime(long milliseconds) {
+		_keepAliveTime = milliseconds;
+
+		if (_pool != null) {
+			_pool.setKeepAliveTime(_keepAliveTime, TimeUnit.MILLISECONDS);
+		}
 	}
 
 	public static synchronized boolean resolve (final String host, final IResolveHostListener listener) {

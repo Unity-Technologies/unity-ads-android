@@ -30,7 +30,6 @@ import org.junit.runners.Suite;
   StorageGeneralTest.class,
   StorageMemoryTest.class,
   VideoViewTest.class,
-  WebRequestTest.class,
   WebViewAppTest.class,
   WebViewBridgeInterfaceTest.class,
   WebViewBridgeTest.class,
@@ -39,7 +38,8 @@ import org.junit.runners.Suite;
   VolumeChangeTest.class,
   UtilitiesTest.class,
   WebPlayerTest.class,
-  PreferencesTest.class
+  PreferencesTest.class,
+  WebRequestThreadPoolTest.class
 })
 
 public class UnitTestSuite {}

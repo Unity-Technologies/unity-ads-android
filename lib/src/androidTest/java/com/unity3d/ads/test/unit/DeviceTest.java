@@ -227,9 +227,6 @@ public class DeviceTest {
 
 		assertNotNull("Stats should not be null", data.get("stat"));
 		assertNotEquals("Stats should not be empty", data.get("stat"), "");
-
-		assertNotNull("Uptime should not be null", data.get("uptime"));
-		assertNotEquals("Uptime should not be empty", data.get("uptime"), "");
 	}
 
 	@Test
