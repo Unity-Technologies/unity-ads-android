@@ -3,9 +3,9 @@ package com.unity3d.ads.test.unit;
 import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
-import com.unity3d.ads.misc.Utilities;
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.properties.SdkProperties;
+import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.properties.SdkProperties;
 
 import org.json.JSONObject;
 import org.junit.Before;

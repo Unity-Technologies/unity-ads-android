@@ -10,16 +10,16 @@ import android.support.test.filters.RequiresDevice;
 import android.support.test.filters.SdkSuppress;
 import android.view.ViewGroup;
 
-import com.unity3d.ads.api.DeviceInfo;
-import com.unity3d.ads.device.IVolumeChangeListener;
-import com.unity3d.ads.device.VolumeChange;
-import com.unity3d.ads.log.DeviceLog;
-import com.unity3d.ads.properties.ClientProperties;
+import com.unity3d.services.core.api.DeviceInfo;
+import com.unity3d.services.core.device.IVolumeChangeListener;
+import com.unity3d.services.core.device.VolumeChange;
+import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.ads.test.TestUtilities;
-import com.unity3d.ads.video.VideoPlayerEvent;
-import com.unity3d.ads.video.VideoPlayerView;
-import com.unity3d.ads.webview.WebViewApp;
-import com.unity3d.ads.webview.WebViewEventCategory;
+import com.unity3d.services.ads.video.VideoPlayerEvent;
+import com.unity3d.services.ads.video.VideoPlayerView;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.WebViewEventCategory;
 
 import org.junit.Before;
 import org.junit.Test;

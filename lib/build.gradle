@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
-  compileSdkVersion 25
-  buildToolsVersion '27.0.1'
+  compileSdkVersion 26
+  buildToolsVersion '28.0.2'
   com.android.ddmlib.DdmPreferences.setLogLevel("verbose")
   com.android.ddmlib.DdmPreferences.setTimeOut(10 * 60000)
 
@@ -10,15 +10,16 @@ android {
 
   defaultConfig {
     minSdkVersion 9
-    targetSdkVersion 23
-    versionCode = 2300
-    versionName = "2.3.0"
+    targetSdkVersion 26
+    versionCode = 3000
+    versionName = "3.0.0"
 
     setProperty("archivesBaseName", "unity-ads")
 
     buildConfigField 'String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"' + versionName + '"')
 
     testBuildType "coverage"
+
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     testInstrumentationRunnerArguments disableAnalytics: 'true' // Won't work yet, see: https://code.google.com/p/android/issues/detail?id=188241
   }
@@ -50,9 +51,11 @@ android {
 
 dependencies {
   testImplementation 'junit:junit:4.12'
-  androidTestImplementation 'org.mockito:mockito-core:1.10.19'
-  androidTestImplementation 'com.android.support.test:runner:1.0.1'
-  androidTestImplementation 'com.android.support.test:rules:1.0.1'
+  androidTestImplementation 'org.mockito:mockito-core:2.19.1'
+  androidTestImplementation 'org.mockito:mockito-android:2.19.1'
+  androidTestImplementation 'com.android.support.test:runner:1.0.2'
+  androidTestImplementation 'com.android.support.test:rules:1.0.2'
+  compileOnly 'com.google.ar:core:1.0.0'
 }
 
 android.testVariants.all { variant ->
@@ -66,11 +69,13 @@ android.libraryVariants.all { variant ->
         description "Generates Javadoc for $variant.name."
         source = variant.javaCompiler.source
         ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
-        classpath = files(variant.javaCompiler.classpath.files) + files(ext.androidJar)
+        doFirst {
+          classpath = files(variant.javaCompiler.classpath.files) + files(ext.androidJar)
+        }
 		options {
 		       links "http://docs.oracle.com/javase/7/docs/api/"
 		       linksOffline "http://developer.android.com/reference","${android.sdkDirectory}/docs/reference"
-		     }
+        }
         exclude '**/R.java'
 		destinationDir = file("../javadoc/")
     }

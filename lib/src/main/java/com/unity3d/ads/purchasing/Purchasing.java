@@ -1,7 +1,7 @@
 package com.unity3d.ads.purchasing;
 
-import com.unity3d.ads.webview.WebViewApp;
-import com.unity3d.ads.webview.WebViewEventCategory;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.WebViewEventCategory;
 
 public class Purchasing {
 
@@ -14,7 +14,7 @@ public class Purchasing {
     }
 
     public static void initialize(IPurchasing purchasingInterface) {
-        com.unity3d.ads.api.Purchasing.setPurchasingInterface(purchasingInterface);
+        com.unity3d.services.ads.api.Purchasing.setPurchasingInterface(purchasingInterface);
     }
 
     public static void dispatchReturnEvent(int event, String payload) {

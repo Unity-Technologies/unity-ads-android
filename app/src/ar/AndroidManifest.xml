@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.unity3d.ads.example">
+    <uses-permission android:name="android.permission.CAMERA" />
+    <application>
+        <meta-data android:name="com.google.ar.core" android:value="optional" />
+    </application>
+</manifest>

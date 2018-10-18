@@ -3,8 +3,8 @@ package com.unity3d.ads.test.unit;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.placement.Placement;
-import com.unity3d.ads.properties.SdkProperties;
+import com.unity3d.services.ads.placement.Placement;
+import com.unity3d.services.core.properties.SdkProperties;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

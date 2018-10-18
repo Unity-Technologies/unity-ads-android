@@ -5,14 +5,15 @@ import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.configuration.Configuration;
-import com.unity3d.ads.configuration.InitializeThread;
-import com.unity3d.ads.misc.Utilities;
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.properties.SdkProperties;
-import com.unity3d.ads.webview.WebView;
-import com.unity3d.ads.webview.bridge.WebViewCallback;
-import com.unity3d.ads.webview.bridge.WebViewExposed;
+import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.IModuleConfiguration;
+import com.unity3d.services.core.configuration.InitializeThread;
+import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.properties.SdkProperties;
+import com.unity3d.services.core.webview.WebView;
+import com.unity3d.services.core.webview.bridge.WebViewCallback;
+import com.unity3d.services.core.webview.bridge.WebViewExposed;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,6 +21,9 @@ import org.junit.runner.RunWith;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -58,31 +62,7 @@ public class HybridTest {
     SdkProperties.setTestMode(_testMode);
     SdkProperties.setConfigUrl(SdkProperties.getDefaultConfigUrl("test"));
 
-    Configuration configuration = new Configuration();
-    final Class[] apiClassList = {
-      com.unity3d.ads.api.AdUnit.class,
-      com.unity3d.ads.api.Broadcast.class,
-      com.unity3d.ads.api.Cache.class,
-      com.unity3d.ads.api.Connectivity.class,
-      com.unity3d.ads.api.DeviceInfo.class,
-      com.unity3d.ads.api.Listener.class,
-      com.unity3d.ads.api.Storage.class,
-      com.unity3d.ads.api.Sdk.class,
-      com.unity3d.ads.api.Request.class,
-      com.unity3d.ads.api.Resolve.class,
-      com.unity3d.ads.api.VideoPlayer.class,
-      com.unity3d.ads.api.Placement.class,
-      com.unity3d.ads.api.Intent.class,
-      com.unity3d.ads.api.WebPlayer.class,
-      com.unity3d.ads.test.hybrid.HybridTest.class,
-      com.unity3d.ads.api.Lifecycle.class,
-      com.unity3d.ads.api.Preferences.class,
-      com.unity3d.ads.api.Purchasing.class,
-      com.unity3d.ads.api.SensorInfo.class,
-      com.unity3d.ads.test.hybrid.HybridTest.class
-    };
-
-    configuration.setWebAppApiClassList(apiClassList);
+    HybridTestConfiguration configuration = new HybridTestConfiguration();
     InitializeThread.initialize(configuration);
 
     if(!_resultSemaphore.tryAcquire(10, TimeUnit.MINUTES)) {
@@ -96,6 +76,15 @@ public class HybridTest {
   public static void onTestResult(Integer failures, @SuppressWarnings("unused") WebViewCallback callback) {
     _failures = failures;
     _resultSemaphore.release();
+  }
+
+  private class HybridTestConfiguration extends Configuration {
+    @Override
+    public String[] getModuleConfigurationList () {
+      ArrayList<String> moduleConfigurationList = new ArrayList<>(Arrays.asList(super.getModuleConfigurationList()));
+      moduleConfigurationList.add("com.unity3d.ads.test.hybrid.HybridTestModuleConfiguration");
+      return moduleConfigurationList.toArray(new String[moduleConfigurationList.size()]);
+    }
   }
 
 }

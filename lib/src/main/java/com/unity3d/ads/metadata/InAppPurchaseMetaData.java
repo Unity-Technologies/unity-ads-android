@@ -2,10 +2,10 @@ package com.unity3d.ads.metadata;
 
 import android.content.Context;
 
-import com.unity3d.ads.device.Storage;
-import com.unity3d.ads.device.StorageEvent;
-import com.unity3d.ads.device.StorageManager;
-import com.unity3d.ads.log.DeviceLog;
+import com.unity3d.services.core.device.Storage;
+import com.unity3d.services.core.device.StorageEvent;
+import com.unity3d.services.core.device.StorageManager;
+import com.unity3d.services.core.log.DeviceLog;
 
 import org.json.JSONArray;
 import org.json.JSONException;

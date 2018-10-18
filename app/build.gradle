@@ -1,16 +1,27 @@
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion 25
-  buildToolsVersion '27.0.1'
+  compileSdkVersion 26
+  buildToolsVersion '28.0.2'
 
   defaultConfig {
     applicationId "com.unity3d.ads.example"
-    minSdkVersion 9
-    targetSdkVersion 23
-    versionCode = 2300
-    versionName = "2.3.0"
+    minSdkVersion 14
+    targetSdkVersion 26
+    versionCode = 3000
+    versionName = "3.0.0"
   }
+
+  flavorDimensions "arEnabled"
+  productFlavors {
+    ar {
+      dimension "arEnabled"
+    }
+    vanilla {
+      dimension "arEnabled"
+    }
+  }
+
   buildTypes {
     release {
       minifyEnabled false
@@ -25,6 +36,7 @@ android {
 
 dependencies {
   implementation fileTree(include: ['*.jar'], dir: 'libs')
-  implementation 'com.android.support:appcompat-v7:25.4.0'
+  implementation 'com.android.support:appcompat-v7:26.1.0'
+  arImplementation 'com.google.ar:core:1.4.0'
   implementation project(':lib')
 }

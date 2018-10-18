@@ -5,8 +5,8 @@ import android.content.SharedPreferences;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.preferences.AndroidPreferences;
-import com.unity3d.ads.properties.ClientProperties;
+import com.unity3d.services.core.preferences.AndroidPreferences;
+import com.unity3d.services.core.properties.ClientProperties;
 
 import org.junit.Before;
 import org.junit.Test;

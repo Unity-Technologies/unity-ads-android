@@ -1,6 +1,6 @@
 package com.unity3d.ads.test;
 
-import com.unity3d.ads.log.DeviceLog;
+import com.unity3d.services.core.log.DeviceLog;
 
 import java.io.BufferedReader;
 import java.io.File;

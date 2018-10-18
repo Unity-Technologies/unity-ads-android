@@ -7,11 +7,11 @@ import android.os.ConditionVariable;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.lifecycle.LifecycleEvent;
-import com.unity3d.ads.lifecycle.LifecycleListener;
-import com.unity3d.ads.log.DeviceLog;
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.webview.WebViewApp;
+import com.unity3d.services.core.lifecycle.LifecycleEvent;
+import com.unity3d.services.core.lifecycle.LifecycleListener;
+import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.webview.WebViewApp;
 
 import org.junit.After;
 import org.junit.Before;

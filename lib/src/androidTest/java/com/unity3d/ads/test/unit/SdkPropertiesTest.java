@@ -4,8 +4,9 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.unity3d.ads.BuildConfig;
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.properties.SdkProperties;
+import com.unity3d.services.ads.properties.AdsProperties;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.properties.SdkProperties;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -96,8 +97,8 @@ public class SdkPropertiesTest {
 	public void testShowTimeout() {
 		int timeout = 1234;
 
-		SdkProperties.setShowTimeout(timeout);
-		assertEquals("show timeout not what it should be", timeout, SdkProperties.getShowTimeout());
+		AdsProperties.setShowTimeout(timeout);
+		assertEquals("show timeout not what it should be", timeout, AdsProperties.getShowTimeout());
 	}
 
 	@Test

@@ -2,7 +2,7 @@ package com.unity3d.ads.test.unit;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.configuration.EnvironmentCheck;
+import com.unity3d.services.core.configuration.EnvironmentCheck;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

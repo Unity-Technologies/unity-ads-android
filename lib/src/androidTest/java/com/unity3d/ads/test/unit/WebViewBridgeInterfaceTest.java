@@ -6,16 +6,16 @@ import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.configuration.Configuration;
-import com.unity3d.ads.properties.ClientProperties;
+import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.ads.test.TestUtilities;
-import com.unity3d.ads.webview.WebView;
-import com.unity3d.ads.webview.WebViewApp;
-import com.unity3d.ads.webview.bridge.CallbackStatus;
-import com.unity3d.ads.webview.bridge.NativeCallback;
-import com.unity3d.ads.webview.bridge.WebViewBridgeInterface;
-import com.unity3d.ads.webview.bridge.WebViewCallback;
-import com.unity3d.ads.webview.bridge.WebViewExposed;
+import com.unity3d.services.core.webview.WebView;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.bridge.CallbackStatus;
+import com.unity3d.services.core.webview.bridge.NativeCallback;
+import com.unity3d.services.core.webview.bridge.WebViewBridgeInterface;
+import com.unity3d.services.core.webview.bridge.WebViewCallback;
+import com.unity3d.services.core.webview.bridge.WebViewExposed;
 
 import org.json.JSONException;
 import org.junit.After;

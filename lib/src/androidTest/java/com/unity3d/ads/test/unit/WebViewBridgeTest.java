@@ -6,29 +6,27 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.configuration.Configuration;
+import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.ads.test.TestUtilities;
-import com.unity3d.ads.webview.WebViewApp;
-import com.unity3d.ads.webview.bridge.CallbackStatus;
-import com.unity3d.ads.webview.bridge.NativeCallback;
-import com.unity3d.ads.webview.bridge.WebViewBridge;
-import com.unity3d.ads.webview.bridge.WebViewBridgeError;
-import com.unity3d.ads.webview.bridge.WebViewCallback;
-import com.unity3d.ads.webview.bridge.WebViewExposed;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.bridge.CallbackStatus;
+import com.unity3d.services.core.webview.bridge.NativeCallback;
+import com.unity3d.services.core.webview.bridge.WebViewBridge;
+import com.unity3d.services.core.webview.bridge.WebViewBridgeError;
+import com.unity3d.services.core.webview.bridge.WebViewCallback;
+import com.unity3d.services.core.webview.bridge.WebViewExposed;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 @RunWith(AndroidJUnit4.class)

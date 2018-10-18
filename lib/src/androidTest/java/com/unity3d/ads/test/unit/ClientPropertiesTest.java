@@ -9,7 +9,8 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.properties.ClientProperties;
+import com.unity3d.services.ads.properties.AdsProperties;
+import com.unity3d.services.core.properties.ClientProperties;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -31,7 +32,7 @@ public class ClientPropertiesTest {
 		ClientProperties.setApplicationContext(null);
 		ClientProperties.setActivity(null);
 		ClientProperties.setGameId(null);
-		ClientProperties.setListener(null);
+		AdsProperties.setListener(null);
 	}
 
 	@Test
@@ -87,8 +88,8 @@ public class ClientPropertiesTest {
 			}
 		};
 
-		ClientProperties.setListener(listener);
-		assertEquals("Listener was not the same as expected", listener, ClientProperties.getListener());
+		AdsProperties.setListener(listener);
+		assertEquals("Listener was not the same as expected", listener, AdsProperties.getListener());
 	}
 
 	public class MockActivity extends Activity {

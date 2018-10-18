@@ -3,7 +3,7 @@ package com.unity3d.ads.test.unit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.device.AdvertisingId;
+import com.unity3d.services.core.device.AdvertisingId;
 
 import org.junit.BeforeClass;
 import org.junit.Ignore;

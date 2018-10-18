@@ -6,25 +6,25 @@
 
     <application>
         <activity
-            android:name="com.unity3d.ads.adunit.AdUnitActivity"
+            android:name="com.unity3d.services.ads.adunit.AdUnitActivity"
             android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:hardwareAccelerated="true" />
 
         <activity
-            android:name="com.unity3d.ads.adunit.AdUnitTransparentActivity"
+            android:name="com.unity3d.services.ads.adunit.AdUnitTransparentActivity"
             android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
             android:hardwareAccelerated="true" />
 
         <activity
-            android:name="com.unity3d.ads.adunit.AdUnitTransparentSoftwareActivity"
+            android:name="com.unity3d.services.ads.adunit.AdUnitTransparentSoftwareActivity"
             android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
             android:hardwareAccelerated="false" />
 
         <activity
-            android:name="com.unity3d.ads.adunit.AdUnitSoftwareActivity"
+            android:name="com.unity3d.services.ads.adunit.AdUnitSoftwareActivity"
             android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:hardwareAccelerated="false" />

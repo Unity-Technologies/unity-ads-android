@@ -9,20 +9,19 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.ActivityInstrumentationTestCase2;
 
-import com.unity3d.ads.adunit.AdUnitActivity;
-import com.unity3d.ads.log.DeviceLog;
-import com.unity3d.ads.video.VideoPlayerView;
-import com.unity3d.ads.webview.WebView;
-import com.unity3d.ads.webview.WebViewApp;
-import com.unity3d.ads.webview.bridge.CallbackStatus;
-import com.unity3d.ads.webview.bridge.Invocation;
+import com.unity3d.services.ads.adunit.AdUnitActivity;
+import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.ads.video.VideoPlayerView;
+import com.unity3d.services.core.webview.WebView;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.bridge.CallbackStatus;
+import com.unity3d.services.core.webview.bridge.Invocation;
 import android.support.test.rule.ActivityTestRule;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.lang.reflect.Method;
@@ -75,6 +74,8 @@ public class AdUnitActivityTestBaseClass extends ActivityInstrumentationTestCase
 		public ArrayList<Enum> EVENT_CATEGORIES = new ArrayList<>();
 		public ArrayList<Enum> EVENTS = new ArrayList<>();
 
+		private Configuration _configuration = new Configuration();
+
 		@Override
 		public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
 			return true;
@@ -108,6 +109,11 @@ public class AdUnitActivityTestBaseClass extends ActivityInstrumentationTestCase
 		@Override
 		public boolean invokeMethod(String className, String methodName, Method callback, Object... params) {
 			return true;
+		}
+
+		@Override
+		public Configuration getConfiguration() {
+			return _configuration;
 		}
 	}
 

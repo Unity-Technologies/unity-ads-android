@@ -16,11 +16,11 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.ViewGroup;
 
-import com.unity3d.ads.log.DeviceLog;
-import com.unity3d.ads.properties.ClientProperties;
+import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.ads.test.TestUtilities;
-import com.unity3d.ads.webplayer.WebPlayer;
-import com.unity3d.ads.webview.WebViewApp;
+import com.unity3d.services.ads.webplayer.WebPlayer;
+import com.unity3d.services.core.webview.WebViewApp;
 
 @RunWith(AndroidJUnit4.class)
 public class WebPlayerTest extends AdUnitActivityTestBaseClass {
@@ -71,7 +71,7 @@ public class WebPlayerTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				_webPlayer = new WebPlayer(activity, null, null);
+				_webPlayer = new WebPlayer(activity, "webplayer", null, null);
 				activity.addContentView(_webPlayer, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -126,7 +126,7 @@ public class WebPlayerTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				_webPlayer = new WebPlayer(activity, webSettings, webPlayerSettings);
+				_webPlayer = new WebPlayer(activity, "webplayer", webSettings, webPlayerSettings);
 				activity.addContentView(_webPlayer, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -180,7 +180,7 @@ public class WebPlayerTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				_webPlayer = new WebPlayer(activity, webSettings, webPlayerSettings);
+				_webPlayer = new WebPlayer(activity, "webplayer", webSettings, webPlayerSettings);
 				activity.addContentView(_webPlayer, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -235,7 +235,7 @@ public class WebPlayerTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				_webPlayer = new WebPlayer(activity, null, null);
+				_webPlayer = new WebPlayer(activity, "webplayer", null, null);
 				_webPlayer.setEventSettings(eventSettings);
 				activity.addContentView(_webPlayer, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
@@ -313,7 +313,7 @@ public class WebPlayerTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				_webPlayer = new WebPlayer(activity, null, null);
+				_webPlayer = new WebPlayer(activity, "webplayer", null, null);
 				_webPlayer.setEventSettings(eventSettings);
 				activity.addContentView(_webPlayer, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
@@ -384,7 +384,7 @@ public class WebPlayerTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				_webPlayer = new WebPlayer(activity, null, null);
+				_webPlayer = new WebPlayer(activity, "webplayer", null, null);
 				_webPlayer.setEventSettings(null);
 				activity.addContentView(_webPlayer, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();

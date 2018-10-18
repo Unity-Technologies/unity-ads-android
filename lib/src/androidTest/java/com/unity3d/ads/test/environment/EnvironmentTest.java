@@ -9,8 +9,8 @@ import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 import android.test.ActivityInstrumentationTestCase2;
 
-import com.unity3d.ads.adunit.AdUnitActivity;
-import com.unity3d.ads.request.WebRequest;
+import com.unity3d.services.ads.adunit.AdUnitActivity;
+import com.unity3d.services.core.request.WebRequest;
 import com.unity3d.ads.test.TestUtilities;
 
 import org.junit.Before;
@@ -18,7 +18,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.io.IOException;
 
 @RunWith(AndroidJUnit4.class)
 public class EnvironmentTest extends ActivityInstrumentationTestCase2<AdUnitActivity> {

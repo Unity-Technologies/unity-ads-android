@@ -3,15 +3,13 @@ package com.unity3d.ads.test.unit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.device.Storage;
-import com.unity3d.ads.device.StorageManager;
-import com.unity3d.ads.log.DeviceLog;
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.properties.SdkProperties;
+import com.unity3d.services.core.device.Storage;
+import com.unity3d.services.core.device.StorageManager;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.properties.SdkProperties;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

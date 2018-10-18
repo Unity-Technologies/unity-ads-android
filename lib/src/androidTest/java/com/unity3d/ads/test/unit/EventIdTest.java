@@ -3,8 +3,8 @@ package com.unity3d.ads.test.unit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.device.Device;
-import com.unity3d.ads.properties.ClientProperties;
+import com.unity3d.services.core.device.Device;
+import com.unity3d.services.core.properties.ClientProperties;
 
 import org.junit.BeforeClass;
 import org.junit.Test;

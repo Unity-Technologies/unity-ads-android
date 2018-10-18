@@ -6,14 +6,13 @@ import android.os.ConditionVariable;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.broadcast.BroadcastEvent;
-import com.unity3d.ads.broadcast.BroadcastEventReceiver;
-import com.unity3d.ads.broadcast.BroadcastMonitor;
-import com.unity3d.ads.log.DeviceLog;
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.properties.SdkProperties;
-import com.unity3d.ads.webview.WebViewApp;
-import com.unity3d.ads.webview.WebViewEventCategory;
+import com.unity3d.services.core.broadcast.BroadcastEvent;
+import com.unity3d.services.core.broadcast.BroadcastEventReceiver;
+import com.unity3d.services.core.broadcast.BroadcastMonitor;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.properties.SdkProperties;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.WebViewEventCategory;
 
 import org.json.JSONException;
 import org.json.JSONObject;

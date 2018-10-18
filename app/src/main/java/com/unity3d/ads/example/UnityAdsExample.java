@@ -16,16 +16,15 @@ import android.widget.Toast;
 
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.log.DeviceLog;
+import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.ads.metadata.MediationMetaData;
 import com.unity3d.ads.metadata.MetaData;
 import com.unity3d.ads.metadata.PlayerMetaData;
-import com.unity3d.ads.misc.Utilities;
-import com.unity3d.ads.properties.SdkProperties;
-import com.unity3d.ads.webview.WebView;
+import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.properties.SdkProperties;
+import com.unity3d.services.core.webview.WebView;
 
 public class UnityAdsExample extends Activity {
-
 	final private String defaultGameId = "14851";
 
 	private String interstitialPlacementId;

@@ -5,21 +5,22 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SdkSuppress;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.api.Request;
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.request.WebRequestError;
-import com.unity3d.ads.request.WebRequestEvent;
+import com.unity3d.services.core.api.Request;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.request.WebRequestError;
+import com.unity3d.services.core.request.WebRequestEvent;
 import com.unity3d.ads.test.TestUtilities;
-import com.unity3d.ads.webview.WebViewApp;
-import com.unity3d.ads.webview.WebViewEventCategory;
-import com.unity3d.ads.webview.bridge.CallbackStatus;
-import com.unity3d.ads.webview.bridge.Invocation;
-import com.unity3d.ads.webview.bridge.WebViewCallback;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.WebViewEventCategory;
+import com.unity3d.services.core.webview.bridge.CallbackStatus;
+import com.unity3d.services.core.webview.bridge.Invocation;
+import com.unity3d.services.core.webview.bridge.WebViewCallback;
 
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
@@ -371,6 +372,7 @@ public class RequestTest {
 	}
 
 	@SdkSuppress(minSdkVersion = 16)
+	@Ignore
 	@Test
 	public void testValidGetWithInvalidHeader () throws Exception {
 		final ConditionVariable cv = new ConditionVariable();
@@ -407,6 +409,7 @@ public class RequestTest {
 	}
 
 	@SdkSuppress(minSdkVersion = 16)
+	@Ignore
 	@Test
 	public void testValidPostWithInvalidHeader () throws Exception {
 		final ConditionVariable cv = new ConditionVariable();

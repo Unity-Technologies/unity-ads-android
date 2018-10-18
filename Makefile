@@ -34,7 +34,7 @@ push-test-server-address:
 	adb push testServerAddress.txt /data/local/tmp
 
 push-test-server-address-hosted:
-	echo "http://terminal.applifier.info:18080" > testServerAddress.txt
+	echo "http://unity-ads-test-server.unityads.unity3d.com" > testServerAddress.txt
 	adb push testServerAddress.txt /data/local/tmp
 
 push-test-server-address-local:

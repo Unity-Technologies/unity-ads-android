@@ -10,19 +10,18 @@ import android.support.test.filters.SdkSuppress;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.ViewGroup;
 
-import com.unity3d.ads.api.VideoPlayer;
-import com.unity3d.ads.log.DeviceLog;
+import com.unity3d.services.ads.api.VideoPlayer;
+import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.ads.test.TestUtilities;
-import com.unity3d.ads.video.VideoPlayerError;
-import com.unity3d.ads.video.VideoPlayerEvent;
-import com.unity3d.ads.video.VideoPlayerView;
-import com.unity3d.ads.webview.WebViewApp;
-import com.unity3d.ads.webview.WebViewEventCategory;
-import com.unity3d.ads.webview.bridge.CallbackStatus;
-import com.unity3d.ads.webview.bridge.Invocation;
-import com.unity3d.ads.webview.bridge.WebViewCallback;
+import com.unity3d.services.ads.video.VideoPlayerError;
+import com.unity3d.services.ads.video.VideoPlayerEvent;
+import com.unity3d.services.ads.video.VideoPlayerView;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.WebViewEventCategory;
+import com.unity3d.services.core.webview.bridge.CallbackStatus;
+import com.unity3d.services.core.webview.bridge.Invocation;
+import com.unity3d.services.core.webview.bridge.WebViewCallback;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

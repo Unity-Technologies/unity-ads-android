@@ -7,15 +7,15 @@ import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.configuration.Configuration;
-import com.unity3d.ads.log.DeviceLog;
-import com.unity3d.ads.properties.ClientProperties;
+import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.ads.test.TestUtilities;
-import com.unity3d.ads.webview.WebView;
-import com.unity3d.ads.webview.WebViewApp;
-import com.unity3d.ads.webview.bridge.Invocation;
-import com.unity3d.ads.webview.bridge.WebViewCallback;
-import com.unity3d.ads.webview.bridge.WebViewExposed;
+import com.unity3d.services.core.webview.WebView;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.bridge.Invocation;
+import com.unity3d.services.core.webview.bridge.WebViewCallback;
+import com.unity3d.services.core.webview.bridge.WebViewExposed;
 
 import org.junit.Before;
 import org.junit.BeforeClass;

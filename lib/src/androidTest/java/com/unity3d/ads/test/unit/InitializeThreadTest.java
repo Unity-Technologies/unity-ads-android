@@ -7,14 +7,14 @@ import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.configuration.Configuration;
-import com.unity3d.ads.configuration.InitializeThread;
-import com.unity3d.ads.misc.Utilities;
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.properties.SdkProperties;
+import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.InitializeThread;
+import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.ads.test.TestUtilities;
-import com.unity3d.ads.webview.WebView;
-import com.unity3d.ads.webview.WebViewApp;
+import com.unity3d.services.core.webview.WebView;
+import com.unity3d.services.core.webview.WebViewApp;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,8 +32,6 @@ import static org.junit.Assert.assertTrue;
 public class InitializeThreadTest {
 	private static final String _testConfigUrl = "https://www.example.net/test/webview.html";
 	private String _testConfigHash = "12345";
-	private Class[] _apiClassList = {com.unity3d.ads.api.Sdk.class};
-
 	private WebView webview;
 
 	@Before
@@ -62,15 +60,14 @@ public class InitializeThreadTest {
 		SdkProperties.setInitialized(true);
 
 		Configuration initConfig = new Configuration();
-		initConfig.setWebAppApiClassList(_apiClassList);
 		InitializeThread.InitializeStateReset state = new InitializeThread.InitializeStateReset(initConfig);
 		Object nextState = state.execute();
 
 		assertFalse("Init state reset test: SDK is initialized after SDK was reset", SdkProperties.isInitialized());
 		assertFalse("Init state reset test: webapp is loaded after SDK was reset", WebViewApp.getCurrentApp().isWebAppLoaded());
-		assertTrue("Init state reset test: next state is not config", nextState instanceof InitializeThread.InitializeStateAdBlockerCheck);
+		assertTrue("Init state reset test: next state is not config", nextState instanceof InitializeThread.InitializeStateInitModules);
 
-		Configuration config = ((InitializeThread.InitializeStateAdBlockerCheck)nextState).getConfiguration();
+		Configuration config = ((InitializeThread.InitializeStateInitModules)nextState).getConfiguration();
 
 		assertEquals("Init state reset test: next state config url is not set", config.getConfigUrl(), SdkProperties.getConfigUrl());
 	}
@@ -79,14 +76,14 @@ public class InitializeThreadTest {
 	public void testInitializeStateAdBlockerCheck() {
 		Configuration goodConfig = new Configuration();
 		goodConfig.setConfigUrl("http://www.unity3d.com/test");
-		InitializeThread.InitializeStateAdBlockerCheck state = new InitializeThread.InitializeStateAdBlockerCheck(goodConfig);
+		InitializeThread.InitializeStateInitModules state = new InitializeThread.InitializeStateInitModules(goodConfig);
 		Object nextState = state.execute();
 
 		assertTrue("Init state ad blocker check test: next state is not load config", nextState instanceof InitializeThread.InitializeStateConfig);
 
 		Configuration badConfig = new Configuration();
 		badConfig.setConfigUrl("http://localhost/test");
-		InitializeThread.InitializeStateAdBlockerCheck state2 = new InitializeThread.InitializeStateAdBlockerCheck(badConfig);
+		InitializeThread.InitializeStateInitModules state2 = new InitializeThread.InitializeStateInitModules(badConfig);
 		Object nextState2 = state2.execute();
 
 		assertNull("Init state ad blocker check test: next state is not null", nextState2);
@@ -111,7 +108,6 @@ public class InitializeThreadTest {
 	@Test
 	public void testInitializeStateLoadCache() {
 		Configuration bogusConfig = new Configuration();
-		bogusConfig.setWebAppApiClassList(_apiClassList);
 		bogusConfig.setWebViewUrl(_testConfigUrl);
 		bogusConfig.setWebViewHash(_testConfigHash);
 
@@ -132,7 +128,6 @@ public class InitializeThreadTest {
 		String webData = "<p>Test web app</p>\n"; // Contents of testwebapp.html on test server
 		String webHash = Utilities.Sha256(webData);
 		Configuration webConfig = new Configuration();
-		webConfig.setWebAppApiClassList(_apiClassList);
 		webConfig.setWebViewUrl(webUrl);
 		webConfig.setWebViewHash(webHash);
 
@@ -171,12 +166,11 @@ public class InitializeThreadTest {
 
 		// This is very hackish but also reproducing the full init procedure would be very fragile
 		String data = "<script>var nativebridge = new Object(); nativebridge.handleCallback = new function() { " +
-				"webviewbridge.handleInvocation(\"[['com.unity3d.ads.api.Sdk','initComplete', [], 'CALLBACK_01']]\");" +
+				"webviewbridge.handleInvocation(\"[['com.unity3d.services.core.api.Sdk','initComplete', [], 'CALLBACK_01']]\");" +
 				"}</script>";
 		String hash = Utilities.Sha256(data);
 
 		Configuration config = new Configuration();
-		config.setWebAppApiClassList(_apiClassList);
 		config.setWebViewUrl(url);
 		config.setWebViewHash(hash);
 		config.setWebViewData(hash);
@@ -189,7 +183,19 @@ public class InitializeThreadTest {
 
 	@Test
 	public void testInitializeStateComplete() {
-		InitializeThread.InitializeStateComplete state = new InitializeThread.InitializeStateComplete();
+		String url = "http://www.example.net/handlecallback.html"; // This url is never used
+
+		// This is very hackish but also reproducing the full init procedure would be very fragile
+		String data = "<script>var nativebridge = new Object(); nativebridge.handleCallback = new function() { " +
+				"webviewbridge.handleInvocation(\"[['com.unity3d.services.core.api.Sdk','initComplete', [], 'CALLBACK_01']]\");" +
+				"}</script>";
+		String hash = Utilities.Sha256(data);
+		Configuration config = new Configuration();
+		config.setWebViewUrl(url);
+		config.setWebViewHash(hash);
+		config.setWebViewData(hash);
+
+		InitializeThread.InitializeStateComplete state = new InitializeThread.InitializeStateComplete(config);
 		Object nextState = state.execute();
 
 		assertNull("Init state complete test: next step is not null", nextState);
@@ -197,7 +203,19 @@ public class InitializeThreadTest {
 
 	@Test
 	public void testInitializeStateRetry() {
-		InitializeThread.InitializeStateRetry state = new InitializeThread.InitializeStateRetry(new InitializeThread.InitializeStateComplete(), 5);
+		String url = "http://www.example.net/handlecallback.html"; // This url is never used
+
+		// This is very hackish but also reproducing the full init procedure would be very fragile
+		String data = "<script>var nativebridge = new Object(); nativebridge.handleCallback = new function() { " +
+				"webviewbridge.handleInvocation(\"[['com.unity3d.services.core.api.Sdk','initComplete', [], 'CALLBACK_01']]\");" +
+				"}</script>";
+		String hash = Utilities.Sha256(data);
+		Configuration config = new Configuration();
+		config.setWebViewUrl(url);
+		config.setWebViewHash(hash);
+		config.setWebViewData(hash);
+
+		InitializeThread.InitializeStateRetry state = new InitializeThread.InitializeStateRetry(new InitializeThread.InitializeStateComplete(config), 5);
 		long startTime = SystemClock.elapsedRealtime();
 		Object nextState = state.execute();
 		long endTime = SystemClock.elapsedRealtime();

@@ -4,8 +4,8 @@ import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.webview.bridge.WebViewCallback;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.webview.bridge.WebViewCallback;
 
 import org.junit.BeforeClass;
 import org.junit.Test;

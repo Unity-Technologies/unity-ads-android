@@ -1,13 +1,11 @@
 package com.unity3d.ads.test.unit;
 
-import android.os.Bundle;
 import android.os.ConditionVariable;
-import android.os.Handler;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.request.IWebRequestListener;
-import com.unity3d.ads.request.WebRequest;
-import com.unity3d.ads.request.WebRequestThread;
+import com.unity3d.services.core.request.IWebRequestListener;
+import com.unity3d.services.core.request.WebRequest;
+import com.unity3d.services.core.request.WebRequestThread;
 import com.unity3d.ads.test.TestUtilities;
 
 import org.junit.After;
@@ -17,8 +15,6 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -367,53 +363,75 @@ public class WebRequestThreadPoolTest {
 
     @Test
     public void testCancelRequests () throws Exception {
-        WebRequestThread.request(validUrl, WebRequest.RequestType.GET, null, connectTimeout, readTimeout, new IWebRequestListener() {
+        Thread t1 = new Thread(new Runnable() {
             @Override
-            public void onComplete(String url, String response, int responseCode, Map<String, List<String>> headers) {
-                SUCCESS = true;
-                RESPONSE_CODE = responseCode;
-                RESPONSE = response;
-                RESPONSE_COUNT++;
-            }
+            public void run() {
+                WebRequestThread.request(validUrl, WebRequest.RequestType.GET, null, connectTimeout, readTimeout, new IWebRequestListener() {
+                    @Override
+                    public void onComplete(String url, String response, int responseCode, Map<String, List<String>> headers) {
+                        SUCCESS = true;
+                        RESPONSE_CODE = responseCode;
+                        RESPONSE = response;
+                        RESPONSE_COUNT++;
+                    }
 
+                    @Override
+                    public void onFailed(String url, String error) {
+                        SUCCESS = false;
+                        ERROR = error;
+                    }
+                });
+            }
+        });
+
+        Thread t2 = new Thread(new Runnable() {
             @Override
-            public void onFailed(String url, String error) {
-                SUCCESS = false;
-                ERROR = error;
+            public void run() {
+                WebRequestThread.request(validUrl, WebRequest.RequestType.GET, null, connectTimeout, readTimeout, new IWebRequestListener() {
+                    @Override
+                    public void onComplete(String url, String response, int responseCode, Map<String, List<String>> headers) {
+                        SUCCESS = true;
+                        RESPONSE_CODE = responseCode;
+                        RESPONSE = response;
+                        RESPONSE_COUNT++;
+                    }
+
+                    @Override
+                    public void onFailed(String url, String error) {
+                        SUCCESS = false;
+                        ERROR = error;
+                    }
+                });
             }
         });
 
-        WebRequestThread.request(validUrl, WebRequest.RequestType.GET, null, connectTimeout, readTimeout, new IWebRequestListener() {
+        Thread t3 = new Thread(new Runnable() {
             @Override
-            public void onComplete(String url, String response, int responseCode, Map<String, List<String>> headers) {
-                SUCCESS = true;
-                RESPONSE_CODE = responseCode;
-                RESPONSE = response;
-                RESPONSE_COUNT++;
-            }
+            public void run() {
+                WebRequestThread.request(validUrl, WebRequest.RequestType.GET, null, connectTimeout, readTimeout, new IWebRequestListener() {
+                    @Override
+                    public void onComplete(String url, String response, int responseCode, Map<String, List<String>> headers) {
+                        SUCCESS = true;
+                        RESPONSE_CODE = responseCode;
+                        RESPONSE = response;
+                        RESPONSE_COUNT++;
+                    }
 
-            @Override
-            public void onFailed(String url, String error) {
-                SUCCESS = false;
-                ERROR = error;
-               }
-        });
-
-        WebRequestThread.request(validUrl, WebRequest.RequestType.GET, null, connectTimeout, readTimeout, new IWebRequestListener() {
-            @Override
-            public void onComplete(String url, String response, int responseCode, Map<String, List<String>> headers) {
-                SUCCESS = true;
-                RESPONSE_CODE = responseCode;
-                RESPONSE = response;
-                RESPONSE_COUNT++;
-            }
-
-            @Override
-            public void onFailed(String url, String error) {
-                SUCCESS = false;
-                ERROR = error;
+                    @Override
+                    public void onFailed(String url, String error) {
+                        SUCCESS = false;
+                        ERROR = error;
+                    }
+                });
             }
         });
+
+        final long requestCreateTimeout = 500;
+        // On some devices it takes too long to cancel the requests if they are done in serial
+        // Run them in parallel to avoid race condition where response is already returned
+        t1.join(requestCreateTimeout);
+        t2.join(requestCreateTimeout);
+        t3.join(requestCreateTimeout);
 
         WebRequestThread.cancel();
 

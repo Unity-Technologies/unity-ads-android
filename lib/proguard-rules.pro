@@ -13,3 +13,10 @@
 -keep class com.unity3d.ads.** {
    *;
 }
+
+# Keep all classes in Unity Services package
+-keep class com.unity3d.services.** {
+   *;
+}
+
+-dontwarn com.google.ar.core.**

@@ -3,8 +3,8 @@ package com.unity3d.ads.test.unit;
 import android.hardware.SensorManager;
 import android.os.ConditionVariable;
 
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.sensorinfo.SensorInfoListener;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.sensorinfo.SensorInfoListener;
 
 import org.json.JSONObject;
 import org.junit.After;

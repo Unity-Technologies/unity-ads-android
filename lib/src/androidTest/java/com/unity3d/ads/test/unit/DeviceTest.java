@@ -1,27 +1,15 @@
 package com.unity3d.ads.test.unit;
 
 import android.media.AudioManager;
-import android.opengl.GLES11;
-import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
-import android.os.ConditionVariable;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.SurfaceView;
-import android.view.ViewGroup;
 
-import com.unity3d.ads.adunit.AdUnitActivity;
-import com.unity3d.ads.device.Device;
-import com.unity3d.ads.log.DeviceLog;
-import com.unity3d.ads.misc.Utilities;
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.properties.SdkProperties;
+import com.unity3d.services.core.device.Device;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.properties.SdkProperties;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

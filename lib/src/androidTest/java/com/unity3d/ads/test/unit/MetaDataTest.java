@@ -3,14 +3,14 @@ package com.unity3d.ads.test.unit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.device.Storage;
-import com.unity3d.ads.device.StorageManager;
+import com.unity3d.services.core.device.Storage;
+import com.unity3d.services.core.device.StorageManager;
 import com.unity3d.ads.metadata.InAppPurchaseMetaData;
 import com.unity3d.ads.metadata.MediationMetaData;
 import com.unity3d.ads.metadata.MetaData;
 import com.unity3d.ads.metadata.PlayerMetaData;
-import com.unity3d.ads.properties.ClientProperties;
-import com.unity3d.ads.webview.WebViewApp;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.webview.WebViewApp;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,9 +19,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 @RunWith(AndroidJUnit4.class)
 public class MetaDataTest {

@@ -6,11 +6,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.ads.adunit.AdUnitActivity;
-import com.unity3d.ads.adunit.AdUnitEvent;
-import com.unity3d.ads.api.AdUnit;
-import com.unity3d.ads.webview.WebViewApp;
-import com.unity3d.ads.webview.WebViewEventCategory;
+import com.unity3d.services.ads.adunit.AdUnitActivity;
+import com.unity3d.services.ads.adunit.AdUnitEvent;
+import com.unity3d.services.ads.api.AdUnit;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.WebViewEventCategory;
 
 import android.content.Intent;
 import android.view.KeyEvent;
@@ -21,10 +21,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

@@ -1,6 +1,6 @@
-# Unity Ads 2 Android Release Repository
+# Unity Ads 3 Android Release Repository
 
-Welcome to the Unity Ads 2 Android release repository.
+Welcome to the Unity Ads 3 Android release repository.
 
 ## Binaries
 
