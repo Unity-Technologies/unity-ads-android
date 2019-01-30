@@ -4,6 +4,7 @@ import android.app.Activity;
 
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.ads.placement.Placement;
+import com.unity3d.services.banners.view.BannerPosition;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
@@ -63,6 +64,10 @@ public final class UnityBanners {
             }
         }).start();
     }
+
+    public static void setBannerPosition(BannerPosition position) {
+		ClientProperties.setBannerDefaultPosition(position);
+	}
 
     /**
      * Change listener for IUnityAdsListener callbacks

@@ -4,6 +4,8 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import com.unity3d.services.banners.UnityBanners;
+
 public enum BannerPosition {
     TOP_LEFT(new int[] {RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.ALIGN_PARENT_LEFT}, Gravity.TOP | Gravity.LEFT),
     TOP_CENTER(new int[] {RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.CENTER_HORIZONTAL}, Gravity.TOP | Gravity.CENTER_HORIZONTAL),

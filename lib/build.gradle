@@ -11,8 +11,18 @@ android {
   defaultConfig {
     minSdkVersion 9
     targetSdkVersion 26
-    versionCode = 3000
-    versionName = "3.0.0"
+    /*
+    Please ensure that the last two digits of version number does not exceed 50 unless
+    it is a China SDK. This is because adding 50 to the version number is a one-to-one
+    mapping between normal SDK and China SDK.
+
+    Example : version number 2350 corresponds to China version of 2300.
+
+    All SDK with version numbers with last two digits >= 50 will be treated
+    as China SDK for filtering in the backend.
+    */
+    versionCode = 3001
+    versionName = "3.0.1"
 
     setProperty("archivesBaseName", "unity-ads")
 
@@ -77,6 +87,7 @@ android.libraryVariants.all { variant ->
 		       linksOffline "http://developer.android.com/reference","${android.sdkDirectory}/docs/reference"
         }
         exclude '**/R.java'
+        exclude 'com/unity3d/services/ar/view/GLSurfaceView.java'
 		destinationDir = file("../javadoc/")
     }
 }

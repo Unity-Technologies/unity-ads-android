@@ -29,6 +29,7 @@ public class UnityAdsExample extends Activity {
 
 	private String interstitialPlacementId;
 	private String incentivizedPlacementId;
+	private Button bannerButton;
 
 	private static int ordinal = 1;
 
@@ -92,6 +93,9 @@ public class UnityAdsExample extends Activity {
 				UnityAds.show(self, incentivizedPlacementId);
 			}
 		});
+
+		bannerButton = (Button) findViewById(R.id.unityads_example_banner_button);
+		disableButton(bannerButton);
 
 		final Button initializeButton = (Button) findViewById(R.id.unityads_example_initialize_button);
 		final EditText gameIdEdit = (EditText) findViewById(R.id.unityads_example_gameid_edit);

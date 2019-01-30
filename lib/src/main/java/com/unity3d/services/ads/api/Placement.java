@@ -18,4 +18,10 @@ public class Placement {
 
 		callback.invoke();
 	}
+
+	@WebViewExposed
+	public static void setDefaultBannerPlacement(String placement, WebViewCallback callback) {
+		com.unity3d.services.ads.placement.Placement.setDefaultBannerPlacement(placement);
+		callback.invoke();
+	}
 }

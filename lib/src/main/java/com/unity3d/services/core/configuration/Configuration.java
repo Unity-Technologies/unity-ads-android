@@ -121,7 +121,7 @@ public class Configuration {
 		return queryString;
 	}
 
-	protected void makeRequest () throws IOException, JSONException, IllegalStateException, NetworkIOException {
+	protected void makeRequest () throws IOException, JSONException, IllegalStateException, NetworkIOException, IllegalArgumentException {
 		if (_url == null) {
 			throw new MalformedURLException("Base URL is null");
 		}

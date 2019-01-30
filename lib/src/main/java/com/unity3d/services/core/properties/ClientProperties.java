@@ -8,6 +8,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 
+import com.unity3d.services.banners.view.BannerPosition;
 import com.unity3d.services.core.log.DeviceLog;
 
 import java.io.ByteArrayInputStream;
@@ -25,6 +26,7 @@ public class ClientProperties {
 	private static Application _application;
 
 	private static String _gameId;
+	private static BannerPosition _bannerDefaultPosition;
 
 	public static Activity getActivity () {
 		return _activity.get();
@@ -72,6 +74,14 @@ public class ClientProperties {
 			DeviceLog.exception("Error getting package info", e);
 			return null;
 		}
+	}
+
+	public static BannerPosition getbannerDefaultPosition () {
+		return _bannerDefaultPosition;
+	}
+
+	public static void setBannerDefaultPosition(BannerPosition position) {
+		_bannerDefaultPosition = position;
 	}
 
 	public static boolean isAppDebuggable() {

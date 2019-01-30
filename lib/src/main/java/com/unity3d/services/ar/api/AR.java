@@ -135,6 +135,33 @@ public class AR {
 		}
 	}
 
+	@WebViewExposed
+	public static void swapBuffers(WebViewCallback callback) {
+		AdUnitActivity activity = AdUnit.getAdUnitActivity();
+		if (activity != null && AR.getARView() != null) {
+			AR.getARView().swapBuffers();
+			callback.invoke();
+		} else {
+			callback.error(ARError.ARVIEW_NULL);
+		}
+	}
+
+	@WebViewExposed
+	public static void setViewRenderMode(Integer mode, WebViewCallback callback) {
+		final AdUnitActivity activity = AdUnit.getAdUnitActivity();
+		if (activity != null && AR.getARView() != null) {
+			try {
+				AR.getARView().setRenderMode(mode);
+			} catch (IllegalArgumentException e) {
+				callback.error(ARError.INVALID_VALUE);
+				return;
+			}
+			callback.invoke();
+		} else {
+			callback.error(ARError.ARVIEW_NULL);
+		}
+	}
+
 	// Android doesn't support video format selection at the moment and it's not possible to get the
 	// image size before session starts. This is here for API compatibility with iOS.
 	@WebViewExposed

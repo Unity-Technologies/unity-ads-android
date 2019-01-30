@@ -3,7 +3,6 @@ package com.unity3d.services.ar.view;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.util.SparseArray;
 
@@ -79,7 +78,8 @@ public class ARView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		setEGLContextClientVersion(2);
 		setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Alpha used for plane blending.
 		setRenderer(this);
-		setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+		setPreserveEGLContextOnPause(true);
 
 		_displayRotationHelper = new DisplayRotationHelper(context);
 	}
@@ -144,8 +144,6 @@ public class ARView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onDrawFrame(GL10 gl) {
-		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-
 		if (_shouldSendResize) {
 			// Fix for Samsung devices (S7-S9, manually send AR_WINDOW_RESIZED)
 			WebViewApp webViewApp = WebViewApp.getCurrentApp();
@@ -176,22 +174,12 @@ public class ARView extends GLSurfaceView implements GLSurfaceView.Renderer {
 				return;
 			}
 
-			if (!_showCameraFrame) {
-				return;
-			}
-			_backgroundRenderer.draw(frame);
-
 			long currentTime = System.currentTimeMillis();
 			if (_timeOfLastDrawnCameraFrame == 0) {
 				_timeOfLastDrawnCameraFrame = currentTime;
 			}
-			long timeSinceLastDrawnCameraFrame = currentTime - _timeOfLastDrawnCameraFrame;
-			if (timeSinceLastDrawnCameraFrame < FRAME_UPDATE_TIMEOUT && !_drawNextCameraFrame) {
-				return;
-			}
 
 			_timeOfLastDrawnCameraFrame = currentTime;
-			_drawNextCameraFrame = false;
 
 			camera.getProjectionMatrix(_projectionMatrixArray, 0, _arNear, _arFar);
 			camera.getViewMatrix(_viewMatrixArray, 0);
@@ -234,6 +222,13 @@ public class ARView extends GLSurfaceView implements GLSurfaceView.Renderer {
 			updatePlanes(updatedTrackables);
 
 			DeviceLog.debug(frame.toString());
+
+			if (!_showCameraFrame) {
+				return;
+			}
+
+			GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+			_backgroundRenderer.draw(frame);
 		}
 	}
 
@@ -325,6 +320,13 @@ public class ARView extends GLSurfaceView implements GLSurfaceView.Renderer {
 		_sessionRunning = true;
 
 		_displayRotationHelper.onResume();
+
+		postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				requestRender();
+			}
+		}, 200);
 	}
 
 	public void pauseSession() {
@@ -334,7 +336,7 @@ public class ARView extends GLSurfaceView implements GLSurfaceView.Renderer {
 	}
 
 	public void setDrawNextCameraFrame() {
-		_drawNextCameraFrame = true;
+		requestRender();
 	}
 
 	public boolean getShowCameraFrame() {

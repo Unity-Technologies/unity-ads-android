@@ -39,6 +39,8 @@ public class CacheDirectory {
 					}
 
 					if(testCacheDirectory(externalCache)) {
+						createNoMediaFile(externalCache);
+
 						_cacheDirectory = externalCache;
 						_type = CacheDirectoryType.EXTERNAL;
 						DeviceLog.debug("Unity Ads is using external cache directory: " + externalCache.getAbsolutePath());
@@ -122,6 +124,22 @@ public class CacheDirectory {
 		} catch(Exception e) {
 			DeviceLog.debug("Unity Ads exception while testing cache directory " + directory.getAbsolutePath() + ": " + e.getMessage());
 			return false;
+		}
+	}
+
+	private void createNoMediaFile(File path) {
+		File noMediaFile = new File(path, ".nomedia");
+
+		try {
+			boolean created = noMediaFile.createNewFile();
+
+			if(created) {
+				DeviceLog.debug("Successfully created .nomedia file");
+			} else {
+				DeviceLog.debug("Using existing .nomedia file");
+			}
+		} catch(Exception e) {
+			DeviceLog.exception("Failed to create .nomedia file", e);
 		}
 	}
 }

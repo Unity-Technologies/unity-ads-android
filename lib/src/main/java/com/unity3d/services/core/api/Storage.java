@@ -52,13 +52,13 @@ public class Storage {
 		if (s != null) {
 			boolean success = s.set(key, value);
 			if (success) {
-				callback.invoke(key, value);
+				callback.invoke(key);
 			} else {
-				callback.error(StorageError.COULDNT_SET_VALUE, key, value);
+				callback.error(StorageError.COULDNT_SET_VALUE, key);
 			}
 		}
 		else {
-			callback.error(StorageError.COULDNT_GET_STORAGE, type, key, value);
+			callback.error(StorageError.COULDNT_GET_STORAGE, type, key);
 		}
 	}
 

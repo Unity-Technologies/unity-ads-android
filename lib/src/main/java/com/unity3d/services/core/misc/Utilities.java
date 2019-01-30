@@ -130,55 +130,6 @@ public class Utilities {
 		return success;
 	}
 
-	public static String readFile (File fileToRead) {
-		if (fileToRead == null) {
-			return null;
-		}
-
-		String fileContent = "";
-		BufferedReader br = null;
-		FileReader fr = null;
-
-		if (fileToRead.exists() && fileToRead.canRead()) {
-			try {
-				fr = new FileReader(fileToRead);
-				br = new BufferedReader(fr);
-				String line;
-
-				while ((line = br.readLine()) != null) {
-					fileContent = fileContent.concat(line);
-				}
-			}
-			catch (Exception e) {
-				DeviceLog.exception("Problem reading file", e);
-				fileContent = null;
-			}
-			try {
-				if (br != null) {
-					br.close();
-				}
-			}
-			catch (Exception e) {
-				DeviceLog.exception("Couldn't close BufferedReader", e);
-			}
-			try {
-				if (fr != null) {
-					fr.close();
-				}
-			}
-			catch (Exception e) {
-				DeviceLog.exception("Couldn't close FileReader", e);
-			}
-
-			return fileContent;
-		}
-		else {
-			DeviceLog.error("File did not exist or couldn't be read");
-		}
-
-		return null;
-	}
-
 	public static byte[] readFileBytes(File file) throws IOException {
 		if (file == null) {
 			return null;

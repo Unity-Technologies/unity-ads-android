@@ -56,8 +56,8 @@ zip: release
 	rm unity-ads.aar
 
 use-local-webview:
-	sed -i '' 's/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/return "new-ip";/' "lib/src/main/java/com/unity3d/ads/properties/SdkProperties.java"
-	sed -i '' 's/return ".*";/return "http:\/\/$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8000\/build\/dev\/config.json";/' "lib/src/main/java/com/unity3d/ads/properties/SdkProperties.java"
+	sed -i '' 's/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/return "new-ip";/' "lib/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"
+	sed -i '' 's/return ".*";/return "http:\/\/$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8000\/build\/" + flavor + "\/config.json";/' "lib/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"
 
 use-public-webview:
-	sed -i '' 's/return ".*";/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/' "lib/src/main/java/com/unity3d/ads/properties/SdkProperties.java"
+	sed -i '' 's/return ".*";/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/' "lib/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"

@@ -30,9 +30,14 @@ public class Banner {
             @Override
             public synchronized void run() {
                 BannerView view = BannerView.getOrCreateInstance();
-                view.setBannerDimensions(width, height, BannerPosition.fromString(style));
-                view.setViews(getArrayFromJSONArray(viewsArray));
+				BannerPosition position = ClientProperties.getbannerDefaultPosition();
 
+				if (position == null) {
+					position = BannerPosition.fromString(style);
+				}
+
+				view.setBannerDimensions(width, height, position);
+                view.setViews(getArrayFromJSONArray(viewsArray));
                 WebViewApp app = WebViewApp.getCurrentApp();
                 if (app != null) {
                     app.sendEvent(WebViewEventCategory.BANNER, BannerEvent.BANNER_LOADED);
@@ -104,7 +109,12 @@ public class Banner {
             public void run() {
                 BannerView view = BannerView.getInstance();
                 if (view != null) {
-                    view.setBannerDimensions(width, height, BannerPosition.fromString(style));
+                	BannerPosition position = ClientProperties.getbannerDefaultPosition();
+                	if ( position == null) {
+                		position = BannerPosition.fromString(style);
+					}
+					view.setBannerDimensions(width, height, position);
+
                     view.setLayoutParams(view.getLayoutParams());
                 }
             }

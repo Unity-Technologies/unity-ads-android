@@ -209,13 +209,13 @@ public class WebRequest {
 		return total;
 	}
 
-	public String makeRequest () throws NetworkIOException, IOException, IllegalStateException {
+	public String makeRequest () throws NetworkIOException, IOException, IllegalStateException, IllegalArgumentException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		makeStreamRequest(baos);
 		return baos.toString("UTF-8");
 	}
 
-	private HttpURLConnection getHttpUrlConnectionWithHeaders() throws NetworkIOException {
+	private HttpURLConnection getHttpUrlConnectionWithHeaders() throws NetworkIOException, IllegalArgumentException {
 		HttpURLConnection connection;
 
 		if (getUrl().toString().startsWith("https://")) {
@@ -226,13 +226,16 @@ public class WebRequest {
 				throw new NetworkIOException("Open HTTPS connection: " + e.getMessage());
 			}
 		}
-		else {
+		else if (getUrl().toString().startsWith("http://")) {
 			try {
 				connection = (HttpURLConnection)getUrl().openConnection();
 			}
 			catch (IOException e) {
 				throw new NetworkIOException("Open HTTP connection: " + e.getMessage());
 			}
+		}
+		else {
+			throw new IllegalArgumentException("Invalid url-protocol in url: " + getUrl().toString());
 		}
 
 		connection.setInstanceFollowRedirects(false);

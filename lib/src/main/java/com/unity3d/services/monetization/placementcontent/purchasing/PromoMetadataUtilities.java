@@ -78,7 +78,7 @@ public class PromoMetadataUtilities {
             productBuilder.withLocalizedTitle((String) productParams.get("localizedTitle"));
         }
         if (productParams.containsKey("localizedPrice")) {
-            productBuilder.withLocalizedPrice((double) productParams.get("localizedPrice"));
+            productBuilder.withLocalizedPrice(new Double(productParams.get("localizedPrice").toString()));
         }
         if (productParams.containsKey("productType")) {
             productBuilder.withProductType((String) productParams.get("productType"));

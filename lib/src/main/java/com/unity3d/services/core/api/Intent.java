@@ -56,11 +56,13 @@ public class Intent {
 			if (action != null)
 				intent.setAction(action);
 
-			if (uri != null)
+			if (uri != null && mimeType != null) {
+				intent.setDataAndType(Uri.parse(uri), mimeType);
+			} else if (uri != null) {
 				intent.setData(Uri.parse(uri));
-
-			if (mimeType != null)
+			} else if (mimeType != null) {
 				intent.setType(mimeType);
+			}
 
 			if (flags != null && flags > -1)
 				intent.setFlags(flags);

@@ -25,21 +25,20 @@ public class Storage extends JsonStorage {
 
 	public synchronized boolean readStorage () {
 		File f = new File(_targetFileName);
-		String fileData = Utilities.readFile(f);
 
-		if (fileData != null) {
-			try {
-				setData(new JSONObject(Utilities.readFile(f)));
-			}
-			catch (Exception e) {
-				DeviceLog.exception("Error creating storage JSON", e);
+		try {
+			byte[] bytes = Utilities.readFileBytes(f);
+			if (bytes == null) {
 				return false;
 			}
-
+			String fileData = new String(bytes);
+			setData(new JSONObject(fileData));
 			return true;
 		}
-
-		return false;
+		catch (Exception e) {
+			DeviceLog.exception("Error creating storage JSON", e);
+			return false;
+		}
 	}
 
 	public synchronized boolean initStorage () {

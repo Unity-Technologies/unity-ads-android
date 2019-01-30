@@ -24,6 +24,7 @@ import com.unity3d.ads.metadata.PlayerMetaData;
 import com.unity3d.services.UnityServices;
 import com.unity3d.services.banners.IUnityBannerListener;
 import com.unity3d.services.banners.UnityBanners;
+import com.unity3d.services.banners.view.BannerPosition;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.webview.WebView;
@@ -155,11 +156,12 @@ public class UnityMonetizationExample extends Activity {
 		});
 
 		bannerButton = (Button) findViewById(R.id.unityads_example_banner_button);
-		enableButton(bannerButton);
+		disableButton(bannerButton);
 		bannerButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (bannerView == null) {
+					UnityBanners.setBannerPosition(BannerPosition.BOTTOM_CENTER);
 					UnityBanners.loadBanner(thisActivity, bannerPlacementId);
 				} else {
 					UnityBanners.destroy();
@@ -196,6 +198,8 @@ public class UnityMonetizationExample extends Activity {
 				SharedPreferences.Editor preferencesEdit = preferences.edit();
 				preferencesEdit.putString("gameId", gameId);
 				preferencesEdit.commit();
+
+				enableButton(bannerButton);
 			}
 		});
 
@@ -230,6 +234,8 @@ public class UnityMonetizationExample extends Activity {
 			else {
 				disableButton((Button) findViewById(R.id.unityads_example_incentivized_button));
 			}
+
+			enableButton(bannerButton);
 		}
 	}
 

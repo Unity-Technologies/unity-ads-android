@@ -66,7 +66,7 @@ public class WebRequestRunnable implements Runnable {
 		String response;
 		try {
 			response = _currentRequest.makeRequest();
-		} catch (IOException | NetworkIOException | IllegalStateException e) {
+		} catch (IOException | NetworkIOException | IllegalStateException | IllegalArgumentException e) {
 			DeviceLog.exception("Error completing request", e);
 			onFailed(e.getClass().getName() + ": " + e.getMessage());
 			return;
