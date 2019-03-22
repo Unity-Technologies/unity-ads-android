@@ -16,5 +16,6 @@ public enum WebViewEventCategory {
 	PURCHASING,
 	ANALYTICS,
 	AR,
-	PERMISSIONS
+	PERMISSIONS,
+	STORE
 }

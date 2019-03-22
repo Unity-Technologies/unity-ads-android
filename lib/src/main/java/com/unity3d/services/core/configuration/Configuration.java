@@ -36,7 +36,8 @@ public class Configuration {
 			"com.unity3d.services.purchasing.core.configuration.PurchasingModuleConfiguration",
 			"com.unity3d.services.analytics.core.configuration.AnalyticsModuleConfiguration",
 			"com.unity3d.services.ar.configuration.ARModuleConfiguration",
-			"com.unity3d.services.banners.configuration.BannersModuleConfiguration"
+			"com.unity3d.services.banners.configuration.BannersModuleConfiguration",
+			"com.unity3d.services.store.core.configuration.StoreModuleConfiguration"
 	};
 
 	private Class[] _webAppApiClassList;
