@@ -9,25 +9,29 @@
             android:name="com.unity3d.services.ads.adunit.AdUnitActivity"
             android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:hardwareAccelerated="true" />
+            android:hardwareAccelerated="true" 
+            android:excludeFromRecents="true" />
 
         <activity
             android:name="com.unity3d.services.ads.adunit.AdUnitTransparentActivity"
             android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
-            android:hardwareAccelerated="true" />
+            android:hardwareAccelerated="true" 
+            android:excludeFromRecents="true" />
 
         <activity
             android:name="com.unity3d.services.ads.adunit.AdUnitTransparentSoftwareActivity"
             android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
-            android:hardwareAccelerated="false" />
+            android:hardwareAccelerated="false" 
+            android:excludeFromRecents="true" />
 
         <activity
             android:name="com.unity3d.services.ads.adunit.AdUnitSoftwareActivity"
             android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:hardwareAccelerated="false" />
+            android:hardwareAccelerated="false" 
+            android:excludeFromRecents="true" />
     </application>
 
 </manifest>
