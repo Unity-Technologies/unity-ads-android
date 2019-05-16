@@ -1,31 +1,19 @@
-# unity-ads-android
-Unity Ads Android Development Repository
+# Unity Ads 3.1.0 Android Release Repository
 
-### Execute unit tests
+Welcome to the Unity Ads 3.1.0 Android release repository.
 
-1. Connect Android device or simulator
-1. `make test`
-1. Coverage report available at `lib/build/reports/coverage/debug/index.html`
+## Binaries
 
-### Build example application
+Binaries can be found from the [releases tab](https://github.com/Unity-Technologies/unity-ads-android/releases).
 
-1. `./gradlew assemble`
-1. Find example app in the `app/build/outputs/apk/` subfolder
+## Integration Guide
 
-### Releasing
+Integration guide can be found [here](https://github.com/Unity-Technologies/unity-ads-android/wiki/sdk_android_integration_guide). There is [integration tutorial video](https://www.youtube.com/watch?v=MNdJ0KWlYPw) on YouTube.
 
-Step 1. Make a staged commit by removing ./publish_to_public.sh from the end of .travis.yml
+## API Reference
 
-Step 2. Tag the release, push tag to internal repository, Travis will automatically publish a release in internal repository under the releases tab
+API Reference can be found [here](https://github.com/Unity-Technologies/unity-ads-android/wiki/sdk_android_api_reference)
 
-Step 3. Final testing with QA
+## Transition guide from Unity Ads 1.5
 
-Step 4. Add ./publish_to_public.sh back to .travis.yml, re-tag the release and push tag
-
-#### Updating staged binaries
-
-If issues are found during testing or other changes need to be made before pushing the release to public repository, you need to update the staged binaries.
-
-Step 1. Delete the release from internal repository
-
-Step 2. Continue with release steps 2 and 3
+Transition guide from Unity Ads 1.5 can be found [here](https://github.com/Unity-Technologies/unity-ads-android/wiki/sdk_android_transition_guide)
