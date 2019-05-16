@@ -67,6 +67,9 @@ public class BannerView extends RelativeLayout {
         if (parent != null && parent instanceof ViewGroup) {
             ((ViewGroup) parent).removeView(this);
         }
+        if (this._webPlayer != null) {
+            this._webPlayer.destroy();
+        }
         this._webPlayer = null;
         BannerView._instance = null;
     }

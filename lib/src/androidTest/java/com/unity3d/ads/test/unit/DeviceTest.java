@@ -95,6 +95,11 @@ public class DeviceTest {
 	}
 
 	@Test
+	public void testNetworkCountryISO () {
+		assertNotNull("Expected network operator name to be something else than null", Device.getNetworkCountryISO());
+	}
+
+	@Test
 	public void testGetFreeSpace () {
 		assertTrue("There should be space left in the SDK cache directory", Device.getFreeSpace(SdkProperties.getCacheDirectory()) > 0);
 		assertEquals("Invalid file should return -1 as result", -1, Device.getFreeSpace(new File("/fkjdhsfdsfd/fdsfdsfds/")));

@@ -1,7 +1,9 @@
 package com.unity3d.services.ads.api;
 
+import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.mediation.IUnityAdsExtendedListener;
+import com.unity3d.services.ads.properties.AdsProperties;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
 import com.unity3d.services.core.webview.bridge.WebViewExposed;
@@ -12,8 +14,8 @@ public class Listener {
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				if (UnityAds.getListener() != null) {
-					UnityAds.getListener().onUnityAdsReady(placementId);
+				for (IUnityAdsListener listener : AdsProperties.getListeners()) {
+					listener.onUnityAdsReady(placementId);
 				}
 			}
 		});
@@ -26,8 +28,8 @@ public class Listener {
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				if (UnityAds.getListener() != null) {
-					UnityAds.getListener().onUnityAdsStart(placementId);
+				for (IUnityAdsListener listener : AdsProperties.getListeners()) {
+					listener.onUnityAdsStart(placementId);
 				}
 			}
 		});
@@ -40,8 +42,8 @@ public class Listener {
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				if (UnityAds.getListener() != null) {
-					UnityAds.getListener().onUnityAdsFinish(placementId, UnityAds.FinishState.valueOf(result));
+				for (IUnityAdsListener listener : AdsProperties.getListeners()) {
+					listener.onUnityAdsFinish(placementId, UnityAds.FinishState.valueOf(result));
 				}
 			}
 		});
@@ -54,8 +56,11 @@ public class Listener {
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				if (UnityAds.getListener() != null && UnityAds.getListener() instanceof IUnityAdsExtendedListener) {
-					((IUnityAdsExtendedListener)UnityAds.getListener()).onUnityAdsClick(placementId);
+				for (IUnityAdsListener listener : AdsProperties.getListeners()) {
+					if (listener instanceof IUnityAdsExtendedListener) {
+						((IUnityAdsExtendedListener)listener).onUnityAdsClick(placementId);
+					}
+
 				}
 			}
 		});
@@ -68,8 +73,10 @@ public class Listener {
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				if (UnityAds.getListener() != null && UnityAds.getListener() instanceof IUnityAdsExtendedListener) {
-					((IUnityAdsExtendedListener)UnityAds.getListener()).onUnityAdsPlacementStateChanged(placementId, UnityAds.PlacementState.valueOf(oldState), UnityAds.PlacementState.valueOf(newState));
+				for (IUnityAdsListener listener : AdsProperties.getListeners()) {
+					if (listener instanceof IUnityAdsExtendedListener) {
+						((IUnityAdsExtendedListener)listener).onUnityAdsPlacementStateChanged(placementId, UnityAds.PlacementState.valueOf(oldState), UnityAds.PlacementState.valueOf(newState));
+					}
 				}
 			}
 		});
@@ -82,8 +89,10 @@ public class Listener {
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				if (UnityAds.getListener() != null) {
-					UnityAds.getListener().onUnityAdsError(UnityAds.UnityAdsError.valueOf(error), message);
+				for (IUnityAdsListener listener : AdsProperties.getListeners()) {
+					if (listener instanceof IUnityAdsExtendedListener) {
+						listener.onUnityAdsError(UnityAds.UnityAdsError.valueOf(error), message);
+					}
 				}
 			}
 		});

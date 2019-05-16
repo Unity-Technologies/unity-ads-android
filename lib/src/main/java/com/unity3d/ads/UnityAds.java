@@ -100,18 +100,40 @@ public final class UnityAds {
 	}
 
 	/**
-	 * Change listener for IUnityAdsListener callbacks
+	 * Set listener for IUnityAdsListener callbacks. Use this if only ever using one listener
 	 *
 	 * @param listener New listener for IUnityAdsListener callbacks
+	 *
+	 * @deprecated this method is deprecated in favor of {@link #addListener(IUnityAdsListener)}
 	 */
 	public static void setListener(IUnityAdsListener listener) {
 		UnityAdsImplementation.setListener(listener);
 	}
 
 	/**
-	 * Get current listener for IUnityAdsListener callbacks
+	 * Add listener for IUnityAdsListener callbacks. Use this if subscribing multiple listeners
 	 *
-	 * @return Current listener for IUnityAdsListener callbacks
+	 * @param listener New listener for IUnityAdsListener callbacks
+	 */
+	public static void addListener(IUnityAdsListener listener) {
+		UnityAdsImplementation.addListener(listener);
+	}
+
+	/**
+	 * Remove listener for IUnityAdsListener callbacks
+	 *
+	 * @param listener New listener for IUnityAdsListener callbacks
+	 */
+	public static void removeListener(IUnityAdsListener listener) {
+		UnityAdsImplementation.removeListener(listener);
+	}
+
+	/**
+	 * Get current listener for IUnityAdsListener callbacks. Returns the first listener added
+	 *
+	 * @return First listener set for IUnityAdsListener callbacks
+	 *
+	 * @deprecated this method is deprecated in favor of {@link #addListener(IUnityAdsListener)} and {@link #removeListener(IUnityAdsListener)}
 	 */
 	public static IUnityAdsListener getListener() {
 		return UnityAdsImplementation.getListener();

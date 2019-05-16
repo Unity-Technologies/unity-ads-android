@@ -68,15 +68,15 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 		if(success && _address != null && _address.isLoopbackAddress()) {
 			DeviceLog.error("Unity Ads init: halting init because Unity Ads config resolves to loopback address (due to ad blocker?)");
 
-			final IUnityAdsListener listener = AdsProperties.getListener();
-			if(listener != null) {
-				Utilities.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
+
+			Utilities.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					for (IUnityAdsListener listener : AdsProperties.getListeners()) {
 						listener.onUnityAdsError(UnityAds.UnityAdsError.AD_BLOCKER_DETECTED, "Unity Ads config server resolves to loopback address (due to ad blocker?)");
 					}
-				});
-			}
+				}
+			});
 			return false;
 		}
 
@@ -84,16 +84,15 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 	}
 
 	public boolean initErrorState(Configuration configuration, String state, String errorMessage) {
-		final IUnityAdsListener listener = UnityAds.getListener();
 		final String message = "Init failed in " + state;
-		if(AdsProperties.getListener() != null) {
-			Utilities.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				for (IUnityAdsListener listener : AdsProperties.getListeners()) {
 					listener.onUnityAdsError(UnityAds.UnityAdsError.INITIALIZE_FAILED, message);
 				}
-			});
-		}
+			}
+		});
 		return true;
 	}
 

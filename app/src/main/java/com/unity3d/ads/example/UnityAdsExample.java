@@ -44,7 +44,7 @@ public class UnityAdsExample extends Activity {
 			WebView.setWebContentsDebuggingEnabled(true);
 		}
 
-		UnityAds.setListener(unityAdsListener);
+		UnityAds.addListener(unityAdsListener);
 		UnityAds.setDebugMode(true);
 
 		MediationMetaData mediationMetaData = new MediationMetaData(this);

@@ -12,13 +12,10 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.metadata.MediationMetaData;
-import com.unity3d.ads.metadata.MetaData;
 import com.unity3d.ads.metadata.PlayerMetaData;
 
 import com.unity3d.services.UnityServices;
@@ -30,7 +27,6 @@ import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.webview.WebView;
 import com.unity3d.services.monetization.IUnityMonetizationListener;
 import com.unity3d.services.monetization.UnityMonetization;
-import com.unity3d.services.monetization.placementcontent.ads.IShowAdListener;
 import com.unity3d.services.monetization.placementcontent.ads.ShowAdListenerAdapter;
 import com.unity3d.services.monetization.placementcontent.ads.ShowAdPlacementContent;
 import com.unity3d.services.monetization.placementcontent.core.PlacementContent;

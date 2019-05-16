@@ -17,6 +17,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
@@ -32,7 +36,13 @@ public class ClientPropertiesTest {
 		ClientProperties.setApplicationContext(null);
 		ClientProperties.setActivity(null);
 		ClientProperties.setGameId(null);
-		AdsProperties.setListener(null);
+		this.removeListeners();
+	}
+
+	private void removeListeners() {
+		for (IUnityAdsListener listener : AdsProperties.getListeners()) {
+			AdsProperties.removeListener(listener);
+		}
 	}
 
 	@Test
@@ -88,8 +98,8 @@ public class ClientPropertiesTest {
 			}
 		};
 
-		AdsProperties.setListener(listener);
-		assertEquals("Listener was not the same as expected", listener, AdsProperties.getListener());
+		AdsProperties.addListener(listener);
+		assertEquals("Listener was not the same as expected", new HashSet<>(Arrays.asList(listener)), AdsProperties.getListeners());
 	}
 
 	public class MockActivity extends Activity {

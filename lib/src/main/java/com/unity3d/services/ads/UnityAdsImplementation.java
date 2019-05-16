@@ -20,6 +20,8 @@ import com.unity3d.services.core.properties.ClientProperties;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Iterator;
+
 public final class UnityAdsImplementation {
 
 	/**
@@ -43,7 +45,8 @@ public final class UnityAdsImplementation {
 	 */
 	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode) {
 		DeviceLog.entered();
-		AdsProperties.setListener(listener);
+		
+		UnityAdsImplementation.addListener(listener);
 
 		UnityServices.initialize(activity, gameId, new IUnityServicesListener() {
 			@Override
@@ -68,21 +71,47 @@ public final class UnityAdsImplementation {
 	}
 
 	/**
-	 * Change listener for IUnityAdsListener callbacks
+	 * Set listener for IUnityAdsListener callbacks
 	 *
 	 * @param listener New listener for IUnityAdsListener callbacks
 	 */
+	@Deprecated
 	public static void setListener(IUnityAdsListener listener) {
-		AdsProperties.setListener(listener);
+		AdsProperties.addListener(listener);
 	}
 
 	/**
-	 * Get current listener for IUnityAdsListener callbacks
+	 * Add listener for IUnityAdsListener callbacks
 	 *
-	 * @return Current listener for IUnityAdsListener callbacks
+	 * @param listener New listener for IUnityAdsListener callbacks
 	 */
+	public static void addListener(IUnityAdsListener listener) {
+		AdsProperties.addListener(listener);
+	}
+
+	/**
+	 * Remove listener for IUnityAdsListener callbacks
+	 *
+	 * @param listener New listener for IUnityAdsListener callbacks
+	 */
+	public static void removeListener(IUnityAdsListener listener) {
+		AdsProperties.removeListener(listener);
+	}
+
+	/**
+	 * Get the first listener added for IUnityAdsListener callbacks
+	 *
+	 * @return First listener added for IUnityAdsListener callbacks
+	 */
+	@Deprecated
 	public static IUnityAdsListener getListener() {
-		return AdsProperties.getListener();
+		// For now, return the first listener registered
+		Iterator<IUnityAdsListener> it = AdsProperties.getListeners().iterator();
+		if (it.hasNext()) {
+			return it.next();
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -227,21 +256,19 @@ public final class UnityAdsImplementation {
 		final String errorMessage = "Unity Ads show failed: " + message;
 		DeviceLog.error(errorMessage);
 
-		final IUnityAdsListener listener = AdsProperties.getListener();
-		if(listener != null) {
-			Utilities.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				for (IUnityAdsListener listener : AdsProperties.getListeners()) {
 					listener.onUnityAdsError(error, errorMessage);
-
-					if(placementId != null) {
+					if (placementId != null) {
 						listener.onUnityAdsFinish(placementId, UnityAds.FinishState.ERROR);
 					} else {
 						listener.onUnityAdsFinish("", UnityAds.FinishState.ERROR);
 					}
 				}
-			});
-		}
+			}
+		});
 	}
 
 	/**
@@ -260,5 +287,9 @@ public final class UnityAdsImplementation {
 	 */
 	public static boolean getDebugMode() {
 		return UnityServices.getDebugMode();
+	}
+
+	public static String getDefaultPlacement() {
+		return Placement.getDefaultPlacement();
 	}
 }

@@ -4,6 +4,7 @@ import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.webview.WebViewApp;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,11 +43,16 @@ public class Invocation {
 		if (_invocations != null && _invocations.size() > 0) {
 			ArrayList<Object> invocation = _invocations.remove(0);
 
+			String className = (String) invocation.get(0);
+			String methodName = (String) invocation.get(1);
+			Object[] params = (Object[]) invocation.get(2);
+			WebViewCallback callback = (WebViewCallback)invocation.get(3);
+
 			try {
-				WebViewBridge.handleInvocation((String)invocation.get(0), (String)invocation.get(1), (Object[])invocation.get(2), (WebViewCallback)invocation.get(3));
+				WebViewBridge.handleInvocation(className, methodName, params, callback);
 			}
 			catch (Exception e) {
-				DeviceLog.exception("Error handling invocation", e);
+				DeviceLog.exception(String.format("Error handling invocation %s.%s(%s)", className, methodName, Arrays.toString(params)), e);
 			}
 
 			return true;

@@ -158,6 +158,15 @@ public class Device {
 		return "";
 	}
 
+	public static String getNetworkCountryISO() {
+		if (ClientProperties.getApplicationContext() != null) {
+			TelephonyManager tm = (TelephonyManager)ClientProperties.getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
+			return tm.getNetworkCountryIso();
+		}
+
+		return "";
+	}
+
 	public static int getScreenDensity() {
 		if (ClientProperties.getApplicationContext() != null) {
 			return ClientProperties.getApplicationContext().getResources().getDisplayMetrics().densityDpi;

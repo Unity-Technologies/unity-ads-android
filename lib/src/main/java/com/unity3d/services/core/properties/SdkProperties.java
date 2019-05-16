@@ -4,6 +4,7 @@ import android.content.Context;
 import com.unity3d.ads.BuildConfig;
 import com.unity3d.services.IUnityServicesListener;
 import com.unity3d.services.core.cache.CacheDirectory;
+import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.log.DeviceLog;
 
 import java.io.File;
@@ -12,11 +13,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 public class SdkProperties {
-	private static String _configUrl = getDefaultConfigUrl("release");
+	private static String _configUrl = null;
 	private static CacheDirectory _cacheDirectory = null;
 	private static final String CACHE_DIR_NAME = "UnityAdsCache";
 	private static final String LOCAL_CACHE_FILE_PREFIX = "UnityAdsCache-";
 	private static final String LOCAL_STORAGE_FILE_PREFIX = "UnityAdsStorage-";
+	private static final String CHINA_ISO_ALPHA_2_CODE = "CN";
+	private static final String CHINA_ISO_ALPHA_3_CODE = "CHN";
 	private static long _initializationTime = 0;
 	private static IUnityServicesListener _listener;
 
@@ -74,11 +77,19 @@ public class SdkProperties {
 	}
 
 	public static String getConfigUrl() {
+		if (_configUrl == null) {
+			_configUrl = getDefaultConfigUrl("release");
+		}
 		return _configUrl;
 	}
 
 	public static String getDefaultConfigUrl(String flavor) {
-		return "https://config.unityads.unity3d.com/webview/" + getWebViewBranch() + "/" + flavor + "/config.json";
+		boolean isChinaLocale = isChinaLocale(Device.getNetworkCountryISO());
+		String baseURI = "https://config.unityads.unity3d.com/webview/";
+		if (isChinaLocale) {
+			baseURI = "https://config.unityads.unitychina.cn/webview/";
+		}
+		return baseURI + getWebViewBranch() + "/" + flavor + "/config.json";
 	}
 
 	private static String getWebViewBranch() {
@@ -149,4 +160,12 @@ public class SdkProperties {
 	public static IUnityServicesListener getListener() {
 		return _listener;
 	}
+
+	public static boolean isChinaLocale(String networkISOCode) {
+		if (networkISOCode.equalsIgnoreCase(CHINA_ISO_ALPHA_2_CODE) || networkISOCode.equalsIgnoreCase(CHINA_ISO_ALPHA_3_CODE)) {
+			return true;
+		} else {
+			return false;
+		}
+  }
 }

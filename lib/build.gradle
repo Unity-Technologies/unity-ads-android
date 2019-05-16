@@ -1,4 +1,33 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
+
+ext {
+    bintrayRepo = "UnityAds"
+    bintrayName = "unityads"
+
+    publishedGroupId = 'com.unity3d.ads'
+    libraryName = 'unity-ads'
+    artifact = 'unity-ads'
+    archivesBaseName = 'unity-ads'
+
+    libraryDescription = 'Monetize your entire player base and reach new audiences with video ads.'
+
+    siteUrl = 'https://github.com/Unity-Technologies/unity-ads-android'
+    gitUrl = 'https://github.com/Unity-Technologies/unity-ads-android.git'
+
+    libraryVersion = '3.0.3'
+
+    developerId = 'sbankhead'
+    developerName = 'Steven Bankhead'
+    developerEmail = 'sbankhead@unity3d.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
+version = libraryVersion
 
 android {
   compileSdkVersion 26
@@ -21,14 +50,14 @@ android {
     All SDK with version numbers with last two digits >= 50 will be treated
     as China SDK for filtering in the backend.
     */
-    versionCode = 3003
-    versionName = "3.0.3"
+    versionCode = 3100
+    versionName = "3.1.0"
 
     setProperty("archivesBaseName", "unity-ads")
 
     buildConfigField 'String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"' + versionName + '"')
 
-    testBuildType "coverage"
+    testBuildType "debug"
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     testInstrumentationRunnerArguments disableAnalytics: 'true' // Won't work yet, see: https://code.google.com/p/android/issues/detail?id=188241
@@ -57,6 +86,14 @@ android {
       buildConfigField 'String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"development"')
     }
   }
+
+  libraryVariants.all { variant ->
+        variant.outputs.all { output ->
+            if (outputFile != null && outputFileName.endsWith('.aar')) {
+                outputFileName = "${archivesBaseName}-release.aar"
+            }
+        }
+    }
 }
 
 dependencies {
@@ -74,21 +111,74 @@ android.testVariants.all { variant ->
   }
 }
 
-android.libraryVariants.all { variant ->
-    task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
-        description "Generates Javadoc for $variant.name."
-        source = variant.javaCompiler.source
+task javadoc(type: Javadoc, overwrite: true) {
+        description "Generates Javadoc for Release"
+        source = android.sourceSets.main.java.srcDirs
         ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
         doFirst {
-          classpath = files(variant.javaCompiler.classpath.files) + files(ext.androidJar)
+          classpath = project.files(android.getBootClasspath().join(File.pathSeparator)) + files(ext.androidJar)
         }
-		options {
-		       links "http://docs.oracle.com/javase/7/docs/api/"
-		       linksOffline "http://developer.android.com/reference","${android.sdkDirectory}/docs/reference"
+    options {
+           links "http://docs.oracle.com/javase/7/docs/api/"
+           linksOffline "http://developer.android.com/reference","${android.sdkDirectory}/docs/reference"
         }
         exclude '**/R.java'
         exclude 'com/unity3d/services/ar/view/GLSurfaceView.java'
-		destinationDir = file("../javadoc/")
+        exclude 'com/unity3d/services/ar/api/AR.java'
+        exclude 'com/unity3d/services/ar/view/ARView.java'
+        exclude 'com/unity3d/services/ar/view/ARViewHandler.java'
+        destinationDir = file("../javadoc/")
+    }
+
+task androidJavadocsJar(type: Jar, dependsOn: javadoc) {
+    classifier = "javadoc"
+    baseName = "${archivesBaseName}"
+    from javadoc.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = "sources"
+    baseName = "${archivesBaseName}"
+    from android.sourceSets.main.java.srcDirs
+}
+
+artifacts {
+    archives androidJavadocsJar
+    archives androidSourcesJar
+}
+
+task localProperties { 
+  if (!file("$rootDir/local.properties").exists()) {
+    file("$rootDir/local.properties").withWriterAppend { w -> "" }
+  }
+}
+
+// Bintray
+bintray {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+    pkg {
+        repo = bintrayRepo
+        name = bintrayName
+        desc = libraryDescription
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = allLicenses
+        publish = true
+        publicDownloadNumbers = false
+        version {
+            desc = libraryDescription
+            gpg {
+                sign = true //Determines whether to GPG sign the files. The default is false
+                passphrase = properties.getProperty("bintray.gpg.password")
+                //Optional. The passphrase for GPG signing'
+            }
+        }
     }
 }
 
@@ -100,4 +190,8 @@ def getPropertyStringWithDefaultValue(String key, String defaultValue) {
     value = "\"$value\""
   }
   return value != null ? value : defaultValue
+}
+
+if (project.rootProject.file('local.properties').exists()) {
+    apply from: 'mavenPomBintrayUpload.gradle'
 }

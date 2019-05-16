@@ -21,6 +21,7 @@ public class WebPlayerHandler implements IAdUnitViewHandler {
 	public boolean destroy() {
 		if (_webPlayer != null) {
 			ViewUtilities.removeViewFromParent(_webPlayer);
+			_webPlayer.destroy();
 		}
 
 		_webPlayer = null;

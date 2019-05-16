@@ -1,6 +1,7 @@
 package com.unity3d.services.analytics;
 
 import com.unity3d.services.analytics.mocks.UnityAnalyticsMock;
+import com.unity3d.services.core.webview.WebViewApp;
 
 import org.json.JSONObject;
 import org.junit.After;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import java.util.Date;
 import java.util.HashMap;
 
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -18,6 +20,7 @@ public class UnityAnalyticsTest {
     @Before
     public void before() {
         UnityAnalyticsMock.clearEventQueue();
+	    WebViewApp.setCurrentApp(null);
     }
 
     @After
@@ -69,7 +72,7 @@ public class UnityAnalyticsTest {
 
     @Test
     public void testCreateLevelFail() throws Exception {
-        UnityAnalyticsMock.onLevelFail(7);
+        UnityAnalyticsMock.onLevelFail("7");
 
         JSONObject jsonEvent = (JSONObject) UnityAnalyticsMock.getEventQueue().get(0);
 
@@ -78,12 +81,12 @@ public class UnityAnalyticsTest {
         assertEquals("level_fail", msg.get("name"));
         assertNotNull(msg.get("ts"));
         JSONObject customParams = (JSONObject) msg.get("custom_params");
-        assertEquals(7, customParams.get("level_index"));
+        assertEquals("7", customParams.get("level_index"));
     }
 
     @Test
     public void testCreateLevelUp() throws Exception {
-        UnityAnalyticsMock.onLevelUp(88);
+        UnityAnalyticsMock.onLevelUp("88");
 
         JSONObject jsonEvent = (JSONObject) UnityAnalyticsMock.getEventQueue().get(0);
 
@@ -92,7 +95,7 @@ public class UnityAnalyticsTest {
         assertEquals("level_up", msg.get("name"));
         assertNotNull(msg.get("ts"));
         JSONObject customParams = (JSONObject) msg.get("custom_params");
-        assertEquals(88, customParams.get("new_level_index"));
+        assertEquals("88", customParams.get("new_level_index"));
     }
 
     @Test
@@ -123,8 +126,6 @@ public class UnityAnalyticsTest {
         assertEquals("myCoolProduct", msg.get("productid"));
         assertEquals(34.5F, msg.get("amount"));
         assertEquals("USD", msg.get("currency"));
-        assertEquals(3151341L, msg.get("transactionid"));
-        assertEquals(false, msg.get("iap_service"));
         assertEquals(true, msg.get("promo"));
         assertEquals("test receipt", msg.get("receipt"));
     }

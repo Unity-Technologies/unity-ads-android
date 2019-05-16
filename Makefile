@@ -48,7 +48,7 @@ dismantle-adb-reverse:
 	adb reverse --remove-all
 
 javadoc:
-	./gradlew :lib:generateReleaseJavadoc
+	./gradlew :lib:javadoc
 
 zip: release
 	cp lib/build/outputs/aar/unity-ads-release.aar unity-ads.aar

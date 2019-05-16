@@ -105,4 +105,15 @@ public class SdkPropertiesTest {
 	public void testGetVersionCode() {
 		assertEquals("Version code not what it should be", BuildConfig.VERSION_CODE, SdkProperties.getVersionCode());
 	}
+
+	@Test
+	public void testIsChinaLocale() {
+		assertTrue("Should return true with a china iso alpha 2 code", SdkProperties.isChinaLocale("cn"));
+		assertTrue("Should return true with a china iso alpha 3 code", SdkProperties.isChinaLocale("chn"));
+		assertTrue("Should return true with an uppercase china iso alpha 2 code", SdkProperties.isChinaLocale("CN"));
+		assertTrue("Should return true with an uppercase china iso alpha 3 code", SdkProperties.isChinaLocale("CHN"));
+		assertTrue("Should return true with an upper and lowercase china iso alpha 3 code", SdkProperties.isChinaLocale("ChN"));
+
+		assertFalse("Should return false with a US iso code", SdkProperties.isChinaLocale("us"));
+	}
 }

@@ -1,5 +1,6 @@
 package com.unity3d.services.analytics;
 
+import com.unity3d.services.core.webview.WebView;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.WebViewEventCategory;
 
@@ -57,7 +58,7 @@ public class UnityAnalytics {
         return new JSONObject(map);
     }
 
-    private static JSONObject createLevelFail(Integer levelIndex) {
+    private static JSONObject createLevelFail(String levelIndex) {
         HashMap<String, Object> customParams = new HashMap<>();
         customParams.put("level_index", levelIndex);
         HashMap<String, Object> msg = new HashMap<>();
@@ -70,7 +71,7 @@ public class UnityAnalytics {
         return new JSONObject(map);
     }
 
-    private static JSONObject createLevelUp(Integer newLevelIndex) {
+    private static JSONObject createLevelUp(String newLevelIndex) {
         HashMap<String, Object> customParams = new HashMap<>();
         customParams.put("new_level_index", newLevelIndex);
         HashMap<String, Object> msg = new HashMap<>();
@@ -101,7 +102,6 @@ public class UnityAnalytics {
     private static JSONObject createIapTransaction(String productId, Float amount, String currency, Boolean isPromo, String receipt) {
         HashMap<String, Object> msg = new HashMap<>();
         msg.put("ts", new Date().getTime());
-        msg.put("name", "ad_complete");
         msg.put("productid", productId);
         msg.put("amount", amount);
         msg.put("currency", currency);
@@ -123,12 +123,12 @@ public class UnityAnalytics {
         postEvent(jsonObject);
     }
 
-    public static void onLevelFail(Integer levelIndex) {
+    public static void onLevelFail(String levelIndex) {
         JSONObject jsonObject = createLevelFail(levelIndex);
         postEvent(jsonObject);
     }
 
-    public static void onLevelUp(Integer newLevelIndex) {
+    public static void onLevelUp(String newLevelIndex) {
         JSONObject jsonObject = createLevelUp(newLevelIndex);
         postEvent(jsonObject);
     }

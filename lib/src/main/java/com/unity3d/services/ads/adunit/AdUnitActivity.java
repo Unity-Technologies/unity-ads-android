@@ -207,7 +207,9 @@ public class AdUnitActivity extends Activity {
 			return;
 		}
 
-		if (isFinishing()) {
+		if (WebViewApp.getCurrentApp().getWebView() == null) {
+			DeviceLog.warning("Unity Ads web view is null, from onPause");
+		} else if (isFinishing()) {
 			ViewUtilities.removeViewFromParent(WebViewApp.getCurrentApp().getWebView());
 		}
 
