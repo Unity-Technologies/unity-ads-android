@@ -75,7 +75,9 @@ public final class UnityAds {
 	 * @param listener Listener for IUnityAdsListener callbacks
 	 */
 	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener) {
-		initialize(activity, gameId, listener, false);
+		boolean testMode = false;
+		boolean usePerPlacementLoad = false;
+		initialize(activity, gameId, listener, testMode, usePerPlacementLoad);
 	}
 
 	/**
@@ -87,7 +89,22 @@ public final class UnityAds {
 	 * @param testMode If true, only test ads are shown
 	 */
 	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode) {
-		UnityAdsImplementation.initialize(activity, gameId, listener, testMode);
+		boolean usePerPlacementLoad = false;
+		UnityAdsImplementation.initialize(activity, gameId, listener, testMode, usePerPlacementLoad);
+	}
+
+	/**
+	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
+	 * Note: The `load` API is in closed beta and available upon invite only. If you would like to be considered for the beta, please contact Unity Ads Support.
+	 *
+	 * @param activity Current Android activity of calling app
+	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
+	 * @param listener Listener for IUnityAdsListener callbacks
+	 * @param testMode If true, only test ads are shown
+	 * @param enablePerPlacementLoad Set this flag to `YES` to disable automatic placement caching. When this is enabled, developer must call `load` on placements before calling show
+	 */
+	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode, final boolean enablePerPlacementLoad) {
+		UnityAdsImplementation.initialize(activity, gameId, listener, testMode, enablePerPlacementLoad);
 	}
 
 	/**
@@ -230,5 +247,15 @@ public final class UnityAds {
 	 */
 	public static boolean getDebugMode() {
 		return UnityAdsImplementation.getDebugMode();
+	}
+
+	/**
+	 * Request fill for a specific placement ID. This functionality is enabled through the `enablePerPlacementLoad` in initialize.
+	 * Note: The `load` API is in closed beta and available upon invite only. If you would like to be considered for the beta, please contact Unity Ads Support.
+	 *
+	 * @param placementId The placement ID to be loaded.
+	 */
+	public static void load(final String placementId) {
+		UnityAdsImplementation.load(placementId);
 	}
 }

@@ -1,6 +1,7 @@
 package com.unity3d.services.core.properties;
 
 import android.content.Context;
+
 import com.unity3d.ads.BuildConfig;
 import com.unity3d.services.IUnityServicesListener;
 import com.unity3d.services.core.cache.CacheDirectory;
@@ -26,31 +27,40 @@ public class SdkProperties {
 	private static boolean _initialized = false;
 	private static boolean _reinitialized = false;
 	private static boolean _testMode = false;
+	private static boolean _perPlacementLoadEnabled = false;
 	private static boolean _debugMode = false;
 
-	public static boolean isInitialized () {
+	public static boolean isInitialized() {
 		return _initialized;
 	}
 
-	public static void setInitialized (boolean initialized) {
+	public static void setInitialized(boolean initialized) {
 		_initialized = initialized;
 	}
 
-	public static boolean isTestMode () {
+	public static boolean isTestMode() {
 		return _testMode;
 	}
 
-	public static void setTestMode (boolean testMode) {
+	public static void setTestMode(boolean testMode) {
 		_testMode = testMode;
+	}
+
+	public static boolean isPerPlacementLoadEnabled () { return _perPlacementLoadEnabled; }
+
+	public static void setPerPlacementLoadEnabled (boolean perPlacementLoad) {
+		_perPlacementLoadEnabled = perPlacementLoad;
 	}
 
 	public static int getVersionCode () {
 		return BuildConfig.VERSION_CODE;
 	}
 
-	public static String getVersionName () { return BuildConfig.VERSION_NAME; }
+	public static String getVersionName() {
+		return BuildConfig.VERSION_NAME;
+	}
 
-	public static String getCacheDirectoryName () {
+	public static String getCacheDirectoryName() {
 		return CACHE_DIR_NAME;
 	}
 
@@ -62,7 +72,7 @@ public class SdkProperties {
 		return LOCAL_STORAGE_FILE_PREFIX;
 	}
 
-	public static void setConfigUrl (String url) throws URISyntaxException, MalformedURLException {
+	public static void setConfigUrl(String url) throws URISyntaxException, MalformedURLException {
 		if (url == null) {
 			throw new MalformedURLException();
 		}
@@ -93,56 +103,56 @@ public class SdkProperties {
 	}
 
 	private static String getWebViewBranch() {
-		if(BuildConfig.DEBUG) {
+		if (BuildConfig.DEBUG) {
 			return BuildConfig.WEBVIEW_BRANCH;
 		}
 		return getVersionName();
 	}
 
-	public static String getLocalWebViewFile () {
+	public static String getLocalWebViewFile() {
 		return SdkProperties.getCacheDirectory().getAbsolutePath() + "/" + "UnityAdsWebApp.html";
 	}
 
-	public static File getCacheDirectory () {
+	public static File getCacheDirectory() {
 		return getCacheDirectory(ClientProperties.getApplicationContext());
 	}
 
-	public static File getCacheDirectory (Context context) {
-		if(_cacheDirectory == null) {
+	public static File getCacheDirectory(Context context) {
+		if (_cacheDirectory == null) {
 			setCacheDirectory(new CacheDirectory(CACHE_DIR_NAME));
 		}
 
 		return _cacheDirectory.getCacheDirectory(context);
 	}
 
-	public static void setCacheDirectory (CacheDirectory cacheDirectory) {
+	public static void setCacheDirectory(CacheDirectory cacheDirectory) {
 		_cacheDirectory = cacheDirectory;
 	}
 
-	public static CacheDirectory getCacheDirectoryObject () {
+	public static CacheDirectory getCacheDirectoryObject() {
 		return _cacheDirectory;
 	}
 
-	public static void setInitializationTime (long milliseconds) {
+	public static void setInitializationTime(long milliseconds) {
 		_initializationTime = milliseconds;
 	}
 
-	public static long getInitializationTime () {
+	public static long getInitializationTime() {
 		return _initializationTime;
 	}
 
-	public static void setReinitialized (boolean status) {
+	public static void setReinitialized(boolean status) {
 		_reinitialized = status;
 	}
 
-	public static boolean isReinitialized () {
+	public static boolean isReinitialized() {
 		return _reinitialized;
 	}
 
 	public static void setDebugMode(boolean debugMode) {
 		_debugMode = debugMode;
 
-		if(debugMode) {
+		if (debugMode) {
 			DeviceLog.setLogLevel(DeviceLog.LOGLEVEL_DEBUG);
 		} else {
 			DeviceLog.setLogLevel(DeviceLog.LOGLEVEL_INFO);
@@ -162,10 +172,11 @@ public class SdkProperties {
 	}
 
 	public static boolean isChinaLocale(String networkISOCode) {
-		if (networkISOCode.equalsIgnoreCase(CHINA_ISO_ALPHA_2_CODE) || networkISOCode.equalsIgnoreCase(CHINA_ISO_ALPHA_3_CODE)) {
+		if (networkISOCode.equalsIgnoreCase(CHINA_ISO_ALPHA_2_CODE)
+			|| networkISOCode.equalsIgnoreCase(CHINA_ISO_ALPHA_3_CODE)) {
 			return true;
 		} else {
 			return false;
 		}
-  }
+	}
 }

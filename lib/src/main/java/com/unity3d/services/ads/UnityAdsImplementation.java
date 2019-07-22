@@ -11,6 +11,7 @@ import com.unity3d.ads.UnityAds;
 import com.unity3d.services.IUnityServicesListener;
 import com.unity3d.services.UnityServices;
 import com.unity3d.services.ads.adunit.AdUnitOpen;
+import com.unity3d.services.ads.load.LoadModule;
 import com.unity3d.services.ads.placement.Placement;
 import com.unity3d.services.ads.properties.AdsProperties;
 import com.unity3d.services.core.log.DeviceLog;
@@ -32,7 +33,8 @@ public final class UnityAdsImplementation {
 	 * @param listener Listener for IUnityAdsListener callbacks
 	 */
 	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener) {
-		initialize(activity, gameId, listener, false);
+		boolean testMode = false;
+		initialize(activity, gameId, listener, testMode);
 	}
 
 	/**
@@ -44,6 +46,19 @@ public final class UnityAdsImplementation {
 	 * @param testMode If true, only test ads are shown
 	 */
 	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode) {
+		boolean usePerPlacementLoad = false;
+		initialize(activity, gameId, listener, testMode, usePerPlacementLoad);
+	}
+
+	/**
+	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
+	 *  @param activity Current Android activity of calling app
+	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
+	 * @param listener Listener for IUnityAdsListener callbacks
+	 * @param testMode If true, only test ads are shown
+	 * @param enablePerPlacementLoad Set this flag to `YES` to disable automatic placement caching. When this is enabled, developer must call `load` on placements before calling show
+	 */
+	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode, final boolean enablePerPlacementLoad) {
 		DeviceLog.entered();
 		
 		UnityAdsImplementation.addListener(listener);
@@ -58,7 +73,7 @@ public final class UnityAdsImplementation {
 					listener.onUnityAdsError(UnityAds.UnityAdsError.INVALID_ARGUMENT, message);
 				}
 			}
-		}, testMode);
+		}, testMode, enablePerPlacementLoad);
 	}
 
 	/**
@@ -291,5 +306,9 @@ public final class UnityAdsImplementation {
 
 	public static String getDefaultPlacement() {
 		return Placement.getDefaultPlacement();
+	}
+
+	public static void load(final String placementId) {
+		LoadModule.getInstance().load(placementId);
 	}
 }

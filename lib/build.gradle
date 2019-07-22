@@ -50,8 +50,8 @@ android {
     All SDK with version numbers with last two digits >= 50 will be treated
     as China SDK for filtering in the backend.
     */
-    versionCode = 3100
-    versionName = "3.1.0"
+    versionCode = 3200
+    versionName = "3.2.0"
 
     setProperty("archivesBaseName", "unity-ads")
 
@@ -90,7 +90,7 @@ android {
   libraryVariants.all { variant ->
         variant.outputs.all { output ->
             if (outputFile != null && outputFileName.endsWith('.aar')) {
-                outputFileName = "${archivesBaseName}-release.aar"
+                outputFileName = "${archivesBaseName}-${variant.buildType.name}.aar"
             }
         }
     }

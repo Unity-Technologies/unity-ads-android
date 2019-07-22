@@ -1,7 +1,10 @@
 package com.unity3d.services.core.api;
 
+import com.unity3d.services.core.configuration.InitializationNotificationCenter;
+
 import com.unity3d.services.core.configuration.InitializeThread;
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.webview.WebViewApp;
@@ -15,6 +18,7 @@ public class Sdk {
 		WebViewApp.getCurrentApp().setWebAppLoaded(true);
 
 		Object[] parameters = new Object[] {
+
 			ClientProperties.getGameId(),
 			SdkProperties.isTestMode(),
 			ClientProperties.getAppName(),
@@ -27,7 +31,8 @@ public class Sdk {
 			WebViewApp.getCurrentApp().getConfiguration().getWebViewHash(),
 			WebViewApp.getCurrentApp().getConfiguration().getWebViewVersion(),
 			SdkProperties.getInitializationTime(),
-			SdkProperties.isReinitialized()
+			SdkProperties.isReinitialized(),
+			SdkProperties.isPerPlacementLoadEnabled()
 		};
 
 		callback.invoke(parameters);
@@ -38,6 +43,14 @@ public class Sdk {
 		DeviceLog.debug("Web Application initialized");
 		SdkProperties.setInitialized(true);
 		WebViewApp.getCurrentApp().setWebAppInitialized(true);
+
+		InitializationNotificationCenter.getInstance().triggerOnSdkInitialized();
+		callback.invoke();
+	}
+
+	@WebViewExposed
+	public static void initError(String message, final int code, WebViewCallback callback) {
+		InitializationNotificationCenter.getInstance().triggerOnSdkInitializationFailed(message, code);
 		callback.invoke();
 	}
 
@@ -77,7 +90,7 @@ public class Sdk {
 	}
 
 	@WebViewExposed
-	public static void reinitialize (WebViewCallback callback) {
+	public static void reinitialize(WebViewCallback callback) {
 		SdkProperties.setReinitialized(true);
 		InitializeThread.initialize(WebViewApp.getCurrentApp().getConfiguration());
 

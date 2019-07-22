@@ -135,11 +135,17 @@ public class Configuration {
 		JSONObject config = new JSONObject(data);
 
 		_webViewUrl = config.getString("url");
+
 		if(!config.isNull("hash")) {
 			_webViewHash = config.getString("hash");
+		} else {
+			_webViewHash = null;
 		}
+
 		if(config.has("version")) {
 			_webViewVersion = config.getString("version");
+		} else {
+			_webViewVersion = null;
 		}
 
 		if (_webViewUrl == null || _webViewUrl.isEmpty()) {

@@ -20,24 +20,13 @@ public class UnityServices {
 
 	/**
 	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
-	 *
-	 * @param activity Current Android activity of calling app
-	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
-	 * @param listener Listener for IUnityAdsListener callbacks
-	 */
-	public static void initialize(final Activity activity, final String gameId, final IUnityServicesListener listener) {
-		initialize(activity, gameId, listener, false);
-	}
-
-	/**
-	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
-	 *
-	 * @param activity Current Android activity of calling app
+	 *  @param activity Current Android activity of calling app
 	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
 	 * @param listener Listener for IUnityAdsListener callbacks
 	 * @param testMode If true, only test ads are shown
+	 * @param enablePerPlacementLoad If true, disables automatic requests, and allows the load() function to request placements instead
 	 */
-	public static void initialize(final Activity activity, final String gameId, final IUnityServicesListener listener, final boolean testMode) {
+	public static void initialize(final Activity activity, final String gameId, final IUnityServicesListener listener, final boolean testMode, final boolean enablePerPlacementLoad) {
 		DeviceLog.entered();
 
 		// Allow init call only once. Configuration thread will take care of retries in case of network failures.
@@ -84,6 +73,7 @@ public class UnityServices {
 		ClientProperties.setGameId(gameId);
 		ClientProperties.setApplicationContext(activity.getApplicationContext());
 		ClientProperties.setApplication(activity.getApplication());
+		SdkProperties.setPerPlacementLoadEnabled(enablePerPlacementLoad);
 		SdkProperties.setTestMode(testMode);
 
 		if(EnvironmentCheck.isEnvironmentOk()) {

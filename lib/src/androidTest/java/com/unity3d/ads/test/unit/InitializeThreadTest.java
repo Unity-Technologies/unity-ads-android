@@ -104,6 +104,26 @@ public class InitializeThreadTest {
 		assertEquals("Init state config test: config webview hash does not match hash in testconfig.json", config.getWebViewHash(), _testConfigHash);
 	}
 
+	@Test
+	public void testInitializeStateConfigWithNullHash() throws MalformedURLException, URISyntaxException {
+		SdkProperties.setConfigUrl(TestUtilities.getTestServerAddress() + "/testconfig_with_null_hash.json");
+
+		Configuration initConfig = new Configuration();
+		initConfig.setWebViewUrl(_testConfigUrl);
+		initConfig.setWebViewHash(_testConfigHash);
+
+		initConfig.setConfigUrl(SdkProperties.getConfigUrl());
+		InitializeThread.InitializeStateConfig state = new InitializeThread.InitializeStateConfig(initConfig);
+		Object nextState = state.execute();
+
+		assertTrue("Init state config test: next state is not load cache", nextState instanceof InitializeThread.InitializeStateLoadCache);
+
+		Configuration config = ((InitializeThread.InitializeStateLoadCache)nextState).getConfiguration();
+
+		assertEquals("Init state config test: config webview url does not match url in testconfig.json", config.getWebViewUrl(), _testConfigUrl);
+		assertEquals("Init state config test: config webview hash does not match hash in testconfig.json", null, config.getWebViewHash());
+	}
+
 	// Test for cache load fail case, success case is handled in load web test
 	@Test
 	public void testInitializeStateLoadCache() {

@@ -14,7 +14,7 @@ import com.unity3d.services.core.webview.bridge.WebViewExposed;
 public class VideoPlayer {
 	private static VideoPlayerView _videoPlayerView;
 
-	public static void setVideoPlayerView (VideoPlayerView videoPlayerView) {
+	public static void setVideoPlayerView(VideoPlayerView videoPlayerView) {
 		_videoPlayerView = videoPlayerView;
 	}
 
@@ -23,7 +23,7 @@ public class VideoPlayer {
 	}
 
 	@WebViewExposed
-	public static void setProgressEventInterval (final Integer milliseconds, final WebViewCallback callback) {
+	public static void setProgressEventInterval(final Integer milliseconds, final WebViewCallback callback) {
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -35,29 +35,27 @@ public class VideoPlayer {
 
 		if (getVideoPlayerView() != null) {
 			callback.invoke();
-		}
-		else {
+		} else {
 			callback.error(VideoPlayerError.VIDEOVIEW_NULL);
 		}
 	}
 
 	@WebViewExposed
-	public static void getProgressEventInterval (final WebViewCallback callback) {
+	public static void getProgressEventInterval(final WebViewCallback callback) {
 		if (getVideoPlayerView() != null) {
 			callback.invoke(getVideoPlayerView().getProgressEventInterval());
-		}
-		else {
+		} else {
 			callback.error(VideoPlayerError.VIDEOVIEW_NULL);
 		}
 	}
 
 	@WebViewExposed
-	public static void prepare (final String url, final Double initialVolume, final WebViewCallback callback) {
+	public static void prepare(final String url, final Double initialVolume, final WebViewCallback callback) {
 		prepare(url, initialVolume, 0, callback);
 	}
 
 	@WebViewExposed
-	public static void prepare (final String url, final Double initialVolume, final Integer timeout, final WebViewCallback callback) {
+	public static void prepare(final String url, final Double initialVolume, final Integer timeout, final WebViewCallback callback) {
 		DeviceLog.debug("Preparing video for playback: " + url);
 
 		Utilities.runOnUiThread(new Runnable() {
@@ -71,14 +69,13 @@ public class VideoPlayer {
 
 		if (getVideoPlayerView() != null) {
 			callback.invoke(url);
-		}
-		else {
+		} else {
 			callback.error(VideoPlayerError.VIDEOVIEW_NULL);
 		}
 	}
 
 	@WebViewExposed
-	public static void play (final WebViewCallback callback) {
+	public static void play(final WebViewCallback callback) {
 		DeviceLog.debug("Starting playback of prepared video");
 
 		Utilities.runOnUiThread(new Runnable() {
@@ -92,14 +89,13 @@ public class VideoPlayer {
 
 		if (getVideoPlayerView() != null) {
 			callback.invoke();
-		}
-		else {
+		} else {
 			callback.error(VideoPlayerError.VIDEOVIEW_NULL);
 		}
 	}
 
 	@WebViewExposed
-	public static void pause (final WebViewCallback callback) {
+	public static void pause(final WebViewCallback callback) {
 		DeviceLog.debug("Pausing current video");
 
 		Utilities.runOnUiThread(new Runnable() {
@@ -113,14 +109,13 @@ public class VideoPlayer {
 
 		if (getVideoPlayerView() != null) {
 			callback.invoke();
-		}
-		else {
+		} else {
 			callback.error(VideoPlayerError.VIDEOVIEW_NULL);
 		}
 	}
 
 	@WebViewExposed
-	public static void stop (final WebViewCallback callback) {
+	public static void stop(final WebViewCallback callback) {
 		DeviceLog.debug("Stopping current video");
 
 		Utilities.runOnUiThread(new Runnable() {
@@ -134,14 +129,13 @@ public class VideoPlayer {
 
 		if (getVideoPlayerView() != null) {
 			callback.invoke();
-		}
-		else {
+		} else {
 			callback.error(VideoPlayerError.VIDEOVIEW_NULL);
 		}
 	}
 
 	@WebViewExposed
-	public static void seekTo (final Integer time, final WebViewCallback callback) {
+	public static void seekTo(final Integer time, final WebViewCallback callback) {
 		DeviceLog.debug("Seeking video to time: " + time);
 
 		Utilities.runOnUiThread(new Runnable() {
@@ -162,7 +156,7 @@ public class VideoPlayer {
 	}
 
 	@WebViewExposed
-	public static void getCurrentPosition (final WebViewCallback callback) {
+	public static void getCurrentPosition(final WebViewCallback callback) {
 		if (getVideoPlayerView() != null) {
 			callback.invoke(getVideoPlayerView().getCurrentPosition());
 		} else {
@@ -171,41 +165,48 @@ public class VideoPlayer {
 	}
 
 	@WebViewExposed
-	public static void getVolume (final WebViewCallback callback) {
+	public static void getVolume(final WebViewCallback callback) {
 		if (getVideoPlayerView() != null) {
 			callback.invoke(getVideoPlayerView().getVolume());
-		}
-		else {
+		} else {
 			callback.error(VideoPlayerError.VIDEOVIEW_NULL);
 		}
 	}
 
 	@WebViewExposed
-	public static void setVolume (final Double volume, final WebViewCallback callback) {
+	public static void setVolume(final Double volume, final WebViewCallback callback) {
 		DeviceLog.debug("Setting video volume: " + volume);
 
 		if (getVideoPlayerView() != null) {
 			getVideoPlayerView().setVolume(volume.floatValue());
 			callback.invoke(volume);
-		}
-		else {
+		} else {
 			callback.error(VideoPlayerError.VIDEOVIEW_NULL);
 		}
 	}
 
 	@WebViewExposed
-	public static void setInfoListenerEnabled (final boolean enabled, final WebViewCallback callback) {
+	public static void setInfoListenerEnabled(final boolean enabled, final WebViewCallback callback) {
 		if (Build.VERSION.SDK_INT > 16) {
 			if (getVideoPlayerView() != null) {
 				getVideoPlayerView().setInfoListenerEnabled(enabled);
 				callback.invoke(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.INFO, enabled);
-			}
-			else {
+			} else {
 				callback.error(VideoPlayerError.VIDEOVIEW_NULL);
 			}
-		}
-		else {
+		} else {
 			callback.error(VideoPlayerError.API_LEVEL_ERROR, Build.VERSION.SDK_INT, enabled);
+		}
+	}
+
+	@WebViewExposed
+	public static void getVideoViewRectangle(final WebViewCallback callback) {
+		VideoPlayerView view = getVideoPlayerView();
+		if (view != null) {
+			int[] rectangle = view.getVideoViewRectangle();
+			callback.invoke(rectangle[0], rectangle[1], rectangle[2], rectangle[3]);
+		} else {
+			callback.error(VideoPlayerError.VIDEOVIEW_NULL);
 		}
 	}
 }

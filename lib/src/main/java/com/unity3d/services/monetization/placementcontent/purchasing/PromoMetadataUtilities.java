@@ -15,7 +15,7 @@ public class PromoMetadataUtilities {
             builder.withImpressionDate(new Date(impression));
         }
         if (params.containsKey("offerDuration")) {
-            builder.withOfferDuration((long) params.get("offerDuration"));
+            builder.withOfferDuration(Long.valueOf(params.get("offerDuration").toString()));
         }
         if (params.containsKey("costs")) {
             List<Map<String, Object>> itemsList = (List<Map<String, Object>>) params.get("costs");

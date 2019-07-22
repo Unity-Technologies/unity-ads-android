@@ -9,7 +9,9 @@ import android.support.test.filters.RequiresDevice;
 import android.support.test.filters.SdkSuppress;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
+import com.unity3d.services.ads.adunit.AdUnitActivity;
 import com.unity3d.services.ads.api.VideoPlayer;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.ads.test.TestUtilities;
@@ -806,5 +808,101 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		else {
 			DeviceLog.debug("Skipping test \"testInfoListenerTooLowApiLevel\", API level too high: " + Build.VERSION.SDK_INT);
 		}
+	}
+
+	@Test
+	@RequiresDevice
+	public void testVideoViewRectangle () throws Exception {
+		final Activity activity = waitForActivityStart(null);
+		assertNotNull("Started activity should not be null!", activity);
+
+		final ConditionVariable cv1 = new ConditionVariable();
+		Handler handler = new Handler(Looper.getMainLooper());
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				((AdUnitActivity)activity).setViewFrame("adunit", 50, 60, 510, 520);
+				cv1.open();
+			}
+		});
+
+		boolean success = cv1.block(2000);
+		assertTrue("Did not set view size", success);
+
+		WebViewApp.setCurrentApp(new MockWebViewApp() {
+			@Override
+			public boolean sendEvent(Enum eventCategory, Enum eventId, Object... params) {
+				super.sendEvent(eventCategory, eventId, params);
+
+				DeviceLog.debug("Event: " + eventCategory.name() + ", " + eventId.name());
+
+				if (eventCategory.equals(WebViewEventCategory.VIDEOPLAYER) && eventId.equals(VideoPlayerEvent.PREPARED)) {
+					if (CONDITION_VARIABLE != null)
+						CONDITION_VARIABLE.open();
+				}
+
+				return true;
+			}
+
+			@Override
+			public boolean invokeCallback(Invocation invocation) {
+				super.invokeCallback(invocation);
+
+				for (ArrayList<Object> response : invocation.getResponses()) {
+					CallbackStatus status = (CallbackStatus) response.get(0);
+
+					if (status.equals(CallbackStatus.OK)) {
+						if (CONDITION_VARIABLE != null)
+							CONDITION_VARIABLE.open();
+					}
+
+					break;
+				}
+
+				return true;
+			}
+		});
+
+		final String validUrl = TestUtilities.getTestServerAddress() + "/blue_test_trailer.mp4";
+
+		final ConditionVariable viewAddCV = new ConditionVariable();
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(510, 520);
+				params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+				params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+				params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+				((AdUnitActivity)activity).getLayout().addView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, params);
+				viewAddCV.open();
+			}
+		});
+		success = viewAddCV.block(3000);
+		assertTrue("ConditionVariable did not open in view add", success);
+
+
+		MockWebViewApp mockWebViewApp = (MockWebViewApp)WebViewApp.getCurrentApp();
+		ConditionVariable prepareCV = new ConditionVariable();
+		mockWebViewApp.CONDITION_VARIABLE = prepareCV;
+		DeviceLog.debug("URL_GIVEN: " + validUrl);
+		((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.prepare(validUrl, 1f, 0);
+		success = prepareCV.block(30000);
+
+		assertTrue("Condition Variable was not opened: PREPARE or PREPARE ERROR event was not received", success);
+
+		int[] rectangle = ((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW.getVideoViewRectangle();
+
+		int[] xy = new int[2];
+		((AdUnitActivity)activity).getLayout().getLocationInWindow(xy);
+
+		assertEquals(4, rectangle.length);
+		assertEquals(xy[0], rectangle[0]);
+		assertEquals(xy[1], rectangle[1]);
+		assertEquals(510, rectangle[2]);
+		assertTrue(520 == rectangle[3] || 286 == rectangle[3]);
+
+		assertTrue("Didn't get activity finish", waitForActivityFinish(activity));
 	}
 }

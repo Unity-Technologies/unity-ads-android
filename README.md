@@ -1,6 +1,6 @@
-# Unity Ads 3.1.0 Android Release Repository
+# Unity Ads Android Release Repository
 
-Welcome to the Unity Ads 3.1.0 Android release repository.
+Welcome to the Unity Ads Android release repository.
 
 ## Binaries
 

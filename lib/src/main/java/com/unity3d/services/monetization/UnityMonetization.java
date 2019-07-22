@@ -56,7 +56,8 @@ public class UnityMonetization {
     }
 
     public static void initialize(Activity activity, String gameId, IUnityMonetizationListener listener) {
-        initialize(activity, gameId, listener, false);
+        boolean testMode = false;
+        initialize(activity, gameId, listener, testMode);
     }
 
     public static void initialize(Activity activity, String gameId, IUnityMonetizationListener listener, boolean testMode) {
@@ -65,7 +66,8 @@ public class UnityMonetization {
             setListener(listener);
         }
         ClientProperties.setMonetizationEnabled(true);
-        UnityServices.initialize(activity, gameId, listener, testMode);
+        boolean usePerPlacementLoad = false;
+        UnityServices.initialize(activity, gameId, listener, testMode, usePerPlacementLoad);
     }
 
     /**

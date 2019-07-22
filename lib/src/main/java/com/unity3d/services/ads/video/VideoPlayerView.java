@@ -223,4 +223,11 @@ public class VideoPlayerView extends VideoView {
 	public int getProgressEventInterval () {
 		return _progressEventInterval;
 	}
+
+	public int[] getVideoViewRectangle() {
+		int xyPoint[] = new int[2];
+		this.getLocationInWindow(xyPoint);
+
+		return new int[] { xyPoint[0], xyPoint[1], this.getMeasuredWidth(), this.getMeasuredHeight() };
+	}
 }
