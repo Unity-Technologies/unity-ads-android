@@ -1,0 +1,70 @@
+variables:
+
+stages:
+  - test
+  - build
+  - release
+
+instrumentation-test:
+  stage: test
+  script:
+    - ./scripts/gitlab/setup.sh
+    - ./scripts/gitlab/instrumentation_test.sh
+  tags:
+    - ads_sdk_osx_worker
+
+integration-test:
+  stage: test
+  script:
+    - ./scripts/gitlab/setup.sh
+    - ./scripts/gitlab/integration_test.sh
+  tags:
+    - ads_sdk_osx_worker
+
+legacy-test:
+  stage: test
+  script:
+    - ./scripts/gitlab/setup.sh
+    - ./scripts/gitlab/legacy_test.sh
+  tags:
+    - ads_sdk_osx_worker
+    
+build-release:
+  stage: build
+  script:
+    - make zip
+  tags:
+    - ads_sdk_osx_worker
+  artifacts:
+    when: on_success
+    paths:
+      - unity-ads.aar.zip
+
+internal-release:
+  only: 
+    - /^feature/ci/
+    - /^release\/[0-9\.]*/
+  stage: release
+  script:
+    - echo "Running an internal release"
+    - ./scripts/gitlab/post-internal-github-release.sh
+  tags:
+    - ads_sdk_osx_worker
+  dependencies:
+    - build-release
+  when: manual
+
+# # TODO
+# public-release:
+#   only: 
+#     - /^feature/ci/
+#     - /^release\/[0-9\.]*/
+#   stage: release
+#   script:
+#     - echo "Running a public release"
+#     - ./scripts/gitlab/post-public-github-release.sh
+#   tags:
+#     - ads_sdk_osx_worker
+#   dependencies:
+#     - build-release
+#   when: manual

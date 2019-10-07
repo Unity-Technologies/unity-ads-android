@@ -1,0 +1,188 @@
+package com.unity3d.ads.test.integration.banner;
+
+import android.support.test.rule.ActivityTestRule;
+import android.view.View;
+
+import com.unity3d.ads.IUnityAdsListener;
+import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.test.hybrid.HybridTestActivity;
+import com.unity3d.services.banners.BannerErrorInfo;
+import com.unity3d.services.banners.BannerView;
+import com.unity3d.services.banners.IUnityBannerListener;
+import com.unity3d.services.banners.UnityBannerSize;
+import com.unity3d.services.banners.UnityBanners;
+import com.unity3d.services.banners.view.BannerPosition;
+import com.unity3d.services.core.configuration.IInitializationListener;
+import com.unity3d.services.core.configuration.InitializationNotificationCenter;
+import com.unity3d.services.core.misc.Utilities;
+
+
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
+
+import java.util.concurrent.Semaphore;
+
+import static junit.framework.Assert.*;
+
+public class BannerIntegrationTest {
+	@ClassRule
+	public static final ActivityTestRule<HybridTestActivity> _activityRule = new ActivityTestRule<>(HybridTestActivity.class);
+	BannerView callbackbannerView;
+	View oldBannerView;
+	BannerView bannerView;
+	static IInitializationListener initializationListener;
+
+	@BeforeClass
+	public static void setUpOnce() throws InterruptedException {
+		final Semaphore initializeSemaphore = new Semaphore(0);
+		initializationListener = new IInitializationListener() {
+			@Override
+			public void onSdkInitialized() {
+				InitializationNotificationCenter.getInstance().removeListener(initializationListener);
+				initializeSemaphore.release();
+			}
+
+			@Override
+			public void onSdkInitializationFailed(String message, int code) {
+				InitializationNotificationCenter.getInstance().removeListener(initializationListener);
+				fail("Failed to initialize");
+				initializeSemaphore.release();
+			}
+		};
+		InitializationNotificationCenter.getInstance().addListener(initializationListener);
+		UnityAds.initialize(_activityRule.getActivity(), "14851", null, true, true);
+		initializeSemaphore.acquire();
+	}
+
+	@Test(timeout = 100000)
+	public void LegacyBannerTest() throws InterruptedException {
+		final Semaphore _loadedSemaphore = new Semaphore(0);
+		final Semaphore _shownSemaphore = new Semaphore(0);
+		final UnityBannerListener listener = new UnityBannerListener() {
+			@Override
+			public void onUnityBannerLoaded(String placementId, View view)
+			{
+				oldBannerView = view;
+				_loadedSemaphore.release();
+				Utilities.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if (oldBannerView.getParent() == null) {
+							_activityRule.getActivity().addContentView(oldBannerView, oldBannerView.getLayoutParams());
+							_shownSemaphore.release();
+						}
+					}
+				});
+			}
+
+			@Override
+			public void onUnityBannerClick(String placementId) {
+
+			}
+
+			@Override
+			public void onUnityBannerError(String message) {
+				_loadedSemaphore.release();
+				_shownSemaphore.release();
+				fail("Banner error encountered " + message);
+			}
+		};
+		UnityBanners.setBannerListener(listener);
+		UnityBanners.setBannerPosition(BannerPosition.BOTTOM_CENTER);
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				UnityBanners.loadBanner(_activityRule.getActivity(), "bannerads");
+			}
+		});
+		_loadedSemaphore.acquire();
+		assertNotNull(oldBannerView);
+
+		_shownSemaphore.acquire();
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				UnityBanners.destroy();
+			}
+		});
+		oldBannerView = null;
+	}
+
+	@Test(timeout = 100000)
+	public void BannerTest() throws InterruptedException {
+		// There may be a timing issue with this test where webview has not finished initializing fully
+		// Even though webview tells native it is initialized
+		UnityBannerSize unityBannerSize = new UnityBannerSize(320, 50);
+		bannerView = new BannerView(_activityRule.getActivity(), "bannerads", unityBannerSize);
+		final Semaphore _loadedSemaphore = new Semaphore(0);
+		final Semaphore _clickSemaphore = new Semaphore(0);
+		bannerView.setListener(new BannerView.IListener() {
+			public void onBannerLoaded(BannerView bannerAdView) {
+				callbackbannerView = bannerAdView;
+				_loadedSemaphore.release();
+			}
+
+			public void onBannerClick(BannerView bannerAdView) {
+				callbackbannerView = bannerAdView;
+				_clickSemaphore.release();
+			}
+
+			public void onBannerFailedToLoad(BannerView bannerAdView, BannerErrorInfo bannerErrorInfo) {
+				_loadedSemaphore.release();
+				_clickSemaphore.release();
+				fail("Banner error encountered " + bannerErrorInfo.errorMessage);
+			}
+
+			public void onBannerLeftApplication(BannerView bannerView) {
+
+			}
+		});
+		bannerView.load();
+		_loadedSemaphore.acquire();
+		assertEquals(bannerView, callbackbannerView);
+
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (bannerView.getParent() == null) {
+					_activityRule.getActivity().addContentView(bannerView, bannerView.getLayoutParams());
+				}
+			}
+		});
+	}
+
+	private class UnityBannerListener implements IUnityBannerListener {
+
+		@Override
+		public void onUnityBannerLoaded(String placementId, View view) {
+
+		}
+
+		@Override
+		public void onUnityBannerUnloaded(String placementId) {
+
+		}
+
+		@Override
+		public void onUnityBannerShow(String placementId) {
+
+		}
+
+		@Override
+		public void onUnityBannerClick(String placementId) {
+
+		}
+
+		@Override
+		public void onUnityBannerHide(String placementId) {
+
+		}
+
+		@Override
+		public void onUnityBannerError(String message) {
+
+		}
+	}
+}

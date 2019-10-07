@@ -24,6 +24,9 @@ import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.webview.WebView;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 public class UnityAdsExample extends Activity {
 	final private String defaultGameId = "14851";
 
@@ -36,7 +39,7 @@ public class UnityAdsExample extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.unityads_example_layout);
+		setContentView(R.layout.fragment_unity_ads);
 		final UnityAdsExample self = this;
 		final UnityAdsListener unityAdsListener = new UnityAdsListener();
 

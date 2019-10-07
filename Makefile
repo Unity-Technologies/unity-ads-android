@@ -1,8 +1,8 @@
 release:
-	./gradlew :lib:assembleRelease
+	./gradlew :unity-ads:assembleRelease
 
 clean:
-	./gradlew :lib:clean
+	./gradlew :unity-ads:clean
 
 test: test-hosted
 
@@ -11,7 +11,7 @@ test-local: push-test-server-address exec-tests
 test-unit-tests: push-test-server-address exec-unit-tests
 
 build-test-apk: clean
-	./gradlew :lib:assembleAndroidTest --full-stacktrace
+	./gradlew :unity-ads:assembleAndroidTest --full-stacktrace
 
 test-emulator: exec-tests
 
@@ -23,11 +23,11 @@ exec-tests: exec-unit-tests exec-hybrid-tests
 
 exec-unit-tests: clean
 	adb shell input keyevent 82
-	./gradlew :lib:connectedCheck --full-stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.UnitTestSuite
+	./gradlew :unity-ads:connectedCheck --full-stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.LegacyTestSuite
 
 exec-hybrid-tests: clean
 	adb shell input keyevent 82
-	./gradlew :lib:connectedCheck --full-stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.HybridTestSuite
+	./gradlew :unity-ads:connectedCheck --full-stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.HybridTestSuite
 
 push-test-server-address:
 	echo http://$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8080 > testServerAddress.txt
@@ -48,16 +48,30 @@ dismantle-adb-reverse:
 	adb reverse --remove-all
 
 javadoc:
-	./gradlew :lib:javadoc
+	./gradlew :unity-ads:javadoc
 
 zip: release
-	cp lib/build/outputs/aar/unity-ads-release.aar unity-ads.aar
-	zip -9r builds.zip unity-ads.aar
+	cp unity-ads/build/outputs/aar/unity-ads-release.aar unity-ads.aar
+	zip -9r unity-ads.aar.zip unity-ads.aar
 	rm unity-ads.aar
 
+verify-release-build:
+	if [[ -f "unity-ads.aar.zip" ]]; then \
+		echo 'unity-ads.aar.zip exists'; \
+	else \
+		echo 'unity-ads.aar.zip does not exist'; \
+		exit 1; \
+	fi;
+
 use-local-webview:
-	sed -i '' 's/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/return "new-ip";/' "lib/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"
-	sed -i '' 's/return ".*";/return "http:\/\/$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8000\/build\/" + flavor + "\/config.json";/' "lib/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"
+	sed -i '' 's/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/return "new-ip";/' "unity-ads/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"
+	sed -i '' 's/return ".*";/return "http:\/\/$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8000\/build\/" + flavor + "\/config.json";/' "unity-ads/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"
 
 use-public-webview:
-	sed -i '' 's/return ".*";/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/' "lib/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"
+	sed -i '' 's/return ".*";/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/' "unity-ads/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"
+
+create-android-26-emulator:
+	echo "no" | ${ANDROID_HOME}/tools/bin/avdmanager create avd --name "android-26-test" --package "system-images;android-26;google_apis;x86" --device "Nexus 6P" --tag google_apis --abi google_apis/x86 --force
+
+start-android-26-emulator:
+	${ANDROID_HOME}/emulator/emulator -port 5556 -avd android-26-test -no-window -noaudio -no-boot-anim -memory 2048 -partition-size 1024 &

@@ -21,7 +21,6 @@ import com.unity3d.ads.metadata.PlayerMetaData;
 import com.unity3d.services.UnityServices;
 import com.unity3d.services.banners.IUnityBannerListener;
 import com.unity3d.services.banners.UnityBanners;
-import com.unity3d.services.banners.view.BannerPosition;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.webview.WebView;
@@ -62,7 +61,7 @@ public class UnityMonetizationExample extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.unityads_example_layout);
+		setContentView(R.layout.fragment_unity_ads);
 		final UnityMonetizationExample thisActivity = this;
 		final IUnityMonetizationListener unityMonetizationListener = new UnityMonetizationListener();
 		final IUnityBannerListener unityBannerListener = new UnityBannerListener();
@@ -157,7 +156,6 @@ public class UnityMonetizationExample extends Activity {
 			@Override
 			public void onClick(View v) {
 				if (bannerView == null) {
-					UnityBanners.setBannerPosition(BannerPosition.BOTTOM_CENTER);
 					UnityBanners.loadBanner(thisActivity, bannerPlacementId);
 				} else {
 					UnityBanners.destroy();

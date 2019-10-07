@@ -5,10 +5,12 @@ local.properties
 build
 captures
 testServerAddress.txt
-app/app.iml
-lib/lib.iml
+app/bin
+unity-ads/bin
 javadoc
 .settings
 .project
 .vscode
 .classpath
+*.iml
+fastlane/report.xml
