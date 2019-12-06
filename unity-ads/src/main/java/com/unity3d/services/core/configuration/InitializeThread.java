@@ -81,7 +81,6 @@ public class InitializeThread extends Thread  {
 
 			if (currentApp != null) {
 				currentApp.setWebAppLoaded(false);
-				success = cv.block(10000);
 				currentApp.setWebAppInitialized(false);
 
 				if (currentApp.getWebView() != null) {

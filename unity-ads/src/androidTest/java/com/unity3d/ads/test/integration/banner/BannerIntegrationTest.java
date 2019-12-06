@@ -153,6 +153,39 @@ public class BannerIntegrationTest {
 		});
 	}
 
+	@Test(timeout = 100000)
+	public void BannerTestFailedToLoad() throws InterruptedException {
+		// There may be a timing issue with this test where webview has not finished initializing fully
+		// Even though webview tells native it is initialized
+		UnityBannerSize unityBannerSize = new UnityBannerSize(320, 50);
+		bannerView = new BannerView(_activityRule.getActivity(), "garbagePlacement", unityBannerSize);
+		final Semaphore _errorSemaphore = new Semaphore(0);
+		bannerView.setListener(new BannerView.IListener() {
+			public void onBannerLoaded(BannerView bannerAdView) {
+				_errorSemaphore.release();
+				fail("onBannerLoaded should not be called");
+			}
+
+			public void onBannerClick(BannerView bannerAdView) {
+				_errorSemaphore.release();
+				fail("onBannerClick should not be called");
+			}
+
+			public void onBannerFailedToLoad(BannerView bannerAdView, BannerErrorInfo bannerErrorInfo) {
+				callbackbannerView = bannerAdView;
+				_errorSemaphore.release();
+			}
+
+			public void onBannerLeftApplication(BannerView bannerView) {
+				_errorSemaphore.release();
+				fail("onBannerLeftApplication should not be called");
+			}
+		});
+		bannerView.load();
+		_errorSemaphore.acquire();
+		assertEquals(bannerView, callbackbannerView);
+	}
+
 	private class UnityBannerListener implements IUnityBannerListener {
 
 		@Override

@@ -90,9 +90,7 @@ public class Listener {
 			@Override
 			public void run() {
 				for (IUnityAdsListener listener : AdsProperties.getListeners()) {
-					if (listener instanceof IUnityAdsExtendedListener) {
-						listener.onUnityAdsError(UnityAds.UnityAdsError.valueOf(error), message);
-					}
+					listener.onUnityAdsError(UnityAds.UnityAdsError.valueOf(error), message);
 				}
 			}
 		});

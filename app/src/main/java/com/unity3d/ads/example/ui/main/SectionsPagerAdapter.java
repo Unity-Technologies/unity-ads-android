@@ -15,8 +15,6 @@ import com.unity3d.ads.example.R;
  */
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-	@StringRes
-	private static final int[] TAB_TITLES = new int[]{R.string.tab_text_1, R.string.tab_text_2, R.string.tab_text_3};
 	private final Context mContext;
 
 	public SectionsPagerAdapter(Context context, FragmentManager fm) {
@@ -31,8 +29,6 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 		switch (position) {
 			case 0:
 				return UnityAdsFragment.newInstance(position);
-			case 1:
-				return UnityBannersFragment.newInstance(position);
 			default:
 				return UnityAdsFragment.newInstance(position);
 		}
@@ -41,12 +37,12 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 	@Nullable
 	@Override
 	public CharSequence getPageTitle(int position) {
-		return mContext.getResources().getString(TAB_TITLES[position]);
+		return null;
 	}
 
 	@Override
 	public int getCount() {
-		// Show 2 total pages.
-		return 2;
+		// Show 1 total pages.
+		return 1;
 	}
 }

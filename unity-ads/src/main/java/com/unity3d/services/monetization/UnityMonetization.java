@@ -8,6 +8,7 @@ import com.unity3d.services.monetization.core.placementcontent.PlacementContents
 import com.unity3d.services.monetization.placementcontent.core.PlacementContent;
 import com.unity3d.services.monetization.core.properties.ClientProperties;
 
+@Deprecated
 public class UnityMonetization {
 
     /**

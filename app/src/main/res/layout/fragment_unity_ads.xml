@@ -132,7 +132,7 @@
             android:layout_marginRight="15dp"
             android:background="#FF2196F3"
             android:enabled="false"
-            android:text="@string/unityads_example_banner_text"
+            android:text="@string/show_banner"
             android:textColor="@android:color/white"
             android:visibility="visible" />
 

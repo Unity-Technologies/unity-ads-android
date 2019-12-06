@@ -73,7 +73,9 @@ public final class UnityAds {
 	 * @param activity Current Android activity of calling app
 	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
 	 * @param listener Listener for IUnityAdsListener callbacks
+	 * @deprecated this method is deprecated in favor of {@link #initialize(Activity, String)} use {@link #addListener(IUnityAdsListener)} to add a listener
 	 */
+	@Deprecated
 	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener) {
 		boolean testMode = false;
 		boolean usePerPlacementLoad = false;
@@ -85,12 +87,38 @@ public final class UnityAds {
 	 *
 	 * @param activity Current Android activity of calling app
 	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
+	 */
+	public static void initialize(final Activity activity, final String gameId) {
+		boolean testMode = false;
+		boolean usePerPlacementLoad = false;
+		initialize(activity, gameId, null, testMode, usePerPlacementLoad);
+	}
+
+	/**
+	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
+	 *
+	 * @param activity Current Android activity of calling app
+	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
 	 * @param listener Listener for IUnityAdsListener callbacks
 	 * @param testMode If true, only test ads are shown
+	 * @deprecated this method is deprecated in favor of {@link #initialize(Activity, String, boolean)} use {@link #addListener(IUnityAdsListener)} to add a listener
 	 */
+	@Deprecated
 	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode) {
 		boolean usePerPlacementLoad = false;
 		UnityAdsImplementation.initialize(activity, gameId, listener, testMode, usePerPlacementLoad);
+	}
+
+	/**
+	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
+	 *
+	 * @param activity Current Android activity of calling app
+	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
+	 * @param testMode If true, only test ads are shown
+	 */
+	public static void initialize(final Activity activity, final String gameId, final boolean testMode) {
+		boolean usePerPlacementLoad = false;
+		UnityAdsImplementation.initialize(activity, gameId, null, testMode, usePerPlacementLoad);
 	}
 
 	/**
@@ -102,9 +130,24 @@ public final class UnityAds {
 	 * @param listener Listener for IUnityAdsListener callbacks
 	 * @param testMode If true, only test ads are shown
 	 * @param enablePerPlacementLoad Set this flag to `YES` to disable automatic placement caching. When this is enabled, developer must call `load` on placements before calling show
+	 * @deprecated this method is deprecated in favor of {@link #initialize(Activity, String, boolean, boolean)} use {@link #addListener(IUnityAdsListener)} to add a listener
 	 */
+	@Deprecated
 	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode, final boolean enablePerPlacementLoad) {
 		UnityAdsImplementation.initialize(activity, gameId, listener, testMode, enablePerPlacementLoad);
+	}
+
+	/**
+	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
+	 * Note: The `load` API is in closed beta and available upon invite only. If you would like to be considered for the beta, please contact Unity Ads Support.
+	 *
+	 * @param activity Current Android activity of calling app
+	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
+	 * @param testMode If true, only test ads are shown
+	 * @param enablePerPlacementLoad Set this flag to `YES` to disable automatic placement caching. When this is enabled, developer must call `load` on placements before calling show
+	 */
+	public static void initialize(final Activity activity, final String gameId, final boolean testMode, final boolean enablePerPlacementLoad) {
+		UnityAdsImplementation.initialize(activity, gameId, null, testMode, enablePerPlacementLoad);
 	}
 
 	/**
@@ -117,18 +160,34 @@ public final class UnityAds {
 	}
 
 	/**
-	 * Set listener for IUnityAdsListener callbacks. Use this if only ever using one listener
+	 * Set listener for IUnityAdsListener callbacks. Use this if only ever using one listener.
+	 * This overwrites the previous set listener.
 	 *
 	 * @param listener New listener for IUnityAdsListener callbacks
 	 *
 	 * @deprecated this method is deprecated in favor of {@link #addListener(IUnityAdsListener)}
 	 */
+	@Deprecated
 	public static void setListener(IUnityAdsListener listener) {
 		UnityAdsImplementation.setListener(listener);
 	}
 
 	/**
-	 * Add listener for IUnityAdsListener callbacks. Use this if subscribing multiple listeners
+	 * Get current listener for IUnityAdsListener callbacks. Returns the most recent listener set through setListener
+	 * or the listener from the first initialize
+	 *
+	 * @return Return IUnityAdsListener that was set from setListener
+	 *
+	 * @deprecated this method is deprecated in favor of {@link #addListener(IUnityAdsListener)} and {@link #removeListener(IUnityAdsListener)}
+	 */
+	@Deprecated
+	public static IUnityAdsListener getListener() {
+		return UnityAdsImplementation.getListener();
+	}
+
+	/**
+	 * Add listener for IUnityAdsListener callbacks. Use this if subscribing multiple listeners.
+	 * It is not recommended to mix setListener with addListener
 	 *
 	 * @param listener New listener for IUnityAdsListener callbacks
 	 */
@@ -143,17 +202,6 @@ public final class UnityAds {
 	 */
 	public static void removeListener(IUnityAdsListener listener) {
 		UnityAdsImplementation.removeListener(listener);
-	}
-
-	/**
-	 * Get current listener for IUnityAdsListener callbacks. Returns the first listener added
-	 *
-	 * @return First listener set for IUnityAdsListener callbacks
-	 *
-	 * @deprecated this method is deprecated in favor of {@link #addListener(IUnityAdsListener)} and {@link #removeListener(IUnityAdsListener)}
-	 */
-	public static IUnityAdsListener getListener() {
-		return UnityAdsImplementation.getListener();
 	}
 
 	/**

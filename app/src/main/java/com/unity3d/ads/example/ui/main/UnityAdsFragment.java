@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,9 @@ import com.unity3d.ads.example.R;
 import com.unity3d.ads.metadata.MediationMetaData;
 import com.unity3d.ads.metadata.MetaData;
 import com.unity3d.ads.metadata.PlayerMetaData;
+import com.unity3d.services.banners.IUnityBannerListener;
+import com.unity3d.services.banners.UnityBanners;
+import com.unity3d.services.banners.view.BannerPosition;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.SdkProperties;
@@ -33,7 +37,7 @@ import java.net.URISyntaxException;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class UnityAdsFragment extends Fragment implements IUnityAdsListener {
+public class UnityAdsFragment extends Fragment implements IUnityAdsListener, IUnityBannerListener {
 
 	private View root;
 	private EditText gameIdEdit;
@@ -41,7 +45,9 @@ public class UnityAdsFragment extends Fragment implements IUnityAdsListener {
 	private Button initializeButton;
 	private Button interstitialButton;
 	private Button incentivizedButton;
+	private Button bannerButton;
 	private TextView statusText;
+	private boolean bannerShowing = false;
 
 	private String interstitialPlacementId;
 	private String incentivizedPlacementId;
@@ -69,11 +75,13 @@ public class UnityAdsFragment extends Fragment implements IUnityAdsListener {
 		this.initializeButton = root.findViewById(R.id.unityads_example_initialize_button);
 		this.interstitialButton = root.findViewById(R.id.unityads_example_interstitial_button);
 		this.incentivizedButton = root.findViewById(R.id.unityads_example_incentivized_button);
+		this.bannerButton = root.findViewById(R.id.unityads_example_banner_button);
 		this.statusText = root.findViewById(R.id.unityads_example_statustext);
 
 		enableButton(initializeButton);
 		disableButton(interstitialButton);
 		disableButton(incentivizedButton);
+		enableButton(bannerButton);
 
 		SharedPreferences preferences = getActivity().getSharedPreferences("Settings", Context.MODE_PRIVATE);
 		gameIdEdit.setText(preferences.getString("gameId", defaultGameId));
@@ -95,7 +103,6 @@ public class UnityAdsFragment extends Fragment implements IUnityAdsListener {
 		debugMetaData.set("test.debugOverlayEnabled", true);
 		debugMetaData.commit();
 
-		final UnityAdsFragment self = this;
 		this.initializeButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -110,7 +117,8 @@ public class UnityAdsFragment extends Fragment implements IUnityAdsListener {
 				testModeCheckBox.setEnabled(false);
 
 				statusText.setText("Initializing...");
-				UnityAds.initialize(getActivity(), gameId, self, testModeCheckBox.isChecked());
+				UnityAds.addListener(UnityAdsFragment.this);
+				UnityAds.initialize(getActivity(), gameId, testModeCheckBox.isChecked());
 
 				// store entered gameid in app settings
 				SharedPreferences preferences = getActivity().getSharedPreferences("Settings", Context.MODE_PRIVATE);
@@ -153,6 +161,24 @@ public class UnityAdsFragment extends Fragment implements IUnityAdsListener {
 				UnityAds.show(getActivity(), incentivizedPlacementId);
 			}
 		});
+
+		this.bannerButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (UnityAdsFragment.this.bannerShowing) {
+					UnityBanners.destroy();
+					UnityAdsFragment.this.bannerButton.setText(R.string.show_banner);
+					UnityAdsFragment.this.bannerShowing = false;
+				} else {
+					UnityAdsFragment.this.bannerShowing = true;
+					UnityAdsFragment.this.bannerButton.setText(R.string.hide_banner);
+					UnityBanners.setBannerPosition(BannerPosition.BOTTOM_CENTER);
+					UnityBanners.setBannerListener(UnityAdsFragment.this);
+					UnityBanners.loadBanner(getActivity(), "bannerads");
+				}
+			}
+		});
+
 
 		return root;
 	}
@@ -235,4 +261,35 @@ public class UnityAdsFragment extends Fragment implements IUnityAdsListener {
 		}
 	}
 
+	public void onUnityBannerLoaded(String placementId, final View view) {
+		final UnityAdsFragment self = this;
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (view.getParent() == null) {
+					self.getActivity().addContentView(view, view.getLayoutParams());
+				}
+			}
+		});
+	}
+
+	public void onUnityBannerUnloaded(String placementId) {
+
+	}
+
+	public void onUnityBannerShow(String placementId) {
+
+	}
+
+	public void onUnityBannerClick(String placementId) {
+
+	}
+
+	public void onUnityBannerHide(String placementId) {
+
+	}
+
+	public void onUnityBannerError(String message) {
+		Log.e("BANNER ERROR", message);
+	}
 }

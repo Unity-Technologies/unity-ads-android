@@ -17,6 +17,8 @@
     <string name="hide_refresh_banner">Hide Refresh Banner</string>
     <string name="show_old_banner">Show Old Banner</string>
     <string name="hide_old_banner">Hide Old Banner</string>
+    <string name="show_banner">Show Banner</string>
+    <string name="hide_banner">Hide Banner</string>
     <string name="load_text">Load</string>
     <string name="show_text">Show</string>
 

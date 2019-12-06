@@ -16,6 +16,7 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 				com.unity3d.services.core.api.Cache.class,
 				com.unity3d.services.core.api.Connectivity.class,
 				com.unity3d.services.core.api.DeviceInfo.class,
+				com.unity3d.services.core.api.ClassDetection.class,
 				com.unity3d.services.core.api.Storage.class,
 				com.unity3d.services.core.api.Sdk.class,
 				com.unity3d.services.core.api.Request.class,

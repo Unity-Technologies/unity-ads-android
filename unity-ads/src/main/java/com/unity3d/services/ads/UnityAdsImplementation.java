@@ -8,20 +8,18 @@ import android.view.WindowManager;
 
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.IUnityServicesListener;
 import com.unity3d.services.UnityServices;
 import com.unity3d.services.ads.adunit.AdUnitOpen;
 import com.unity3d.services.ads.load.LoadModule;
 import com.unity3d.services.ads.placement.Placement;
-import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Iterator;
 
 public final class UnityAdsImplementation {
 
@@ -60,7 +58,7 @@ public final class UnityAdsImplementation {
 	 */
 	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode, final boolean enablePerPlacementLoad) {
 		DeviceLog.entered();
-		
+
 		UnityAdsImplementation.addListener(listener);
 
 		UnityServices.initialize(activity, gameId, new IUnityServicesListener() {
@@ -92,7 +90,18 @@ public final class UnityAdsImplementation {
 	 */
 	@Deprecated
 	public static void setListener(IUnityAdsListener listener) {
-		AdsProperties.addListener(listener);
+		AdsProperties.setListener(listener);
+	}
+
+	/**
+	 * Get current listener for IUnityAdsListener callbacks. Returns the most recent listener set through setListener
+	 * or the listener from the first initialize
+	 *
+	 * @return Return IUnityAdsListener that was set from setListener
+	 */
+	@Deprecated
+	public static IUnityAdsListener getListener() {
+		return AdsProperties.getListener();
 	}
 
 	/**
@@ -111,22 +120,6 @@ public final class UnityAdsImplementation {
 	 */
 	public static void removeListener(IUnityAdsListener listener) {
 		AdsProperties.removeListener(listener);
-	}
-
-	/**
-	 * Get the first listener added for IUnityAdsListener callbacks
-	 *
-	 * @return First listener added for IUnityAdsListener callbacks
-	 */
-	@Deprecated
-	public static IUnityAdsListener getListener() {
-		// For now, return the first listener registered
-		Iterator<IUnityAdsListener> it = AdsProperties.getListeners().iterator();
-		if (it.hasNext()) {
-			return it.next();
-		} else {
-			return null;
-		}
 	}
 
 	/**

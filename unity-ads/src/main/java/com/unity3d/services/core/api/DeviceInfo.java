@@ -604,11 +604,6 @@ public class DeviceInfo {
 
 	}
 
-    @WebViewExposed
-    public static void isMadeWithUnity(WebViewCallback callback) {
-        callback.invoke(ClientProperties.isMadeWithUnity());
-    }
-
 	@SuppressLint("MissingPermission")
 	private static void getDeviceIdCommon(final Integer slotIndex, WebViewCallback callback) {
 		if (ClientProperties.getApplicationContext() == null) {
