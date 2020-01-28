@@ -164,6 +164,11 @@ class 	CacheThreadHandler extends Handler {
 			_active = false;
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.NETWORK_ERROR, source, e.getMessage());
 		}
+		catch (Exception e) {
+			DeviceLog.exception("Unknown error", e);
+			_active = false;
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.UNKNOWN_ERROR, source, e.getMessage());
+		}
 		finally {
 			_currentRequest = null;
 			try {

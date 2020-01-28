@@ -117,7 +117,7 @@ public class WebRequest {
 		_progressListener = listener;
 	}
 
-	public long makeStreamRequest(OutputStream outputStream) throws NetworkIOException, IOException, IllegalStateException {
+	public long makeStreamRequest(OutputStream outputStream) throws Exception {
 		HttpURLConnection connection = getHttpUrlConnectionWithHeaders();
 		connection.setDoInput(true);
 
@@ -192,6 +192,9 @@ public class WebRequest {
 			catch (IOException e) {
 				throw new NetworkIOException("Network exception: " + e.getMessage());
 			}
+			catch (Exception e) {
+				throw new Exception("Unknown Exception: " + e.getMessage());
+			}
 
 			if (bytesRead > 0) {
 				outputStream.write(readTarget, 0, bytesRead);
@@ -209,7 +212,7 @@ public class WebRequest {
 		return total;
 	}
 
-	public String makeRequest () throws NetworkIOException, IOException, IllegalStateException, IllegalArgumentException {
+	public String makeRequest () throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		makeStreamRequest(baos);
 		return baos.toString("UTF-8");

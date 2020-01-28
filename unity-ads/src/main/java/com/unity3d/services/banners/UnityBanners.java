@@ -90,7 +90,7 @@ public final class UnityBanners {
 
 	private void _loadBanner(Activity activity, String placementId) {
 		if (_currentBannerWrapper == null) {
-			BannerAdRefreshView bannerAdRefreshView = new BannerAdRefreshView(activity, placementId, UnityBannerSize.getDynamicSize(activity));
+			BannerAdRefreshView bannerAdRefreshView = new BannerAdRefreshView(activity, placementId, new UnityBannerSize(320, 50));
 			final BannerWrapper bannerWrapper = new BannerWrapper(activity, bannerAdRefreshView);
 			bannerWrapper.setBannerPosition(_currentBannerPosition);
 			_currentBannerWrapper = bannerWrapper;
