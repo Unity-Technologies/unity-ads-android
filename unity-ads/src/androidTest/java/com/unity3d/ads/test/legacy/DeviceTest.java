@@ -56,20 +56,6 @@ public class DeviceTest {
 	}
 
 	@Test
-	public void testIsAppInstalled () {
-		List<Map<String, Object>> installedPackages = Device.getInstalledPackages(false);
-		assertNotNull("Installed packages should not be null", installedPackages);
-		assertTrue("Installed packages contained: " + installedPackages.get(0).get("name") + " so it should also be installed", Device.isAppInstalled((String)installedPackages.get(0).get("name")));
-	}
-
-	@Test
-	public void testInstalledPackages () {
-		List<Map<String, Object>> installedPackages = Device.getInstalledPackages(false);
-		assertNotNull("Installed packages should not be null", installedPackages);
-		assertTrue("Installed packages should contain at least 1 entry", installedPackages.size() > 0);
-	}
-
-	@Test
 	public void testIsActiveNetworkConnected () {
 		assertTrue("Active network should be connected", Device.isActiveNetworkConnected());
 	}

@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
@@ -243,5 +244,18 @@ public class InitializeThreadTest {
 		assertTrue("Init state retry test: retry state did not return proper next state", nextState instanceof InitializeThread.InitializeStateComplete);
 		assertFalse("Init state retry test: retry delay is less than four seconds (should be five seconds)", (endTime - startTime) < 4000);
 		assertFalse("Init state retry test: retry delay is greater than six seconds (should be five seconds)", (endTime - startTime) > 6000);
+	}
+
+	@Test()
+	public void testInitializeThreadRunThrowOOMError() throws Exception {
+		Constructor<InitializeThread> constructor = InitializeThread.class.getDeclaredConstructor(Class.forName("com.unity3d.services.core.configuration.InitializeThread$InitializeState"));
+		constructor.setAccessible(true);
+		InitializeThread initializeThread = constructor.newInstance(new InitializeThread.InitializeStateCreate(null, null) {
+			@Override
+			public InitializeThread.InitializeStateCreate execute() {
+				throw new OutOfMemoryError("This should get caught automatically");
+			}
+		});
+		initializeThread.run();
 	}
 }

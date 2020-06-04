@@ -475,9 +475,13 @@ public class WebPlayerView extends WebView {
 		@TargetApi(14)
 		@Override
 		public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-			if (shouldCallSuper("onReceivedSslError")) {
-				super.onReceivedSslError(view, handler, error);
-			}
+			// Don't call shouldCallSuper("onReceivedSslError") to ensure
+			// we always rely on the default behavior.  Otherwise it is
+			// possible Google might reject the app as an unsafe implementation.
+			// https://support.google.com/faqs/answer/7071387?hl=en
+			super.onReceivedSslError(view, handler, error);
+			DeviceLog.error("Received SSL error for '%s': %s", error.getUrl(), error.toString());
+
 			if (shouldSendEvent("onReceivedSslError")) {
 				String url = "";
 				if (error != null) {

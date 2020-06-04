@@ -15,8 +15,6 @@ import com.unity3d.services.core.request.WebRequest;
 import com.unity3d.services.core.webview.WebViewApp;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 
 public class InitializeThread extends Thread  {
@@ -31,10 +29,21 @@ public class InitializeThread extends Thread  {
 
 	@Override
 	public void run() {
-		while ((_state != null && !(_state instanceof InitializeStateComplete)) && !_stopThread) {
-			_state = _state.execute();
+		try {
+			while ((_state != null && !(_state instanceof InitializeStateComplete)) && !_stopThread) {
+				try {
+					_state = _state.execute();
+				} catch (Exception e) {
+					DeviceLog.exception("Unity Ads SDK encountered an error during initialization, cancel initialization", e);
+					_state = new InitializeThread.InitializeStateForceReset();
+				} catch (OutOfMemoryError oom) {
+					DeviceLog.exception("Application doesn't have enough memory to initialize Unity Ads SDK", new Exception(oom));
+					_state = new InitializeThread.InitializeStateForceReset();
+				}
+			}
+		} catch (OutOfMemoryError oom) {
+			//Do Nothing
 		}
-
 		_thread = null;
 	}
 
@@ -225,7 +234,7 @@ public class InitializeThread extends Thread  {
 
 			try {
 				localWebViewData = Utilities.readFileBytes(new File(SdkProperties.getLocalWebViewFile()));
-			} catch (IOException e) {
+			} catch (Exception e) {
 				DeviceLog.debug("Unity Ads init: webapp not found in local cache: " + e.getMessage());
 				return new InitializeStateLoadWeb(_configuration);
 			}
@@ -237,7 +246,7 @@ public class InitializeThread extends Thread  {
 
 				try {
 					webViewDataString = new String(localWebViewData, "UTF-8");
-				} catch (UnsupportedEncodingException e) {
+				} catch (Exception e) {
 					return new InitializeStateError("load cache", e, _configuration);
 				}
 
@@ -469,7 +478,7 @@ public class InitializeThread extends Thread  {
 			DeviceLog.debug("Unity Ads init: retrying in " + _delay + " seconds");
 			try {
 				Thread.sleep(_delay * 1000L);
-			} catch(InterruptedException e) {
+			} catch(Exception e) {
 				DeviceLog.exception("Init retry interrupted", e);
 			}
 

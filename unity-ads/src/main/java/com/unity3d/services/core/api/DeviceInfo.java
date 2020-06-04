@@ -1,13 +1,8 @@
 package com.unity3d.services.core.api;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
-import android.os.Build;
-import android.telephony.TelephonyManager;
 import android.util.SparseArray;
 
 import com.unity3d.services.core.device.Device;
@@ -148,11 +143,6 @@ public class DeviceInfo {
 	}
 
 	@WebViewExposed
-	public static void isAppInstalled(String pkgname, WebViewCallback callback) {
-		callback.invoke(Device.isAppInstalled(pkgname));
-	}
-
-	@WebViewExposed
 	public static void isRooted(WebViewCallback callback) {
 		callback.invoke(Device.isRooted());
 	}
@@ -165,13 +155,6 @@ public class DeviceInfo {
 		} else {
 			callback.error(DeviceError.COULDNT_GET_ADB_STATUS);
 		}
-	}
-
-	@WebViewExposed
-	public static void getInstalledPackages(boolean md5, WebViewCallback callback) {
-		List<Map<String, Object>> installedPackages = Device.getInstalledPackages(md5);
-		JSONArray packageJson = new JSONArray(installedPackages);
-		callback.invoke(packageJson);
 	}
 
 	@WebViewExposed
@@ -590,57 +573,6 @@ public class DeviceInfo {
 	@WebViewExposed
 	public static void getBuildVersionIncremental(WebViewCallback callback) {
 		callback.invoke(Device.getBuildVersionIncremental());
-	}
-
-	@WebViewExposed
-	@SuppressLint("MissingPermission")
-	public static void getDeviceIdWithSlot(final Integer slotIndex, WebViewCallback callback) {
-		getDeviceIdCommon(slotIndex, callback);
-	}
-
-	@WebViewExposed
-	public static void getDeviceId(WebViewCallback callback) {
-		getDeviceIdCommon(null, callback);
-
-	}
-
-	@SuppressLint("MissingPermission")
-	private static void getDeviceIdCommon(final Integer slotIndex, WebViewCallback callback) {
-		if (ClientProperties.getApplicationContext() == null) {
-			callback.error(DeviceError.APPLICATION_CONTEXT_NULL);
-			return;
-		}
-
-		if (ClientProperties.getApplicationContext().checkCallingOrSelfPermission(android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-			callback.error(PermissionsError.PERMISSION_NOT_GRANTED);
-			return;
-		}
-
-		TelephonyManager mTelephony = (TelephonyManager) ClientProperties.getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
-
-		if (mTelephony != null) {
-			// check api version
-			// getDeviceId was deprecated in API level 26
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-				if (slotIndex == null) {
-					callback.invoke(mTelephony.getImei());
-				} else {
-					callback.invoke(mTelephony.getImei(slotIndex));
-				}
-			} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				if (slotIndex == null) {
-					callback.invoke(mTelephony.getDeviceId());
-				} else {
-					callback.invoke(mTelephony.getDeviceId(slotIndex));
-				}
-			} else if (slotIndex == null) {
-				// getDeviceId() is supported for API level <= 23 but getDeviceId(int) is not
-				callback.invoke(mTelephony.getDeviceId());
-			} else {
-				callback.error(DeviceError.API_LEVEL_ERROR, Build.VERSION.SDK_INT);
-			}
-		}
-
 	}
 }
 

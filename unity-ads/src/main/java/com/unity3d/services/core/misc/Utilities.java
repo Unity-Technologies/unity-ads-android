@@ -1,5 +1,6 @@
 package com.unity3d.services.core.misc;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -8,13 +9,12 @@ import com.unity3d.services.core.log.DeviceLog;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
@@ -131,27 +131,31 @@ public class Utilities {
 	}
 
 	public static byte[] readFileBytes(File file) throws IOException {
-		if (file == null) {
+
+		if (file == null || !file.exists()) {
 			return null;
 		}
 
-		InputStream inputStream = new FileInputStream(file);
-
-		byte[] buffer = new byte[(int)file.length()];
-		int offset = 0;
-		int read;
-		int defaultBufferSize = 4096;
-		int readAmount = file.length() < defaultBufferSize ? (int)file.length() : defaultBufferSize;
-
-		while ((read = inputStream.read(buffer, offset, readAmount)) > 0) {
-			offset += read;
-			if (file.length() - offset < defaultBufferSize) {
-				readAmount = (int)file.length() - offset;
-			}
+		// If Device API Level is 26+, utilize built in functionality
+		if (Build.VERSION.SDK_INT >= 26) {
+			return Files.readAllBytes(file.toPath());
 		}
 
-		inputStream.close();
+		InputStream inputStream = null;
+		byte[] buffer;
 
+		try {
+			inputStream = new FileInputStream(file);
+			buffer = new byte[(int) file.length()];
+			int readBytes = inputStream.read(buffer);
+			if (readBytes != buffer.length) {
+				throw new IOException("Failed to read all bytes from input file path: " + file.getPath());
+			}
+		} finally {
+			if (inputStream != null) {
+				inputStream.close();
+			}
+		}
 		return buffer;
 	}
 

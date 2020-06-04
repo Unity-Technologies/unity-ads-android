@@ -212,56 +212,6 @@ public class Device {
 		return false;
 	}
 
-	public static boolean isAppInstalled(String pkgname) {
-		if (ClientProperties.getApplicationContext() != null) {
-			PackageManager pm = ClientProperties.getApplicationContext().getPackageManager();
-
-			try {
-				PackageInfo pkgInfo = pm.getPackageInfo(pkgname, 0);
-
-				if(pkgInfo != null && pkgInfo.packageName != null && pkgname.equals(pkgInfo.packageName)) {
-					return true;
-				}
-			} catch(PackageManager.NameNotFoundException e) {
-				return false;
-			}
-		}
-
-		return false;
-	}
-
-	public static List<Map<String, Object>> getInstalledPackages(boolean hash) {
-		List<Map<String,Object>> returnList = new ArrayList<>();
-
-		if (ClientProperties.getApplicationContext() != null) {
-			PackageManager pm = ClientProperties.getApplicationContext().getPackageManager();
-
-			for(PackageInfo pkg : pm.getInstalledPackages(0)) {
-				HashMap<String, Object> packageEntry = new HashMap<>();
-
-				if (hash) {
-					packageEntry.put("name", Utilities.Sha256(pkg.packageName));
-				}
-				else {
-					packageEntry.put("name", pkg.packageName);
-				}
-
-				if (pkg.firstInstallTime > 0) {
-					packageEntry.put("time", pkg.firstInstallTime);
-				}
-
-				String installer = pm.getInstallerPackageName(pkg.packageName);
-				if (installer != null && !installer.isEmpty()) {
-					packageEntry.put("installer", installer);
-				}
-
-				returnList.add(packageEntry);
-			}
-		}
-
-		return returnList;
-	}
-
 	public static String getUniqueEventId() {
 		return UUID.randomUUID().toString();
 	}

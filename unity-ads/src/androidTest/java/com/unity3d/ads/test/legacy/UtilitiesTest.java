@@ -113,12 +113,27 @@ public class UtilitiesTest {
 	}
 
 	@Test
-	public void testReadFileBytes() throws Exception {
-		byte[] large_data = Utilities.readFileBytes(new File(SdkProperties.getCacheDirectory() + "/" + SdkProperties.getCacheFilePrefix() + "testfile_large.dat"));
-		byte[] small_data = Utilities.readFileBytes(new File(SdkProperties.getCacheDirectory() + "/" + SdkProperties.getCacheFilePrefix() + "testfile_small.dat"));
+	public void testReadFileBytesNull() throws Exception {
+		byte[] null_data = Utilities.readFileBytes(new File(SdkProperties.getCacheDirectory() + "/" + SdkProperties.getCacheFilePrefix() + null));
+		assertEquals("Incorrectly read bytes of null file", null, null_data);
+	}
 
-		assertEquals("Incorrect read large file data size", 56789, large_data.length);
+	@Test
+	public void testReadFileBytesNonExistent() throws Exception {
+		byte[] fake_data = Utilities.readFileBytes(new File(SdkProperties.getCacheDirectory() + "/" + SdkProperties.getCacheFilePrefix() + "fake_file.dat"));
+		assertEquals("Incorrect read bytes of non-existent file", null, fake_data);
+	}
+
+	@Test
+	public void testReadFileBytesSmallFile() throws Exception {
+		byte[] small_data = Utilities.readFileBytes(new File(SdkProperties.getCacheDirectory() + "/" + SdkProperties.getCacheFilePrefix() + "testfile_small.dat"));
 		assertEquals("Incorrect read small file data size", 1024, small_data.length);
+	}
+
+	@Test
+	public void testReadFileBytesLargeFile() throws Exception {
+		byte[] large_data = Utilities.readFileBytes(new File(SdkProperties.getCacheDirectory() + "/" + SdkProperties.getCacheFilePrefix() + "testfile_large.dat"));
+		assertEquals("Incorrect read large file data size", 56789, large_data.length);
 	}
 
 	public void assertHash(int size, String sha256) throws Exception {
