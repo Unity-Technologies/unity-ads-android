@@ -101,7 +101,11 @@ public class ConnectivityMonitor {
 
 			if(!_wifi) {
 				TelephonyManager tm = (TelephonyManager)ClientProperties.getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
-				_networkType = tm.getNetworkType();
+				try {
+					_networkType = tm.getNetworkType();
+				} catch (SecurityException ex) {
+					DeviceLog.warning("Unity Ads was not able to get current network type due to missing permission");
+				}
 			}
 		} else {
 			_connected = 0;
@@ -159,7 +163,13 @@ public class ConnectivityMonitor {
 		if(ni != null && ni.isConnected()) {
 			boolean wifiStatus = ni.getType() == ConnectivityManager.TYPE_WIFI;
 			TelephonyManager tm = (TelephonyManager)ClientProperties.getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
-			int mobileNetworkType = tm.getNetworkType();
+			int mobileNetworkType = -1;
+
+			try {
+				mobileNetworkType = tm.getNetworkType();
+			} catch (SecurityException ex) {
+				DeviceLog.warning("Unity Ads was not able to get current network type due to missing permission");
+			}
 
 			// If wifi status and network type have not changed, ignore this event. If wifi is on, mobile network type does not need to match.
 			if(wifiStatus == _wifi && (mobileNetworkType == _networkType || _wifi)) {

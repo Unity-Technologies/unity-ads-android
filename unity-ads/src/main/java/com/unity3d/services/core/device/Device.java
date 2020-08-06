@@ -121,7 +121,11 @@ public class Device {
 	public static int getNetworkType() {
 		if (ClientProperties.getApplicationContext() != null) {
 			TelephonyManager tm = (TelephonyManager)ClientProperties.getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
-			return tm.getNetworkType();
+			try {
+				return tm.getNetworkType();
+			} catch (SecurityException ex) {
+				DeviceLog.warning("Unity Ads was not able to get current network type due to missing permission");
+			}
 		}
 
 		return -1;
