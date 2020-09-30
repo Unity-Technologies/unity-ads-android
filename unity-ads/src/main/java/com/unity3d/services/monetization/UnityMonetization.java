@@ -68,7 +68,7 @@ public class UnityMonetization {
         }
         ClientProperties.setMonetizationEnabled(true);
         boolean usePerPlacementLoad = false;
-        UnityServices.initialize(activity, gameId, listener, testMode, usePerPlacementLoad);
+        UnityServices.initialize(activity.getApplicationContext(), gameId, listener, testMode, usePerPlacementLoad, null);
     }
 
     /**

@@ -97,10 +97,7 @@ public class BannerView extends RelativeLayout {
 		// Log the banner was destroyed
 		DeviceLog.info("Banner [" + this.placementId + "] was destroyed");
 
-		// Null all instance variables
-		this.placementId = null;
 		this.viewId = null;
-		this.size = null;
 		this.listener = null;
 		this.bannerWebPlayerContainer = null;
 	}

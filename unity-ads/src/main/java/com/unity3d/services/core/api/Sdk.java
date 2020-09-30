@@ -1,10 +1,8 @@
 package com.unity3d.services.core.api;
 
-import com.unity3d.services.core.configuration.InitializationNotificationCenter;
-
 import com.unity3d.services.core.configuration.InitializeThread;
+import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.log.DeviceLog;
-import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.webview.WebViewApp;
@@ -26,13 +24,15 @@ public class Sdk {
 			SdkProperties.getVersionCode(),
 			SdkProperties.getVersionName(),
 			ClientProperties.isAppDebuggable(),
-			WebViewApp.getCurrentApp().getConfiguration().getConfigUrl(),
+			SdkProperties.getConfigUrl(),
 			WebViewApp.getCurrentApp().getConfiguration().getWebViewUrl(),
 			WebViewApp.getCurrentApp().getConfiguration().getWebViewHash(),
 			WebViewApp.getCurrentApp().getConfiguration().getWebViewVersion(),
 			SdkProperties.getInitializationTime(),
 			SdkProperties.isReinitialized(),
-			SdkProperties.isPerPlacementLoadEnabled()
+			SdkProperties.isPerPlacementLoadEnabled(),
+			SdkProperties.getLatestConfiguration() != null,
+			Device.getElapsedRealtime()
 		};
 
 		callback.invoke(parameters);
@@ -44,13 +44,15 @@ public class Sdk {
 		SdkProperties.setInitialized(true);
 		WebViewApp.getCurrentApp().setWebAppInitialized(true);
 
-		InitializationNotificationCenter.getInstance().triggerOnSdkInitialized();
 		callback.invoke();
 	}
 
 	@WebViewExposed
-	public static void initError(String message, final int code, WebViewCallback callback) {
-		InitializationNotificationCenter.getInstance().triggerOnSdkInitializationFailed(message, code);
+	public static void initError(String message, final Integer code, WebViewCallback callback) {
+		WebViewApp.getCurrentApp().setWebAppFailureMessage(message);
+		WebViewApp.getCurrentApp().setWebAppFailureCode(code);
+		WebViewApp.getCurrentApp().setWebAppInitialized(false);
+
 		callback.invoke();
 	}
 
@@ -95,5 +97,11 @@ public class Sdk {
 		InitializeThread.initialize(WebViewApp.getCurrentApp().getConfiguration());
 
 		// Callback will not be invoked because reinitialize will destroy webview
+	}
+
+	@WebViewExposed
+	public static void downloadLatestWebView(WebViewCallback callback) {
+		DeviceLog.debug("Unity Ads init: WebView called download");
+		callback.invoke(InitializeThread.downloadLatestWebView().getValue());
 	}
 }

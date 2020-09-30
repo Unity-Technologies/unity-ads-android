@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class TestUtilities {
 
-	private static String testServerAddress = "http://unity-ads-test-server.unityads.unity3d.com";
+	private static String testServerAddress = "https://unity-ads-test-server.unityads.unity3d.com";
 
 	private static String convertStreamToString(InputStream is) throws IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));

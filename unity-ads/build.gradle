@@ -16,7 +16,7 @@ ext {
     siteUrl = 'https://github.com/Unity-Technologies/unity-ads-android'
     gitUrl = 'https://github.com/Unity-Technologies/unity-ads-android.git'
 
-    libraryVersion = '3.4.8'
+    libraryVersion = '3.5.0'
 
     developerId = 'sbankhead'
     developerName = 'Steven Bankhead'
@@ -38,8 +38,8 @@ android {
   defaultPublishConfig "release"
 
   defaultConfig {
-    minSdkVersion 9
-    targetSdkVersion 26
+    minSdkVersion 19
+    targetSdkVersion 29
     /*
     Please ensure that the last two digits of version number does not exceed 50 unless
     it is a China SDK. This is because adding 50 to the version number is a one-to-one
@@ -50,8 +50,8 @@ android {
     All SDK with version numbers with last two digits >= 50 will be treated
     as China SDK for filtering in the backend.
     */
-    versionCode = 3480
-    versionName = "3.4.8"
+    versionCode = 3500
+    versionName = "3.5.0"
 
     setProperty("archivesBaseName", "unity-ads")
 

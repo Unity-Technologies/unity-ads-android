@@ -18,6 +18,7 @@ import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.misc.ViewUtilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
+import com.unity3d.services.core.request.SDKMetrics;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.Invocation;
 import com.unity3d.services.core.webview.bridge.NativeCallback;
@@ -33,6 +34,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class WebViewApp {
 
@@ -44,7 +46,9 @@ public class WebViewApp {
 	private WebView _webView;
 	private Configuration _configuration;
 	private HashMap<String, NativeCallback> _nativeCallbacks;
-	private boolean _initialized = false;
+	private static AtomicReference<Boolean> _initialized = new AtomicReference<Boolean>(false);
+	private static AtomicReference<String> _webAppFailureMessage = new AtomicReference<>();
+	private static AtomicReference<Integer> _webAppFailureCode = new AtomicReference<>();
 
 	private WebViewApp (Configuration configuration) {
 		setConfiguration(configuration);
@@ -64,13 +68,36 @@ public class WebViewApp {
 		return _webAppLoaded;
 	}
 
+	public void setWebAppFailureMessage(String message) {
+		_webAppFailureMessage.set(message);
+	}
+
+	public void setWebAppFailureCode(int code) {
+		_webAppFailureCode.set(code);
+	}
+
+	public String getWebAppFailureMessage() {
+		return _webAppFailureMessage.get();
+	}
+
+	public int getWebAppFailureCode() {
+		return _webAppFailureCode.get();
+	}
+
 	public void setWebAppInitialized (boolean initialized) {
-		_initialized = initialized;
+		_initialized.set(initialized);
 		_conditionVariable.open();
 	}
 
+	public void resetWebViewAppInitialization() {
+		_webAppLoaded = false;
+		_webAppFailureCode.set(-1);
+		_webAppFailureMessage.set("");
+		_initialized.set(false);
+	}
+
 	public boolean isWebAppInitialized () {
-		return _initialized;
+		return _initialized.get();
 	}
 
 	public WebView getWebView () {
@@ -296,7 +323,20 @@ public class WebViewApp {
 		});
 
 		_conditionVariable = new ConditionVariable();
-		return _conditionVariable.block(60000) && WebViewApp.getCurrentApp() != null;
+		final boolean webViewCreateDidNotTimeout = _conditionVariable.block(configuration.getWebViewAppCreateTimeout());
+		final boolean webAppDefined = WebViewApp.getCurrentApp() != null;
+		final boolean webAppInitialized = webAppDefined && WebViewApp.getCurrentApp().isWebAppInitialized();
+
+		boolean createdSuccessfully = webViewCreateDidNotTimeout && webAppDefined && webAppInitialized;
+
+		if (!createdSuccessfully) {
+			SDKMetrics.getInstance().sendEventWithTags("native_webview_creation_failed", new HashMap<String, String>() {{
+				put("wto", "" + !webViewCreateDidNotTimeout);
+				put("wad", "" + webAppDefined);
+				put("wai", "" + webAppInitialized);
+			}});
+		}
+		return createdSuccessfully;
 	}
 
 	/* PRIVATE CLASSES */
@@ -304,7 +344,7 @@ public class WebViewApp {
 	private class WebAppClient extends WebViewClient {
 
 		@Override
-		public boolean onRenderProcessGone(android.webkit.WebView view, RenderProcessGoneDetail detail) {
+		public boolean onRenderProcessGone(android.webkit.WebView view, final RenderProcessGoneDetail detail) {
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -324,9 +364,16 @@ public class WebViewApp {
 				}
 			});
 
-			// the ads sdk cannot be recovered but return true to prevent the crash
 			DeviceLog.error("UnityAds Sdk WebView onRenderProcessGone : " + detail.toString());
+			SDKMetrics.getInstance().sendEventWithTags("native_webview_render_process_gone", new HashMap<String, String>() {{
+				// Only apply tags if minimum API Level applies
+				if (Build.VERSION.SDK_INT >= 26) {
+					put("dc", "" + detail.didCrash());
+					put("pae", "" + detail.rendererPriorityAtExit());
+				}
+			}});
 
+			// the ads sdk cannot be recovered but return true to prevent the crash
 			return true;
 		}
 

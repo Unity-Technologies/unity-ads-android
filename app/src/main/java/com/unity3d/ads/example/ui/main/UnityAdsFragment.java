@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.example.R;
@@ -118,7 +119,17 @@ public class UnityAdsFragment extends Fragment implements IUnityAdsListener, IUn
 
 				statusText.setText("Initializing...");
 				UnityAds.addListener(UnityAdsFragment.this);
-				UnityAds.initialize(getActivity(), gameId, testModeCheckBox.isChecked());
+				UnityAds.initialize(getContext(), gameId, testModeCheckBox.isChecked(), new IUnityAdsInitializationListener() {
+					@Override
+					public void onInitializationComplete() {
+						statusText.setText("Initialization Complete");
+					}
+
+					@Override
+					public void onInitializationFailed(UnityAds.UnityAdsInitializationError error, String message) {
+						statusText.setText("Initialization Failed: [" + error + "] " + message);
+					}
+				});
 
 				// store entered gameid in app settings
 				SharedPreferences preferences = getActivity().getSharedPreferences("Settings", Context.MODE_PRIVATE);

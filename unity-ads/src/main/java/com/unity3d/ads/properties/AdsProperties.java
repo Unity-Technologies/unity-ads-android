@@ -7,17 +7,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class AdsProperties {
+
 	private static IUnityAdsListener _listener = null;
 	private static Set<IUnityAdsListener> _listeners = Collections.synchronizedSet(new LinkedHashSet<IUnityAdsListener>());
-	private static int _showTimeout = 5000;
-
-	public static void setShowTimeout(int timeout) {
-		_showTimeout = timeout;
-	}
-
-	public static int getShowTimeout() {
-		return _showTimeout;
-	}
 
 	public static void setListener(IUnityAdsListener listener) {
 		// cleanup possible reference in _listeners

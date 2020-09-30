@@ -1,12 +1,15 @@
 package com.unity3d.services.ads;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.IUnityAdsListener;
+import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.IUnityServicesListener;
@@ -21,49 +24,58 @@ import com.unity3d.services.core.properties.ClientProperties;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public final class UnityAdsImplementation {
+
+	static ExecutorService _showExecutorService = Executors.newSingleThreadExecutor();
 
 	/**
 	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
 	 *
-	 * @param activity Current Android activity of calling app
+	 * @param context Current Android application context of calling app
 	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
 	 * @param listener Listener for IUnityAdsListener callbacks
 	 */
-	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener) {
+	public static void initialize(final Context context, final String gameId, final IUnityAdsListener listener) {
 		boolean testMode = false;
-		initialize(activity, gameId, listener, testMode);
+		initialize(context, gameId, listener, testMode);
 	}
 
 	/**
 	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
 	 *
-	 * @param activity Current Android activity of calling app
+	 * @param context Current Android application context of calling app
 	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
 	 * @param listener Listener for IUnityAdsListener callbacks
 	 * @param testMode If true, only test ads are shown
 	 */
-	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode) {
+	public static void initialize(final Context context, final String gameId, final IUnityAdsListener listener, final boolean testMode) {
 		boolean usePerPlacementLoad = false;
-		initialize(activity, gameId, listener, testMode, usePerPlacementLoad);
+		initialize(context, gameId, listener, testMode, usePerPlacementLoad, null);
 	}
 
 	/**
 	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
-	 *  @param activity Current Android activity of calling app
+	 *  @param context Current Android application context of calling app
 	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
 	 * @param listener Listener for IUnityAdsListener callbacks
 	 * @param testMode If true, only test ads are shown
 	 * @param enablePerPlacementLoad Set this flag to `YES` to disable automatic placement caching. When this is enabled, developer must call `load` on placements before calling show
+	 * @param initializationListener Listener for IUnityAdsInitializationListener callbacks
 	 */
-	public static void initialize(final Activity activity, final String gameId, final IUnityAdsListener listener, final boolean testMode, final boolean enablePerPlacementLoad) {
+	public static void initialize(final Context context, final String gameId, final IUnityAdsListener listener, final boolean testMode, final boolean enablePerPlacementLoad, final IUnityAdsInitializationListener initializationListener) {
 		DeviceLog.entered();
 
 		UnityAdsImplementation.addListener(listener);
 
-		UnityServices.initialize(activity, gameId, new IUnityServicesListener() {
+		UnityServices.initialize(context, gameId, new IUnityServicesListener() {
 			@Override
 			public void onUnityServicesError(UnityServices.UnityServicesError error, String message) {
+				if (listener == null) {
+					return;
+				}
 				if (error == UnityServices.UnityServicesError.INIT_SANITY_CHECK_FAIL) {
 					listener.onUnityAdsError(UnityAds.UnityAdsError.INIT_SANITY_CHECK_FAIL, message);
 				}
@@ -71,7 +83,7 @@ public final class UnityAdsImplementation {
 					listener.onUnityAdsError(UnityAds.UnityAdsError.INVALID_ARGUMENT, message);
 				}
 			}
-		}, testMode, enablePerPlacementLoad);
+		}, testMode, enablePerPlacementLoad, initializationListener);
 	}
 
 	/**
@@ -214,7 +226,7 @@ public final class UnityAdsImplementation {
 		if(isReady(placementId)) {
 			DeviceLog.info("Unity Ads opening new ad unit for placement " + placementId);
 			ClientProperties.setActivity(activity);
-			new Thread(new Runnable() {
+			_showExecutorService.submit(new Runnable() {
 				@Override
 				public void run() {
 					Display defaultDisplay = ((WindowManager)activity.getSystemService(activity.WINDOW_SERVICE)).getDefaultDisplay();
@@ -248,7 +260,7 @@ public final class UnityAdsImplementation {
 						handleShowError(placementId, UnityAds.UnityAdsError.SHOW_ERROR, "Could not get com.unity3d.ads.properties.showCallback method");
 					}
 				}
-			}).start();
+			});
 		} else {
 			if (!isSupported()) {
 				handleShowError(placementId, UnityAds.UnityAdsError.NOT_INITIALIZED, "Unity Ads is not supported for this device");
@@ -301,7 +313,7 @@ public final class UnityAdsImplementation {
 		return Placement.getDefaultPlacement();
 	}
 
-	public static void load(final String placementId) {
-		LoadModule.getInstance().load(placementId);
+	public static void load(final String placementId, final IUnityAdsLoadListener listener) {
+		LoadModule.getInstance().load(placementId, listener);
 	}
 }

@@ -3,7 +3,7 @@
     package="com.unity3d.ads.example">
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="UnityAds 3.0"
         android:theme="@style/AppTheme">
@@ -21,17 +21,6 @@
         <meta-data
             android:name="com.google.ar.core"
             android:value="optional" />
-
-        <activity
-            android:name=".UnityAdsExample"
-            android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
-            android:label="UnityAds 3.0">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>

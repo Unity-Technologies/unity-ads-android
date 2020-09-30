@@ -27,6 +27,7 @@ public class WebRequest {
 	private int _responseCode = -1;
 	private long _contentLength = -1;
 	private boolean _canceled = false;
+	private ByteArrayOutputStream _baos;
 
 	private int _connectTimeout;
 	private int _readTimeout;
@@ -161,6 +162,18 @@ public class WebRequest {
 		}
 
 		_contentLength = connection.getContentLength();
+		if (_contentLength == -1) {
+			// X-OrigLength is a custom field which contains uncompressed response size.
+			// More information here https://unity.slack.com/archives/CULLDMTH9/p1589991686357100
+			_contentLength = connection.getHeaderFieldInt("X-OrigLength", -1);
+		}
+
+		// If we know expected content size and the call was made from  String makeRequest(),
+		// override already created boas with new stream with preallocated buffer.
+		if (_baos != null && _baos == outputStream && _contentLength > 0) {
+			_baos = new ByteArrayOutputStream((int)_contentLength);
+			outputStream = _baos;
+		}
 
 		if (connection.getHeaderFields() != null) {
 			_responseHeaders = connection.getHeaderFields();
@@ -213,9 +226,9 @@ public class WebRequest {
 	}
 
 	public String makeRequest () throws Exception {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		makeStreamRequest(baos);
-		return baos.toString("UTF-8");
+		_baos = new ByteArrayOutputStream();
+		makeStreamRequest(_baos);
+		return _baos.toString("UTF-8");
 	}
 
 	private HttpURLConnection getHttpUrlConnectionWithHeaders() throws NetworkIOException, IllegalArgumentException {

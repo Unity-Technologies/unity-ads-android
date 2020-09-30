@@ -6,10 +6,10 @@ android {
 
     defaultConfig {
         applicationId "com.unity3d.ads.example"
-        minSdkVersion 14
-        targetSdkVersion 26
-        versionCode = 3480
-        versionName = "3.4.8"
+        minSdkVersion 19
+        targetSdkVersion 29
+        versionCode = 3500
+        versionName = "3.5.0"
     }
 
     flavorDimensions "arEnabled"

@@ -9,6 +9,7 @@ import com.unity3d.services.core.webview.WebViewEventCategory;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 public class Storage extends JsonStorage {
 	private String _targetFileName;
@@ -35,8 +36,12 @@ public class Storage extends JsonStorage {
 			setData(new JSONObject(fileData));
 			return true;
 		}
+		catch (FileNotFoundException e) {
+			DeviceLog.debug("Storage JSON file not found in local cache:", e);
+			return false;
+		}
 		catch (Exception e) {
-			DeviceLog.exception("Error creating storage JSON", e);
+			DeviceLog.debug("Failed to read storage JSON file:", e);
 			return false;
 		}
 	}

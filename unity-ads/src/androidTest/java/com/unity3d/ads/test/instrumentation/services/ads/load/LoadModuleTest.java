@@ -2,33 +2,41 @@ package com.unity3d.ads.test.instrumentation.services.ads.load;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import com.unity3d.services.ads.load.ILoadBridge;
+import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.services.ads.load.LoadModule;
 import com.unity3d.services.core.configuration.IInitializationListener;
 import com.unity3d.services.core.configuration.IInitializationNotificationCenter;
 import com.unity3d.services.core.configuration.InitializationNotificationCenter;
 import com.unity3d.services.core.properties.SdkProperties;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.bridge.CallbackStatus;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @RunWith(AndroidJUnit4.class)
 public class LoadModuleTest {
 
-	private ILoadBridge loadBridge;
 	private InitializationNotificationCenter initializationNotificationCenter;
 	private LoadModule loadModule;
 	private IInitializationNotificationCenter notificationCenter;
@@ -37,7 +45,6 @@ public class LoadModuleTest {
 
 	@Before
 	public void before() {
-		loadBridge = mock(ILoadBridge.class);
 		notificationCenter = mock(IInitializationNotificationCenter.class);
 
 		doAnswer(new Answer() {
@@ -47,7 +54,7 @@ public class LoadModuleTest {
 			}})
 			.when(notificationCenter).addListener(any(IInitializationListener.class));
 
-		loadModule = new LoadModule(loadBridge, notificationCenter);
+		loadModule = new LoadModule(notificationCenter);
 	}
 
 	@Test
@@ -57,117 +64,321 @@ public class LoadModuleTest {
 	}
 
 	@Test
-	public void testLoadAfterInitialized() {
-		SdkProperties.setInitialized(true);
-		loadModule.load("test");
+	public void testLoadAfterInitialized() throws InterruptedException, InvocationTargetException, IllegalAccessException, JSONException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
 
-		LinkedHashMap<String, Integer> expectedMap = new LinkedHashMap<>();
-		expectedMap.put("test", new Integer(1));
-		verify(loadBridge, times(1)).loadPlacements(expectedMap);
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
+
+		MockedLoadListener mockedLoadListener = new MockedLoadListener();
+
+		loadModule.load("test", mockedLoadListener.listener);
+
+		mockedWebViewApp.await();
+		mockedWebViewApp.simulateLoadCall("test");
+
+		mockedLoadListener.await();
+
+		verify(mockedLoadListener.listener, Mockito.times(1)).onUnityAdsAdLoaded("test");
+		verifyNoMoreInteractions(mockedLoadListener.listener);
 	}
 
 	@Test
-	public void testTwiceLoadAfterInitialized() {
-		SdkProperties.setInitialized(true);
-		loadModule.load("test1");
-		loadModule.load("test2");
+	public void testLoadAfterInitialized_WithWebViewTimeout() throws InterruptedException, InvocationTargetException, IllegalAccessException, JSONException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
 
-		LinkedHashMap<String, Integer> expectedMap = new LinkedHashMap<>();
-		expectedMap.put("test1", new Integer(1));
-		LinkedHashMap<String, Integer> expectedMap2 = new LinkedHashMap<>();
-		expectedMap2.put("test2", new Integer(1));
-		verify(loadBridge, times(2)).loadPlacements(any(Map.class));
-		verify(loadBridge, times(1)).loadPlacements(expectedMap);
-		verify(loadBridge, times(1)).loadPlacements(expectedMap2);
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
+
+		MockedLoadListener mockedLoadListener = new MockedLoadListener();
+
+		loadModule.load("test", mockedLoadListener.listener);
+
+		mockedWebViewApp.await();
+		mockedLoadListener.await();
+
+		verify(mockedLoadListener.listener, Mockito.times(1)).onUnityAdsFailedToLoad("test");
+		verifyNoMoreInteractions(mockedLoadListener.listener);
 	}
 
 	@Test
-	public void testLoadWithNilPlacement() {
-		SdkProperties.setInitialized(true);
-		loadModule.load(null);
-		verify(loadBridge, never()).loadPlacements(any(Map.class));
+	public void testLoadAfterInitialized_ListenerCleanup() throws InterruptedException, InvocationTargetException, IllegalAccessException, JSONException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
+
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
+
+		MockedLoadListener mockedLoadListener = new MockedLoadListener();
+
+		loadModule.load("test", mockedLoadListener.listener);
+
+		mockedWebViewApp.await();
+		mockedWebViewApp.simulateLoadCall("test");
+		mockedWebViewApp.simulateLoadCall("test");
+
+		mockedLoadListener.await();
+
+		verify(mockedLoadListener.listener, Mockito.times(1)).onUnityAdsAdLoaded("test");
+		verifyNoMoreInteractions(mockedLoadListener.listener);
 	}
 
 	@Test
-	public void testLoadWithEmptyPlacement() {
-		SdkProperties.setInitialized(true);
-		loadModule.load("");
-		verify(loadBridge, never()).loadPlacements(any(Map.class));
+	public void testLoadAfterInitialized_WithFailedWebViewCall() throws InterruptedException, InvocationTargetException, IllegalAccessException, JSONException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
+
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
+
+		MockedLoadListener mockedLoadListener = new MockedLoadListener();
+
+		loadModule.load("test", mockedLoadListener.listener);
+
+		mockedWebViewApp.await();
+		mockedWebViewApp.failLoadCall("test");
+
+		mockedLoadListener.await();
+
+		verify(mockedLoadListener.listener, Mockito.times(1)).onUnityAdsFailedToLoad("test");
+		verifyNoMoreInteractions(mockedLoadListener.listener);
 	}
 
 	@Test
-	public void testLoadBeforeInitialized() throws Exception {
-		SdkProperties.setInitialized(false);
-		loadModule.load("test");
+	public void testLoadAfterInitialized_WithHardcodedTimeout() throws InterruptedException, InvocationTargetException, IllegalAccessException, JSONException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
 
-		verify(loadBridge, never()).loadPlacements(any(Map.class));
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
 
-		listener.onSdkInitialized();
+		MockedLoadListener mockedLoadListener = new MockedLoadListener();
 
-		LinkedHashMap<String, Integer> expectedMap = new LinkedHashMap<>();
-		expectedMap.put("test", new Integer(1));
-		verify(loadBridge, times(1)).loadPlacements(expectedMap);
+		loadModule.load("test", mockedLoadListener.listener);
+
+		mockedWebViewApp.await();
+		mockedWebViewApp.simulateLoadCallTimeout("test");
+
+		mockedLoadListener.await();
+
+		verify(mockedLoadListener.listener, Mockito.times(1)).onUnityAdsFailedToLoad("test");
+		verifyNoMoreInteractions(mockedLoadListener.listener);
 	}
 
 	@Test
-	public void testLoadBeforeInitializedAndBatchInvocation() {
-		SdkProperties.setInitialized(false);
-		loadModule.load("test1");
-		loadModule.load("test2");
+	public void testTwiceLoadAfterInitialized() throws InterruptedException, JSONException, InvocationTargetException, IllegalAccessException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
 
-		verify(loadBridge, never()).loadPlacements(any(LinkedHashMap.class));
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
 
-		listener.onSdkInitialized();
+		MockedLoadListener mockedLoadListener1 = new MockedLoadListener();
+		MockedLoadListener mockedLoadListener2 = new MockedLoadListener();
 
-		LinkedHashMap<String, Integer> expectedMap = new LinkedHashMap<>();
-		expectedMap.put("test1", new Integer(1));
-		expectedMap.put("test2", new Integer(1));
-		verify(loadBridge, times(1)).loadPlacements(expectedMap);
+		loadModule.load("test", mockedLoadListener1.listener);
+		loadModule.load("test_2", mockedLoadListener2.listener);
+
+		mockedWebViewApp.await();
+		mockedWebViewApp.simulateLoadCall("test");
+
+		mockedWebViewApp.await();
+		mockedWebViewApp.simulateLoadCall("test_2");
+
+		mockedLoadListener1.await();
+		mockedLoadListener2.await();
+
+		verify(mockedLoadListener1.listener, Mockito.times(1)).onUnityAdsAdLoaded("test");
+		verifyNoMoreInteractions(mockedLoadListener1.listener);
+
+		verify(mockedLoadListener2.listener, Mockito.times(1)).onUnityAdsAdLoaded("test_2");
+		verifyNoMoreInteractions(mockedLoadListener2.listener);
 	}
 
 	@Test
-	public void testLoadBeforeInitializedSamePlacement() {
-		SdkProperties.setInitialized(false);
-		loadModule.load("test1");
-		loadModule.load("test1");
+	public void testLoadWithNullPlacement() throws InterruptedException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
 
-		verify(loadBridge, never()).loadPlacements(any(LinkedHashMap.class));
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
 
-		listener.onSdkInitialized();
+		MockedLoadListener mockedLoadListener = new MockedLoadListener();
 
-		LinkedHashMap<String, Integer> expectedMap = new LinkedHashMap<>();
-		expectedMap.put("test1", new Integer(2));
-		verify(loadBridge, times(1)).loadPlacements(expectedMap);
+		loadModule.load(null, mockedLoadListener.listener);
+
+		mockedLoadListener.await();
+
+		verify(mockedLoadListener.listener, Mockito.times(1)).onUnityAdsFailedToLoad(null);
+		verifyNoMoreInteractions(mockedLoadListener.listener);
 	}
 
 	@Test
-	public void testLoadBeforeInitializedWithNilPlacement() {
-		SdkProperties.setInitialized(false);
-		loadModule.load(null);
+	public void testLoadWithEmptyPlacement() throws InterruptedException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
 
-		listener.onSdkInitialized();
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
 
-		verify(loadBridge, never()).loadPlacements(any(LinkedHashMap.class));
+		MockedLoadListener mockedLoadListener = new MockedLoadListener();
+
+		loadModule.load("", mockedLoadListener.listener);
+
+		mockedLoadListener.await();
+
+		verify(mockedLoadListener.listener, Mockito.times(1)).onUnityAdsFailedToLoad("");
+		verifyNoMoreInteractions(mockedLoadListener.listener);
 	}
 
 	@Test
-	public void testLoadBeforeInitializedWithEmptyPlacement() {
-		SdkProperties.setInitialized(false);
-		loadModule.load("");
+	public void testLoadBeforeInitializedAndBatchInvocation() throws InterruptedException, IllegalAccessException, JSONException, InvocationTargetException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
 
-		listener.onSdkInitialized();
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZING);
 
-		verify(loadBridge, never()).loadPlacements(any(LinkedHashMap.class));
+		MockedLoadListener mockedLoadListener1 = new MockedLoadListener();
+		MockedLoadListener mockedLoadListener2 = new MockedLoadListener();
+
+		loadModule.load("test", mockedLoadListener1.listener);
+		loadModule.load("test_2", mockedLoadListener2.listener);
+
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
+		loadModule.onSdkInitialized();
+
+		mockedWebViewApp.await();
+		mockedWebViewApp.simulateLoadCall("test");
+
+		mockedWebViewApp.await();
+		mockedWebViewApp.simulateLoadCall("test_2");
+
+		mockedLoadListener1.await();
+		mockedLoadListener2.await();
+
+		verify(mockedLoadListener1.listener, Mockito.times(1)).onUnityAdsAdLoaded("test");
+		verifyNoMoreInteractions(mockedLoadListener1.listener);
+
+		verify(mockedLoadListener2.listener, Mockito.times(1)).onUnityAdsAdLoaded("test_2");
+		verifyNoMoreInteractions(mockedLoadListener2.listener);
 	}
 
 	@Test
-	public void testDidNotInitialized() {
-		SdkProperties.setInitialized(false);
-		loadModule.load("test1");
-		loadModule.load("test2");
+	public void testLoadBeforeInitializedAndBatchInvocation_InitFailed() throws InterruptedException, IllegalAccessException, JSONException, InvocationTargetException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
 
-		listener.onSdkInitializationFailed("test error", 1);
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZING);
 
-		verify(loadBridge, never()).loadPlacements(any(LinkedHashMap.class));
+		MockedLoadListener mockedLoadListener1 = new MockedLoadListener();
+		MockedLoadListener mockedLoadListener2 = new MockedLoadListener();
+
+		loadModule.load("test", mockedLoadListener1.listener);
+		loadModule.load("test_2", mockedLoadListener2.listener);
+
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_FAILED);
+		loadModule.onSdkInitializationFailed("", 0);
+
+		mockedLoadListener1.await();
+		mockedLoadListener2.await();
+
+		verify(mockedLoadListener1.listener, Mockito.times(1)).onUnityAdsFailedToLoad("test");
+		verifyNoMoreInteractions(mockedLoadListener1.listener);
+
+		verify(mockedLoadListener2.listener, Mockito.times(1)).onUnityAdsFailedToLoad("test_2");
+		verifyNoMoreInteractions(mockedLoadListener2.listener);
 	}
+
+	@Test
+	public void testLoadBeforeInitializedSamePlacement() throws InterruptedException, IllegalAccessException, JSONException, InvocationTargetException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
+
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZING);
+
+		MockedLoadListener mockedLoadListener1 = new MockedLoadListener();
+		MockedLoadListener mockedLoadListener2 = new MockedLoadListener();
+
+		loadModule.load("test", mockedLoadListener1.listener);
+		loadModule.load("test", mockedLoadListener2.listener);
+
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
+		loadModule.onSdkInitialized();
+
+		mockedWebViewApp.await();
+		mockedWebViewApp.simulateLoadCall("test");
+
+		mockedWebViewApp.await();
+		mockedWebViewApp.simulateLoadCall("test");
+
+		mockedLoadListener1.await();
+		mockedLoadListener2.await();
+
+		verify(mockedLoadListener1.listener, Mockito.times(1)).onUnityAdsAdLoaded("test");
+		verifyNoMoreInteractions(mockedLoadListener1.listener);
+
+		verify(mockedLoadListener2.listener, Mockito.times(1)).onUnityAdsAdLoaded("test");
+		verifyNoMoreInteractions(mockedLoadListener2.listener);
+	}
+
+	class MockedLoadListener {
+		public CountDownLatch latch;
+		public IUnityAdsLoadListener listener;
+
+		public MockedLoadListener() {
+			latch = new CountDownLatch(1);
+			listener = mock(IUnityAdsLoadListener.class);
+
+			doAnswer(new Answer() {
+           		public Object answer(InvocationOnMock invocation) {
+				latch.countDown();
+				return null;
+			}}).when(listener).onUnityAdsAdLoaded(anyString());
+			doAnswer(new Answer() {
+				public Object answer(InvocationOnMock invocation) {
+					latch.countDown();
+					return null;
+				}}).when(listener).onUnityAdsFailedToLoad(anyString());
+		}
+
+		public void await() throws InterruptedException {
+			latch.await(35, TimeUnit.SECONDS);
+		}
+	}
+
+	class MockedWebViewApp {
+		private final LoadModule loadModule;
+		public CountDownLatch latch;
+		public WebViewApp webViewApp;
+
+		public Method loadCallback;
+		public JSONObject options;
+
+		public MockedWebViewApp(LoadModule loadModule) {
+			webViewApp = mock(WebViewApp.class);
+			latch = new CountDownLatch(1);
+			this.loadModule = loadModule;
+
+			doAnswer(new Answer() {
+				public Object answer(InvocationOnMock invocation) {
+					loadCallback = invocation.getArgument(2);
+					options = invocation.getArgument(3);
+					latch.countDown();
+					return null;
+				}}).when(webViewApp).invokeMethod(eq("webview"), eq("load"), any(Method.class), any());
+		}
+
+		public void await() throws InterruptedException {
+			latch.await(35, TimeUnit.SECONDS);
+			latch = new CountDownLatch(1);
+		}
+
+		public void failLoadCall(String placementId) throws InvocationTargetException, IllegalAccessException, JSONException {
+			loadCallback.invoke(null, CallbackStatus.ERROR);
+		}
+
+		public void simulateLoadCall(String placementId) throws InvocationTargetException, IllegalAccessException, JSONException {
+			loadCallback.invoke(null, CallbackStatus.OK);
+			loadModule.sendAdLoaded(placementId, options.getString("listenerId"));
+		}
+
+		public void simulateLoadCallTimeout(String placementId) throws InvocationTargetException, IllegalAccessException, JSONException {
+			loadCallback.invoke(null, CallbackStatus.OK);
+		}
+	}
+
 }

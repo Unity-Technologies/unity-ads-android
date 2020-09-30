@@ -3,7 +3,6 @@ package com.unity3d.services.core.configuration;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +10,7 @@ import java.util.Map;
 public class InitializationNotificationCenter implements IInitializationNotificationCenter {
 
 	private static InitializationNotificationCenter instance = null;
-	private HashMap<Integer, WeakReference<IInitializationListener>> _sdkListeners =  new HashMap<>();
+	private HashMap<Integer, IInitializationListener> _sdkListeners =  new HashMap<>();
 
 	public static InitializationNotificationCenter getInstance() {
 		if (instance == null) {
@@ -23,7 +22,7 @@ public class InitializationNotificationCenter implements IInitializationNotifica
 	public void addListener(IInitializationListener listener) {
 		synchronized (_sdkListeners) {
 			if (listener != null) {
-				_sdkListeners.put(new Integer(listener.hashCode()), new WeakReference<>(listener));
+				_sdkListeners.put(new Integer(listener.hashCode()), listener);
 			}
 		}
 	}
@@ -39,13 +38,12 @@ public class InitializationNotificationCenter implements IInitializationNotifica
 	public void triggerOnSdkInitialized() {
 		synchronized (_sdkListeners) {
 			ArrayList<Integer> keysToRemove = new ArrayList<>();
-			for (final Map.Entry<Integer, WeakReference<IInitializationListener>> entry : _sdkListeners.entrySet()) {
-				if (entry.getValue().get() != null) {
-					final IInitializationListener listener = entry.getValue().get();
+			for (final Map.Entry<Integer, IInitializationListener> entry : _sdkListeners.entrySet()) {
+				if (entry.getValue() != null) {
 					Utilities.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							listener.onSdkInitialized();
+							entry.getValue().onSdkInitialized();
 						}
 					});
 				} else {
@@ -64,13 +62,12 @@ public class InitializationNotificationCenter implements IInitializationNotifica
 			DeviceLog.error(exceptionMessage);
 
 			ArrayList<Integer> keysToRemove = new ArrayList<>();
-			for (final Map.Entry<Integer, WeakReference<IInitializationListener>> entry : _sdkListeners.entrySet()) {
-				if (entry.getValue().get() != null) {
-					final IInitializationListener listener = entry.getValue().get();
+			for (final Map.Entry<Integer, IInitializationListener> entry : _sdkListeners.entrySet()) {
+				if (entry.getValue() != null) {
 					Utilities.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							listener.onSdkInitializationFailed(exceptionMessage, code);
+							entry.getValue().onSdkInitializationFailed(exceptionMessage, code);
 						}
 					});
 				} else {

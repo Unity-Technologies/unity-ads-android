@@ -2,13 +2,17 @@ package com.unity3d.services.ads.configuration;
 
 import android.os.ConditionVariable;
 
+import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
+import com.unity3d.services.ads.adunit.AdUnitOpen;
+import com.unity3d.services.ads.load.LoadModule;
 import com.unity3d.services.ads.placement.Placement;
 import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.properties.SdkProperties;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -27,7 +31,7 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 			com.unity3d.services.ads.api.Placement.class,
 			com.unity3d.services.ads.api.WebPlayer.class,
 			com.unity3d.services.ads.api.Purchasing.class,
-			com.unity3d.services.ads.api.AdsProperties.class
+			com.unity3d.services.ads.api.Load.class
 		};
 
 		return list;
@@ -35,6 +39,8 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 
 	public boolean resetState(Configuration configuration) {
 		Placement.reset();
+		AdUnitOpen.setConfiguration(configuration);
+		LoadModule.setConfiguration(configuration);
 		return true;
 	}
 
@@ -67,18 +73,10 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 		boolean success = cv.block(2000);
 		if(success && _address != null && _address.isLoopbackAddress()) {
 			DeviceLog.error("Unity Ads init: halting init because Unity Ads config resolves to loopback address (due to ad blocker?)");
-
-
-			Utilities.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					for (IUnityAdsListener listener : AdsProperties.getListeners()) {
-						listener.onUnityAdsError(UnityAds.UnityAdsError.AD_BLOCKER_DETECTED, "Unity Ads config server resolves to loopback address (due to ad blocker?)");
-					}
-				}
-			});
 			return false;
 		}
+		AdUnitOpen.setConfiguration(configuration);
+		LoadModule.setConfiguration(configuration);
 
 		return true;
 	}
@@ -97,6 +95,8 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 	}
 
 	public boolean initCompleteState(Configuration configuration) {
+		AdUnitOpen.setConfiguration(configuration);
+		LoadModule.setConfiguration(configuration);
 		return true;
 	}
 

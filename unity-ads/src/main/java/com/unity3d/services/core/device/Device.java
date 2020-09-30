@@ -93,6 +93,14 @@ public class Device {
 		return AdvertisingId.getLimitedAdTracking();
 	}
 
+	public static String getOpenAdvertisingTrackingId() {
+		return OpenAdvertisingId.getOpenAdvertisingTrackingId();
+	}
+
+	public static boolean isLimitOpenAdTrackingEnabled() {
+		return OpenAdvertisingId.getLimitedOpenAdTracking();
+	}
+
 	public static boolean isUsingWifi () {
 		ConnectivityManager mConnectivity;
 

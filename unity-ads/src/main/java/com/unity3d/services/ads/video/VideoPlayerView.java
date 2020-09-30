@@ -1,6 +1,7 @@
 package com.unity3d.services.ads.video;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.widget.VideoView;
@@ -19,6 +20,7 @@ public class VideoPlayerView extends VideoView {
 	private MediaPlayer _mediaPlayer = null;
 	private Float _volume = null;
 	private boolean _infoListenerEnabled = true;
+	private AudioManager _audioManager = null;
 
 	public VideoPlayerView(Context context) {
 		super(context);
@@ -113,6 +115,19 @@ public class VideoPlayerView extends VideoView {
 		}
 
 		try {
+			// check api version
+			// setAudioFocusRequest is available in API level 26 and above
+			// requestAudioFocus(AudioManager.OnAudioFocusChangeListener l, int streamType, int durationHint) was deprecated in API level 26.
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+				_audioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+
+				if (_audioManager != null) {
+					_audioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+				}
+			} else {
+				setAudioFocusRequest(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+			}
+
 			setVideoPath(_videoUrl);
 		}
 		catch (Exception e) {
@@ -166,6 +181,16 @@ public class VideoPlayerView extends VideoView {
 	public void pause () {
 		try {
 			super.pause();
+
+			// check api version
+			// abandonAudioFocus was deprecated in API level 26
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+				if (_audioManager != null) {
+					_audioManager.abandonAudioFocus(null);
+				}
+			} else {
+				setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE);
+			}
 		}
 		catch (Exception e) {
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PAUSE_ERROR, _videoUrl);
@@ -194,6 +219,15 @@ public class VideoPlayerView extends VideoView {
 	public void stop () {
 		stopPlayback();
 		stopVideoProgressTimer();
+
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+			if (_audioManager != null) {
+				_audioManager.abandonAudioFocus(null);
+			}
+		} else {
+			setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE);
+		}
+
 		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.STOP, _videoUrl);
 	}
 

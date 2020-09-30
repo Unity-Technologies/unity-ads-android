@@ -21,7 +21,7 @@ platform :android do
   lane :instrumentation_test do
     gradle(
       task: "connectedDebugAndroidTest",
-      flags: "-i -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.InstrumentationTestSuite"
+      flags: "-w -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.InstrumentationTestSuite"
     )
   end
 
@@ -29,7 +29,7 @@ platform :android do
   lane :legacy_test do
     gradle(
       task: "connectedDebugAndroidTest",
-      flags: "-i -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.LegacyTestSuite"
+      flags: "-w -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.LegacyTestSuite"
     )
   end
 
@@ -37,7 +37,7 @@ platform :android do
   lane :integration_test do
     gradle(
       task: "connectedDebugAndroidTest",
-      flags: "-i -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.IntegrationTestSuite"
+      flags: "-w -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.IntegrationTestSuite"
     )
   end
 

@@ -1,14 +1,14 @@
 package com.unity3d.services.core.configuration;
 
+import android.text.TextUtils;
+
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.services.core.request.NetworkIOException;
 import com.unity3d.services.core.request.WebRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,25 @@ public class Configuration {
 	private String _webViewHash;
 	private String _webViewVersion;
 	private String _webViewData;
-	private String _url;
+	private String _sdkVersion;
+	private boolean _delayWebViewUpdate;
+	private int _resetWebAppTimeout;
+	private int _maxRetries;
+	private long _retryDelay;
+	private double _retryScalingFactor;
+	private int _connectedEventThresholdInMs;
+	private int _maximumConnectedEvents;
+	private long _networkErrorTimeout;
+	private int _showTimeout;
+	private int _loadTimeout;
+	private int _noFillTimeout;
+	private String _metricsUrl;
+	private double _metricSampleRate;
+	private long _webViewAppCreateTimeout;
+
+	private String _configJsonString;
+	private String _configUrl;
+
 	private Map<String, IModuleConfiguration> _moduleConfigurations;
 
 	private String[] _moduleConfigurationList = {
@@ -38,19 +56,19 @@ public class Configuration {
 	private Class[] _webAppApiClassList;
 
 	public Configuration () {
+		this.setOptionalFields(new JSONObject());
 	}
 
 	public Configuration (String configUrl) {
-		_url = configUrl;
+		_configUrl = configUrl;
+		this.setOptionalFields(new JSONObject());
 	}
 
-	public void setConfigUrl (String url) {
-		_url = url;
+	public Configuration (JSONObject configData) throws MalformedURLException {
+		handleConfigurationData(configData);
 	}
 
-	public String getConfigUrl () {
-		return _url;
-	}
+	public String getConfigUrl () { return _configUrl; }
 
 	public Class[] getWebAppApiClassList () {
 		if (_webAppApiClassList == null) {
@@ -62,33 +80,49 @@ public class Configuration {
 
 	public String[] getModuleConfigurationList () { return _moduleConfigurationList; }
 
-	public String getWebViewUrl() {
-		return _webViewUrl;
-	}
+	public String getWebViewUrl() { return _webViewUrl; }
 
-	public void setWebViewUrl (String url) {
-		_webViewUrl = url;
-	}
+	public void setWebViewUrl (String url) { _webViewUrl = url; }
 
-	public String getWebViewHash() {
-		return _webViewHash;
-	}
+	public String getWebViewHash() { return _webViewHash; }
 
-	public void setWebViewHash (String hash) {
-		_webViewHash = hash;
-	}
+	public void setWebViewHash (String hash) { _webViewHash = hash; }
 
-	public String getWebViewVersion () {
-		return _webViewVersion;
-	}
+	public String getWebViewVersion () { return _webViewVersion; }
 
-	public String getWebViewData () {
-		return _webViewData;
-	}
+	public String getWebViewData () { return _webViewData; }
 
-	public void setWebViewData (String data) {
-		_webViewData = data;
-	}
+	public void setWebViewData (String data) { _webViewData = data; }
+
+	public String getSdkVersion() { return _sdkVersion; }
+
+	public boolean getDelayWebViewUpdate() { return _delayWebViewUpdate; }
+
+	public int getResetWebappTimeout() { return _resetWebAppTimeout; }
+
+	public int getMaxRetries() { return _maxRetries; }
+
+	public long getRetryDelay() { return _retryDelay; }
+
+	public double getRetryScalingFactor() { return _retryScalingFactor; }
+
+	public int getConnectedEventThreshold() { return _connectedEventThresholdInMs; }
+
+	public int getMaximumConnectedEvents() { return _maximumConnectedEvents; }
+
+	public long getNetworkErrorTimeout() { return _networkErrorTimeout; }
+
+	public int getShowTimeout() { return _showTimeout; }
+
+	public int getLoadTimeout() { return _loadTimeout; }
+
+	public int getNoFillTimeout() { return _noFillTimeout; }
+
+	public String getMetricsUrl() { return _metricsUrl; }
+
+	public double getMetricSampleRate() { return _metricSampleRate; }
+
+	public long getWebViewAppCreateTimeout() { return _webViewAppCreateTimeout; }
 
 	public IModuleConfiguration getModuleConfiguration(String moduleName) {
 		if (_moduleConfigurations != null && _moduleConfigurations.containsKey(moduleName)) {
@@ -112,40 +146,75 @@ public class Configuration {
 		}
 	}
 
+	public String getJSONString() { return _configJsonString; }
+
 	protected String buildQueryString () {
-		String queryString = "?ts=" + System.currentTimeMillis() + "&sdkVersion=" + SdkProperties.getVersionCode() + "&sdkVersionName=" + SdkProperties.getVersionName();
-		return queryString;
+		return "?ts=" + System.currentTimeMillis()
+			+ "&sdkVersion=" + SdkProperties.getVersionCode()
+			+ "&sdkVersionName=" + SdkProperties.getVersionName();
 	}
 
 	protected void makeRequest () throws Exception {
-		if (_url == null) {
+		if (_configUrl == null) {
 			throw new MalformedURLException("Base URL is null");
 		}
 
-		String url = _url + buildQueryString();
+		String url = _configUrl + buildQueryString();
 		DeviceLog.debug("Requesting configuration with: " + url);
 
 		WebRequest request = new WebRequest(url, "GET", null);
 		String data = request.makeRequest();
-		JSONObject config = new JSONObject(data);
 
-		_webViewUrl = config.getString("url");
+		try {
+			handleConfigurationData(new JSONObject(data));
+		} catch (Exception e) {
+			throw e;
+		}
+	}
 
-		if(!config.isNull("hash")) {
-			_webViewHash = config.getString("hash");
-		} else {
+	private void handleConfigurationData(JSONObject configData) throws MalformedURLException {
+
+		String url = null;
+
+		try {
+			url = !configData.isNull("url") ? configData.getString("url") : null;
+		} catch (JSONException e) {}
+
+
+		if (TextUtils.isEmpty(url)) {
+			throw new MalformedURLException("WebView URL is null or empty");
+		}
+		_webViewUrl = url;
+
+		// Workaround to allow hash to be set to null by swallowing error
+		try {
+			_webViewHash = !configData.isNull("hash") ? configData.getString("hash") : null;
+		} catch (JSONException e) {
 			_webViewHash = null;
 		}
 
-		if(config.has("version")) {
-			_webViewVersion = config.getString("version");
-		} else {
-			_webViewVersion = null;
-		}
+		this.setOptionalFields(configData);
 
-		if (_webViewUrl == null || _webViewUrl.isEmpty()) {
-			throw new MalformedURLException("Invalid data. Web view URL is null or empty");
-		}
+		_configJsonString = configData.toString();
+	}
+
+	private void setOptionalFields(JSONObject configData) {
+		_webViewVersion = configData.optString("version", null);
+		_delayWebViewUpdate = configData.optBoolean("dwu", false);
+		_resetWebAppTimeout = configData.optInt("rwt", 10000);
+		_maxRetries = configData.optInt("mr", 6);
+		_retryDelay = configData.optLong("rd", 5000L);
+		_retryScalingFactor = configData.optDouble("rcf", 2.0d);
+		_connectedEventThresholdInMs = configData.optInt("cet", 10000);
+		_maximumConnectedEvents = configData.optInt("mce", 500);
+		_networkErrorTimeout = configData.optLong("net", 60000L);
+		_sdkVersion = configData.optString("sdkv", "");
+		_showTimeout = configData.optInt("sto", 5000);
+		_loadTimeout = configData.optInt("lto", 5000);
+		_noFillTimeout = configData.optInt("nft", 30000);
+		_metricsUrl = configData.optString("murl", "");
+		_metricSampleRate = configData.optDouble("msr", 100d);
+		_webViewAppCreateTimeout = configData.optLong("wct", 60000L);
 	}
 
 	private void createWebAppApiClassList() {

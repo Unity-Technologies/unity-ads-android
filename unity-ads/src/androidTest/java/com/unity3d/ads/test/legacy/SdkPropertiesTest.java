@@ -4,6 +4,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.unity3d.ads.BuildConfig;
+import com.unity3d.ads.IUnityAdsInitializationListener;
+import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
@@ -12,11 +14,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.times;
 
 @RunWith(AndroidJUnit4.class)
 public class SdkPropertiesTest {
@@ -33,6 +37,8 @@ public class SdkPropertiesTest {
 		SdkProperties.setInitialized(false);
 		SdkProperties.setTestMode(false);
 		SdkProperties.setConfigUrl(CONFIG_URL);
+		SdkProperties.resetInitializationListeners();
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.NOT_INITIALIZED);
 	}
 
 	@Test
@@ -41,6 +47,18 @@ public class SdkPropertiesTest {
 		SdkProperties.setInitialized(true);
 		assertEquals("setInitialized was used but isInitialized doesn't correspond", true, SdkProperties.isInitialized());
 	}
+
+	@Test
+	public void testSetAndGetInitializeState() {
+		assertEquals(SdkProperties.InitializationState.NOT_INITIALIZED, SdkProperties.getCurrentInitializationState());
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZING);
+		assertEquals(SdkProperties.InitializationState.INITIALIZING, SdkProperties.getCurrentInitializationState());
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_FAILED);
+		assertEquals(SdkProperties.InitializationState.INITIALIZED_FAILED, SdkProperties.getCurrentInitializationState());
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
+		assertEquals(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY, SdkProperties.getCurrentInitializationState());
+	}
+
 
 	@Test
 	public void testTestMode() {
@@ -94,14 +112,6 @@ public class SdkPropertiesTest {
 	}
 
 	@Test
-	public void testShowTimeout() {
-		int timeout = 1234;
-
-		AdsProperties.setShowTimeout(timeout);
-		assertEquals("show timeout not what it should be", timeout, AdsProperties.getShowTimeout());
-	}
-
-	@Test
 	public void testGetVersionCode() {
 		assertEquals("Version code not what it should be", BuildConfig.VERSION_CODE, SdkProperties.getVersionCode());
 	}
@@ -115,5 +125,125 @@ public class SdkPropertiesTest {
 		assertTrue("Should return true with an upper and lowercase china iso alpha 3 code", SdkProperties.isChinaLocale("ChN"));
 
 		assertFalse("Should return false with a US iso code", SdkProperties.isChinaLocale("us"));
+	}
+
+	@Test
+	public void testGetInitializationListeners() {
+		IUnityAdsInitializationListener[] initializationListeners = SdkProperties.getInitializationListeners();
+
+		assertEquals(0, initializationListeners.length);
+	}
+
+	@Test
+	public void testAddInitializationListenerAndGetInitializationListeners() {
+		IUnityAdsInitializationListener initializationListener = Mockito.mock(IUnityAdsInitializationListener.class);
+		SdkProperties.addInitializationListener(initializationListener);
+
+		IUnityAdsInitializationListener[] initializationListeners = SdkProperties.getInitializationListeners();
+
+		assertEquals(1, initializationListeners.length);
+		assertTrue(initializationListeners[0] == initializationListener);
+	}
+
+	@Test
+	public void testAddMultipleSameInitializationListenerAndGetInitializationListeners() {
+		IUnityAdsInitializationListener initializationListener1 = Mockito.mock(IUnityAdsInitializationListener.class);
+		SdkProperties.addInitializationListener(initializationListener1);
+		SdkProperties.addInitializationListener(initializationListener1);
+
+		IUnityAdsInitializationListener[] initializationListeners = SdkProperties.getInitializationListeners();
+
+		assertEquals(1, initializationListeners.length);
+		assertTrue(initializationListeners[0] == initializationListener1);
+	}
+
+	@Test
+	public void testAddMultipleInitializationListenerAndGetInitializationListeners() {
+		IUnityAdsInitializationListener initializationListener1 = Mockito.mock(IUnityAdsInitializationListener.class);
+		IUnityAdsInitializationListener initializationListener2 = Mockito.mock(IUnityAdsInitializationListener.class);
+		IUnityAdsInitializationListener initializationListener3 = Mockito.mock(IUnityAdsInitializationListener.class);
+		SdkProperties.addInitializationListener(initializationListener1);
+		SdkProperties.addInitializationListener(initializationListener2);
+		SdkProperties.addInitializationListener(initializationListener3);
+
+		IUnityAdsInitializationListener[] initializationListeners = SdkProperties.getInitializationListeners();
+
+		assertEquals(3, initializationListeners.length);
+		assertTrue(initializationListeners[0] == initializationListener1);
+		assertTrue(initializationListeners[1] == initializationListener2);
+		assertTrue(initializationListeners[2] == initializationListener3);
+
+	}
+
+	@Test
+	public void testResetInitializationListenersAndGetInitializationListeners() {
+		IUnityAdsInitializationListener initializationListener1 = Mockito.mock(IUnityAdsInitializationListener.class);
+		IUnityAdsInitializationListener initializationListener2 = Mockito.mock(IUnityAdsInitializationListener.class);
+		IUnityAdsInitializationListener initializationListener3 = Mockito.mock(IUnityAdsInitializationListener.class);
+		SdkProperties.addInitializationListener(initializationListener1);
+		SdkProperties.addInitializationListener(initializationListener2);
+		SdkProperties.addInitializationListener(initializationListener3);
+
+		IUnityAdsInitializationListener[] initializationListeners = SdkProperties.getInitializationListeners();
+		assertEquals(3, initializationListeners.length);
+
+		SdkProperties.resetInitializationListeners();
+		initializationListeners = SdkProperties.getInitializationListeners();
+
+		assertEquals(0, initializationListeners.length);
+	}
+
+	@Test
+	public void testAddInitializationListenerAfterResetInitializationListenersAndGetInitializationListeners() {
+		IUnityAdsInitializationListener initializationListener = Mockito.mock(IUnityAdsInitializationListener.class);
+		SdkProperties.addInitializationListener(initializationListener);
+
+		IUnityAdsInitializationListener[] initializationListeners = SdkProperties.getInitializationListeners();
+		assertEquals(1, initializationListeners.length);
+
+		SdkProperties.resetInitializationListeners();
+		initializationListeners = SdkProperties.getInitializationListeners();
+
+		assertEquals(0, initializationListeners.length);
+
+		SdkProperties.addInitializationListener(initializationListener);
+		initializationListeners = SdkProperties.getInitializationListeners();
+
+		assertEquals(1, initializationListeners.length);
+		assertTrue(initializationListeners[0] == initializationListener);
+	}
+
+	@Test
+	public void testNotifyInitializationCompleteMultipleListeners() {
+		IUnityAdsInitializationListener initializationListener1 = Mockito.mock(IUnityAdsInitializationListener.class);
+		IUnityAdsInitializationListener initializationListener2 = Mockito.mock(IUnityAdsInitializationListener.class);
+		IUnityAdsInitializationListener initializationListener3 = Mockito.mock(IUnityAdsInitializationListener.class);
+		SdkProperties.addInitializationListener(initializationListener1);
+		SdkProperties.addInitializationListener(initializationListener2);
+		SdkProperties.addInitializationListener(initializationListener3);
+
+		IUnityAdsInitializationListener[] initializationListeners = SdkProperties.getInitializationListeners();
+		assertEquals(3, initializationListeners.length);
+
+		SdkProperties.notifyInitializationComplete();
+
+		assertEquals(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY, SdkProperties.getCurrentInitializationState());
+		Mockito.<IUnityAdsInitializationListener>verify(initializationListener1, times(1)).onInitializationComplete();
+		Mockito.<IUnityAdsInitializationListener>verify(initializationListener2, times(1)).onInitializationComplete();
+		Mockito.<IUnityAdsInitializationListener>verify(initializationListener3, times(1)).onInitializationComplete();
+	}
+
+	@Test
+	public void testNotifyInitializationFailed() {
+		IUnityAdsInitializationListener initializationListener = Mockito.mock(IUnityAdsInitializationListener.class);
+		SdkProperties.addInitializationListener(initializationListener);
+
+		IUnityAdsInitializationListener[] initializationListeners = SdkProperties.getInitializationListeners();
+		assertEquals(1, initializationListeners.length);
+
+		SdkProperties.notifyInitializationFailed(UnityAds.UnityAdsInitializationError.INTERNAL_ERROR, "Sdk failed to initialize.");
+
+		assertEquals(SdkProperties.InitializationState.INITIALIZED_FAILED, SdkProperties.getCurrentInitializationState());
+		Mockito.<IUnityAdsInitializationListener>verify(initializationListener, times(1)).onInitializationFailed(UnityAds.UnityAdsInitializationError.INTERNAL_ERROR, "Sdk failed to initialize.");
 	}
 }

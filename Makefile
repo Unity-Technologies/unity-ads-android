@@ -30,15 +30,15 @@ exec-hybrid-tests: clean
 	./gradlew :unity-ads:connectedCheck --full-stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.HybridTestSuite
 
 push-test-server-address:
-	echo http://$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8080 > testServerAddress.txt
+	echo https://$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8080 > testServerAddress.txt
 	adb push testServerAddress.txt /data/local/tmp
 
 push-test-server-address-hosted:
-	echo "http://unity-ads-test-server.unityads.unity3d.com" > testServerAddress.txt
+	echo "https://unity-ads-test-server.unityads.unity3d.com" > testServerAddress.txt
 	adb push testServerAddress.txt /data/local/tmp
 
 push-test-server-address-local:
-	echo "http://localhost:8080" > testServerAddress.txt
+	echo "https://localhost:8080" > testServerAddress.txt
 	adb push testServerAddress.txt /data/local/tmp
 
 setup-adb-reverse:
@@ -65,7 +65,7 @@ verify-release-build:
 
 use-local-webview:
 	sed -i '' 's/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/return "new-ip";/' "unity-ads/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"
-	sed -i '' 's/return ".*";/return "http:\/\/$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8000\/build\/" + flavor + "\/config.json";/' "unity-ads/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"
+	sed -i '' 's/return ".*";/return "https:\/\/$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8000\/build\/" + flavor + "\/config.json";/' "unity-ads/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"
 
 use-public-webview:
 	sed -i '' 's/return ".*";/return "https:\/\/config.unityads.unity3d.com\/webview\/" + getWebViewBranch() + "\/" + flavor + "\/config.json";/' "unity-ads/src/main/java/com/unity3d/services/core/properties/SdkProperties.java"

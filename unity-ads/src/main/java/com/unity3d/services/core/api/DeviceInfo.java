@@ -50,6 +50,16 @@ public class DeviceInfo {
 	}
 
 	@WebViewExposed
+	public static void getOpenAdvertisingTrackingId(WebViewCallback callback) {
+		callback.invoke(Device.getOpenAdvertisingTrackingId());
+	}
+
+	@WebViewExposed
+	public static void getLimitOpenAdTrackingFlag(WebViewCallback callback) {
+		callback.invoke(Device.isLimitOpenAdTrackingEnabled());
+	}
+
+	@WebViewExposed
 	public static void getApiLevel (WebViewCallback callback) {
 		callback.invoke(Device.getApiLevel());
 	}
