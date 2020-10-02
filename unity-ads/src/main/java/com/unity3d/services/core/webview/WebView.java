@@ -22,14 +22,12 @@ public class WebView extends android.webkit.WebView {
 		super(context);
 		WebSettings settings = getSettings();
 
-		if(Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT < 30) {
+		if(Build.VERSION.SDK_INT >= 16) {
 			settings.setAllowFileAccessFromFileURLs(true);
 			settings.setAllowUniversalAccessFromFileURLs(true);
 		}
 
-		if(Build.VERSION.SDK_INT >= 30) {
-			settings.setAllowFileAccess(true);
-		}
+		settings.setAllowFileAccess(true);
 
 		if (Build.VERSION.SDK_INT >= 19) {
 			try {
