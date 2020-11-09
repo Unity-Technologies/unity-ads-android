@@ -8,8 +8,8 @@ android {
         applicationId "com.unity3d.ads.example"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode = 3500
-        versionName = "3.5.0"
+        versionCode = 3510
+        versionName = "3.5.1"
     }
 
     flavorDimensions "arEnabled"

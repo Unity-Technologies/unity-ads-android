@@ -608,10 +608,10 @@ public class InitializeThreadTest {
 		byte[] data = {1,2,3,4,5};
 		String webViewHash = Utilities.Sha256(data);
 		String webViewHashNew = Utilities.Sha256("123");
-		String sdkVersion = "3.5.0";
+		String sdkVersion = "99.99.99";
 
-		Configuration cacheConfig = new Configuration(getJSONObject(TEST_WEBVIEW_URL, webViewHash, SdkProperties.getVersionName()).put("sdkv", sdkVersion));
-		Configuration updatedConfig = new Configuration(getJSONObject(TEST_WEBVIEW_URL, webViewHashNew, SdkProperties.getVersionName()).put("sdkv", sdkVersion));
+		Configuration cacheConfig = new Configuration(getJSONObject(TEST_WEBVIEW_URL, webViewHash, SdkProperties.getVersionName()).put("sdkv", SdkProperties.getVersionName()));
+		Configuration updatedConfig = new Configuration(getJSONObject(TEST_WEBVIEW_URL, webViewHashNew, sdkVersion).put("sdkv", sdkVersion));
 
 		InitializeThread.InitializeStateCheckForUpdatedWebView state = new InitializeThread.InitializeStateCheckForUpdatedWebView(updatedConfig, data, cacheConfig);
 		Object nextState = state.execute();
