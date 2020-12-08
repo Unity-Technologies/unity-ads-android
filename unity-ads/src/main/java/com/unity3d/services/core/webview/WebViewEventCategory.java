@@ -18,5 +18,6 @@ public enum WebViewEventCategory {
 	AR,
 	PERMISSIONS,
 	STORE,
-	LOAD_API
+	LOAD_API,
+	TOKEN
 }

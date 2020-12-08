@@ -2,17 +2,16 @@ package com.unity3d.services.ads.configuration;
 
 import android.os.ConditionVariable;
 
-import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.ads.adunit.AdUnitOpen;
 import com.unity3d.services.ads.load.LoadModule;
 import com.unity3d.services.ads.placement.Placement;
 import com.unity3d.ads.properties.AdsProperties;
+import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
-import com.unity3d.services.core.properties.SdkProperties;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -31,7 +30,8 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 			com.unity3d.services.ads.api.Placement.class,
 			com.unity3d.services.ads.api.WebPlayer.class,
 			com.unity3d.services.ads.api.Purchasing.class,
-			com.unity3d.services.ads.api.Load.class
+			com.unity3d.services.ads.api.Load.class,
+			com.unity3d.services.ads.api.Token.class
 		};
 
 		return list;
@@ -41,6 +41,7 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 		Placement.reset();
 		AdUnitOpen.setConfiguration(configuration);
 		LoadModule.setConfiguration(configuration);
+		TokenStorage.deleteTokens();
 		return true;
 	}
 

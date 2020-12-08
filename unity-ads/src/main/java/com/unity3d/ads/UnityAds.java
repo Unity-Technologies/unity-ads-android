@@ -431,6 +431,17 @@ public final class UnityAds {
 	}
 
 	/**
+	 * Show one advertisement with custom placement and custom options.
+	 *
+	 * @param activity Current Android activity of calling app
+	 * @param placementId Placement, as defined in Unity Ads admin tools
+	 * @param options Custom options
+	 */
+	public static void show(final Activity activity, final String placementId, final UnityAdsShowOptions options) {
+		UnityAdsImplementation.show(activity, placementId, options);
+	}
+
+	/**
 	 * Toggles debug mode on/off
 	 *
 	 * @param debugMode If true, debug mode is on and there will be lots of debug output from Unity Ads. If false, there will be only some short log messages from Unity Ads.
@@ -477,7 +488,26 @@ public final class UnityAds {
 	 * @param listener The listener which is going to be notified about load request result.
 	 */
 	public static void load(final String placementId, final IUnityAdsLoadListener listener) {
-		UnityAdsImplementation.load(placementId, listener);
+		UnityAdsImplementation.load(placementId, new UnityAdsLoadOptions(), listener);
+	}
+
+	/**
+	 * Request fill for a specific placement ID with custom options. This functionality is enabled through the `enablePerPlacementLoad` in initialize.
+	 * Note: The `load` API is in closed beta and available upon invite only. If you would like to be considered for the beta, please contact Unity Ads Support
+	 *
+	 * @param placementId The placement ID to be loaded.
+	 * @param loadOptions Custom options.
+	 * @param listener The listener which is going to be notified about load request result.
+	 */
+	public static void load(final String placementId, final UnityAdsLoadOptions loadOptions, final IUnityAdsLoadListener listener) {
+		UnityAdsImplementation.load(placementId, loadOptions, listener);
+	}
+
+	/**
+	 * Get request token.
+	 */
+	public static String getToken() {
+		return UnityAdsImplementation.getToken();
 	}
 
   /**

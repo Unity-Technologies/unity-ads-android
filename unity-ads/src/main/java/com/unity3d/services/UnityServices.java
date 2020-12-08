@@ -82,6 +82,9 @@ public class UnityServices {
 			return;
 		}
 		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZING);
+		ClientProperties.setGameId(gameId);
+		SdkProperties.setTestMode(testMode);
+		SdkProperties.setPerPlacementLoadEnabled(enablePerPlacementLoad);
 
 		if(!isSupported()) {
 			DeviceLog.error("Error while initializing Unity Services: device is not supported");
@@ -130,10 +133,7 @@ public class UnityServices {
 
 		SdkProperties.setDebugMode(SdkProperties.getDebugMode());
 		SdkProperties.setListener(listener);
-		ClientProperties.setGameId(gameId);
 		ClientProperties.setApplicationContext(context.getApplicationContext());
-		SdkProperties.setPerPlacementLoadEnabled(enablePerPlacementLoad);
-		SdkProperties.setTestMode(testMode);
 
 		if(!EnvironmentCheck.isEnvironmentOk()) {
 			DeviceLog.error("Error during Unity Services environment check, halting Unity Services init");

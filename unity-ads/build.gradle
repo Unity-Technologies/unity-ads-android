@@ -16,15 +16,15 @@ ext {
     siteUrl = 'https://github.com/Unity-Technologies/unity-ads-android'
     gitUrl = 'https://github.com/Unity-Technologies/unity-ads-android.git'
 
-    libraryVersion = '3.5.1'
+    libraryVersion = '3.6.0'
 
     developerId = 'sbankhead'
     developerName = 'Steven Bankhead'
     developerEmail = 'sbankhead@unity3d.com'
 
-    licenseName = 'The Apache Software License, Version 2.0'
-    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-    allLicenses = ["Apache-2.0"]
+    licenseName = 'Unity Ads License'
+    licenseUrl = 'https://unity3d.com/legal/monetization-services-terms-of-service'
+    allLicenses = ["Unity Ads License"]
 }
 
 version = libraryVersion
@@ -50,8 +50,8 @@ android {
     All SDK with version numbers with last two digits >= 50 will be treated
     as China SDK for filtering in the backend.
     */
-    versionCode = 3510
-    versionName = "3.5.1"
+    versionCode = 3600
+    versionName = "3.6.0"
 
     setProperty("archivesBaseName", "unity-ads")
 

@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 
 import com.unity3d.ads.IUnityAdsLoadListener;
+import com.unity3d.ads.UnityAdsLoadOptions;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.IInitializationListener;
 import com.unity3d.services.core.configuration.IInitializationNotificationCenter;
@@ -46,13 +47,15 @@ public class LoadModule implements IInitializationListener {
 		public long time;
 		public IUnityAdsLoadListener listener;
 		public Runnable timeoutRunnable;
+		public UnityAdsLoadOptions loadOptions;
 
-		LoadEventState(String placementId, String listenerId, IUnityAdsLoadListener listener, Runnable timeoutRunnable, long elapsedRealtime) {
+		LoadEventState(String placementId, String listenerId, IUnityAdsLoadListener listener, Runnable timeoutRunnable, long elapsedRealtime, UnityAdsLoadOptions loadOptions) {
 			this.placementId = placementId;
 			this.listenerId = listenerId;
 			this.listener = listener;
 			this.time = elapsedRealtime;
 			this.timeoutRunnable = timeoutRunnable;
+			this.loadOptions = loadOptions;
 		}
 	}
 
@@ -79,7 +82,7 @@ public class LoadModule implements IInitializationListener {
 		initializationNotificationCenter.addListener(this);
 	}
 
-	public void load(final String placementId, final IUnityAdsLoadListener listener) {
+	public void load(final String placementId, final UnityAdsLoadOptions loadOptions, final IUnityAdsLoadListener listener) {
 		if (TextUtils.isEmpty(placementId)) {
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
@@ -90,7 +93,7 @@ public class LoadModule implements IInitializationListener {
 			return;
 		}
 
-		final LoadEventState loadEventState = createLoadEvent(placementId, listener);
+		final LoadEventState loadEventState = createLoadEvent(placementId, listener, loadOptions);
 
 		if (SdkProperties.getCurrentInitializationState() == SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY) {
 			_executorService.submit(new Runnable() {
@@ -169,7 +172,7 @@ public class LoadModule implements IInitializationListener {
 		});
 	}
 
-	private LoadEventState createLoadEvent(final String placementId, IUnityAdsLoadListener listener) {
+	private LoadEventState createLoadEvent(final String placementId, IUnityAdsLoadListener listener, UnityAdsLoadOptions loadOptions) {
 		final String listenerId = UUID.randomUUID().toString();
 
 		Runnable timeoutRunnable = new Runnable() {
@@ -179,7 +182,7 @@ public class LoadModule implements IInitializationListener {
 			}
 		};
 
-		LoadEventState loadEventState = new LoadEventState(placementId, listenerId, listener, timeoutRunnable, Device.getElapsedRealtime());
+		LoadEventState loadEventState = new LoadEventState(placementId, listenerId, listener, timeoutRunnable, Device.getElapsedRealtime(), loadOptions);
 
 		synchronized (_loadListeners) {
 			_loadListeners.put(listenerId, loadEventState);
@@ -235,6 +238,7 @@ public class LoadModule implements IInitializationListener {
 		options.put("listenerId", loadEvent.listenerId);
 		options.put("placementId", loadEvent.placementId);
 		options.put("time", loadEvent.time);
+		options.put("options", loadEvent.loadOptions.getData());
 
 		_lastStatus = CallbackStatus.ERROR;
 		_waitLoadStatus = new ConditionVariable();

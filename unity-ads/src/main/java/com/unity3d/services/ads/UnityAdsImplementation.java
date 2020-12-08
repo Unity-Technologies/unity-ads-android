@@ -11,12 +11,15 @@ import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.UnityAdsLoadOptions;
+import com.unity3d.ads.UnityAdsShowOptions;
 import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.IUnityServicesListener;
 import com.unity3d.services.UnityServices;
 import com.unity3d.services.ads.adunit.AdUnitOpen;
 import com.unity3d.services.ads.load.LoadModule;
 import com.unity3d.services.ads.placement.Placement;
+import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
@@ -218,6 +221,17 @@ public final class UnityAdsImplementation {
 	 * @param placementId Placement, as defined in Unity Ads admin tools
 	 */
 	public static void show(final Activity activity, final String placementId) {
+		show(activity, placementId, new UnityAdsShowOptions());
+	}
+
+	/**
+	 * Show one advertisement with custom placement and custom options.
+	 *
+	 * @param activity Current Android activity of calling app
+	 * @param placementId Placement, as defined in Unity Ads admin tools
+	 * @param showOptions Custom options.
+	 */
+	public static void show(final Activity activity, final String placementId, final UnityAdsShowOptions showOptions) {
 		if(activity == null) {
 			handleShowError(placementId, UnityAds.UnityAdsError.INVALID_ARGUMENT, "Activity must not be null");
 			return;
@@ -246,6 +260,7 @@ public final class UnityAdsImplementation {
 							display.put("height", defaultDisplay.getHeight());
 						}
 						options.put("display", display);
+						options.put("options", showOptions.getData());
 					} catch(JSONException e) {
 						DeviceLog.exception("JSON error while constructing show options", e);
 					}
@@ -313,7 +328,11 @@ public final class UnityAdsImplementation {
 		return Placement.getDefaultPlacement();
 	}
 
-	public static void load(final String placementId, final IUnityAdsLoadListener listener) {
-		LoadModule.getInstance().load(placementId, listener);
+	public static void load(final String placementId, final UnityAdsLoadOptions loadOptions, final IUnityAdsLoadListener listener) {
+		LoadModule.getInstance().load(placementId, loadOptions, listener);
+	}
+
+	public static String getToken() {
+		return TokenStorage.getToken();
 	}
 }

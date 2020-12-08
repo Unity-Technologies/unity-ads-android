@@ -3,6 +3,7 @@ package com.unity3d.ads.test.instrumentation.services.ads.load;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.unity3d.ads.IUnityAdsLoadListener;
+import com.unity3d.ads.UnityAdsLoadOptions;
 import com.unity3d.services.ads.load.LoadModule;
 import com.unity3d.services.core.configuration.IInitializationListener;
 import com.unity3d.services.core.configuration.IInitializationNotificationCenter;
@@ -25,6 +26,9 @@ import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -72,7 +76,7 @@ public class LoadModuleTest {
 
 		MockedLoadListener mockedLoadListener = new MockedLoadListener();
 
-		loadModule.load("test", mockedLoadListener.listener);
+		loadModule.load("test", new UnityAdsLoadOptions(), mockedLoadListener.listener);
 
 		mockedWebViewApp.await();
 		mockedWebViewApp.simulateLoadCall("test");
@@ -84,6 +88,43 @@ public class LoadModuleTest {
 	}
 
 	@Test
+	public void testLoadWithHeaderBiddingOptions() throws InterruptedException, InvocationTargetException, IllegalAccessException, JSONException {
+		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
+		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
+
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
+
+		MockedLoadListener mockedLoadListener = new MockedLoadListener();
+
+		String objectId = "1234";
+		String adMarkup = "<ad>Test</ad>";
+		UnityAdsLoadOptions options = new UnityAdsLoadOptions();
+		options.setObjectId(objectId);
+		options.setAdMarkup(adMarkup);
+
+		loadModule.load("test", options, mockedLoadListener.listener);
+
+		mockedWebViewApp.await();
+		mockedWebViewApp.simulateLoadCall("test");
+
+		mockedLoadListener.await();
+
+		verify(mockedLoadListener.listener, Mockito.times(1)).onUnityAdsAdLoaded("test");
+		verifyNoMoreInteractions(mockedLoadListener.listener);
+
+		JSONObject invocationOptions = mockedWebViewApp.getOptions();
+
+		assertNotNull("Test load with header bidding options: invocation options are null", invocationOptions);
+		assertTrue("Test load with header bidding options: header bidding options are missing", invocationOptions.has("options"));
+
+		JSONObject headerBiddingOptions = invocationOptions.getJSONObject("options");
+		assertTrue("Test load with header bidding options: object_id is missing", headerBiddingOptions.has("objectId"));
+		assertTrue("Test load with header bidding options: ad_markup is missing", headerBiddingOptions.has("adMarkup"));
+		assertEquals("Test load with header bidding options: incorrect object id", objectId, headerBiddingOptions.getString("objectId"));
+		assertEquals("Test load with header bidding options: incorrect ad markup", adMarkup, headerBiddingOptions.getString("adMarkup"));
+	}
+
+	@Test
 	public void testLoadAfterInitialized_WithWebViewTimeout() throws InterruptedException, InvocationTargetException, IllegalAccessException, JSONException {
 		MockedWebViewApp mockedWebViewApp = new MockedWebViewApp(loadModule);
 		WebViewApp.setCurrentApp(mockedWebViewApp.webViewApp);
@@ -92,7 +133,7 @@ public class LoadModuleTest {
 
 		MockedLoadListener mockedLoadListener = new MockedLoadListener();
 
-		loadModule.load("test", mockedLoadListener.listener);
+		loadModule.load("test", new UnityAdsLoadOptions(), mockedLoadListener.listener);
 
 		mockedWebViewApp.await();
 		mockedLoadListener.await();
@@ -110,7 +151,7 @@ public class LoadModuleTest {
 
 		MockedLoadListener mockedLoadListener = new MockedLoadListener();
 
-		loadModule.load("test", mockedLoadListener.listener);
+		loadModule.load("test", new UnityAdsLoadOptions(), mockedLoadListener.listener);
 
 		mockedWebViewApp.await();
 		mockedWebViewApp.simulateLoadCall("test");
@@ -131,7 +172,7 @@ public class LoadModuleTest {
 
 		MockedLoadListener mockedLoadListener = new MockedLoadListener();
 
-		loadModule.load("test", mockedLoadListener.listener);
+		loadModule.load("test", new UnityAdsLoadOptions(), mockedLoadListener.listener);
 
 		mockedWebViewApp.await();
 		mockedWebViewApp.failLoadCall("test");
@@ -151,7 +192,7 @@ public class LoadModuleTest {
 
 		MockedLoadListener mockedLoadListener = new MockedLoadListener();
 
-		loadModule.load("test", mockedLoadListener.listener);
+		loadModule.load("test", new UnityAdsLoadOptions(), mockedLoadListener.listener);
 
 		mockedWebViewApp.await();
 		mockedWebViewApp.simulateLoadCallTimeout("test");
@@ -172,8 +213,8 @@ public class LoadModuleTest {
 		MockedLoadListener mockedLoadListener1 = new MockedLoadListener();
 		MockedLoadListener mockedLoadListener2 = new MockedLoadListener();
 
-		loadModule.load("test", mockedLoadListener1.listener);
-		loadModule.load("test_2", mockedLoadListener2.listener);
+		loadModule.load("test", new UnityAdsLoadOptions(), mockedLoadListener1.listener);
+		loadModule.load("test_2", new UnityAdsLoadOptions(), mockedLoadListener2.listener);
 
 		mockedWebViewApp.await();
 		mockedWebViewApp.simulateLoadCall("test");
@@ -200,7 +241,7 @@ public class LoadModuleTest {
 
 		MockedLoadListener mockedLoadListener = new MockedLoadListener();
 
-		loadModule.load(null, mockedLoadListener.listener);
+		loadModule.load(null, new UnityAdsLoadOptions(), mockedLoadListener.listener);
 
 		mockedLoadListener.await();
 
@@ -217,7 +258,7 @@ public class LoadModuleTest {
 
 		MockedLoadListener mockedLoadListener = new MockedLoadListener();
 
-		loadModule.load("", mockedLoadListener.listener);
+		loadModule.load("", new UnityAdsLoadOptions(), mockedLoadListener.listener);
 
 		mockedLoadListener.await();
 
@@ -235,8 +276,8 @@ public class LoadModuleTest {
 		MockedLoadListener mockedLoadListener1 = new MockedLoadListener();
 		MockedLoadListener mockedLoadListener2 = new MockedLoadListener();
 
-		loadModule.load("test", mockedLoadListener1.listener);
-		loadModule.load("test_2", mockedLoadListener2.listener);
+		loadModule.load("test", new UnityAdsLoadOptions(), mockedLoadListener1.listener);
+		loadModule.load("test_2", new UnityAdsLoadOptions(), mockedLoadListener2.listener);
 
 		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
 		loadModule.onSdkInitialized();
@@ -267,8 +308,8 @@ public class LoadModuleTest {
 		MockedLoadListener mockedLoadListener1 = new MockedLoadListener();
 		MockedLoadListener mockedLoadListener2 = new MockedLoadListener();
 
-		loadModule.load("test", mockedLoadListener1.listener);
-		loadModule.load("test_2", mockedLoadListener2.listener);
+		loadModule.load("test", new UnityAdsLoadOptions(), mockedLoadListener1.listener);
+		loadModule.load("test_2", new UnityAdsLoadOptions(), mockedLoadListener2.listener);
 
 		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_FAILED);
 		loadModule.onSdkInitializationFailed("", 0);
@@ -293,8 +334,8 @@ public class LoadModuleTest {
 		MockedLoadListener mockedLoadListener1 = new MockedLoadListener();
 		MockedLoadListener mockedLoadListener2 = new MockedLoadListener();
 
-		loadModule.load("test", mockedLoadListener1.listener);
-		loadModule.load("test", mockedLoadListener2.listener);
+		loadModule.load("test", new UnityAdsLoadOptions(), mockedLoadListener1.listener);
+		loadModule.load("test", new UnityAdsLoadOptions(), mockedLoadListener2.listener);
 
 		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_SUCCESSFULLY);
 		loadModule.onSdkInitialized();
@@ -378,6 +419,10 @@ public class LoadModuleTest {
 
 		public void simulateLoadCallTimeout(String placementId) throws InvocationTargetException, IllegalAccessException, JSONException {
 			loadCallback.invoke(null, CallbackStatus.OK);
+		}
+
+		public JSONObject getOptions() {
+			return options;
 		}
 	}
 
