@@ -15,7 +15,7 @@ import com.unity3d.services.core.properties.ClientProperties;
 public class ConnectivityNetworkCallback extends ConnectivityManager.NetworkCallback {
 	private static ConnectivityNetworkCallback _impl = null;
 
-	public static void register() {
+	public static synchronized void register() {
 		if(_impl == null) {
 			_impl = new ConnectivityNetworkCallback();
 
@@ -24,7 +24,7 @@ public class ConnectivityNetworkCallback extends ConnectivityManager.NetworkCall
 		}
 	}
 
-	public static void unregister() {
+	public static synchronized void unregister() {
 		if(_impl != null) {
 			ConnectivityManager cm = (ConnectivityManager)ClientProperties.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 			cm.unregisterNetworkCallback(_impl);

@@ -29,6 +29,27 @@ public class MetaData extends JsonStorage {
 		return _category;
 	}
 
+	/**
+	 * Used by C# layer for reflective metadata set calls
+	 */
+	private synchronized boolean set (String key, boolean value) {
+		return set(key, (Object)value);
+	}
+
+	/**
+	 * Used by C# layer for reflective metadata set calls
+	 */
+	private synchronized boolean set (String key, int value) {
+		return set(key, (Object)value);
+	}
+
+	/**
+	 * Used by C# layer for reflective metadata set calls
+	 */
+	private synchronized boolean set (String key, long value) {
+		return set(key, (Object)value);
+	}
+
 	public synchronized boolean set (String key, Object value) {
 		initData();
 

@@ -18,10 +18,15 @@ import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.Invocation;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -45,6 +50,58 @@ public class ConnectivityTest {
 
 		ConnectivityMonitor.connected();
 		assertEquals("ConnectivityMonitor connected callbacks not equal to one", 1, listener.getOnConnectedCalls());
+	}
+
+	private List<Listener> createListeners(int count) {
+		final List<Listener> listeners = new ArrayList<>();
+		for (int x=0; x<count; x++) {
+			listeners.add(new Listener());
+		}
+		return listeners;
+	}
+
+	private Thread createListenerThread(final List<Listener> listeners, final int iterations, final boolean add) {
+		return new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for (int x=0; x<iterations; x++) {
+					for(Listener listener : listeners) {
+						if (add) {
+							ConnectivityMonitor.addListener(listener);
+						} else {
+							ConnectivityMonitor.removeListener(listener);
+						}
+					}
+				}
+			}
+		});
+	}
+
+	private Thread createConnectionThread(final int iterations, final ConditionVariable conditionVariable) {
+		return new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for (int x=0; x<iterations; x++) {
+					ConnectivityMonitor.connected();
+					ConnectivityMonitor.disconnected();
+				}
+				conditionVariable.open();
+			}
+		});
+	}
+
+	@Test
+	public void testAddRemoveListenerThreadSafety() {
+		ConnectivityMonitor.setConnectionMonitoring(false);
+		final ConditionVariable cv = new ConditionVariable();
+
+		List<Listener> listeners = createListeners(10);
+		createListenerThread(listeners, 1000, true).start();
+		createListenerThread(listeners, 1000, false).start();
+		createConnectionThread(1000, cv).start();
+
+		boolean success = cv.block(10000);
+		Assert.assertThat(success, is(true));
 	}
 
 	private class Listener implements IConnectivityListener {

@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'jacoco'
 
 ext {
     bintrayRepo = "UnityAds"
@@ -16,7 +17,7 @@ ext {
     siteUrl = 'https://github.com/Unity-Technologies/unity-ads-android'
     gitUrl = 'https://github.com/Unity-Technologies/unity-ads-android.git'
 
-    libraryVersion = '3.6.0'
+    libraryVersion = '3.6.2'
 
     developerId = 'sbankhead'
     developerName = 'Steven Bankhead'
@@ -50,8 +51,8 @@ android {
     All SDK with version numbers with last two digits >= 50 will be treated
     as China SDK for filtering in the backend.
     */
-    versionCode = 3600
-    versionName = "3.6.0"
+    versionCode = 3620
+    versionName = "3.6.2"
 
     setProperty("archivesBaseName", "unity-ads")
 
@@ -76,24 +77,24 @@ android {
     }
     debug {
       minifyEnabled false
-      testCoverageEnabled false
-      consumerProguardFiles 'proguard-rules.pro'
-    }
-    coverage {
       testCoverageEnabled true
       consumerProguardFiles 'proguard-rules.pro'
-      signingConfig signingConfigs.debug
-      buildConfigField 'String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"development"')
     }
   }
 
   libraryVariants.all { variant ->
-        variant.outputs.all { output ->
-            if (outputFile != null && outputFileName.endsWith('.aar')) {
-                outputFileName = "${archivesBaseName}-${variant.buildType.name}.aar"
-            }
-        }
+    variant.outputs.all { output ->
+      if (outputFile != null && outputFileName.endsWith('.aar')) {
+          outputFileName = "${archivesBaseName}-${variant.buildType.name}.aar"
+      }
     }
+  }
+
+  testVariants.all { variant ->
+    variant.outputs.all { output ->
+      outputFileName = "../../androidTest.apk"
+    }
+  }
 }
 
 dependencies {
@@ -103,12 +104,6 @@ dependencies {
   androidTestImplementation 'com.android.support.test:runner:1.0.2'
   androidTestImplementation 'com.android.support.test:rules:1.0.2'
   compileOnly 'com.google.ar:core:1.0.0'
-}
-
-android.testVariants.all { variant ->
-  variant.outputs.all { output ->
-    outputFileName = "../../androidTest.apk"
-  }
 }
 
 task javadoc(type: Javadoc, overwrite: true) {
@@ -147,13 +142,38 @@ artifacts {
     archives androidSourcesJar
 }
 
+jacoco {
+    toolVersion = '0.8.1'
+}
+
+tasks.withType(Test) {
+    jacoco.includeNoLocationClasses = true
+}
+
+task jacocoTestReport(type: JacocoReport) {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
+    def javaClasses = fileTree(dir: "$project.buildDir/intermediates/classes/debug", excludes: fileFilter)
+    def javaSrc = "$project.projectDir/src/main/java"
+
+    sourceDirectories = files([javaSrc])
+    classDirectories = files([javaClasses])
+    executionData = fileTree(dir: project.buildDir, includes: [
+      'outputs/code-coverage/connected/*coverage.ec'
+    ])
+}
+
+// Bintray
 task localProperties { 
   if (!file("$rootDir/local.properties").exists()) {
     file("$rootDir/local.properties").withWriterAppend { w -> "" }
   }
 }
 
-// Bintray
 bintray {
     Properties properties = new Properties()
     properties.load(project.rootProject.file('local.properties').newDataInputStream())

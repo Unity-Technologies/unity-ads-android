@@ -11,7 +11,9 @@ import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.WebViewEventCategory;
 
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectivityMonitor {
 	private static int _connected = -1;
@@ -19,7 +21,7 @@ public class ConnectivityMonitor {
 	private static boolean _webappMonitoring = false;
 	private static boolean _wifi = false;
 	private static int _networkType = -1;
-	private static HashSet<IConnectivityListener> _listeners = null;
+	private static Set<IConnectivityListener> _listeners = null;
 
 	public static void setConnectionMonitoring(boolean monitoring) {
 		_webappMonitoring = monitoring;
@@ -28,7 +30,7 @@ public class ConnectivityMonitor {
 
 	public static void addListener(IConnectivityListener listener) {
 		if(_listeners == null) {
-			_listeners = new HashSet<>();
+			_listeners = Collections.newSetFromMap(new ConcurrentHashMap<IConnectivityListener, Boolean>());
 		}
 
 		_listeners.add(listener);
