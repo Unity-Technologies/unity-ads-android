@@ -4,8 +4,8 @@ import android.os.ConditionVariable;
 
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
+import com.unity3d.services.ads.UnityAdsImplementation;
 import com.unity3d.services.ads.adunit.AdUnitOpen;
-import com.unity3d.services.ads.load.LoadModule;
 import com.unity3d.services.ads.placement.Placement;
 import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.ads.token.TokenStorage;
@@ -31,6 +31,7 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 			com.unity3d.services.ads.api.WebPlayer.class,
 			com.unity3d.services.ads.api.Purchasing.class,
 			com.unity3d.services.ads.api.Load.class,
+			com.unity3d.services.ads.api.Show.class,
 			com.unity3d.services.ads.api.Token.class
 		};
 
@@ -40,7 +41,7 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 	public boolean resetState(Configuration configuration) {
 		Placement.reset();
 		AdUnitOpen.setConfiguration(configuration);
-		LoadModule.setConfiguration(configuration);
+		UnityAdsImplementation.setConfiguration(configuration);
 		TokenStorage.deleteTokens();
 		return true;
 	}
@@ -77,7 +78,7 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 			return false;
 		}
 		AdUnitOpen.setConfiguration(configuration);
-		LoadModule.setConfiguration(configuration);
+		UnityAdsImplementation.setConfiguration(configuration);
 
 		return true;
 	}
@@ -97,7 +98,7 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 
 	public boolean initCompleteState(Configuration configuration) {
 		AdUnitOpen.setConfiguration(configuration);
-		LoadModule.setConfiguration(configuration);
+		UnityAdsImplementation.setConfiguration(configuration);
 		return true;
 	}
 

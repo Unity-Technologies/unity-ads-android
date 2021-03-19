@@ -1,6 +1,6 @@
 package com.unity3d.ads.test.legacy;
 
-import android.support.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 import android.util.Log;
 
 import com.unity3d.services.core.misc.Utilities;
@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNotEquals;
 public class UtilitiesTest {
 	@Before
 	public void setup() throws IOException {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 		assertNotEquals("Cache directory has not been properly initialized", null, SdkProperties.getCacheDirectory());
 
 		File tesfile_large = new File(SdkProperties.getCacheDirectory() + "/" + SdkProperties.getCacheFilePrefix() + "testfile_large.dat");

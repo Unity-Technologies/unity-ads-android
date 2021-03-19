@@ -3,8 +3,8 @@ package com.unity3d.ads.test.legacy;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.ConditionVariable;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.broadcast.BroadcastEvent;
 import com.unity3d.services.core.broadcast.BroadcastEventReceiver;
@@ -30,7 +30,7 @@ import static org.junit.Assert.fail;
 public class BroadcastTest {
 	@Before
 	public void setup() {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 	}
 
 	@After

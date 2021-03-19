@@ -1,8 +1,8 @@
 package com.unity3d.ads.test.legacy;
 
 import android.os.Parcel;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 public class WebViewCallbackTest {
 	@BeforeClass
 	public static void prepareTests () throws Exception {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 	}
 
 	@Test

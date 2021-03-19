@@ -4,31 +4,30 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.rule.ActivityTestRule;
+
 import android.telephony.TelephonyManager;
-import android.test.ActivityInstrumentationTestCase2;
 
 import com.unity3d.services.ads.adunit.AdUnitActivity;
 import com.unity3d.services.core.request.WebRequest;
 import com.unity3d.ads.test.TestUtilities;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(AndroidJUnit4.class)
-public class EnvironmentTest extends ActivityInstrumentationTestCase2<AdUnitActivity> {
+public class EnvironmentTest extends ActivityTestRule<AdUnitActivity> {
 
 	public EnvironmentTest () {
 		super(AdUnitActivity.class);
-	}
-
-	@Before
-	public void beforeTest () {
-		injectInstrumentation(InstrumentationRegistry.getInstrumentation());
 	}
 
 	@Test
@@ -36,9 +35,9 @@ public class EnvironmentTest extends ActivityInstrumentationTestCase2<AdUnitActi
 		ConnectivityManager mConnectivity;
 		boolean isWifi = false;
 
-		mConnectivity = (ConnectivityManager) InstrumentationRegistry.getTargetContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+		mConnectivity = (ConnectivityManager) InstrumentationRegistry.getInstrumentation().getTargetContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 		TelephonyManager mTelephony;
-		mTelephony = (TelephonyManager)InstrumentationRegistry.getTargetContext().getSystemService(Context.TELEPHONY_SERVICE);
+		mTelephony = (TelephonyManager)InstrumentationRegistry.getInstrumentation().getTargetContext().getSystemService(Context.TELEPHONY_SERVICE);
 
 		// Skip if no connection, or background data disabled
 		if (mConnectivity != null) {
@@ -68,7 +67,7 @@ public class EnvironmentTest extends ActivityInstrumentationTestCase2<AdUnitActi
 
 	@Test
 	public void testStorageAccess () {
-		File cacheDir = getCacheDirectory(InstrumentationRegistry.getTargetContext());
+		File cacheDir = getCacheDirectory(InstrumentationRegistry.getInstrumentation().getTargetContext());
 		assertNotNull("Cache directory is null", cacheDir);
 		assertTrue("Cannot read cache directory: " + cacheDir, cacheDir.canRead());
 		assertTrue("Cannot write to cache directory: " + cacheDir, cacheDir.canWrite());
@@ -76,7 +75,7 @@ public class EnvironmentTest extends ActivityInstrumentationTestCase2<AdUnitActi
 
 	@Test
 	public void testStorageSpace () {
-		File cacheDir = getCacheDirectory(InstrumentationRegistry.getTargetContext());
+		File cacheDir = getCacheDirectory(InstrumentationRegistry.getInstrumentation().getTargetContext());
 		assertNotNull("Cache directory is null", cacheDir);
 		assertTrue("Target cache (" + cacheDir + ") doesn't have enough space left", cacheDir.getFreeSpace() > 2000000);
 		assertTrue("Cannot read cache directory: " + cacheDir, cacheDir.canRead());

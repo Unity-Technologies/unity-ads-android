@@ -2,8 +2,8 @@ package com.unity3d.ads.test.legacy;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.properties.ClientProperties;
@@ -41,7 +41,7 @@ public class NativeCallbackTest {
 	@BeforeClass
 	public static void prepareTests () throws Exception {
 		final Configuration conf = new Configuration(TestUtilities.getTestServerAddress());
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 		Handler handler = new Handler(Looper.getMainLooper());
 		handler.postDelayed(new Runnable() {
 			@Override

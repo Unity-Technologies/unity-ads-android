@@ -1,7 +1,7 @@
 package com.unity3d.ads.test.legacy;
 
 import android.os.ConditionVariable;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.request.IWebRequestListener;
 import com.unity3d.services.core.request.WebRequest;

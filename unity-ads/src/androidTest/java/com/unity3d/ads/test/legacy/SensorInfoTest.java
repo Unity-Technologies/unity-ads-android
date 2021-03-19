@@ -3,6 +3,8 @@ package com.unity3d.ads.test.legacy;
 import android.hardware.SensorManager;
 import android.os.ConditionVariable;
 
+import androidx.test.platform.app.InstrumentationRegistry;
+
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.sensorinfo.SensorInfoListener;
 
@@ -11,11 +13,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 public class SensorInfoTest extends AdUnitActivityTestBaseClass {
 
 	@Before
 	public void setup() {
-		ClientProperties.setApplicationContext(this.getInstrumentation().getContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 	}
 
 	@After

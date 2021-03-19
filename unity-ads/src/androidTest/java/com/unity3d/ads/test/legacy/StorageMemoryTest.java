@@ -1,7 +1,7 @@
 package com.unity3d.ads.test.legacy;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.device.Storage;
 import com.unity3d.services.core.device.StorageManager;
@@ -29,8 +29,8 @@ public class StorageMemoryTest {
 	public static void prepareStorageTests () throws Exception {
 		_jsonObjectValue = new JSONObject("{\"testkey\":\"testvalue\"}");
 		_jsonArrayValue = new JSONArray("[1, \"test1\"]");
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
-		File cacheDir = SdkProperties.getCacheDirectory(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
+		File cacheDir = SdkProperties.getCacheDirectory(InstrumentationRegistry.getInstrumentation().getTargetContext());
 		StorageManager.addStorageLocation(StorageManager.StorageType.PUBLIC, cacheDir.getAbsolutePath() + "/test.data");
 		StorageManager.initStorage(StorageManager.StorageType.PUBLIC);
 	}

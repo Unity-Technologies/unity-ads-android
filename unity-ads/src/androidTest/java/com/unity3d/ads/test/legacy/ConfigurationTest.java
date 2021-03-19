@@ -1,13 +1,12 @@
 package com.unity3d.ads.test.legacy;
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.configuration.Configuration;
 
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -28,7 +27,7 @@ public class ConfigurationTest {
 											boolean delayUpdate, int resetTimeout, int maxRetries,
 											long retryDelay, double scalingFactor, int connectEventThreshold,
 											int maxConnectedEvents, long networkErrorTimeout, int showTimeout,
-											int loadTimeout, int noFillTimeout, String sdkVersion, String metricsUrl,
+											int loadTimeout, int webViewBridgeTimeout, String sdkVersion, String metricsUrl,
 											double metricSampleRate, long webviewCreateTimeout) {
 		JSONObject json = new JSONObject();
 
@@ -46,7 +45,7 @@ public class ConfigurationTest {
 			json.put("net", networkErrorTimeout);
 			json.put("sto", showTimeout);
 			json.put("lto", loadTimeout);
-			json.put("nft", noFillTimeout);
+			json.put("wto", webViewBridgeTimeout);
 			json.put("sdkv", sdkVersion);
 			json.put("murl", metricsUrl);
 			json.put("msr", metricSampleRate);
@@ -79,9 +78,9 @@ public class ConfigurationTest {
 		assertEquals("Connected Event threshold does not equal what is expected", 10000, config.getConnectedEventThreshold());
 		assertEquals("Maximum Connected Events does not equal what is expected", 500, config.getMaximumConnectedEvents());
 		assertEquals("Network Error Timeout does not equal what is expected", 60000L, config.getNetworkErrorTimeout());
-		assertEquals("Show Timeout does not equal what is expected", 5000, config.getShowTimeout());
-		assertEquals("Load Timeout does not equal what is expected", 5000, config.getLoadTimeout());
-		assertEquals("No fill Timeout does not equal what is expected",30000, config.getNoFillTimeout());
+		assertEquals("Show Timeout does not equal what is expected", 10000, config.getShowTimeout());
+		assertEquals("Load Timeout does not equal what is expected", 30000, config.getLoadTimeout());
+		assertEquals("WebViewBridge Timeout does not equal what is expected",5000, config.getWebViewBridgeTimeout());
 		assertEquals("SDK Version should not be set", "", config.getSdkVersion());
 		assertEquals("Metric URL does not equal what is expected", "", config.getMetricsUrl());
     	assertEquals("Metric Sample Rate does not equal what is expected", 100, config.getMetricSampleRate(), 0);
@@ -133,7 +132,7 @@ public class ConfigurationTest {
 		assertEquals("Network Error Timeout does not equal what is expected", networkErrorTimeout, config.getNetworkErrorTimeout());
 		assertEquals("Show Timeout does not equal what is expected", showTimeout, config.getShowTimeout());
 		assertEquals("Load Timeout does not equal what is expected", loadTimeout, config.getLoadTimeout());
-		assertEquals("No fill Timeout does not equal what is expected", noFillTimeout, config.getNoFillTimeout());
+		assertEquals("No fill Timeout does not equal what is expected", noFillTimeout, config.getWebViewBridgeTimeout());
 		assertEquals("SDK Version does not equal what is expected", sdkVersion, config.getSdkVersion());
 		assertEquals("Metrics URL does not equal what is expected", metricsUrl, config.getMetricsUrl());
     	assertEquals("Metrics Sample Rate does not equal what is expected", metricSampleRate, config.getMetricSampleRate(), 0);

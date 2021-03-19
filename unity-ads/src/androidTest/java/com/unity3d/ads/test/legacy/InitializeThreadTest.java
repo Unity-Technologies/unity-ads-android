@@ -4,8 +4,8 @@ import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.UnityAds;
@@ -53,7 +53,7 @@ public class InitializeThreadTest {
 
 	@Before
 	public void setup() throws MalformedURLException, URISyntaxException {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 		SdkProperties.setConfigUrl(TestUtilities.getTestServerAddress() + "/testconfig.json");
 		SdkProperties.setLatestConfiguration(null);
 		DeleteAllTempFiles();
@@ -93,7 +93,7 @@ public class InitializeThreadTest {
 		json.put("rd", 3);
 		json.put("sto", 4);
 		json.put("lto", 5);
-		json.put("nft", 6);
+		json.put("wto", 6);
 		Configuration initConfig = new Configuration(json);
 		boolean fileWritten = Utilities.writeFile(new File(filePath), initConfig.getJSONString());
 		assertTrue("File was not written properly", fileWritten);
@@ -109,7 +109,7 @@ public class InitializeThreadTest {
 		assertEquals("Retry Delay not properly overridden", 3, configuration.getRetryDelay());
 		assertEquals("Show timeout not properly overridden", 4, configuration.getShowTimeout());
 		assertEquals("Load timeout not properly overridden", 5, configuration.getLoadTimeout());
-		assertEquals("No fill timeout not properly overridden", 6, configuration.getNoFillTimeout());
+		assertEquals("No fill timeout not properly overridden", 6, configuration.getWebViewBridgeTimeout());
 	}
 
 	@Test
@@ -148,9 +148,9 @@ public class InitializeThreadTest {
 		assertEquals("Max Retries not return default value", 6, configuration.getMaxRetries());
 		assertEquals("Retry Scaling Factor not return default value", 2, configuration.getRetryScalingFactor(), 0);
 		assertEquals("Retry Delay not return default value", 5000L, configuration.getRetryDelay());
-		assertEquals("Show timeout not return default value", 5000, configuration.getShowTimeout());
-		assertEquals("Load timeout not return default value", 5000, configuration.getLoadTimeout());
-		assertEquals("No fill timeout not return default value", 30000, configuration.getNoFillTimeout());
+		assertEquals("Show timeout not return default value", 10000, configuration.getShowTimeout());
+		assertEquals("Load timeout not return default value", 30000, configuration.getLoadTimeout());
+		assertEquals("No fill timeout not return default value", 5000, configuration.getWebViewBridgeTimeout());
 
 	}
 
@@ -162,7 +162,7 @@ public class InitializeThreadTest {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				webview = new WebView(InstrumentationRegistry.getTargetContext());
+				webview = new WebView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				cv.open();
 			}
 		});

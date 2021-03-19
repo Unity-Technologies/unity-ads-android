@@ -3,8 +3,8 @@ package com.unity3d.ads.test.legacy;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.properties.ClientProperties;
@@ -69,7 +69,7 @@ public class WebViewBridgeInterfaceTest {
 
 	@BeforeClass
 	public static void prepareTests () {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 	}
 
 	@Before

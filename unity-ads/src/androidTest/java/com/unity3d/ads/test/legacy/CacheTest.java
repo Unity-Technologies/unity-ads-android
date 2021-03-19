@@ -1,8 +1,8 @@
 package com.unity3d.ads.test.legacy;
 
 import android.os.ConditionVariable;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.ads.adunit.AdUnitEvent;
 import com.unity3d.services.core.api.Cache;
@@ -58,7 +58,7 @@ public class CacheTest {
 
 	@Before
 	public void setup() throws IOException {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 		assertNotEquals("Cache directory has not been properly initialized", null, SdkProperties.getCacheDirectory());
 
 		// Write test file to cache directory

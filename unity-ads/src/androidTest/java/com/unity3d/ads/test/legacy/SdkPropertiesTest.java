@@ -1,12 +1,11 @@
 package com.unity3d.ads.test.legacy;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.ads.BuildConfig;
 import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 
@@ -29,7 +28,7 @@ public class SdkPropertiesTest {
 
 	@BeforeClass
 	public static void prepareTests() {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 	}
 
 	@Before

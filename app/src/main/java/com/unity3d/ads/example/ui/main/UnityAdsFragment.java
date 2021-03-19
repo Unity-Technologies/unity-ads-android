@@ -8,8 +8,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -29,11 +29,7 @@ import com.unity3d.services.banners.UnityBanners;
 import com.unity3d.services.banners.view.BannerPosition;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
-import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.webview.WebView;
-
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 
 /**
  * A placeholder fragment containing a simple view.

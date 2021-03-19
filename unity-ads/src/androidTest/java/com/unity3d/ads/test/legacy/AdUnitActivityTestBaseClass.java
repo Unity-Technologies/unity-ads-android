@@ -5,9 +5,8 @@ import android.content.Intent;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.ActivityInstrumentationTestCase2;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.ads.adunit.AdUnitActivity;
 import com.unity3d.services.core.configuration.Configuration;
@@ -17,10 +16,8 @@ import com.unity3d.services.core.webview.WebView;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.Invocation;
-import android.support.test.rule.ActivityTestRule;
+import androidx.test.rule.ActivityTestRule;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 
@@ -30,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
-public class AdUnitActivityTestBaseClass extends ActivityInstrumentationTestCase2<AdUnitActivity> {
+public class AdUnitActivityTestBaseClass extends ActivityTestRule<AdUnitActivity> {
 	public AdUnitActivityTestBaseClass() {
 		super(AdUnitActivity.class);
 	}
@@ -49,16 +46,6 @@ public class AdUnitActivityTestBaseClass extends ActivityInstrumentationTestCase
 	@Rule
 	public MyCustomRule<AdUnitActivity> testRule = new MyCustomRule<>(AdUnitActivity.class, false, false);
 
-	@Before
-	public void setUp() throws Exception {
-		super.setUp();
-		injectInstrumentation(InstrumentationRegistry.getInstrumentation());
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		super.tearDown();
-	}
 
 	protected class MockWebViewApp extends WebViewApp {
 		public CallbackStatus CALLBACK_STATUS = null;
@@ -197,7 +184,7 @@ public class AdUnitActivityTestBaseClass extends ActivityInstrumentationTestCase
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				WebViewApp.getCurrentApp().setWebView(new WebView(InstrumentationRegistry.getTargetContext()));
+				WebViewApp.getCurrentApp().setWebView(new WebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				webViewCV.open();
 			}
 		});

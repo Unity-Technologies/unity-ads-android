@@ -56,6 +56,17 @@ public final class UnityAds {
 		NO_FILL
 	}
 
+	public enum UnityAdsShowCompletionState {
+		/**
+		 *  A state that indicates that the user skipped the ad.
+		 */
+		SKIPPED,
+		/**
+		 *  A state that indicates that the ad was played entirely.
+		 */
+		COMPLETED
+	}
+
 	public enum UnityAdsError {
 		NOT_INITIALIZED,
 		INITIALIZE_FAILED,
@@ -87,6 +98,76 @@ public final class UnityAds {
 		 * Error related to url being blocked
 		 */
 		AD_BLOCKER_DETECTED
+	}
+
+	/**
+	 * Enumeration of UnityAds load errors.
+	 */
+	public enum UnityAdsLoadError {
+		/**
+		 * Error related to SDK not initialized
+		 */
+		INITIALIZE_FAILED,
+
+		/**
+		 * Error related to environment or internal services
+		 */
+		INTERNAL_ERROR,
+
+		/**
+		 * Error related to invalid arguments
+		 */
+		INVALID_ARGUMENT,
+
+		/**
+		 * Error related to there being no ads available
+		 */
+		NO_FILL,
+
+		/**
+		 * Error related to an Ad being unable to load within a specified time frame
+		 */
+		TIMEOUT
+	}
+
+	/**
+	 * Enumeration of UnityAds show errors.
+	 */
+	public enum UnityAdsShowError {
+		/**
+		 * Error related to SDK not initialized
+		 */
+		NOT_INITIALIZED,
+
+		/**
+		 * Error related to placement  not being ready
+		 */
+		NOT_READY,
+
+		/**
+		 * Error related to the video player
+		 */
+		VIDEO_PLAYER_ERROR,
+
+		/**
+		 * Error related to invalid arguments
+		 */
+		INVALID_ARGUMENT,
+
+		/**
+		 * Error related to internet connection
+		 */
+		NO_CONNECTION,
+
+		/**
+		 * Error related to ad is already being showed
+		 */
+		ALREADY_SHOWING,
+
+		/**
+		 * Error related to environment or internal services
+		 */
+		INTERNAL_ERROR,
 	}
 
 	/**
@@ -416,6 +497,7 @@ public final class UnityAds {
 	 *
 	 * @param activity Current Android activity of calling app
 	 */
+	@Deprecated
 	public static void show(final Activity activity) {
 		UnityAdsImplementation.show(activity);
 	}
@@ -426,8 +508,20 @@ public final class UnityAds {
 	 * @param activity Current Android activity of calling app
 	 * @param placementId Placement, as defined in Unity Ads admin tools
 	 */
+	@Deprecated
 	public static void show(final Activity activity, final String placementId) {
-		UnityAdsImplementation.show(activity, placementId);
+		UnityAdsImplementation.show(activity, placementId, null);
+	}
+
+	/**
+	 * Show one advertisement with custom placement and custom options.
+	 *
+	 * @param activity Current Android activity of calling app
+	 * @param placementId Placement, as defined in Unity Ads admin tools
+	 * @param showListener Listener for IUnityAdsShowListener callbacks
+	 */
+	public static void show(final Activity activity, final String placementId, final IUnityAdsShowListener showListener) {
+		UnityAdsImplementation.show(activity, placementId, showListener);
 	}
 
 	/**
@@ -437,8 +531,21 @@ public final class UnityAds {
 	 * @param placementId Placement, as defined in Unity Ads admin tools
 	 * @param options Custom options
 	 */
+	@Deprecated
 	public static void show(final Activity activity, final String placementId, final UnityAdsShowOptions options) {
-		UnityAdsImplementation.show(activity, placementId, options);
+		UnityAdsImplementation.show(activity, placementId, options, null);
+	}
+
+	/**
+	 * Show one advertisement with custom placement and custom options.
+	 *
+	 * @param activity Current Android activity of calling app
+	 * @param placementId Placement, as defined in Unity Ads admin tools
+	 * @param options Custom options
+	 * @param showListener Listener for IUnityAdsShowListener callbacks
+	 */
+	public static void show(final Activity activity, final String placementId, final UnityAdsShowOptions options, final IUnityAdsShowListener showListener) {
+		UnityAdsImplementation.show(activity, placementId, options, showListener);
 	}
 
 	/**
@@ -474,7 +581,7 @@ public final class UnityAds {
 			}
 
 			@Override
-			public void onUnityAdsFailedToLoad(String placementId) {
+			public void onUnityAdsFailedToLoad(String placementId, UnityAdsLoadError error, String message) {
 
 			}
 		});

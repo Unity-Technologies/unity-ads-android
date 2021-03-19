@@ -32,7 +32,7 @@ public class Configuration {
 	private long _networkErrorTimeout;
 	private int _showTimeout;
 	private int _loadTimeout;
-	private int _noFillTimeout;
+	private int _webViewBridgeTimeout;
 	private String _metricsUrl;
 	private double _metricSampleRate;
 	private long _webViewAppCreateTimeout;
@@ -116,7 +116,7 @@ public class Configuration {
 
 	public int getLoadTimeout() { return _loadTimeout; }
 
-	public int getNoFillTimeout() { return _noFillTimeout; }
+	public int getWebViewBridgeTimeout() { return _webViewBridgeTimeout; }
 
 	public String getMetricsUrl() { return _metricsUrl; }
 
@@ -209,9 +209,9 @@ public class Configuration {
 		_maximumConnectedEvents = configData.optInt("mce", 500);
 		_networkErrorTimeout = configData.optLong("net", 60000L);
 		_sdkVersion = configData.optString("sdkv", "");
-		_showTimeout = configData.optInt("sto", 5000);
-		_loadTimeout = configData.optInt("lto", 5000);
-		_noFillTimeout = configData.optInt("nft", 30000);
+		_showTimeout = configData.optInt("sto", 10000);
+		_loadTimeout = configData.optInt("lto", 30000);
+		_webViewBridgeTimeout = configData.optInt("wto", 5000);
 		_metricsUrl = configData.optString("murl", "");
 		_metricSampleRate = configData.optDouble("msr", 100d);
 		_webViewAppCreateTimeout = configData.optLong("wct", 60000L);

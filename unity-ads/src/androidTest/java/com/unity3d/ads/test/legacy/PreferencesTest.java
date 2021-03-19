@@ -2,8 +2,8 @@ package com.unity3d.ads.test.legacy;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.preferences.AndroidPreferences;
 import com.unity3d.services.core.properties.ClientProperties;
@@ -30,7 +30,7 @@ public class PreferencesTest {
 
 	@Before
 	public void setup() {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 
 		deleteKey(stringKey);
 		deleteKey(intKey);
@@ -207,11 +207,11 @@ public class PreferencesTest {
 	}
 
 	private SharedPreferences getPrefs() {
-		return InstrumentationRegistry.getTargetContext().getSharedPreferences(testSettings, Context.MODE_PRIVATE);
+		return InstrumentationRegistry.getInstrumentation().getTargetContext().getSharedPreferences(testSettings, Context.MODE_PRIVATE);
 	}
 
 	private SharedPreferences.Editor getEditor() {
-		return InstrumentationRegistry.getTargetContext().getSharedPreferences(testSettings, Context.MODE_PRIVATE).edit();
+		return InstrumentationRegistry.getInstrumentation().getTargetContext().getSharedPreferences(testSettings, Context.MODE_PRIVATE).edit();
 	}
 
 	private void deleteKey(String key) {

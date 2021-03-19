@@ -1,8 +1,8 @@
 package com.unity3d.ads.test.legacy;
 
 import android.os.Build;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.device.OpenAdvertisingId;
 
@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNull;
 public class OpenAdvertisingIdentifierTest {
 	@BeforeClass
 	public static void setupOpenAdvertisingIdentifier() {
-		OpenAdvertisingId.init(InstrumentationRegistry.getTargetContext());
+		OpenAdvertisingId.init(InstrumentationRegistry.getInstrumentation().getTargetContext());
 	}
 
 	@Test

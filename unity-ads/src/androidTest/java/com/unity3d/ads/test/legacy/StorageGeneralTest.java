@@ -1,7 +1,7 @@
 package com.unity3d.ads.test.legacy;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.device.Storage;
 import com.unity3d.services.core.device.StorageManager;
@@ -27,8 +27,8 @@ public class StorageGeneralTest {
 	public static void prepareStorageTests () throws Exception {
 		StorageManager.removeStorage(StorageManager.StorageType.PRIVATE);
 		StorageManager.removeStorage(StorageManager.StorageType.PUBLIC);
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
-		File cacheDir = SdkProperties.getCacheDirectory(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
+		File cacheDir = SdkProperties.getCacheDirectory(InstrumentationRegistry.getInstrumentation().getTargetContext());
 		StorageManager.addStorageLocation(StorageManager.StorageType.PUBLIC, cacheDir.getAbsolutePath() + "/test.data");
 		StorageManager.initStorage(StorageManager.StorageType.PUBLIC);
 	}
@@ -65,7 +65,7 @@ public class StorageGeneralTest {
 	public void testStorageManager () throws Exception {
 		assertFalse("Private storage should not exist.", StorageManager.hasStorage(StorageManager.StorageType.PRIVATE));
 
-		File cacheDir = SdkProperties.getCacheDirectory(InstrumentationRegistry.getTargetContext());
+		File cacheDir = SdkProperties.getCacheDirectory(InstrumentationRegistry.getInstrumentation().getTargetContext());
 		StorageManager.addStorageLocation(StorageManager.StorageType.PRIVATE, cacheDir.getAbsolutePath() + "/private-test.data");
 		StorageManager.initStorage(StorageManager.StorageType.PRIVATE);
 		assertTrue("Private storage should exist now.", StorageManager.hasStorage(StorageManager.StorageType.PRIVATE));

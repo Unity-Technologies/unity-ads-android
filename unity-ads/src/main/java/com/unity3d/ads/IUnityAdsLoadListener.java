@@ -12,6 +12,8 @@ public interface IUnityAdsLoadListener {
 	 * Callback triggered when load request has failed to load an ad for a requested placement.
 	 *
 	 * @param placementId Placement, as defined in Unity Ads admin tools
+	 * @param error Error code related to the error  See: {@link com.unity3d.ads.UnityAds.UnityAdsLoadError}
+	 * @param message Human-readable error message
 	 */
-	void onUnityAdsFailedToLoad(String placementId);
+	void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message);
 }

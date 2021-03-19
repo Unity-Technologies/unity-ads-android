@@ -2,37 +2,37 @@ package com.unity3d.services.ads;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Point;
-import android.os.Build;
-import android.view.Display;
-import android.view.WindowManager;
 
 import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.IUnityAdsLoadListener;
+import com.unity3d.ads.IUnityAdsShowListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.UnityAdsLoadOptions;
 import com.unity3d.ads.UnityAdsShowOptions;
 import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.IUnityServicesListener;
 import com.unity3d.services.UnityServices;
-import com.unity3d.services.ads.adunit.AdUnitOpen;
-import com.unity3d.services.ads.load.LoadModule;
+import com.unity3d.services.ads.operation.load.LoadOperationState;
+import com.unity3d.services.ads.operation.load.LoadModule;
+import com.unity3d.services.ads.operation.show.ShowOperationState;
+import com.unity3d.services.ads.operation.show.ShowModule;
 import com.unity3d.services.ads.placement.Placement;
 import com.unity3d.services.ads.token.TokenStorage;
+import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.bridge.WebViewBridgeInvoker;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class UnityAdsImplementation {
-
 	static ExecutorService _showExecutorService = Executors.newSingleThreadExecutor();
+	private static Configuration configuration = null;
+	private static WebViewBridgeInvoker webViewBridgeInvoker = new WebViewBridgeInvoker();
 
 	/**
 	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
@@ -210,7 +210,7 @@ public final class UnityAdsImplementation {
 		if(Placement.getDefaultPlacement() != null) {
 			show(activity, Placement.getDefaultPlacement());
 		} else {
-			handleShowError("", com.unity3d.ads.UnityAds.UnityAdsError.NOT_INITIALIZED, "Unity Ads default placement is not initialized");
+			handleLegacyListenerShowError("", com.unity3d.ads.UnityAds.UnityAdsError.NOT_INITIALIZED, "Unity Ads default placement is not initialized");
 		}
 	}
 
@@ -221,7 +221,18 @@ public final class UnityAdsImplementation {
 	 * @param placementId Placement, as defined in Unity Ads admin tools
 	 */
 	public static void show(final Activity activity, final String placementId) {
-		show(activity, placementId, new UnityAdsShowOptions());
+		show(activity, placementId, new UnityAdsShowOptions(), null);
+	}
+
+	/**
+	 * Show one advertisement with custom placement.
+	 *
+	 * @param activity Current Android activity of calling app
+	 * @param placementId Placement, as defined in Unity Ads admin tools
+	 * @param showListener Listener for IUnityAdsShowListener callbacks
+	 */
+	public static void show(final Activity activity, final String placementId, final IUnityAdsShowListener showListener) {
+		show(activity, placementId, new UnityAdsShowOptions(), showListener);
 	}
 
 	/**
@@ -229,65 +240,39 @@ public final class UnityAdsImplementation {
 	 *
 	 * @param activity Current Android activity of calling app
 	 * @param placementId Placement, as defined in Unity Ads admin tools
-	 * @param showOptions Custom options.
+	 * @param showOptions Custom options
+	 * @param showListener Listener for IUnityAdsShowListener callbacks
 	 */
-	public static void show(final Activity activity, final String placementId, final UnityAdsShowOptions showOptions) {
-		if(activity == null) {
-			handleShowError(placementId, UnityAds.UnityAdsError.INVALID_ARGUMENT, "Activity must not be null");
+	public static void show(final Activity activity, final String placementId, final UnityAdsShowOptions showOptions, final IUnityAdsShowListener showListener) {
+		if (!isSupported()) {
+			String showErrorMessage = "Unity Ads is not supported for this device";
+			handleLegacyListenerShowError(placementId, UnityAds.UnityAdsError.NOT_INITIALIZED, showErrorMessage);
+			handleShowError(showListener, placementId, UnityAds.UnityAdsShowError.NOT_INITIALIZED, showErrorMessage);
 			return;
 		}
-
-		if(isReady(placementId)) {
-			DeviceLog.info("Unity Ads opening new ad unit for placement " + placementId);
-			ClientProperties.setActivity(activity);
-			_showExecutorService.submit(new Runnable() {
-				@Override
-				public void run() {
-					Display defaultDisplay = ((WindowManager)activity.getSystemService(activity.WINDOW_SERVICE)).getDefaultDisplay();
-					JSONObject options = new JSONObject();
-					try {
-						options.put("requestedOrientation", activity.getRequestedOrientation());
-
-						JSONObject display = new JSONObject();
-						display.put("rotation", defaultDisplay.getRotation());
-						if (Build.VERSION.SDK_INT >= 13) {
-							Point displaySize = new Point();
-							defaultDisplay.getSize(displaySize);
-							display.put("width", displaySize.x);
-							display.put("height", displaySize.y);
-						} else {
-							display.put("width", defaultDisplay.getWidth());
-							display.put("height", defaultDisplay.getHeight());
-						}
-						options.put("display", display);
-						options.put("options", showOptions.getData());
-					} catch(JSONException e) {
-						DeviceLog.exception("JSON error while constructing show options", e);
-					}
-
-					try {
-						if(!AdUnitOpen.open(placementId, options)) {
-							handleShowError(placementId, UnityAds.UnityAdsError.INTERNAL_ERROR, "Webapp timeout, shutting down Unity Ads");
-						}
-					}
-					catch (NoSuchMethodException exception) {
-						DeviceLog.exception("Could not get callback method", exception);
-						handleShowError(placementId, UnityAds.UnityAdsError.SHOW_ERROR, "Could not get com.unity3d.ads.properties.showCallback method");
-					}
-				}
-			});
-		} else {
-			if (!isSupported()) {
-				handleShowError(placementId, UnityAds.UnityAdsError.NOT_INITIALIZED, "Unity Ads is not supported for this device");
-			} else if(!isInitialized()) {
-				handleShowError(placementId, UnityAds.UnityAdsError.NOT_INITIALIZED, "Unity Ads is not initialized");
-			} else {
-				handleShowError(placementId, UnityAds.UnityAdsError.SHOW_ERROR, "Placement \"" + placementId + "\" is not ready");
-			}
+		if(!isInitialized()) {
+			String showErrorMessage = "Unity Ads is not initialized";
+			handleLegacyListenerShowError(placementId, UnityAds.UnityAdsError.NOT_INITIALIZED, showErrorMessage);
+			handleShowError(showListener, placementId, UnityAds.UnityAdsShowError.NOT_INITIALIZED, showErrorMessage);
+			return;
 		}
+		if(activity == null) {
+			String showErrorMessage = "Activity must not be null";
+			handleLegacyListenerShowError(placementId, UnityAds.UnityAdsError.INVALID_ARGUMENT, showErrorMessage);
+			handleShowError(showListener, placementId, UnityAds.UnityAdsShowError.INVALID_ARGUMENT, showErrorMessage);
+			return;
+		}
+		Configuration config = configuration == null ? new Configuration() : configuration;
+		ClientProperties.setActivity(activity);
+		ShowModule.getInstance().executeAdOperation(WebViewApp.getCurrentApp(), new ShowOperationState(placementId, showListener, activity, showOptions, config));
 	}
 
-	private static void handleShowError(final String placementId, final UnityAds.UnityAdsError error, final String message) {
+	private static void handleShowError(IUnityAdsShowListener showListener, String placementId, UnityAds.UnityAdsShowError error, String message) {
+		if (showListener == null) return;
+		showListener.onUnityAdsShowFailure(placementId, error, message);
+	}
+
+	private static void handleLegacyListenerShowError(final String placementId, final UnityAds.UnityAdsError error, final String message) {
 		final String errorMessage = "Unity Ads show failed: " + message;
 		DeviceLog.error(errorMessage);
 
@@ -324,15 +309,16 @@ public final class UnityAdsImplementation {
 		return UnityServices.getDebugMode();
 	}
 
-	public static String getDefaultPlacement() {
-		return Placement.getDefaultPlacement();
-	}
-
 	public static void load(final String placementId, final UnityAdsLoadOptions loadOptions, final IUnityAdsLoadListener listener) {
-		LoadModule.getInstance().load(placementId, loadOptions, listener);
+		Configuration config = configuration == null ? new Configuration() : configuration;
+		LoadModule.getInstance().executeAdOperation(webViewBridgeInvoker, new LoadOperationState(placementId, listener, loadOptions, config));
 	}
 
 	public static String getToken() {
 		return TokenStorage.getToken();
+	}
+
+	public static void setConfiguration(Configuration configuration) {
+		UnityAdsImplementation.configuration = configuration;
 	}
 }

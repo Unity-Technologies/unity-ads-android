@@ -17,7 +17,7 @@ ext {
     siteUrl = 'https://github.com/Unity-Technologies/unity-ads-android'
     gitUrl = 'https://github.com/Unity-Technologies/unity-ads-android.git'
 
-    libraryVersion = '3.6.2'
+    libraryVersion = '3.7.0'
 
     developerId = 'sbankhead'
     developerName = 'Steven Bankhead'
@@ -31,7 +31,7 @@ ext {
 version = libraryVersion
 
 android {
-  compileSdkVersion 26
+  compileSdkVersion 30
   buildToolsVersion '28.0.2'
   com.android.ddmlib.DdmPreferences.setLogLevel("verbose")
   com.android.ddmlib.DdmPreferences.setTimeOut(10 * 60000)
@@ -40,7 +40,7 @@ android {
 
   defaultConfig {
     minSdkVersion 19
-    targetSdkVersion 29
+    targetSdkVersion 30
     /*
     Please ensure that the last two digits of version number does not exceed 50 unless
     it is a China SDK. This is because adding 50 to the version number is a one-to-one
@@ -51,16 +51,15 @@ android {
     All SDK with version numbers with last two digits >= 50 will be treated
     as China SDK for filtering in the backend.
     */
-    versionCode = 3620
-    versionName = "3.6.2"
+    versionCode = 3700
+    versionName = "3.7.0"
 
     setProperty("archivesBaseName", "unity-ads")
 
-    buildConfigField 'String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"' + versionName + '"')
-
+    buildConfigField('String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"' + versionName + '"'))
     testBuildType "debug"
 
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     testInstrumentationRunnerArguments disableAnalytics: 'true' // Won't work yet, see: https://code.google.com/p/android/issues/detail?id=188241
   }
 
@@ -99,31 +98,31 @@ android {
 
 dependencies {
   testImplementation 'junit:junit:4.12'
-  androidTestImplementation 'org.mockito:mockito-core:2.19.1'
-  androidTestImplementation 'org.mockito:mockito-android:2.19.1'
-  androidTestImplementation 'com.android.support.test:runner:1.0.2'
-  androidTestImplementation 'com.android.support.test:rules:1.0.2'
+  androidTestImplementation 'org.mockito:mockito-core:2.25.0'
+  androidTestImplementation 'org.mockito:mockito-android:2.25.0'
+  androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+  androidTestImplementation 'androidx.test:rules:1.1.1'
   compileOnly 'com.google.ar:core:1.0.0'
 }
 
 task javadoc(type: Javadoc, overwrite: true) {
-        description "Generates Javadoc for Release"
-        source = android.sourceSets.main.java.srcDirs
-        ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
-        doFirst {
-          classpath = project.files(android.getBootClasspath().join(File.pathSeparator)) + files(ext.androidJar)
-        }
+    description "Generates Javadoc for Release"
+    source = android.sourceSets.main.java.srcDirs
+    ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+    doFirst {
+      classpath = project.files(android.getBootClasspath().join(File.pathSeparator)) + files(ext.androidJar)
+    }
     options {
            links "http://docs.oracle.com/javase/7/docs/api/"
            linksOffline "http://developer.android.com/reference","${android.sdkDirectory}/docs/reference"
-        }
-        exclude '**/R.java'
-        exclude 'com/unity3d/services/ar/view/GLSurfaceView.java'
-        exclude 'com/unity3d/services/ar/api/AR.java'
-        exclude 'com/unity3d/services/ar/view/ARView.java'
-        exclude 'com/unity3d/services/ar/view/ARViewHandler.java'
-        destinationDir = file("../javadoc/")
     }
+    exclude '**/R.java'
+    exclude 'com/unity3d/services/ar/view/GLSurfaceView.java'
+    exclude 'com/unity3d/services/ar/api/AR.java'
+    exclude 'com/unity3d/services/ar/view/ARView.java'
+    exclude 'com/unity3d/services/ar/view/ARViewHandler.java'
+    destinationDir = file("../javadoc/")
+}
 
 task androidJavadocsJar(type: Jar, dependsOn: javadoc) {
     classifier = "javadoc"

@@ -5,9 +5,11 @@ import android.os.Build;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.filters.RequiresDevice;
-import android.support.test.filters.SdkSuppress;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.filters.RequiresDevice;
+import androidx.test.filters.SdkSuppress;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
@@ -29,6 +31,12 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(AndroidJUnit4.class)
 public class VideoViewTest extends AdUnitActivityTestBaseClass {
 
@@ -44,7 +52,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				VideoPlayerView vp = new VideoPlayerView(getInstrumentation().getTargetContext());
+				VideoPlayerView vp = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				assertNotNull("VideoPlayerView should not be null after constructing", vp);
 				cv.open();
 			}
@@ -83,7 +91,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -143,7 +151,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -206,7 +214,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -270,7 +278,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -334,7 +342,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -395,7 +403,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -411,7 +419,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 
 		assertTrue("Condition Variable was not opened: PREPARED or PREPARE ERROR event was not received", success);
 		assertFalse("Videoplayer shouldn't be in isPlaying state", mockWebViewApp.VIDEOPLAYER_VIEW.isPlaying());
-		assertEquals("getVolume should return the same value as what was set as volume", 0.666f, mockWebViewApp.VIDEOPLAYER_VIEW.getVolume());
+		assertEquals("getVolume should return the same value as what was set as volume", 0.666f, mockWebViewApp.VIDEOPLAYER_VIEW.getVolume(), 0.001f);
 		assertTrue("Didn't get activity finish", waitForActivityFinish(activity));
 	}
 
@@ -462,7 +470,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -541,7 +549,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -602,7 +610,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -667,7 +675,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -733,7 +741,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}
@@ -869,7 +877,7 @@ public class VideoViewTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(510, 520);
 				params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				params.addRule(RelativeLayout.ALIGN_PARENT_TOP);

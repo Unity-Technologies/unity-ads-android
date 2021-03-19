@@ -6,8 +6,10 @@ import android.media.AudioManager;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.filters.RequiresDevice;
-import android.support.test.filters.SdkSuppress;
+import androidx.test.filters.RequiresDevice;
+import androidx.test.filters.SdkSuppress;
+import androidx.test.platform.app.InstrumentationRegistry;
+
 import android.view.ViewGroup;
 
 import com.unity3d.services.core.api.DeviceInfo;
@@ -24,6 +26,10 @@ import com.unity3d.services.core.webview.WebViewEventCategory;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 public class VolumeChangeTest extends AdUnitActivityTestBaseClass {
 	@Before
 	public void setup() {
@@ -36,7 +42,7 @@ public class VolumeChangeTest extends AdUnitActivityTestBaseClass {
 	public void testVolumeChange() throws Exception {
 		final Activity activity = waitForActivityStart(null);
 
-		ClientProperties.setApplicationContext(getInstrumentation().getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 
 		AudioManager am = (AudioManager)ClientProperties.getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
 		am.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
@@ -83,7 +89,7 @@ public class VolumeChangeTest extends AdUnitActivityTestBaseClass {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				((MockWebViewApp) WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(getInstrumentation().getTargetContext());
+				((MockWebViewApp) WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW = new VideoPlayerView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				activity.addContentView(((MockWebViewApp)WebViewApp.getCurrentApp()).VIDEOPLAYER_VIEW, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				viewAddCV.open();
 			}

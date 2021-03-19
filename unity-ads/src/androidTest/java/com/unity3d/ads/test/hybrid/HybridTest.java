@@ -1,12 +1,11 @@
 package com.unity3d.ads.test.hybrid;
 
 import android.os.Build;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.core.configuration.Configuration;
-import com.unity3d.services.core.configuration.IModuleConfiguration;
 import com.unity3d.services.core.configuration.InitializeThread;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
@@ -23,7 +22,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 

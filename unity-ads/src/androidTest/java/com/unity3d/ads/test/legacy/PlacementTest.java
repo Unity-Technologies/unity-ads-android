@@ -1,6 +1,6 @@
 package com.unity3d.ads.test.legacy;
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.ads.placement.Placement;

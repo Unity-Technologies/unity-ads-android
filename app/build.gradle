@@ -8,8 +8,8 @@ android {
         applicationId "com.unity3d.ads.example"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode = 3620
-        versionName = "3.6.2"
+        versionCode = 3700
+        versionName = "3.7.0"
     }
 
     flavorDimensions "arEnabled"
@@ -36,10 +36,10 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support:design:26.1.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    implementation 'android.arch.lifecycle:extensions:1.1.1'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     arImplementation 'com.google.ar:core:1.4.0'
     implementation project(':unity-ads')
 }

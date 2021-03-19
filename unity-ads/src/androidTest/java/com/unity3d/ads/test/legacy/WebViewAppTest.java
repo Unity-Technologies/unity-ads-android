@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.misc.Utilities;
@@ -32,7 +32,7 @@ public class WebViewAppTest {
 
 	@BeforeClass
 	public static void prepareTests () throws Exception {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
@@ -138,7 +138,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
@@ -166,7 +166,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebView webView = new WebView(InstrumentationRegistry.getContext());
+				WebView webView = new WebView(InstrumentationRegistry.getInstrumentation().getTargetContext());
 				WebViewApp.getCurrentApp().setWebView(webView);
 				assertEquals("Local and WebApps WebView should be the same object", webView, WebViewApp.getCurrentApp().getWebView());
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
@@ -191,7 +191,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
@@ -218,7 +218,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
 			}
@@ -241,7 +241,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
 			}
@@ -265,7 +265,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
@@ -289,7 +289,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
@@ -313,7 +313,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppLoaded(false);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
@@ -338,7 +338,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
@@ -363,7 +363,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
@@ -388,7 +388,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
@@ -413,7 +413,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
 			}
@@ -438,7 +438,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();
@@ -464,7 +464,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getContext()));
+				WebViewApp.getCurrentApp().setWebView(new MockWebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				cv.open();

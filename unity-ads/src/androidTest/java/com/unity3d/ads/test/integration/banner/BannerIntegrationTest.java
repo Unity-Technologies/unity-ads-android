@@ -1,9 +1,8 @@
 package com.unity3d.ads.test.integration.banner;
 
-import android.support.test.rule.ActivityTestRule;
+import androidx.test.rule.ActivityTestRule;
 import android.view.View;
 
-import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.test.hybrid.HybridTestActivity;
 import com.unity3d.services.banners.BannerErrorInfo;
@@ -19,7 +18,6 @@ import com.unity3d.services.core.misc.Utilities;
 
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.concurrent.Semaphore;

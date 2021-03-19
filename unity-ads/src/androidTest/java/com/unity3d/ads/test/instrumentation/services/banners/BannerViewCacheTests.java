@@ -1,7 +1,7 @@
 package com.unity3d.ads.test.instrumentation.services.banners;
 
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.ads.test.instrumentation.InstrumentationTestActivity;
 import com.unity3d.services.banners.BannerErrorCode;

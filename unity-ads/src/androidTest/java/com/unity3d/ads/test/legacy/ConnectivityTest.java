@@ -3,8 +3,8 @@ package com.unity3d.ads.test.legacy;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.api.Connectivity;
 import com.unity3d.services.core.connectivity.ConnectivityEvent;
@@ -32,9 +32,11 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class ConnectivityTest {
+	private boolean StopBackgroundTheads = false;
+
 	@Before
 	public void setup() {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 	}
 
 	@Test
@@ -45,19 +47,13 @@ public class ConnectivityTest {
 		Listener listener = new Listener();
 		ConnectivityMonitor.addListener(listener);
 
+		int currentDisconnects = listener.getOnDisconnectedCalls();
 		ConnectivityMonitor.disconnected();
-		assertEquals("ConnectivityMonitor disconnected callbacks not equal to one", 1, listener.getOnDisconnectedCalls());
+		assertEquals("ConnectivityMonitor disconnected callbacks not equal to one", currentDisconnects+1, listener.getOnDisconnectedCalls());
 
+		int currentConnects = listener.getOnConnectedCalls();
 		ConnectivityMonitor.connected();
-		assertEquals("ConnectivityMonitor connected callbacks not equal to one", 1, listener.getOnConnectedCalls());
-	}
-
-	private List<Listener> createListeners(int count) {
-		final List<Listener> listeners = new ArrayList<>();
-		for (int x=0; x<count; x++) {
-			listeners.add(new Listener());
-		}
-		return listeners;
+		assertEquals("ConnectivityMonitor connected callbacks not equal to one", currentConnects+1, listener.getOnConnectedCalls());
 	}
 
 	private Thread createListenerThread(final List<Listener> listeners, final int iterations, final boolean add) {
@@ -65,6 +61,9 @@ public class ConnectivityTest {
 			@Override
 			public void run() {
 				for (int x=0; x<iterations; x++) {
+					if (StopBackgroundTheads) {
+						return;
+					}
 					for(Listener listener : listeners) {
 						if (add) {
 							ConnectivityMonitor.addListener(listener);
@@ -85,6 +84,7 @@ public class ConnectivityTest {
 					ConnectivityMonitor.connected();
 					ConnectivityMonitor.disconnected();
 				}
+				StopBackgroundTheads = true;
 				conditionVariable.open();
 			}
 		});
@@ -92,7 +92,7 @@ public class ConnectivityTest {
 
 	@Test
 	public void testAddRemoveListenerThreadSafety() {
-		ConnectivityMonitor.setConnectionMonitoring(false);
+		StopBackgroundTheads = false;
 		final ConditionVariable cv = new ConditionVariable();
 
 		List<Listener> listeners = createListeners(10);
@@ -102,6 +102,14 @@ public class ConnectivityTest {
 
 		boolean success = cv.block(10000);
 		Assert.assertThat(success, is(true));
+	}
+
+	private List<Listener> createListeners(int count) {
+		final List<Listener> listeners = new ArrayList<>();
+		for (int x=0; x<count; x++) {
+			listeners.add(new Listener());
+		}
+		return listeners;
 	}
 
 	private class Listener implements IConnectivityListener {

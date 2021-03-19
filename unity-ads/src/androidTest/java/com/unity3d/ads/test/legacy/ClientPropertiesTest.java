@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
@@ -27,7 +27,7 @@ public class ClientPropertiesTest {
 
 	@BeforeClass
 	public static void prepareTests () {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 	}
 
 	@Before
@@ -46,8 +46,8 @@ public class ClientPropertiesTest {
 
 	@Test
 	public void testSetApplicationContext () {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
-		assertEquals("Application context was not the same as expected", InstrumentationRegistry.getTargetContext(), ClientProperties.getApplicationContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
+		assertEquals("Application context was not the same as expected", InstrumentationRegistry.getInstrumentation().getTargetContext(), ClientProperties.getApplicationContext());
 	}
 
 	@Test

@@ -1,6 +1,6 @@
 package com.unity3d.services.monetization.core.api;
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.monetization.placementcontent.core.PlacementContent;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;

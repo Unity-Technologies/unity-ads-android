@@ -60,4 +60,9 @@ public class TestUtilities {
 		return result;
 	}
 
+	public static void SleepCurrentThread(int timeInMilliseconds) {
+		try {
+			Thread.sleep(timeInMilliseconds);
+		} catch (InterruptedException e) { }
+	}
 }

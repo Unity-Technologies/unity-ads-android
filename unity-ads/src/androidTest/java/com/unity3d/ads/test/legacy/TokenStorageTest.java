@@ -1,10 +1,10 @@
 package com.unity3d.ads.test.legacy;
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.ads.token.TokenEvent;
-import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.ads.token.TokenStorage;
+import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.WebViewEventCategory;
 
 import org.json.JSONArray;

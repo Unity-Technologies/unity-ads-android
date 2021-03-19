@@ -3,7 +3,6 @@ package com.unity3d.services.core.webview;
 import android.os.Build;
 import android.os.ConditionVariable;
 import android.os.Looper;
-import android.view.ViewGroup;
 import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -11,6 +10,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebViewClient;
 
 import com.unity3d.services.ads.api.AdUnit;
+import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.InitializeThread;
 import com.unity3d.services.core.log.DeviceLog;
@@ -36,7 +36,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class WebViewApp {
+public class WebViewApp implements IWebViewBridgeInvoker {
 
 	private static WebViewApp _currentApp;
 	private static ConditionVariable _conditionVariable;
@@ -156,6 +156,7 @@ public class WebViewApp {
 		return true;
 	}
 
+	@Override
 	public boolean invokeMethod(String className, String methodName, Method callback, Object... params) {
 		if(!isWebAppLoaded()) {
 			DeviceLog.debug("invokeMethod ignored because web app is not loaded");

@@ -1,6 +1,6 @@
 package com.unity3d.services.purchasing.core.api;
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.purchasing.core.IPurchasingAdapter;
 import com.unity3d.services.purchasing.core.IRetrieveProductsListener;
@@ -40,7 +40,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(AndroidJUnit4.class)
 public class CustomPurchasingTest {

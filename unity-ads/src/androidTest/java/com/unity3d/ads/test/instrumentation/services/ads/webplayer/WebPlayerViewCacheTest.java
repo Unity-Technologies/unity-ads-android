@@ -1,9 +1,9 @@
 package com.unity3d.ads.test.instrumentation.services.ads.webplayer;
 
 import android.app.Activity;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.ads.test.legacy.TestActivity;
 import com.unity3d.services.ads.webplayer.WebPlayerView;

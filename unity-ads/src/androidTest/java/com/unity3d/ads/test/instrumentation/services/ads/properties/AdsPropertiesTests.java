@@ -1,6 +1,6 @@
 package com.unity3d.ads.test.instrumentation.services.ads.properties;
 
-import android.support.test.rule.ActivityTestRule;
+import androidx.test.rule.ActivityTestRule;
 
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;

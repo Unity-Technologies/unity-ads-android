@@ -1,7 +1,7 @@
 package com.unity3d.ads.test.legacy;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.properties.ClientProperties;
@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 public class EventIdTest {
 	@BeforeClass
 	public static void prepareTests() {
-		ClientProperties.setApplicationContext(InstrumentationRegistry.getTargetContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
 	}
 
 	@Test
