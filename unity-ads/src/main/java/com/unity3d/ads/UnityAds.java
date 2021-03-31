@@ -458,7 +458,9 @@ public final class UnityAds {
 	 * Check if default placement is ready to show ads
 	 *
 	 * @return If true, default placement is ready to show ads
+	 * @deprecated Please migrate to using load call with {@link IUnityAdsLoadListener}.
 	 */
+	@Deprecated
 	public static boolean isReady() {
 		return UnityAdsImplementation.isReady();
 	}
@@ -468,7 +470,9 @@ public final class UnityAds {
 	 *
 	 * @param placementId Placement, as defined in Unity Ads admin tools
 	 * @return If true, placement is ready to show ads
+	 * @deprecated Please migrate to using load call with {@link IUnityAdsLoadListener}.
 	 */
+	@Deprecated
 	public static boolean isReady(String placementId) {
 		return UnityAdsImplementation.isReady(placementId);
 	}
