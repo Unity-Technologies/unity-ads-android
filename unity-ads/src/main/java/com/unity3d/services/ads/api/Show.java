@@ -14,6 +14,13 @@ public class Show {
 	}
 
 	@WebViewExposed
+	public static void sendShowConsentEvent(final String placementId, final String listenerId, WebViewCallback callback) {
+		ShowModule.getInstance().onUnityAdsShowConsent(listenerId);
+		callback.invoke();
+	}
+
+
+	@WebViewExposed
 	public static void sendShowStartEvent(final String placementId, final String listenerId, WebViewCallback callback) {
 		ShowModule.getInstance().onUnityAdsShowStart(listenerId);
 		callback.invoke();

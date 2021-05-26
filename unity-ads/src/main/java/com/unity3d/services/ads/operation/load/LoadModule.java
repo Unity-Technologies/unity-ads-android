@@ -14,6 +14,7 @@ import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocationCallback;
 import com.unity3d.services.core.webview.bridge.invocation.WebViewBridgeInvocation;
+import com.unity3d.services.core.webview.bridge.invocation.WebViewBridgeInvocationSingleThreadedExecutor;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,7 +50,7 @@ public class LoadModule extends AdModule<ILoadOperation, LoadOperationState> imp
 			return;
 		}
 
-		LoadOperation loadOperation = new LoadOperation(state, new WebViewBridgeInvocation(webViewBridgeInvoker, new IWebViewBridgeInvocationCallback() {
+		LoadOperation loadOperation = new LoadOperation(state, new WebViewBridgeInvocation(_executorService, webViewBridgeInvoker, new IWebViewBridgeInvocationCallback() {
 			@Override
 			public void onSuccess() {
 
@@ -73,12 +74,14 @@ public class LoadModule extends AdModule<ILoadOperation, LoadOperationState> imp
 			}
 		}));
 
-		JSONObject invocationParameters = new JSONObject();
+		JSONObject parameters = new JSONObject();
+		JSONObject options = new JSONObject();
 		try {
-			invocationParameters.put("listenerId", loadOperation.getId());
-			invocationParameters.put("placementId", state.placementId);
-			invocationParameters.put("time", Device.getElapsedRealtime());
-			invocationParameters.put("options", state.loadOptions.getData());
+			options.put("headerBiddingOptions", state.loadOptions.getData());
+			parameters.put("options", options);
+			parameters.put("listenerId", loadOperation.getId());
+			parameters.put("placementId", state.placementId);
+			parameters.put("time", Device.getElapsedRealtime());
 		} catch (JSONException e) {
 			sendOnUnityAdsFailedToLoad(state, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, errorMsgFailedToCreateLoadRequest);
 			return;
@@ -88,7 +91,7 @@ public class LoadModule extends AdModule<ILoadOperation, LoadOperationState> imp
 		}
 
 		set(loadOperation);
-		loadOperation.invoke(state.configuration.getWebViewBridgeTimeout(), invocationParameters);
+		loadOperation.invoke(state.configuration.getWebViewBridgeTimeout(), parameters);
 	}
 
 	public void onUnityAdsAdLoaded(String operationId) {

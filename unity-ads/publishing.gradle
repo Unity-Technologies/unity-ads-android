@@ -1,0 +1,46 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId GROUP_ID
+            artifactId ARTIFACT_ID
+            version VERSION_ID
+
+            artifact("$buildDir/outputs/aar/unity-ads-release.aar")
+            artifact androidSourcesJar
+            artifact androidJavadocsJar
+
+            pom {
+                name = ARTIFACT_ID
+                description = 'Monetize your entire player base and reach new audiences with video ads.'
+                url = 'https://github.com/Unity-Technologies/unity-ads-android'
+                licenses {
+                    license {
+                        name = 'Unity Ads License'
+                        url = 'https://unity3d.com/legal/monetization-services-terms-of-service'
+                    }
+                }
+
+                scm {
+                    connection = 'https://github.com/Unity-Technologies/unity-ads-android.git'
+                    developerConnection = 'https://github.com/Unity-Technologies/unity-ads-android.git'
+                    url = 'https://github.com/Unity-Technologies/unity-ads-android'
+                }
+                developers {
+                    developer {
+                        id = 'Unity Ads'
+                        name = 'Unity Ads'
+                        email = 'ads-sdk@unity3d.com'
+                    }
+                }
+            }
+        }
+    }
+}
+
+signing {
+    required { SIGN_AAR }
+    sign publishing.publications.release
+}

@@ -18,6 +18,7 @@ import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocationCallback;
 import com.unity3d.services.core.webview.bridge.invocation.WebViewBridgeInvocation;
+import com.unity3d.services.core.webview.bridge.invocation.WebViewBridgeInvocationSingleThreadedExecutor;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,7 +47,7 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 			sendOnUnityAdsFailedToShow(state, errorMsgPlacementIdNull, UnityAds.UnityAdsShowError.INVALID_ARGUMENT);
 			return;
 		}
-		IShowOperation showOperation = new ShowOperation(state, new WebViewBridgeInvocation(webViewBridgeInvoker, new IWebViewBridgeInvocationCallback() {
+		IShowOperation showOperation = new ShowOperation(state, new WebViewBridgeInvocation(_executorService, webViewBridgeInvoker, new IWebViewBridgeInvocationCallback() {
 			@Override
 			public void onSuccess() {
 			}
@@ -72,11 +73,12 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 		ClientProperties.setActivity(state.activity);
 
 		Display defaultDisplay = ((WindowManager)state.activity.getSystemService(state.activity.WINDOW_SERVICE)).getDefaultDisplay();
+		JSONObject parameters = new JSONObject();
 		JSONObject options = new JSONObject();
 		JSONObject display = new JSONObject();
 
 		try {
-			options.put("requestedOrientation", state.activity.getRequestedOrientation());
+			display.put("requestedOrientation", state.activity.getRequestedOrientation());
 			display.put("rotation", defaultDisplay.getRotation());
 			if (Build.VERSION.SDK_INT >= 13) {
 				Point displaySize = new Point();
@@ -88,10 +90,11 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 				display.put("height", defaultDisplay.getHeight());
 			}
 			options.put("display", display);
-			options.put("options", state.showOptions.getData());
-			options.put("listenerId", showOperation.getId());
-			options.put("placementId", state.placementId);
-			options.put("time", Device.getElapsedRealtime());
+			options.put("headerBiddingOptions", state.showOptions.getData());
+			parameters.put("options", options);
+			parameters.put("listenerId", showOperation.getId());
+			parameters.put("placementId", state.placementId);
+			parameters.put("time", Device.getElapsedRealtime());
 		} catch (JSONException e) {
 			sendOnUnityAdsFailedToShow(state, "[UnityAds] Error creating show options", UnityAds.UnityAdsShowError.INTERNAL_ERROR);
 			return;
@@ -101,7 +104,7 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 		}
 
 		set(showOperation);
-		showOperation.invoke(state.configuration.getWebViewBridgeTimeout(), options);
+		showOperation.invoke(state.configuration.getWebViewBridgeTimeout(), parameters);
 	}
 
 	public void onUnityAdsShowFailure(String id, UnityAds.UnityAdsShowError error, String message) {
@@ -109,6 +112,12 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 		if (showOperation == null || showOperation.getShowOperationState() == null) return;
 		showOperation.onUnityAdsShowFailure(showOperation.getShowOperationState().placementId, error, message);
 		remove(id);
+	}
+
+	public void onUnityAdsShowConsent(String id) {
+		final IShowOperation showOperation = get(id);
+		if (showOperation == null || showOperation.getShowOperationState() == null) return;
+		// We do nothing for now since we don't report back to the user API
 	}
 
 	public void onUnityAdsShowStart(String id) {

@@ -2,8 +2,6 @@ package com.unity3d.services.ads.operation;
 
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocation;
 
-import java.util.UUID;
-
 public abstract class AdOperation implements IAdOperation {
 	private static String invocationClassName = "webview";
 

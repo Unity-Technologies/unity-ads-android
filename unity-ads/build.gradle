@@ -1,62 +1,51 @@
+import com.android.ddmlib.DdmPreferences
+
 apply plugin: 'com.android.library'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'jacoco'
 
-ext {
-    bintrayRepo = "UnityAds"
-    bintrayName = "unityads"
-
-    publishedGroupId = 'com.unity3d.ads'
-    libraryName = 'unity-ads'
-    artifact = 'unity-ads'
-    archivesBaseName = 'unity-ads'
-
-    libraryDescription = 'Monetize your entire player base and reach new audiences with video ads.'
-
-    siteUrl = 'https://github.com/Unity-Technologies/unity-ads-android'
-    gitUrl = 'https://github.com/Unity-Technologies/unity-ads-android.git'
-
-    libraryVersion = '3.7.1'
-
-    developerId = 'sbankhead'
-    developerName = 'Steven Bankhead'
-    developerEmail = 'sbankhead@unity3d.com'
-
-    licenseName = 'Unity Ads License'
-    licenseUrl = 'https://unity3d.com/legal/monetization-services-terms-of-service'
-    allLicenses = ["Unity Ads License"]
+Properties properties = new Properties()
+if (project.rootProject.file('local.properties').exists()) {
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
 }
 
-version = libraryVersion
+dependencies {
+  testImplementation 'junit:junit:4.12'
+  androidTestImplementation 'org.mockito:mockito-core:2.25.0'
+  androidTestImplementation 'org.mockito:mockito-android:2.25.0'
+  androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+  androidTestImplementation 'androidx.test:rules:1.1.1'
+  compileOnly 'com.google.ar:core:1.0.0'
+}
+
+ext {
+  GROUP_ID = "com.unity3d.ads"
+  ARTIFACT_ID = "unity-ads"
+  VERSION_ID = "3.7.2"
+  VERSION_CODE = 3720
+  SIGN_AAR = properties.getProperty("SIGN_AAR") ?: false
+}
 
 android {
   compileSdkVersion 30
-  buildToolsVersion '28.0.2'
-  com.android.ddmlib.DdmPreferences.setLogLevel("verbose")
-  com.android.ddmlib.DdmPreferences.setTimeOut(10 * 60000)
+  DdmPreferences.setLogLevel("verbose")
+  DdmPreferences.setTimeOut(10 * 60000)
 
   defaultPublishConfig "release"
+
+  lintOptions {
+    abortOnError false
+  }
 
   defaultConfig {
     minSdkVersion 19
     targetSdkVersion 30
-    /*
-    Please ensure that the last two digits of version number does not exceed 50 unless
-    it is a China SDK. This is because adding 50 to the version number is a one-to-one
-    mapping between normal SDK and China SDK.
-
-    Example : version number 2350 corresponds to China version of 2300.
-
-    All SDK with version numbers with last two digits >= 50 will be treated
-    as China SDK for filtering in the backend.
-    */
-    versionCode = 3710
-    versionName = "3.7.1"
+    versionCode = VERSION_CODE
+    versionName = VERSION_ID
 
     setProperty("archivesBaseName", "unity-ads")
 
     buildConfigField('String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"' + versionName + '"'))
+    buildConfigField('int', 'VERSION_CODE', "$versionCode")
+    buildConfigField('String', 'VERSION_NAME', "\"$versionName\"")
     testBuildType "debug"
 
     testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -80,125 +69,49 @@ android {
       consumerProguardFiles 'proguard-rules.pro'
     }
   }
-
-  libraryVariants.all { variant ->
-    variant.outputs.all { output ->
-      if (outputFile != null && outputFileName.endsWith('.aar')) {
-          outputFileName = "${archivesBaseName}-${variant.buildType.name}.aar"
-      }
-    }
-  }
-
-  testVariants.all { variant ->
-    variant.outputs.all { output ->
-      outputFileName = "../../androidTest.apk"
-    }
-  }
 }
 
-dependencies {
-  testImplementation 'junit:junit:4.12'
-  androidTestImplementation 'org.mockito:mockito-core:2.25.0'
-  androidTestImplementation 'org.mockito:mockito-android:2.25.0'
-  androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-  androidTestImplementation 'androidx.test:rules:1.1.1'
-  compileOnly 'com.google.ar:core:1.0.0'
-}
-
-task javadoc(type: Javadoc, overwrite: true) {
+task javadoc(type: Javadoc) {
     description "Generates Javadoc for Release"
     source = android.sourceSets.main.java.srcDirs
     ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+    ext.generatedClass = "build/generated/source/buildConfig/release/"
     doFirst {
-      classpath = project.files(android.getBootClasspath().join(File.pathSeparator)) + files(ext.androidJar)
+      classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+      classpath += files(ext.androidJar)
+      classpath += fileTree(dir: 'libs', include: ['*.jar'])
+      classpath += files(ext.generatedClass)
     }
     options {
            links "http://docs.oracle.com/javase/7/docs/api/"
-           linksOffline "http://developer.android.com/reference","${android.sdkDirectory}/docs/reference"
     }
     exclude '**/R.java'
     exclude 'com/unity3d/services/ar/view/GLSurfaceView.java'
     exclude 'com/unity3d/services/ar/api/AR.java'
+    exclude 'com/unity3d/services/ar/ARUtils.java'
+    exclude 'com/unity3d/services/ar/configuration/ARModuleConfiguration.java'
     exclude 'com/unity3d/services/ar/view/ARView.java'
     exclude 'com/unity3d/services/ar/view/ARViewHandler.java'
+    exclude 'com/unity3d/services/ar/view/BackgroundRenderer.java'
+    exclude 'com/unity3d/services/ar/view/DisplayRotationHelper.java'
     destinationDir = file("../javadoc/")
 }
 
 task androidJavadocsJar(type: Jar, dependsOn: javadoc) {
-    classifier = "javadoc"
-    baseName = "${archivesBaseName}"
+    archiveClassifier.set("javadoc")
+    archiveBaseName.set("${archivesBaseName}")
     from javadoc.destinationDir
 }
 
 task androidSourcesJar(type: Jar) {
-    classifier = "sources"
-    baseName = "${archivesBaseName}"
+    archiveClassifier.set("sources")
+    archiveBaseName.set("${archivesBaseName}")
     from android.sourceSets.main.java.srcDirs
 }
 
 artifacts {
     archives androidJavadocsJar
     archives androidSourcesJar
-}
-
-jacoco {
-    toolVersion = '0.8.1'
-}
-
-tasks.withType(Test) {
-    jacoco.includeNoLocationClasses = true
-}
-
-task jacocoTestReport(type: JacocoReport) {
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
-
-    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
-    def javaClasses = fileTree(dir: "$project.buildDir/intermediates/classes/debug", excludes: fileFilter)
-    def javaSrc = "$project.projectDir/src/main/java"
-
-    sourceDirectories = files([javaSrc])
-    classDirectories = files([javaClasses])
-    executionData = fileTree(dir: project.buildDir, includes: [
-      'outputs/code-coverage/connected/*coverage.ec'
-    ])
-}
-
-// Bintray
-task localProperties { 
-  if (!file("$rootDir/local.properties").exists()) {
-    file("$rootDir/local.properties").withWriterAppend { w -> "" }
-  }
-}
-
-bintray {
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-
-    configurations = ['archives']
-    pkg {
-        repo = bintrayRepo
-        name = bintrayName
-        desc = libraryDescription
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = allLicenses
-        publish = true
-        publicDownloadNumbers = false
-        version {
-            desc = libraryDescription
-            gpg {
-                sign = true //Determines whether to GPG sign the files. The default is false
-                passphrase = properties.getProperty("bintray.gpg.password")
-                //Optional. The passphrase for GPG signing'
-            }
-        }
-    }
 }
 
 def getPropertyStringWithDefaultValue(String key, String defaultValue) {
@@ -211,6 +124,6 @@ def getPropertyStringWithDefaultValue(String key, String defaultValue) {
   return value != null ? value : defaultValue
 }
 
-if (project.rootProject.file('local.properties').exists()) {
-    apply from: 'mavenPomBintrayUpload.gradle'
-}
+apply from: 'publishing.gradle'
+apply from: 'artifactory.gradle'
+apply from: 'jacoco.gradle'

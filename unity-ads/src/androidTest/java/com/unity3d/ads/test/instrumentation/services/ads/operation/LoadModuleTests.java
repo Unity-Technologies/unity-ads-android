@@ -62,7 +62,7 @@ public class LoadModuleTests {
 
 		loadModule.executeAdOperation(webViewBridgeInvokerMock, loadOperationState);
 		TestUtilities.SleepCurrentThread(uiThreadDelay);
-		Mockito.verify(loadListenerMock, times(1)).onUnityAdsFailedToLoad(null, UnityAds.UnityAdsLoadError.INVALID_ARGUMENT,"[UnityAds] Placement ID cannot be null");
+		Mockito.verify(loadListenerMock, times(1)).onUnityAdsFailedToLoad("", UnityAds.UnityAdsLoadError.INVALID_ARGUMENT,"[UnityAds] Placement ID cannot be null");
 	}
 
 	@Test

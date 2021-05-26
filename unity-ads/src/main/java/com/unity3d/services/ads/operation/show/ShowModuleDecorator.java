@@ -27,6 +27,9 @@ public class ShowModuleDecorator implements IShowModule {
 	}
 
 	@Override
+	public void onUnityAdsShowConsent(String id) { _showModule.onUnityAdsShowConsent(id);}
+
+	@Override
 	public void onUnityAdsShowStart(String id) {
 		_showModule.onUnityAdsShowStart(id);
 	}

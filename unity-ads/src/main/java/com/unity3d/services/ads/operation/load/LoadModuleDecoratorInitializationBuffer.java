@@ -5,7 +5,6 @@ import com.unity3d.services.core.configuration.IInitializationListener;
 import com.unity3d.services.core.configuration.IInitializationNotificationCenter;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.services.core.request.SDKMetricEvents;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
 import java.util.Map;

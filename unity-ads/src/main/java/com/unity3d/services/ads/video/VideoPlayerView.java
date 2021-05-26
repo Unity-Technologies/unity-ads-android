@@ -154,11 +154,15 @@ public class VideoPlayerView extends VideoView {
 			}
 		});
 
-		start();
-		stopVideoProgressTimer();
-		startVideoProgressTimer();
+		try {
+			start();
+			stopVideoProgressTimer();
+			startVideoProgressTimer();
 
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PLAY, _videoUrl);
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PLAY, _videoUrl);
+		} catch (IllegalStateException ex) {
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE,  _videoUrl, false);
+		}
 	}
 
 	public void setInfoListenerEnabled (boolean enabled) {

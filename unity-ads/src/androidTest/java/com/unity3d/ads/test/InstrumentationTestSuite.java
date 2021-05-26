@@ -13,6 +13,7 @@ import com.unity3d.ads.test.instrumentation.services.ads.webplayer.WebPlayerView
 import com.unity3d.ads.test.instrumentation.services.banners.BannerViewCacheTests;
 import com.unity3d.ads.test.instrumentation.services.core.configuration.InitializationNotificationCenterTest;
 import com.unity3d.ads.test.instrumentation.services.core.webview.bridge.WebViewBridgeSharedObjectTests;
+import com.unity3d.ads.test.instrumentation.services.core.webview.bridge.invocation.WebViewBridgeInvocationRunnableTests;
 import com.unity3d.ads.test.instrumentation.services.core.webview.bridge.invocation.WebViewBridgeInvocationTests;
 import com.unity3d.ads.test.legacy.ConfigurationTest;
 import com.unity3d.services.analytics.AcquisitionTypeTest;
@@ -33,6 +34,7 @@ import org.junit.runners.Suite;
 	BannerViewCacheTests.class,
 	WebViewBridgeSharedObjectTests.class,
 	WebViewBridgeInvocationTests.class,
+	WebViewBridgeInvocationRunnableTests.class,
 	LoadOperationTests.class,
 	LoadModuleTests.class,
 	LoadModuleDecoratorTimeoutTests.class,

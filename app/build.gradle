@@ -2,14 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion '28.0.2'
 
     defaultConfig {
         applicationId "com.unity3d.ads.example"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode = 3710
-        versionName = "3.7.1"
+        versionCode = 3720
+        versionName = "3.7.2"
     }
 
     flavorDimensions "arEnabled"

@@ -62,7 +62,7 @@ public class ShowModuleTests {
 		_showModule.executeAdOperation(_webViewBridgeInvokerMock, showOperationState);
 		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify((_showListenerMock), times(1)).onUnityAdsShowFailure(null, UnityAds.UnityAdsShowError.INVALID_ARGUMENT, "[UnityAds] Placement ID cannot be null");
+		Mockito.verify((_showListenerMock), times(1)).onUnityAdsShowFailure("", UnityAds.UnityAdsShowError.INVALID_ARGUMENT, "[UnityAds] Placement ID cannot be null");
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class ShowModuleTests {
 		_showModule.executeAdOperation(_webViewBridgeInvokerMock, showOperationState);
 		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify((_showListenerMock), times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "WebViewBridgeInvocation:execute: invokeMethod failure");
+		Mockito.verify((_showListenerMock), times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "WebViewBridgeInvocationRunnable:run: invokeMethod failure");
 		Mockito.verify(_sdkMetricSender, times(1)).SendSDKMetricEventWithTag(SDKMetricEvents.native_show_callback_error, new HashMap<String, String> (){{
 			put("cbs", "invocationFailure");
 		}});

@@ -37,6 +37,12 @@ public class ShowModuleDecoratorTimeout extends ShowModuleDecorator {
 	}
 
 	@Override
+	public void onUnityAdsShowConsent(String id) {
+		releaseOperationTimeoutLock(id);
+		super.onUnityAdsShowConsent(id);
+	}
+
+	@Override
 	public void onUnityAdsShowFailure(String id, UnityAds.UnityAdsShowError error, String message) {
 		releaseOperationTimeoutLock(id);
 		super.onUnityAdsShowFailure(id, error, message);
