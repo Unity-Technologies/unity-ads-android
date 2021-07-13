@@ -19,5 +19,7 @@ public enum WebViewEventCategory {
 	PERMISSIONS,
 	STORE,
 	LOAD_API,
-	TOKEN
+	TOKEN,
+	INIT_GMA,
+	GMA
 }

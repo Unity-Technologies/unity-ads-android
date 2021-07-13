@@ -37,16 +37,16 @@ test-local-staging-localhost: device-connected wake-up-device push-test-server-a
 run-all-tests: test-instrumentation test-legacy test-integration
 
 test-ci:
-	./gradlew connectedDebugAndroidTest -i -w --stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.InstrumentationTestSuite,com.unity3d.ads.test.LegacyTestSuite
+	./gradlew unity-ads:connectedDebugAndroidTest -i -w --stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.InstrumentationTestSuite,com.unity3d.ads.test.LegacyTestSuite
 
 test-instrumentation:
-	./gradlew connectedDebugAndroidTest -i -w --stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.InstrumentationTestSuite
+	./gradlew unity-ads:connectedDebugAndroidTest -i -w --stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.InstrumentationTestSuite
 
 test-legacy:
-	./gradlew connectedDebugAndroidTest -i -w --stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.LegacyTestSuite 
+	./gradlew unity-ads:connectedDebugAndroidTest -i -w --stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.LegacyTestSuite 
 
 test-integration:
-	./gradlew connectedDebugAndroidTest -i -w --stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.IntegrationTestSuite 
+	./gradlew unity-ads:connectedDebugAndroidTest -i -w --stacktrace -Pandroid.testInstrumentationRunnerArguments.class=com.unity3d.ads.test.IntegrationTestSuite 
 
 push-test-server-address-ip:
 	echo http://$(shell ifconfig |grep "inet" |grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" |grep -v -E "^0|^127" -m 1):8080 > testServerAddress.txt

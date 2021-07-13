@@ -1,0 +1,56 @@
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 30
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+        multiDexEnabled true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:2.28.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}
+
+task deleteOldJar(type: Delete) {
+    delete("../unity-ads/libs/${project.name}.jar")
+}
+
+task copyJars(type: Copy) {
+    from('build/intermediates/compile_library_classes_jar/release/')
+    into('../unity-ads/libs/')
+    include('classes.jar')
+    rename('classes.jar', "${project.name}.jar")
+}
+
+copyJars.dependsOn(deleteOldJar)
+
+project.tasks.whenTaskAdded { Task theTask ->
+    if (theTask.name == 'bundleLibCompileToJarRelease') {
+        theTask.finalizedBy(copyJars)
+    }
+}

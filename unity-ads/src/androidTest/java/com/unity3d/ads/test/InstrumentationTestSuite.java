@@ -1,5 +1,6 @@
 package com.unity3d.ads.test;
 
+import com.unity3d.ads.test.instrumentation.services.ads.gmascar.GmaScarTestSuite;
 import com.unity3d.ads.test.instrumentation.services.ads.operation.AdOperationTests;
 import com.unity3d.ads.test.instrumentation.services.ads.operation.LoadModuleDecoratorInitializationBufferTests;
 import com.unity3d.ads.test.instrumentation.services.ads.operation.LoadModuleDecoratorTests;
@@ -28,7 +29,6 @@ import org.junit.runners.Suite;
 	AcquisitionTypeTest.class,
 	AdsPropertiesTests.class,
 	InitializationNotificationCenterTest.class,
-//	LoadBridgeTest.class,
 	WebPlayerViewSettingsCacheTest.class,
 	WebPlayerViewCacheTest.class,
 	BannerViewCacheTests.class,
@@ -42,7 +42,8 @@ import org.junit.runners.Suite;
 	LoadModuleDecoratorInitializationBufferTests.class,
 	AdOperationTests.class,
 	ShowModuleTests.class,
-	ConfigurationTest.class
+	ConfigurationTest.class,
+	GmaScarTestSuite.class
 })
 
 public class InstrumentationTestSuite {}

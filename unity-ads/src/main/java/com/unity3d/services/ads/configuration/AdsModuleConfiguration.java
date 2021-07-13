@@ -4,10 +4,10 @@ import android.os.ConditionVariable;
 
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.ads.UnityAdsImplementation;
 import com.unity3d.services.ads.adunit.AdUnitOpen;
 import com.unity3d.services.ads.placement.Placement;
-import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
@@ -32,7 +32,8 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 			com.unity3d.services.ads.api.Purchasing.class,
 			com.unity3d.services.ads.api.Load.class,
 			com.unity3d.services.ads.api.Show.class,
-			com.unity3d.services.ads.api.Token.class
+			com.unity3d.services.ads.api.Token.class,
+			com.unity3d.services.ads.api.GMAScar.class
 		};
 
 		return list;

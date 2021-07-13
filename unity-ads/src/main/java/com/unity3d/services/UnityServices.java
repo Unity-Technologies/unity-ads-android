@@ -180,6 +180,8 @@ public class UnityServices {
 	}
 
 	private static String createExpectedParametersString(String fieldName, Object current, Object received) {
-		return "\n - " + fieldName + " Current: " + current.toString() + " | Received: " + received.toString();
+		String currentSafeString = current == null ? "null" : current.toString();
+		String receivedSafeString = received == null ? "null" : received.toString();
+		return "\n - " + fieldName + " Current: " + currentSafeString + " | Received: " + receivedSafeString;
 	}
 }

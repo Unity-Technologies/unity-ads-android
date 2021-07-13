@@ -7,6 +7,7 @@ captures
 testServerAddress.txt
 app/bin
 unity-ads/bin
+libs
 javadoc
 .settings
 .project

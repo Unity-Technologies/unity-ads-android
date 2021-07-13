@@ -19,8 +19,8 @@ dependencies {
 ext {
   GROUP_ID = "com.unity3d.ads"
   ARTIFACT_ID = "unity-ads"
-  VERSION_ID = "3.7.2"
-  VERSION_CODE = 3720
+  VERSION_ID = "3.7.4"
+  VERSION_CODE = 3740
   SIGN_AAR = properties.getProperty("SIGN_AAR") ?: false
 }
 
@@ -47,6 +47,7 @@ android {
     buildConfigField('int', 'VERSION_CODE', "$versionCode")
     buildConfigField('String', 'VERSION_NAME', "\"$versionName\"")
     testBuildType "debug"
+    multiDexEnabled true
 
     testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     testInstrumentationRunnerArguments disableAnalytics: 'true' // Won't work yet, see: https://code.google.com/p/android/issues/detail?id=188241
@@ -69,6 +70,25 @@ android {
       consumerProguardFiles 'proguard-rules.pro'
     }
   }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestImplementation project(':unity-scaradapter-2000')
+    androidTestImplementation project(':unity-scaradapter-1950')
+    androidTestImplementation project(':unity-scaradapter-1920')
+    androidTestImplementation project(':unity-scaradapter-common')
+    androidTestImplementation 'org.mockito:mockito-core:2.28.2'
+    androidTestImplementation 'org.mockito:mockito-android:2.25.0'
+    androidTestImplementation 'androidx.test:runner:1.3.0'
+    androidTestImplementation 'androidx.test:rules:1.3.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'com.google.android.gms:play-services-ads:19.5.0'
+    compileOnly 'com.google.ar:core:1.0.0'
+    compileOnly project(':unity-scaradapter-2000')
+    compileOnly project(':unity-scaradapter-1950')
+    compileOnly project(':unity-scaradapter-1920')
+    compileOnly project(':unity-scaradapter-common')
 }
 
 task javadoc(type: Javadoc) {
