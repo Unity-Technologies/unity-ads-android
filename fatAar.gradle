@@ -1,0 +1,21 @@
+task deleteOldJar(type: Delete) {
+    delete("../unity-ads/libs/${project.name}.jar")
+}
+
+def copyJarTask(buildType) {
+    return tasks.create("copyJars${buildType}", Copy.class) {
+        from("build/intermediates/compile_library_classes_jar/${buildType}/")
+        into('../unity-ads/libs/')
+        include('classes.jar')
+        rename('classes.jar', "${project.name}.jar")
+    }.dependsOn(deleteOldJar)
+}
+
+project.tasks.whenTaskAdded { Task theTask ->
+    if (theTask.name == 'bundleLibCompileToJarRelease') {
+        theTask.finalizedBy(copyJarTask("release"))
+    }
+    if (theTask.name == 'bundleLibCompileToJarDebug') {
+        theTask.finalizedBy(copyJarTask("debug"))
+    }
+}

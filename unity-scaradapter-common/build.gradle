@@ -36,21 +36,4 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }
 
-task deleteOldJar(type: Delete) {
-    delete("../unity-ads/libs/${project.name}.jar")
-}
-
-task copyJars(type: Copy) {
-    from('build/intermediates/compile_library_classes_jar/release/')
-    into('../unity-ads/libs/')
-    include('classes.jar')
-    rename('classes.jar', "${project.name}.jar")
-}
-
-copyJars.dependsOn(deleteOldJar)
-
-project.tasks.whenTaskAdded { Task theTask ->
-    if (theTask.name == 'bundleLibCompileToJarRelease') {
-        theTask.finalizedBy(copyJars)
-    }
-}
+apply from: '../fatAar.gradle'

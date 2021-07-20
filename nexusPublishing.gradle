@@ -1,0 +1,19 @@
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
+
+Properties properties = new Properties()
+if (project.rootProject.file('local.properties').exists()) {
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            stagingProfileId = properties.getProperty("NEXUS_PROFILE_ID")
+            username = properties.getProperty("NEXUS_USERNAME")
+            password = properties.getProperty("NEXUS_PASSWORD")
+            // Add these lines if using new Sonatype infra
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
+    }
+}
