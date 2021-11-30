@@ -30,7 +30,8 @@ public class Sdk {
 			WebViewApp.getCurrentApp().getConfiguration().getWebViewVersion(),
 			SdkProperties.getInitializationTime(),
 			SdkProperties.isReinitialized(),
-			SdkProperties.isPerPlacementLoadEnabled(),
+			// perPlacementLoadEnabled is now always true
+			true,
 			SdkProperties.getLatestConfiguration() != null,
 			Device.getElapsedRealtime()
 		};

@@ -2,6 +2,7 @@ package com.unity3d.services.ads.gmascar.bridges;
 
 import com.unity3d.services.ads.gmascar.listeners.IInitializationStatusListener;
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.reflection.GenericBridge;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

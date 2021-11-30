@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.ads.placement.Placement;
 import com.unity3d.services.banners.view.BannerPosition;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
@@ -146,11 +145,6 @@ public final class UnityBanners {
 	// OLD BANNER API THAT DOES NOT SUPPORT MULTIPLE BANNERS
 
 	@Deprecated
-	public static void loadBanner(Activity activity) {
-		UnityBanners.loadBanner(activity, Placement.getDefaultBannerPlacement());
-	}
-
-	@Deprecated
 	public static void loadBanner(final Activity activity, final String placementId) {
 		DeviceLog.entered();
 		if (!UnityAds.isSupported()) {
@@ -158,10 +152,6 @@ public final class UnityBanners {
 		}
 		if (!UnityAds.isInitialized()) {
 			sendError("UnityAds is not initialized.");
-			return;
-		}
-		if (!UnityAds.isReady(placementId)) {
-			sendError("Banner placement " + placementId + " is not ready");
 			return;
 		}
 

@@ -1,12 +1,15 @@
 package com.unity3d.ads.test.instrumentation.services.ads.operation;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+
 import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.UnityAdsLoadOptions;
-import com.unity3d.ads.test.TestUtilities;
 import com.unity3d.services.ads.operation.load.ILoadModule;
-import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.ads.operation.load.LoadModuleDecoratorInitializationBuffer;
+import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.IInitializationNotificationCenter;
 import com.unity3d.services.core.properties.SdkProperties;
@@ -16,12 +19,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-
 public class LoadModuleDecoratorInitializationBufferTests {
-	private static String testPlacementId = "TestPlacementId";
-	private static int uiThreadDelay = 25;
+	private static final String testPlacementId = "TestPlacementId";
+	private static final int maxWaitTime = 25000;
 
 	private ILoadModule loadModuleMock = mock(ILoadModule.class);
 	private IInitializationNotificationCenter initializationNotificationCenterMock;
@@ -54,9 +54,8 @@ public class LoadModuleDecoratorInitializationBufferTests {
 		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_FAILED);
 
 		loadModuleInitBuffer.executeAdOperation(webViewBridgeInvokerMock, loadOperationState);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify(loadListenerMock, times(1)).onUnityAdsFailedToLoad(testPlacementId, UnityAds.UnityAdsLoadError.INITIALIZE_FAILED, "[UnityAds] SDK Initialization Failed");
+		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(testPlacementId, UnityAds.UnityAdsLoadError.INITIALIZE_FAILED, "[UnityAds] SDK Initialization Failed");
 	}
 
 	@Test
@@ -101,11 +100,9 @@ public class LoadModuleDecoratorInitializationBufferTests {
 		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZING);
 
 		loadModuleInitBuffer.executeAdOperation(webViewBridgeInvokerMock, loadOperationStateMock);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 		Mockito.verify(initializationNotificationCenterMock, times(1)).addListener(loadModuleInitBuffer);
 
 		loadModuleInitBuffer.onSdkInitializationFailed("UntestableMessage", 0);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
-		Mockito.verify(loadListenerMock, times(1)).onUnityAdsFailedToLoad(testPlacementId, UnityAds.UnityAdsLoadError.INITIALIZE_FAILED, "[UnityAds] SDK Initialization Failure");
+		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(testPlacementId, UnityAds.UnityAdsLoadError.INITIALIZE_FAILED, "[UnityAds] SDK Initialization Failure");
 	}
 }

@@ -35,7 +35,7 @@ public class GMAAdsErrorTest {
 	@Test
 	public void testSignalsError() {
 		GMAAdsError gmaAdsError = GMAAdsError.InternalSignalsError(TEST_MESSAGE);
-		validateGmaAdsError(gmaAdsError, GMAEvent.SIGNALS_ERROR, TEST_MESSAGE, TEST_MESSAGE);
+		validateGmaAdsError(gmaAdsError, GMAEvent.INTERNAL_SIGNALS_ERROR, TEST_MESSAGE, TEST_MESSAGE);
 	}
 
 	private void validateGmaAdsError(GMAAdsError gmaAdsError, Enum eventCategory, String description, Object... errorArguments) {

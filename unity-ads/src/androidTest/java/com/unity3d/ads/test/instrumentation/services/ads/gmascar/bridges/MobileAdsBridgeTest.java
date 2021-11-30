@@ -28,7 +28,7 @@ public class MobileAdsBridgeTest {
 		OnInitializationCompleteListener initializationCompleteListener = Mockito.mock(OnInitializationCompleteListener.class);
 		MobileAdsBridge mobileAdsBridge = new MobileAdsBridge();
 		mobileAdsBridge.initialize(InstrumentationRegistry.getInstrumentation().getContext(), initializationCompleteListener);
-		Mockito.verify(initializationCompleteListener, timeout(1000).times(1)).onInitializationComplete(Mockito.any(InitializationStatus.class));
+		Mockito.verify(initializationCompleteListener, timeout(5000).times(1)).onInitializationComplete(Mockito.any(InitializationStatus.class));
 		String versionString = mobileAdsBridge.getVersionString();
 		Assert.assertTrue(String.format("Minor version 203404000 is not found in %s", versionString), versionString.contains("203404000"));
 	}

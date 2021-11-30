@@ -5,7 +5,6 @@ import android.content.Context;
 import com.unity3d.ads.BuildConfig;
 import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.IUnityServicesListener;
 import com.unity3d.services.core.cache.CacheDirectory;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.device.Device;
@@ -27,7 +26,6 @@ public class SdkProperties {
 	private static final String CHINA_ISO_ALPHA_2_CODE = "CN";
 	private static final String CHINA_ISO_ALPHA_3_CODE = "CHN";
 	private static long _initializationTime = 0;
-	private static IUnityServicesListener _listener;
 	private static Configuration _latestConfiguration;
 
 	private static LinkedHashSet<IUnityAdsInitializationListener> _initializationListeners = new LinkedHashSet<IUnityAdsInitializationListener>();
@@ -35,7 +33,6 @@ public class SdkProperties {
 	private static boolean _initialized = false;
 	private static boolean _reinitialized = false;
 	private static boolean _testMode = false;
-	private static boolean _perPlacementLoadEnabled = false;
 	private static boolean _debugMode = false;
 	private static AtomicReference<InitializationState> _currentInitializationState = new AtomicReference<>(InitializationState.NOT_INITIALIZED);
 
@@ -86,12 +83,6 @@ public class SdkProperties {
 
 	public static void setTestMode(boolean testMode) {
 		_testMode = testMode;
-	}
-
-	public static boolean isPerPlacementLoadEnabled () { return _perPlacementLoadEnabled; }
-
-	public static void setPerPlacementLoadEnabled (boolean perPlacementLoad) {
-		_perPlacementLoadEnabled = perPlacementLoad;
 	}
 
 	public static int getVersionCode () {
@@ -219,14 +210,6 @@ public class SdkProperties {
 
 	public static boolean getDebugMode() {
 		return _debugMode;
-	}
-
-	public static void setListener(IUnityServicesListener listener) {
-		_listener = listener;
-	}
-
-	public static IUnityServicesListener getListener() {
-		return _listener;
 	}
 
 	public static void addInitializationListener(IUnityAdsInitializationListener listener) {

@@ -50,7 +50,7 @@ public class BannerIntegrationTest {
 			}
 		};
 		InitializationNotificationCenter.getInstance().addListener(initializationListener);
-		UnityAds.initialize(_activityRule.getActivity(), "14851", null, true, true);
+		UnityAds.initialize(_activityRule.getActivity(), "14851", true);
 		initializeSemaphore.acquire();
 	}
 

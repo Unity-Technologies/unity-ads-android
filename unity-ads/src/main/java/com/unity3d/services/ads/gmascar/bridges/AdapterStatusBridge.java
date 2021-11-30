@@ -1,6 +1,8 @@
 package com.unity3d.services.ads.gmascar.bridges;
 
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.reflection.GenericBridge;
+
 import java.util.HashMap;
 
 public class AdapterStatusBridge extends GenericBridge {

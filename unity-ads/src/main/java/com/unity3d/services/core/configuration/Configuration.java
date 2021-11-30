@@ -45,8 +45,6 @@ public class Configuration {
 	private String[] _moduleConfigurationList = {
 			"com.unity3d.services.core.configuration.CoreModuleConfiguration",
 			"com.unity3d.services.ads.configuration.AdsModuleConfiguration",
-			"com.unity3d.services.monetization.core.configuration.MonetizationModuleConfiguration",
-			"com.unity3d.services.purchasing.core.configuration.PurchasingModuleConfiguration",
 			"com.unity3d.services.analytics.core.configuration.AnalyticsModuleConfiguration",
 			"com.unity3d.services.ar.configuration.ARModuleConfiguration",
 			"com.unity3d.services.banners.configuration.BannersModuleConfiguration",

@@ -30,6 +30,12 @@ public class ScarAdapterFactoryTest {
 	}
 
 	@Test
+	public void testScarAdapterFactory1980() {
+		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterFactory.CODE_19_8, adsErrorHandlerMock);
+		Assert.assertTrue(adapter instanceof com.unity3d.scar.adapter.v1950.ScarAdapter);
+	}
+
+	@Test
 	public void testScarAdapterFactory2000() {
 		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterFactory.CODE_20_0, adsErrorHandlerMock);
 		Assert.assertTrue(adapter instanceof com.unity3d.scar.adapter.v2000.ScarAdapter);

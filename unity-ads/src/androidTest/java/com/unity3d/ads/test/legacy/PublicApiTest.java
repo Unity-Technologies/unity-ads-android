@@ -23,12 +23,6 @@ public class PublicApiTest {
 	}
 
 	@Test
-	public void testIsReady() {
-		assertFalse("Public API default placement ready before init", UnityAds.isReady());
-		assertFalse("Public API non-existing placement ready", UnityAds.isReady("nonExistingPlacement"));
-	}
-
-	@Test
 	public void testDebugMode() {
 		UnityAds.setDebugMode(false);
 

@@ -1,20 +1,20 @@
 package com.unity3d.ads.test.instrumentation.services.ads.operation;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.ads.operation.load.ILoadModule;
-import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.ads.operation.load.LoadModuleDecorator;
+import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-
 public class LoadModuleDecoratorTests {
-	private static String testId = "TestId";
+	private static final String testId = "TestId";
 
 	private ILoadModule loadModuleMock;
 

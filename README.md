@@ -1,19 +1,18 @@
-# Unity Ads 3 Android Release Repository
+# Unity Ads Android Release Repository
 
-Welcome to the Unity Ads 3 Android release repository.
+Welcome to the Unity Ads Android SDK Repository.
 
 ## Binaries
 
-Binaries can be found from the [releases tab](https://github.com/Unity-Technologies/unity-ads-android/releases).
+Binaries can be found in the [releases tab](https://github.com/Unity-Technologies/unity-ads-android/releases).
 
 ## Integration Guide
 
-Integration guide can be found [here](https://github.com/Unity-Technologies/unity-ads-android/wiki/sdk_android_integration_guide). There is [integration tutorial video](https://www.youtube.com/watch?v=MNdJ0KWlYPw) on YouTube.
+Integration guide can be found [here](https://unityads.unity3d.com/help/android/integration-guide-android).
 
 ## API Reference
 
-API Reference can be found [here](https://github.com/Unity-Technologies/unity-ads-android/wiki/sdk_android_api_reference)
+API Reference can be found [here](https://unityads.unity3d.com/help/android/api-android)
 
-## Transition guide from Unity Ads 1.5
-
-Transition guide from Unity Ads 1.5 can be found [here](https://github.com/Unity-Technologies/unity-ads-android/wiki/sdk_android_transition_guide)
+## License
+The license can be viewed [here](LICENSE)

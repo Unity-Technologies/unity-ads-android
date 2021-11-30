@@ -10,6 +10,7 @@ import com.unity3d.services.ads.gmascar.bridges.InitializationStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializeListenerBridge;
 import com.unity3d.services.ads.gmascar.bridges.MobileAdsBridge;
 import com.unity3d.services.ads.gmascar.finder.GMAInitializer;
+import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.webview.WebView;
 import com.unity3d.services.core.webview.WebViewApp;
 
@@ -37,6 +38,7 @@ public class GMAInitializerTest {
 	@Test
 	public void testGmaInitializer() {
 		GMAInitializer gmaInitializer = new GMAInitializer(mobileAdsBridge, initializeListenerBridge, initializationStatusBridge, adapterStatusBridge);
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getContext());
 		gmaInitializer.initializeGMA();
 		Mockito.verify(mobileAdsBridge, times(1)).initialize(Mockito.any(Context.class), Mockito.any());
 	}

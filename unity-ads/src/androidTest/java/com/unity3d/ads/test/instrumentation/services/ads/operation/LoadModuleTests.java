@@ -1,18 +1,24 @@
 package com.unity3d.ads.test.instrumentation.services.ads.operation;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+
 import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.UnityAdsLoadOptions;
-import com.unity3d.ads.test.TestUtilities;
-import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.ads.operation.load.LoadModule;
 import com.unity3d.services.ads.operation.load.LoadOperation;
+import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.core.request.ISDKMetricSender;
 import com.unity3d.services.core.request.SDKMetricEvents;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocation;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -22,20 +28,14 @@ import org.mockito.stubbing.Answer;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-
 public class LoadModuleTests {
-	private static String placementId = "TestPlacementId";
-	private static UnityAds.UnityAdsLoadError loadError = UnityAds.UnityAdsLoadError.INTERNAL_ERROR;
-	private static String loadErrorMessage = "LoadErrorMessage";
-	private static int uiThreadDelay = 50;
-	private static int webViewTimeout = 150;
-	private static UnityAdsLoadOptions unityAdsLoadOptions = new UnityAdsLoadOptions();
+	private static final String placementId = "TestPlacementId";
+	private static final UnityAds.UnityAdsLoadError loadError = UnityAds.UnityAdsLoadError.INTERNAL_ERROR;
+	private static final String loadErrorMessage = "LoadErrorMessage";
+	private static final int maxWaitTime = 25000;
+	private static final int webViewTimeout = 100;
+	private static final int loadTimeoutExpireMs = webViewTimeout + 10;
+	private static final UnityAdsLoadOptions unityAdsLoadOptions = new UnityAdsLoadOptions();
 
 	private IWebViewBridgeInvoker webViewBridgeInvokerMock;
 	private IUnityAdsLoadListener loadListenerMock;
@@ -50,19 +50,12 @@ public class LoadModuleTests {
 		loadModule = new LoadModule(sdkMetricSender);
 	}
 
-	@After
-	public void afterEachTest() {
-		//Allow for any timeout threads to complete before starting the next test to prevent inaccurate mock counts
-		TestUtilities.SleepCurrentThread(webViewTimeout);
-	}
-
 	@Test
 	public void executeAdOperationCallsOnUnityAdsFailedToLoadWhenPlacementNotSet() {
 		LoadOperationState loadOperationState = new LoadOperationState(null, loadListenerMock, unityAdsLoadOptions, OperationTestUtilities.createConfigurationWithWebviewTimeout(webViewTimeout));
 
 		loadModule.executeAdOperation(webViewBridgeInvokerMock, loadOperationState);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
-		Mockito.verify(loadListenerMock, times(1)).onUnityAdsFailedToLoad("", UnityAds.UnityAdsLoadError.INVALID_ARGUMENT,"[UnityAds] Placement ID cannot be null");
+		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad("", UnityAds.UnityAdsLoadError.INVALID_ARGUMENT,"[UnityAds] Placement ID cannot be null");
 	}
 
 	@Test
@@ -77,9 +70,8 @@ public class LoadModuleTests {
 		}).when(webViewBridgeInvokerMock).invokeMethod(anyString(), anyString(), any(Method.class), any(Object.class));
 
 		loadModule.executeAdOperation(webViewBridgeInvokerMock, loadOperationState);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify(loadListenerMock, times(1)).onUnityAdsFailedToLoad(placementId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "[UnityAds] Internal communication failure");
+		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(placementId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "[UnityAds] Internal communication failure");
 		Mockito.verify(sdkMetricSender, times(1)).SendSDKMetricEventWithTag(SDKMetricEvents.native_load_callback_error, new HashMap<String, String> (){{
 			put("cbs", "invocationFailure");
 		}});
@@ -97,9 +89,8 @@ public class LoadModuleTests {
 		}).when(webViewBridgeInvokerMock).invokeMethod(anyString(), anyString(), any(Method.class), any(Object.class));
 
 		loadModule.executeAdOperation(webViewBridgeInvokerMock, loadOperationState);
-		TestUtilities.SleepCurrentThread(100);
-		TestUtilities.SleepCurrentThread(150);
-		Mockito.verify(loadListenerMock, times(1)).onUnityAdsFailedToLoad(placementId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "[UnityAds] Internal communication timeout");
+
+		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(placementId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "[UnityAds] Internal communication timeout");
 		Mockito.verify(sdkMetricSender, times(1)).SendSDKMetricEvent(eq(SDKMetricEvents.native_load_callback_timeout));
 	}
 
@@ -108,9 +99,8 @@ public class LoadModuleTests {
 		LoadOperationState loadOperationState = new LoadOperationState(placementId, loadListenerMock, null, OperationTestUtilities.createConfigurationWithWebviewTimeout(webViewTimeout));
 
 		loadModule.executeAdOperation(webViewBridgeInvokerMock, loadOperationState);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify(loadListenerMock, times(1)).onUnityAdsFailedToLoad(placementId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "[UnityAds] Failed to create load request");
+		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(placementId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "[UnityAds] Failed to create load request");
 	}
 
 	@Test
@@ -118,8 +108,7 @@ public class LoadModuleTests {
 		LoadOperationState loadOperationState = new LoadOperationState(placementId, loadListenerMock, unityAdsLoadOptions, OperationTestUtilities.createConfigurationWithWebviewTimeout(webViewTimeout));
 
 		loadModule.executeAdOperation(webViewBridgeInvokerMock, loadOperationState);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
-		Mockito.verify(webViewBridgeInvokerMock, times(1)).invokeMethod(anyString(), anyString(), any(Method.class), any(Object.class));
+		Mockito.verify(webViewBridgeInvokerMock, timeout(maxWaitTime).times(1)).invokeMethod(anyString(), anyString(), any(Method.class), any(Object.class));
 	}
 
 	@Test
@@ -130,8 +119,7 @@ public class LoadModuleTests {
 		loadModule.set(loadOperation);
 
 		loadModule.onUnityAdsAdLoaded(loadOperation.getId());
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
-		Mockito.verify(loadListenerMock, times(1)).onUnityAdsAdLoaded(placementId);
+		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsAdLoaded(placementId);
 	}
 
 	@Test
@@ -141,7 +129,6 @@ public class LoadModuleTests {
 		loadModule.set(null);
 
 		loadModule.onUnityAdsAdLoaded(loadOperation.getId());
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 		//No Verification as there is nothing to mock against.  A null pointer exception is all that is being checked for here.
 	}
 
@@ -153,8 +140,7 @@ public class LoadModuleTests {
 		loadModule.set(loadOperation);
 
 		loadModule.onUnityAdsFailedToLoad(loadOperation.getId(), loadError, loadErrorMessage);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
-		Mockito.verify(loadListenerMock, times(1)).onUnityAdsFailedToLoad(placementId, loadError, loadErrorMessage);
+		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(placementId, loadError, loadErrorMessage);
 	}
 
 	@Test
@@ -164,7 +150,6 @@ public class LoadModuleTests {
 		loadModule.set(null);
 
 		loadModule.onUnityAdsFailedToLoad(loadOperation.getId(), loadError, loadErrorMessage);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 		//No Verification as there is nothing to mock against.  A null pointer exception is all that is being checked for here.
 	}
 }

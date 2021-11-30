@@ -5,7 +5,7 @@ public class WebViewAdsError implements IUnityAdsError {
 	private Enum _errorCategory;
 	protected Object[] _errorArguments;
 
-	public WebViewAdsError(GMAEvent errorCategory, String description, Object... errorArguments) {
+	public WebViewAdsError(Enum<?> errorCategory, String description, Object... errorArguments) {
 		_errorCategory = errorCategory;
 		_description = description;
 		_errorArguments = errorArguments;
@@ -26,7 +26,7 @@ public class WebViewAdsError implements IUnityAdsError {
 		return -1;
 	}
 
-	public Enum getErrorCategory() {
+	public Enum<?> getErrorCategory() {
 		return _errorCategory;
 	}
 

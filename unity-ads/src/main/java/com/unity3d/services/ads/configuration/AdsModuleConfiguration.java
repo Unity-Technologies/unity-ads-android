@@ -2,16 +2,11 @@ package com.unity3d.services.ads.configuration;
 
 import android.os.ConditionVariable;
 
-import com.unity3d.ads.IUnityAdsListener;
-import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.ads.UnityAdsImplementation;
 import com.unity3d.services.ads.adunit.AdUnitOpen;
-import com.unity3d.services.ads.placement.Placement;
 import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
-import com.unity3d.services.core.misc.Utilities;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -25,11 +20,8 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 	public Class[] getWebAppApiClassList() {
 		Class[] list = {
 			com.unity3d.services.ads.api.AdUnit.class,
-			com.unity3d.services.ads.api.Listener.class,
 			com.unity3d.services.ads.api.VideoPlayer.class,
-			com.unity3d.services.ads.api.Placement.class,
 			com.unity3d.services.ads.api.WebPlayer.class,
-			com.unity3d.services.ads.api.Purchasing.class,
 			com.unity3d.services.ads.api.Load.class,
 			com.unity3d.services.ads.api.Show.class,
 			com.unity3d.services.ads.api.Token.class,
@@ -40,7 +32,6 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 	}
 
 	public boolean resetState(Configuration configuration) {
-		Placement.reset();
 		AdUnitOpen.setConfiguration(configuration);
 		UnityAdsImplementation.setConfiguration(configuration);
 		TokenStorage.deleteTokens();
@@ -85,15 +76,6 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 	}
 
 	public boolean initErrorState(Configuration configuration, String state, String errorMessage) {
-		final String message = "Init failed in " + state;
-		Utilities.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				for (IUnityAdsListener listener : AdsProperties.getListeners()) {
-					listener.onUnityAdsError(UnityAds.UnityAdsError.INITIALIZE_FAILED, message);
-				}
-			}
-		});
 		return true;
 	}
 

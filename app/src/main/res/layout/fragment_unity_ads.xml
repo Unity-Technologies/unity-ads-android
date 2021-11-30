@@ -1,18 +1,20 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/unityads_example_background"
                 android:id="@+id/unityads_example_layout_root">
 
-    <ImageView android:layout_width="280dp"
-              android:layout_height="wrap_content"
-              android:src="@drawable/unityads_logo"
-              android:layout_centerHorizontal="true"
-              android:layout_alignParentTop="true"
-              android:layout_marginTop="40dp"
-               android:layout_marginLeft="40dp"
-               android:layout_marginRight="40dp"
-              android:id="@+id/unityads_example_title_text" />
+    <ImageView
+        android:id="@+id/unityads_example_title_text"
+        android:layout_width="280dp"
+        android:layout_height="157dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginRight="40dp"
+        android:src="@drawable/unityads_logo" />
 
     <LinearLayout
         android:id="@+id/unityads_example_config_container"
@@ -32,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:width="90dp"
-                android:text="Game Id:"
+                android:text="Game ID:"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="#ffffff" />
 
@@ -57,10 +59,10 @@
 
             <TextView
                 android:id="@+id/unityads_example_testmode_label"
-                android:layout_width="wrap_content"
+                android:layout_width="109dp"
                 android:layout_height="wrap_content"
                 android:width="90dp"
-                android:text="Testmode:"
+                android:text="Test Mode:"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="#ffffff" />
 
@@ -80,77 +82,157 @@
 
     <LinearLayout
         android:id="@+id/unityads_example_button_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="297dp"
+        android:layout_height="386dp"
         android:layout_below="@+id/unityads_example_config_container"
         android:layout_centerHorizontal="true"
         android:orientation="vertical"
-        android:paddingLeft="15dp"
         android:paddingStart="15dp"
+        android:paddingLeft="15dp"
         android:paddingTop="25dp">
 
         <Button
             android:id="@+id/unityads_example_initialize_button"
-            android:layout_width="130dp"
+            android:layout_width="285dp"
             android:layout_height="45dp"
-            android:layout_marginBottom="15dp"
             android:layout_marginRight="15dp"
+            android:layout_marginBottom="15dp"
             android:background="#FF2196F3"
             android:text="@string/unityads_example_initialize_text"
             android:textColor="@android:color/white"
             android:visibility="visible" />
 
-        <Button
-            android:id="@+id/unityads_example_interstitial_button"
-            android:layout_width="130dp"
-            android:layout_height="45dp"
-            android:layout_marginBottom="15dp"
-            android:layout_marginRight="15dp"
-            android:background="#FF2196F3"
-            android:enabled="false"
-            android:text="@string/unityads_example_interstitial_text"
-            android:textColor="@android:color/white"
-            android:visibility="visible" />
-
-        <Button
-            android:id="@+id/unityads_example_incentivized_button"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginBottom="15dp"
-            android:layout_marginRight="15dp"
-            android:background="#FF2196F3"
-            android:enabled="false"
-            android:text="@string/unityads_example_incentivized_text"
-            android:textColor="@android:color/white"
-            android:visibility="visible" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/unityads_example_banner_button"
-            android:layout_width="130dp"
-            android:layout_height="45dp"
-            android:layout_marginBottom="15dp"
-            android:layout_marginRight="15dp"
-            android:background="#FF2196F3"
-            android:enabled="false"
-            android:text="@string/show_banner"
-            android:textColor="@android:color/white"
-            android:visibility="visible" />
+            <TextView
+                android:id="@+id/interstitialTextView"
+                android:layout_width="108dp"
+                android:layout_height="35dp"
+                android:layout_weight="1"
+                android:text="@string/unityads_example_interstitial_text"
+                android:textColor="@color/design_default_color_background" />
+
+            <Button
+                android:id="@+id/unityads_example_load_interstitial_button"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="15dp"
+                android:layout_weight="1"
+                android:background="#FF2196F3"
+                android:enabled="false"
+                android:text="@string/unityads_example_load_text"
+                android:textColor="@android:color/white"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/unityads_example_show_interstitial_button"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="15dp"
+                android:layout_weight="1"
+                android:background="#FF2196F3"
+                android:enabled="false"
+                android:text="@string/unityads_example_show_text"
+                android:textColor="@android:color/white"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/rewardedTextView"
+                android:layout_width="109dp"
+                android:layout_height="35dp"
+                android:layout_weight="1"
+                android:text="@string/unityads_example_rewarded_text"
+                android:textColor="@color/design_default_color_background" />
+
+            <Button
+                android:id="@+id/unityads_example_load_rewarded_button"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="15dp"
+                android:layout_weight="1"
+                android:background="#FF2196F3"
+                android:enabled="false"
+                android:text="@string/unityads_example_load_text"
+                android:textColor="@android:color/white"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/unityads_example_show_rewarded_button"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="15dp"
+                android:layout_weight="1"
+                android:background="#FF2196F3"
+                android:enabled="false"
+                android:text="@string/unityads_example_show_text"
+                android:textColor="@android:color/white"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/bannerTextView"
+                android:layout_width="109dp"
+                android:layout_height="35dp"
+                android:layout_weight="1"
+                android:text="@string/unityads_example_banner_text"
+                android:textColor="@color/design_default_color_background" />
+
+            <Button
+                android:id="@+id/unityads_example_show_banner_button"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="15dp"
+                android:layout_weight="1"
+                android:background="#FF2196F3"
+                android:enabled="false"
+                android:text="@string/unityads_example_show_text"
+                android:textColor="@android:color/white"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/unityads_example_hide_banner_button"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="15dp"
+                android:layout_weight="1"
+                android:background="#FF2196F3"
+                android:enabled="false"
+                android:text="@string/unityads_example_hide_text"
+                android:textColor="@android:color/white"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/unityads_example_banner_layout"
+            android:layout_width="280dp"
+            android:layout_height="100dp">
+
+        </RelativeLayout>
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/unityads_example_statustext"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/unityads_example_button_container"
-        android:gravity="center"
-        android:textAlignment="center"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#ffffff" />
 
 </RelativeLayout>

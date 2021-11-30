@@ -7,18 +7,12 @@ import android.os.Looper;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.unity3d.ads.IUnityAdsListener;
-import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.properties.AdsProperties;
 import com.unity3d.services.core.properties.ClientProperties;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.Arrays;
-import java.util.HashSet;
 
 import static org.junit.Assert.*;
 
@@ -35,13 +29,6 @@ public class ClientPropertiesTest {
 		ClientProperties.setApplicationContext(null);
 		ClientProperties.setActivity(null);
 		ClientProperties.setGameId(null);
-		this.removeListeners();
-	}
-
-	private void removeListeners() {
-		for (IUnityAdsListener listener : AdsProperties.getListeners()) {
-			AdsProperties.removeListener(listener);
-		}
 	}
 
 	@Test
@@ -74,31 +61,6 @@ public class ClientPropertiesTest {
 		String gameId = "TestGameId";
 		ClientProperties.setGameId(gameId);
 		assertEquals("GameID was not the same as expected", gameId, ClientProperties.getGameId());
-	}
-
-	@Test
-	public void testSetListener ()  {
-		IUnityAdsListener listener = new IUnityAdsListener() {
-			@Override
-			public void onUnityAdsReady(String placementId) {
-				// Testing, do nothing
-			}
-			@Override
-			public void onUnityAdsStart(String placementId) {
-				// Testing, do nothing
-			}
-			@Override
-			public void onUnityAdsFinish(String placementId, UnityAds.FinishState result) {
-				// Testing, do nothing
-			}
-			@Override
-			public void onUnityAdsError(UnityAds.UnityAdsError error, String message) {
-				// Testing, do nothing
-			}
-		};
-
-		AdsProperties.addListener(listener);
-		assertEquals("Listener was not the same as expected", new HashSet<>(Arrays.asList(listener)), AdsProperties.getListeners());
 	}
 
 	public class MockActivity extends Activity {

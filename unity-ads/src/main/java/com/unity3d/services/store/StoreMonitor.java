@@ -1,16 +1,23 @@
 package com.unity3d.services.store;
 
 import android.annotation.TargetApi;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.WebViewEventCategory;
-import com.unity3d.services.store.core.StoreException;
+import com.unity3d.services.store.core.StoreExceptionHandler;
+import com.unity3d.services.store.core.StoreLifecycleListener;
+import com.unity3d.services.store.gpbl.BillingResultResponseCode;
+import com.unity3d.services.store.gpbl.IBillingClientStateListener;
+import com.unity3d.services.store.listeners.IPurchaseHistoryResponseListener;
+import com.unity3d.services.store.listeners.IPurchaseUpdatedResponseListener;
+import com.unity3d.services.store.listeners.ISkuDetailsResponseListener;
+import com.unity3d.services.store.gpbl.StoreBilling;
+import com.unity3d.services.store.gpbl.bridges.BillingResultBridge;
+import com.unity3d.services.store.gpbl.bridges.PurchaseBridge;
+import com.unity3d.services.store.gpbl.bridges.PurchaseHistoryRecordBridge;
+import com.unity3d.services.store.gpbl.bridges.SkuDetailsBridge;
+import com.unity3d.services.store.listeners.PurchasesResponseListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,141 +25,127 @@ import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @TargetApi(14)
 public class StoreMonitor {
-	private static Object _billingService;
+	private static StoreBilling _storeBilling;
+	private static AtomicBoolean _isInitialized = new AtomicBoolean(false);
+	private static StoreExceptionHandler _storeExceptionHandler;
 	private static StoreLifecycleListener _lifecycleListener;
 
-	public static void initialize(String intentName, String intentPackage) {
-		Intent intent = new Intent(intentName);
-		intent.setPackage(intentPackage);
+	public static void initialize(StoreExceptionHandler storeExceptionHandler) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InterruptedException, InvocationTargetException {
+		if (_isInitialized.get()) {
+			// Already initialized
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.INITIALIZATION_REQUEST_RESULT, BillingResultResponseCode.OK.getResponseCode());
+			return;
+		}
 
-		ServiceConnection serviceConnection = new ServiceConnection() {
+		_storeExceptionHandler = storeExceptionHandler;
+		_storeBilling = new StoreBilling(ClientProperties.getApplicationContext(), new IPurchaseUpdatedResponseListener() {
 			@Override
-			public void onServiceConnected(ComponentName name, IBinder service) {
-				_billingService = StoreBilling.asInterface(ClientProperties.getApplicationContext(), service);
-				if(_billingService != null) {
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.INITIALIZED);
+			public void onBillingResponse(BillingResultBridge billingResult, List<PurchaseBridge> purchases) {
+				if (billingResult.getResponseCode() == BillingResultResponseCode.OK) {
+					JSONArray purchasesJson = new JSONArray();
+					for (PurchaseBridge purchaseBridge : purchases) {
+						purchasesJson.put(purchaseBridge.toJson());
+					}
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASES_UPDATED_RESULT, purchasesJson);
 				} else {
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.INITIALIZATION_FAILED);
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASES_UPDATED_ERROR, billingResult.getResponseCode());
+				}
+			}
+		});
+		_storeBilling.initialize(new IBillingClientStateListener() {
+			@Override
+			public void onBillingSetupFinished(BillingResultBridge billingResult) {
+				if (billingResult.getResponseCode() == BillingResultResponseCode.OK) {
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.INITIALIZATION_REQUEST_RESULT, billingResult.getResponseCode());
+					_isInitialized.set(true);
+				} else {
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.INITIALIZATION_REQUEST_FAILED, billingResult.getResponseCode());
 				}
 			}
 
 			@Override
-			public void onServiceDisconnected(ComponentName name) {
-				_billingService = null;
-
-				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.DISCONNECTED);
+			public void onBillingServiceDisconnected() {
+				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.DISCONNECTED_RESULT);
 			}
-		};
-
-		ClientProperties.getApplicationContext().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+		});
 	}
 
 	public static boolean isInitialized() {
-		return _billingService != null;
+		return _isInitialized.get();
 	}
 
-	public static int isBillingSupported(String purchaseType) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, StoreException, InvocationTargetException {
-		return StoreBilling.isBillingSupported(ClientProperties.getApplicationContext(), _billingService, purchaseType);
+	public static int isFeatureSupported(int operationId, String purchaseType) {
+		int result = -1;
+		try {
+			result = _storeBilling.isFeatureSupported(purchaseType);
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.IS_FEATURE_SUPPORTED_REQUEST_RESULT, operationId, result);
+		} catch (Exception exception) {
+			_storeExceptionHandler.handleStoreException(StoreEvent.IS_FEATURE_SUPPORTED_REQUEST_ERROR, operationId, exception);
+		}
+		return result;
 	}
 
-	public static JSONObject getPurchases(String purchaseType) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, JSONException, IllegalAccessException, StoreException {
-		return StoreBilling.getPurchases(ClientProperties.getApplicationContext(), _billingService, purchaseType);
+	public static void getPurchases(final int operationId, String purchaseType) {
+		try {
+			_storeBilling.getPurchases(purchaseType, new PurchasesResponseListener(operationId, StoreEvent.PURCHASES_REQUEST_RESULT, StoreEvent.PURCHASES_REQUEST_ERROR));
+		} catch (Exception exception) {
+			_storeExceptionHandler.handleStoreException(StoreEvent.PURCHASES_REQUEST_ERROR, operationId, exception);
+		}
 	}
 
-	public static JSONObject getPurchaseHistory(String purchaseType, int maxPurchases) throws NoSuchMethodException, StoreException, IllegalAccessException, JSONException, InvocationTargetException, ClassNotFoundException {
-		return StoreBilling.getPurchaseHistory(ClientProperties.getApplicationContext(), _billingService, purchaseType, maxPurchases);
+	public static void getPurchaseHistory(final int operationId, String purchaseType, int maxPurchases) {
+		try {
+			_storeBilling.getPurchaseHistory(purchaseType, maxPurchases, new IPurchaseHistoryResponseListener() {
+				@Override
+				public void onBillingResponse(BillingResultBridge billingResult, List<PurchaseHistoryRecordBridge> purchaseHistoryRecordList) {
+					JSONArray jsonArray = new JSONArray();
+					for(PurchaseHistoryRecordBridge purchaseHistoryRecordBridge : purchaseHistoryRecordList) {
+						jsonArray.put(purchaseHistoryRecordBridge.getOriginalJson());
+					}
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_HISTORY_LIST_REQUEST_RESULT, operationId, jsonArray);
+				}
+			});
+		} catch (Exception exception) {
+			_storeExceptionHandler.handleStoreException(StoreEvent.PURCHASE_HISTORY_LIST_REQUEST_ERROR, operationId, exception);
+		}
 	}
 
-	public static JSONArray getSkuDetails(String purchaseType, ArrayList<String> skuList) throws NoSuchMethodException, StoreException, IllegalAccessException, JSONException, InvocationTargetException, ClassNotFoundException {
-		return StoreBilling.getSkuDetails(ClientProperties.getApplicationContext(), _billingService, purchaseType, skuList);
+	public static void getSkuDetails(final int operationId, String purchaseType, ArrayList<String> skuList) {
+		try {
+			_storeBilling.getSkuDetails(purchaseType, skuList, new ISkuDetailsResponseListener() {
+				@Override
+				public void onBillingResponse(BillingResultBridge billingResult, List<SkuDetailsBridge> skuDetailsList) {
+					JSONArray skuDetailsJson = new JSONArray();
+					for (SkuDetailsBridge skuDetailsBridge : skuDetailsList) {
+						skuDetailsJson.put(skuDetailsBridge.getOriginalJson());
+					}
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.SKU_DETAILS_LIST_REQUEST_RESULT, operationId, skuDetailsJson);
+				}
+			});
+		} catch(Exception exception) {
+			_storeExceptionHandler.handleStoreException(StoreEvent.SKU_DETAILS_LIST_REQUEST_ERROR, operationId, exception);
+		}
 	}
 
-	public static void startPurchaseTracking(boolean trackAllActivities, ArrayList<String> exceptions, ArrayList<String> purchaseTypes) {
+	public static void startPurchaseTracking(ArrayList<String> purchaseTypes) {
 		if(_lifecycleListener != null) {
 			stopPurchaseTracking();
 		}
 
-		_lifecycleListener = new StoreLifecycleListener(trackAllActivities, exceptions, purchaseTypes);
+		_lifecycleListener = new StoreLifecycleListener(purchaseTypes, _storeBilling);
 		ClientProperties.getApplication().registerActivityLifecycleCallbacks(_lifecycleListener);
+
 	}
 
 	public static void stopPurchaseTracking() {
 		if(_lifecycleListener != null) {
 			ClientProperties.getApplication().unregisterActivityLifecycleCallbacks(_lifecycleListener);
 			_lifecycleListener = null;
-		}
-	}
-
-	public static void sendPurchaseStatusOnResume(String activityName, ArrayList<String> purchaseTypes) {
-		if(!isInitialized()) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_RESUME_ERROR, StoreError.NOT_INITIALIZED, activityName, "StoreMonitor not initialized");
-			return;
-		}
-
-		try {
-			JSONObject results = new JSONObject();
-
-			if(purchaseTypes.contains("inapp")) {
-				JSONObject inAppStatus = getPurchases("inapp");
-				results.put("inapp", inAppStatus);
-			}
-
-			if(purchaseTypes.contains("subs")) {
-				JSONObject subsStatus = getPurchases("subs");
-				results.put("subs", subsStatus);
-			}
-
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_RESUME, activityName, results);
-		} catch (ClassNotFoundException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_RESUME_ERROR, StoreError.CLASS_NOT_FOUND, activityName, e.getMessage());
-		} catch (NoSuchMethodException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_RESUME_ERROR, StoreError.NO_SUCH_METHOD, activityName, e.getMessage());
-		} catch (InvocationTargetException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_RESUME_ERROR, StoreError.INVOCATION_TARGET, activityName, e.getMessage());
-		} catch (JSONException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_RESUME_ERROR, StoreError.JSON_ERROR, activityName, e.getMessage());
-		} catch (IllegalAccessException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_RESUME_ERROR, StoreError.ILLEGAL_ACCESS, activityName, e.getMessage());
-		} catch (StoreException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_RESUME_ERROR, StoreError.STORE_ERROR, activityName, e.getMessage(), e.getResultCode());
-		}
-	}
-
-	public static void sendPurchaseStatusOnStop(String activityName, ArrayList<String> purchaseTypes) {
-		if(!isInitialized()) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_STOP_ERROR, StoreError.NOT_INITIALIZED, activityName, "StoreMonitor not initialized");
-			return;
-		}
-
-		try {
-			JSONObject results = new JSONObject();
-
-			if(purchaseTypes.contains("inapp")) {
-				JSONObject inAppStatus = getPurchases("inapp");
-				results.put("inapp", inAppStatus);
-			}
-
-			if(purchaseTypes.contains("subs")) {
-				JSONObject subsStatus = getPurchases("subs");
-				results.put("subs", subsStatus);
-			}
-
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_STOP, activityName, results);
-		} catch (ClassNotFoundException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_STOP_ERROR, StoreError.CLASS_NOT_FOUND, activityName, e.getMessage());
-		} catch (NoSuchMethodException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_STOP_ERROR, StoreError.NO_SUCH_METHOD, activityName, e.getMessage());
-		} catch (InvocationTargetException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_STOP_ERROR, StoreError.INVOCATION_TARGET, activityName, e.getMessage());
-		} catch (JSONException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_STOP_ERROR, StoreError.JSON_ERROR, activityName, e.getMessage());
-		} catch (IllegalAccessException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_STOP_ERROR, StoreError.ILLEGAL_ACCESS, activityName, e.getMessage());
-		} catch (StoreException e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_STATUS_ON_STOP_ERROR, StoreError.STORE_ERROR, activityName, e.getMessage(), e.getResultCode());
 		}
 	}
 }

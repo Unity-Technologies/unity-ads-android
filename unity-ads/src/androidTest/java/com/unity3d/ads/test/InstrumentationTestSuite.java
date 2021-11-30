@@ -8,7 +8,6 @@ import com.unity3d.ads.test.instrumentation.services.ads.operation.LoadModuleDec
 import com.unity3d.ads.test.instrumentation.services.ads.operation.LoadModuleTests;
 import com.unity3d.ads.test.instrumentation.services.ads.operation.LoadOperationTests;
 import com.unity3d.ads.test.instrumentation.services.ads.operation.ShowModuleTests;
-import com.unity3d.ads.test.instrumentation.services.ads.properties.AdsPropertiesTests;
 import com.unity3d.ads.test.instrumentation.services.ads.webplayer.WebPlayerViewCacheTest;
 import com.unity3d.ads.test.instrumentation.services.ads.webplayer.WebPlayerViewSettingsCacheTest;
 import com.unity3d.ads.test.instrumentation.services.banners.BannerViewCacheTests;
@@ -27,7 +26,6 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 	UnityAnalyticsTest.class,
 	AcquisitionTypeTest.class,
-	AdsPropertiesTests.class,
 	InitializationNotificationCenterTest.class,
 	WebPlayerViewSettingsCacheTest.class,
 	WebPlayerViewCacheTest.class,

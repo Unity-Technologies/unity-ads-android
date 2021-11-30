@@ -1,11 +1,17 @@
 package com.unity3d.ads.test.instrumentation.services.ads.operation;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+
 import androidx.test.rule.ActivityTestRule;
 
 import com.unity3d.ads.IUnityAdsShowListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.UnityAdsShowOptions;
-import com.unity3d.ads.test.TestUtilities;
 import com.unity3d.ads.test.instrumentation.InstrumentationTestActivity;
 import com.unity3d.services.ads.operation.show.IShowModule;
 import com.unity3d.services.ads.operation.show.ShowModule;
@@ -26,19 +32,12 @@ import org.mockito.stubbing.Answer;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-
 public class ShowModuleTests {
-	private static String placementId = "TestPlacementId";
-	private static UnityAdsShowOptions showOptions = new UnityAdsShowOptions();
+	private static final String placementId = "TestPlacementId";
+	private static final UnityAdsShowOptions showOptions = new UnityAdsShowOptions();
 
-	private static int showTimeout = 100;
-	private static int uiThreadDelay = 25;
+	private static final int showTimeout = 100;
+	private static final int maxWaitTime = 25000;
 
 	private IUnityAdsShowListener _showListenerMock;
 	private IShowModule _showModule;
@@ -60,25 +59,23 @@ public class ShowModuleTests {
 	public void executeAdOperationCallsOnUnityAdsFailedToShowWhenPlacementNotSet() {
 		ShowOperationState showOperationState = new ShowOperationState(null, _showListenerMock, _activityRule.getActivity(), showOptions, OperationTestUtilities.createConfigurationWithShowTimeout(showTimeout));
 		_showModule.executeAdOperation(_webViewBridgeInvokerMock, showOperationState);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify((_showListenerMock), times(1)).onUnityAdsShowFailure("", UnityAds.UnityAdsShowError.INVALID_ARGUMENT, "[UnityAds] Placement ID cannot be null");
+		Mockito.verify((_showListenerMock), timeout(maxWaitTime).times(1)).onUnityAdsShowFailure("", UnityAds.UnityAdsShowError.INVALID_ARGUMENT, "[UnityAds] Placement ID cannot be null");
 	}
 
 	@Test
 	public void showModuleCallsOnUnityAdsFailedToShowWhenInvocationCallbackFails() {
 		ShowOperationState showOperationState = new ShowOperationState(placementId, _showListenerMock, _activityRule.getActivity(), showOptions, OperationTestUtilities.createConfigurationWithShowTimeout(showTimeout));
 
-		doAnswer(new Answer() {
+		doAnswer(new Answer<Object>() {
 			public Object answer(InvocationOnMock invocation) {
 				return false;
 			}
 		}).when(_webViewBridgeInvokerMock).invokeMethod(anyString(), anyString(), any(Method.class), any(Object.class));
 		_showModule.executeAdOperation(_webViewBridgeInvokerMock, showOperationState);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify((_showListenerMock), times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "WebViewBridgeInvocationRunnable:run: invokeMethod failure");
-		Mockito.verify(_sdkMetricSender, times(1)).SendSDKMetricEventWithTag(SDKMetricEvents.native_show_callback_error, new HashMap<String, String> (){{
+		Mockito.verify((_showListenerMock), timeout(maxWaitTime).times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "WebViewBridgeInvocationRunnable:run: invokeMethod failure");
+		Mockito.verify(_sdkMetricSender, timeout(maxWaitTime).times(1)).SendSDKMetricEventWithTag(SDKMetricEvents.native_show_callback_error, new HashMap<String, String> (){{
 			put("cbs", "invocationFailure");
 		}});
 	}
@@ -87,7 +84,7 @@ public class ShowModuleTests {
 	public void showModuleCallsOnUnityAdsFailedToShowWhenInvocationCallbackTimesOut() {
 		ShowOperationState showOperationState = new ShowOperationState(placementId, _showListenerMock, _activityRule.getActivity(), showOptions, OperationTestUtilities.createConfigurationWithWebviewTimeout(50));
 
-		doAnswer(new Answer() {
+		doAnswer(new Answer<Object>() {
 			public Object answer(InvocationOnMock invocation) {
 				//Succeed invocation but don't simulate any return call from WebView so the request acknowledgement times out.
 				return true;
@@ -95,10 +92,9 @@ public class ShowModuleTests {
 		}).when(_webViewBridgeInvokerMock).invokeMethod(anyString(), anyString(), any(Method.class), any(Object.class));
 
 		_showModule.executeAdOperation(_webViewBridgeInvokerMock, showOperationState);
-		TestUtilities.SleepCurrentThread(250);
 
-		Mockito.verify((_showListenerMock), times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "[UnityAds] Show Invocation Timeout");
-		Mockito.verify(_sdkMetricSender, times(1)).SendSDKMetricEvent(eq(SDKMetricEvents.native_show_callback_timeout));
+		Mockito.verify((_showListenerMock), timeout(maxWaitTime).times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "[UnityAds] Show Invocation Timeout");
+		Mockito.verify(_sdkMetricSender, timeout(maxWaitTime).times(1)).SendSDKMetricEvent(eq(SDKMetricEvents.native_show_callback_timeout));
 	}
 
 	@Test
@@ -106,9 +102,7 @@ public class ShowModuleTests {
 		ShowOperationState showOperationState = new ShowOperationState(placementId, _showListenerMock, _activityRule.getActivity(), null, OperationTestUtilities.createConfigurationWithShowTimeout(showTimeout));
 		_showModule.executeAdOperation(_webViewBridgeInvokerMock, showOperationState);
 
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
-
-		Mockito.verify((_showListenerMock), times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "[UnityAds] Error creating show options");
+		Mockito.verify((_showListenerMock), timeout(maxWaitTime).times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "[UnityAds] Error creating show options");
 	}
 
 	@Test
@@ -116,9 +110,8 @@ public class ShowModuleTests {
 		ShowOperationState showOperationState = new ShowOperationState(placementId, _showListenerMock, _activityRule.getActivity(), showOptions, OperationTestUtilities.createConfigurationWithShowTimeout(showTimeout));
 
 		_showModule.executeAdOperation(_webViewBridgeInvokerMock, showOperationState);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify((_webViewBridgeInvokerMock), times(1)).invokeMethod(anyString(), anyString(), any(Method.class), any(Object.class));
+		Mockito.verify((_webViewBridgeInvokerMock), timeout(maxWaitTime).times(1)).invokeMethod(anyString(), anyString(), any(Method.class), any(Object.class));
 	}
 
 	@Test
@@ -128,9 +121,8 @@ public class ShowModuleTests {
 
 		_showModule.set(showOperation);
 		_showModule.onUnityAdsShowFailure(showOperation.getId(), UnityAds.UnityAdsShowError.INTERNAL_ERROR, "ErrorMessage");
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify(_showListenerMock, times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "ErrorMessage");
+		Mockito.verify(_showListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "ErrorMessage");
 	}
 
 	@Test
@@ -139,7 +131,6 @@ public class ShowModuleTests {
 		ShowOperation showOperation = new ShowOperation(showOperationState, mock(IWebViewBridgeInvocation.class));
 
 		_showModule.onUnityAdsShowFailure(showOperation.getId(), UnityAds.UnityAdsShowError.INTERNAL_ERROR, "ErrorMessage");
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 	}
 
 	@Test
@@ -149,9 +140,8 @@ public class ShowModuleTests {
 
 		_showModule.set(showOperation);
 		_showModule.onUnityAdsShowStart(showOperation.getId());
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify(_showListenerMock, times(1)).onUnityAdsShowStart(placementId);
+		Mockito.verify(_showListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsShowStart(placementId);
 	}
 
 	@Test
@@ -160,7 +150,6 @@ public class ShowModuleTests {
 		ShowOperation showOperation = new ShowOperation(showOperationState, mock(IWebViewBridgeInvocation.class));
 
 		_showModule.onUnityAdsShowStart(showOperation.getId());
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 	}
 
 	@Test
@@ -170,9 +159,8 @@ public class ShowModuleTests {
 
 		_showModule.set(showOperation);
 		_showModule.onUnityAdsShowClick(showOperation.getId());
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify(_showListenerMock, times(1)).onUnityAdsShowClick(placementId);
+		Mockito.verify(_showListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsShowClick(placementId);
 	}
 
 	@Test
@@ -181,7 +169,6 @@ public class ShowModuleTests {
 		ShowOperation showOperation = new ShowOperation(showOperationState, mock(IWebViewBridgeInvocation.class));
 
 		_showModule.onUnityAdsShowClick(showOperation.getId());
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 	}
 
 	@Test
@@ -191,9 +178,8 @@ public class ShowModuleTests {
 
 		_showModule.set(showOperation);
 		_showModule.onUnityAdsShowComplete(showOperation.getId(), UnityAds.UnityAdsShowCompletionState.COMPLETED);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 
-		Mockito.verify(_showListenerMock, times(1)).onUnityAdsShowComplete(placementId, UnityAds.UnityAdsShowCompletionState.COMPLETED);
+		Mockito.verify(_showListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsShowComplete(placementId, UnityAds.UnityAdsShowCompletionState.COMPLETED);
 	}
 
 	@Test
@@ -202,6 +188,5 @@ public class ShowModuleTests {
 		ShowOperation showOperation = new ShowOperation(showOperationState, mock(IWebViewBridgeInvocation.class));
 
 		_showModule.onUnityAdsShowComplete(showOperation.getId(), UnityAds.UnityAdsShowCompletionState.COMPLETED);
-		TestUtilities.SleepCurrentThread(uiThreadDelay);
 	}
 }

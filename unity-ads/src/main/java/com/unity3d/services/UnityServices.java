@@ -27,12 +27,10 @@ public class UnityServices {
 	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
 	 *  @param context Current Android application context of calling app
 	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
-	 * @param listener Listener for IUnityAdsListener callbacks
 	 * @param testMode If true, only test ads are shown
-	 * @param enablePerPlacementLoad If true, disables automatic requests, and allows the load() function to request placements instead
 	 * @param initializationListener Listener for IUnityAdsInitializationListener callbacks
 	 */
-	public static void initialize(final Context context, final String gameId, final IUnityServicesListener listener, final boolean testMode, final boolean enablePerPlacementLoad, final IUnityAdsInitializationListener initializationListener) {
+	public static void initialize(final Context context, final String gameId, final boolean testMode, final IUnityAdsInitializationListener initializationListener) {
 		DeviceLog.entered();
 
 		if (SdkProperties.getCurrentInitializationState() != SdkProperties.InitializationState.NOT_INITIALIZED) {
@@ -48,19 +46,11 @@ public class UnityServices {
 				differingParameters += createExpectedParametersString("Test Mode", previousTestMode, testMode);
 			}
 
-			boolean previousLoadEnabled = SdkProperties.isPerPlacementLoadEnabled();
-			if (previousLoadEnabled != enablePerPlacementLoad) {
-				differingParameters += createExpectedParametersString("Enable Per Placement Load", previousLoadEnabled, enablePerPlacementLoad);
-			}
-
 			if (!TextUtils.isEmpty(differingParameters)) {
 				String message = "Unity Ads SDK failed to initialize due to already being initialized with different parameters" + differingParameters;
 				DeviceLog.warning(message);
 				if (initializationListener != null) {
 					initializationListener.onInitializationFailed(UnityAds.UnityAdsInitializationError.INVALID_ARGUMENT, message);
-				}
-				if (listener != null) {
-					listener.onUnityServicesError(UnityServicesError.INVALID_ARGUMENT, message);
 				}
 				return;
 			}
@@ -84,7 +74,6 @@ public class UnityServices {
 		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZING);
 		ClientProperties.setGameId(gameId);
 		SdkProperties.setTestMode(testMode);
-		SdkProperties.setPerPlacementLoadEnabled(enablePerPlacementLoad);
 
 		if(!isSupported()) {
 			DeviceLog.error("Error while initializing Unity Services: device is not supported");
@@ -97,31 +86,28 @@ public class UnityServices {
 		if(gameId == null || gameId.length() == 0) {
 			DeviceLog.error("Error while initializing Unity Services: empty game ID, halting Unity Ads init");
 			SdkProperties.notifyInitializationFailed(UnityAds.UnityAdsInitializationError.INVALID_ARGUMENT, "Unity Ads SDK failed to initialize due to empty game ID");
-			if(listener != null) {
-				listener.onUnityServicesError(UnityServicesError.INVALID_ARGUMENT, "Empty game ID");
-			}
 			return;
 		}
 
 		if(context == null) {
 			DeviceLog.error("Error while initializing Unity Services: null context, halting Unity Ads init");
 			SdkProperties.notifyInitializationFailed(UnityAds.UnityAdsInitializationError.INVALID_ARGUMENT, "Unity Ads SDK failed to initialize due to null context");
-			if(listener != null) {
-				listener.onUnityServicesError(UnityServicesError.INVALID_ARGUMENT, "Null context");
-			}
 			return;
 		}
 
 		if (context instanceof Application) {
 			ClientProperties.setApplication((Application) context);
 		} else if (context instanceof Activity) {
-			ClientProperties.setApplication(((Activity) context).getApplication());
+			if (((Activity) context).getApplication() != null) {
+				ClientProperties.setApplication(((Activity) context).getApplication());
+			} else {
+				DeviceLog.error("Error while initializing Unity Services: cannot retrieve application from context, halting Unity Ads init");
+				SdkProperties.notifyInitializationFailed(UnityAds.UnityAdsInitializationError.INVALID_ARGUMENT, "Unity Ads SDK failed to initialize due to inability to retrieve application from context");
+				return;
+			}
 		} else {
 			DeviceLog.error("Error while initializing Unity Services: invalid context, halting Unity Ads init");
 			SdkProperties.notifyInitializationFailed(UnityAds.UnityAdsInitializationError.INVALID_ARGUMENT, "Unity Ads SDK failed to initialize due to invalid context");
-			if(listener != null) {
-				listener.onUnityServicesError(UnityServicesError.INVALID_ARGUMENT, "Invalid context");
-			}
 			return;
 		}
 
@@ -132,15 +118,18 @@ public class UnityServices {
 		}
 
 		SdkProperties.setDebugMode(SdkProperties.getDebugMode());
-		SdkProperties.setListener(listener);
-		ClientProperties.setApplicationContext(context.getApplicationContext());
+
+		if (context.getApplicationContext() != null) {
+			ClientProperties.setApplicationContext(context.getApplicationContext());
+		} else {
+			DeviceLog.error("Error while initializing Unity Services: cannot retrieve application context, halting Unity Ads init");
+			SdkProperties.notifyInitializationFailed(UnityAds.UnityAdsInitializationError.INVALID_ARGUMENT, "Unity Ads SDK failed to initialize due to inability to retrieve application context");
+			return;
+		}
 
 		if(!EnvironmentCheck.isEnvironmentOk()) {
 			DeviceLog.error("Error during Unity Services environment check, halting Unity Services init");
 			SdkProperties.notifyInitializationFailed(UnityAds.UnityAdsInitializationError.INTERNAL_ERROR, "Unity Ads SDK failed to initialize due to environment check failed");
-			if(listener != null) {
-				listener.onUnityServicesError(UnityServicesError.INIT_SANITY_CHECK_FAIL, "Unity Services init environment check failed");
-			}
 			return;
 		}
 		DeviceLog.info("Unity Services environment check OK");
