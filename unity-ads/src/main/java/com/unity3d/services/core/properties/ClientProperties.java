@@ -7,13 +7,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.util.Log;
 
-import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.log.DeviceLog;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.lang.ref.WeakReference;
@@ -132,36 +127,4 @@ public class ClientProperties {
 
 		return debuggable;
 	}
-
-   public static JSONArray areClassesPresent(JSONArray classNames) {
-
-       if (classNames == null) {
-	   	   return new JSONArray();
-	   }
-	   JSONArray result = new JSONArray();
-
-       for (int i = 0; i < classNames.length(); i++) {
-		   JSONObject item = new JSONObject();
-		   String className = "";
-		   try {
-			   className = classNames.get(i).toString();
-		   } catch (Exception e) {}
-		   try {
-			   Class cls = Class.forName(className);
-			   item.put("class", className);
-			   item.put("found", true);
-		   } catch(Exception ex) {
-				try {
-					item.put("class", className);
-					item.put("found", false);
-				} catch (Exception e) {}
-		   }
-		   try {
-		   		result.put(item);
-		   } catch (Exception e) {}
-
-	   }
-       return result;
-   }
-
 }

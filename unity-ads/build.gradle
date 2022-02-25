@@ -10,8 +10,8 @@ if (project.rootProject.file('local.properties').exists()) {
 ext {
   GROUP_ID = "com.unity3d.ads"
   ARTIFACT_ID = "unity-ads"
-  VERSION_ID = "4.0.0"
-  VERSION_CODE = 4000
+  VERSION_ID = "4.0.1"
+  VERSION_CODE = 4010
   SIGN_AAR = properties.getProperty("SIGN_AAR") ?: false
 }
 
@@ -86,6 +86,7 @@ dependencies {
     compileOnly project(':unity-scaradapter-common')
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:2.28.2'
+    testImplementation 'com.android.billingclient:billing:4.0.0'
 }
 
 task javadoc(type: Javadoc) {
@@ -103,14 +104,6 @@ task javadoc(type: Javadoc) {
            links "http://docs.oracle.com/javase/7/docs/api/"
     }
     exclude '**/R.java'
-    exclude 'com/unity3d/services/ar/view/GLSurfaceView.java'
-    exclude 'com/unity3d/services/ar/api/AR.java'
-    exclude 'com/unity3d/services/ar/ARUtils.java'
-    exclude 'com/unity3d/services/ar/configuration/ARModuleConfiguration.java'
-    exclude 'com/unity3d/services/ar/view/ARView.java'
-    exclude 'com/unity3d/services/ar/view/ARViewHandler.java'
-    exclude 'com/unity3d/services/ar/view/BackgroundRenderer.java'
-    exclude 'com/unity3d/services/ar/view/DisplayRotationHelper.java'
     destinationDir = file("../javadoc/")
 }
 

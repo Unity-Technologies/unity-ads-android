@@ -1,9 +1,9 @@
 package com.unity3d.services.store.gpbl.proxies;
 
 import com.unity3d.services.core.reflection.GenericListenerProxy;
-import com.unity3d.services.store.listeners.IPurchaseHistoryResponseListener;
 import com.unity3d.services.store.gpbl.bridges.BillingResultBridge;
 import com.unity3d.services.store.gpbl.bridges.PurchaseHistoryRecordBridge;
+import com.unity3d.services.store.listeners.IPurchaseHistoryResponseListener;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -38,16 +38,14 @@ public class PurchaseHistoryResponseListenerProxy extends GenericListenerProxy {
 		return result;
 	}
 
-	/**
-	 * Wraps onPurchaseHistoryResponse(BillingResult billingResult, List<PurchaseHistoryRecord> purchaseHistoryRecordList)
-	 * from the reflected billing library.
-	 * @param billingResult Billing result from the operation.
-	 * @param purchaseHistoryRecordList List of PurchaseHistoryRecord objects received from the query.
-	 */
+	// Wraps onPurchaseHistoryResponse(BillingResult billingResult, List<PurchaseHistoryRecord> purchaseHistoryRecordList)
 	public void onPurchaseHistoryResponse(Object billingResult, List<Object> purchaseHistoryRecordList) {
-		List<PurchaseHistoryRecordBridge> purchaseHistoryRecordBridges = new ArrayList<>();
-		for (int purchaseCount = 0;  purchaseCount < _maxPurchases || purchaseCount < purchaseHistoryRecordList.size(); purchaseCount++) {
-			purchaseHistoryRecordBridges.add(new PurchaseHistoryRecordBridge(purchaseHistoryRecordList.get(purchaseCount)));
+		List<PurchaseHistoryRecordBridge> purchaseHistoryRecordBridges = null;
+		if (purchaseHistoryRecordList != null) {
+			purchaseHistoryRecordBridges = new ArrayList<>();
+			for (int purchaseCount = 0; purchaseCount < _maxPurchases && purchaseCount < purchaseHistoryRecordList.size(); purchaseCount++) {
+				purchaseHistoryRecordBridges.add(new PurchaseHistoryRecordBridge(purchaseHistoryRecordList.get(purchaseCount)));
+			}
 		}
 		if (_purchaseUpdatedResponseListener != null) {
 			_purchaseUpdatedResponseListener.onBillingResponse(new BillingResultBridge(billingResult), purchaseHistoryRecordBridges);

@@ -25,6 +25,9 @@ import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,20 +72,6 @@ public class Device {
 		}
 
 		return -1;
-	}
-
-	@SuppressLint("DefaultLocale")
-	public static String getAndroidId () {
-		String androidID = null;
-
-		try {
-			androidID = Settings.Secure.getString(ClientProperties.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-		}
-		catch (Exception e) {
-			DeviceLog.exception("Problems fetching androidId", e);
-		}
-
-		return androidID;
 	}
 
 	public static String getAdvertisingTrackingId() {
@@ -441,6 +430,21 @@ public class Device {
 			DeviceLog.exception("Problems fetching adb enabled status", e);
 		}
 		return status;
+	}
+
+	public static JSONObject getPackageInfo(PackageManager pm) throws PackageManager.NameNotFoundException, JSONException {
+		String appName = ClientProperties.getAppName();
+		PackageInfo appInfo = pm.getPackageInfo(appName, 0);
+		JSONObject data = new JSONObject();
+
+		data.put("installer", pm.getInstallerPackageName(appName));
+		data.put("firstInstallTime", appInfo.firstInstallTime);
+		data.put("lastUpdateTime", appInfo.lastUpdateTime);
+		data.put("versionCode", appInfo.versionCode);
+		data.put("versionName", appInfo.versionName);
+		data.put("packageName", appInfo.packageName);
+
+		return data;
 	}
 
 	private static boolean searchPathForBinary(String binary) {

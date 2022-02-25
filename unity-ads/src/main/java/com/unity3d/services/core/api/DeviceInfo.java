@@ -35,11 +35,6 @@ public class DeviceInfo {
 	private static SparseArray<IVolumeChangeListener> _volumeChangeListeners;
 
 	@WebViewExposed
-	public static void getAndroidId (WebViewCallback callback) {
-		callback.invoke(Device.getAndroidId());
-	}
-
-	@WebViewExposed
 	public static void getAdvertisingTrackingId(WebViewCallback callback) {
 		callback.invoke(Device.getAdvertisingTrackingId());
 	}
@@ -168,35 +163,17 @@ public class DeviceInfo {
 	}
 
 	@WebViewExposed
-	public static void getPackageInfo(String packageName, WebViewCallback callback) {
+	public static void getPackageInfo(WebViewCallback callback) {
 		if (ClientProperties.getApplicationContext() != null) {
-			PackageManager pm = ClientProperties.getApplicationContext().getPackageManager();
-			PackageInfo appInfo;
-
+			String appName = ClientProperties.getAppName();
 			try {
-				appInfo = pm.getPackageInfo(packageName, 0);
-			}
-			catch (PackageManager.NameNotFoundException e) {
-				callback.error(DeviceError.APPLICATION_INFO_NOT_AVAILABLE, packageName);
-				return;
-			}
-
-			JSONObject data = new JSONObject();
-
-			try {
-				data.put("installer", pm.getInstallerPackageName(packageName));
-				data.put("firstInstallTime", appInfo.firstInstallTime);
-				data.put("lastUpdateTime", appInfo.lastUpdateTime);
-				data.put("versionCode", appInfo.versionCode);
-				data.put("versionName", appInfo.versionName);
-				data.put("packageName", appInfo.packageName);
-			}
-			catch (JSONException e) {
+				JSONObject data = Device.getPackageInfo(ClientProperties.getApplicationContext().getPackageManager());
+				callback.invoke(data);
+			} catch (PackageManager.NameNotFoundException e) {
+				callback.error(DeviceError.APPLICATION_INFO_NOT_AVAILABLE, appName);
+			} catch (JSONException e) {
 				callback.error(DeviceError.JSON_ERROR, e.getMessage());
-				return;
 			}
-
-			callback.invoke(data);
 		}
 		else {
 			callback.error(DeviceError.APPLICATION_CONTEXT_NULL);

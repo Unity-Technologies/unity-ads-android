@@ -15,7 +15,6 @@ public enum WebViewEventCategory {
 	WEBPLAYER,
 	PURCHASING,
 	ANALYTICS,
-	AR,
 	PERMISSIONS,
 	STORE,
 	LOAD_API,

@@ -35,16 +35,14 @@ public class PurchaseUpdatedListenerProxy extends GenericListenerProxy {
 		}
 		return result;
 	}
-	/**
-	 * Wraps onPurchasesUpdated (BillingResult billingResult, List<Purchase> purchases)
-	 * from the reflected billing library.
-	 * @param billingResult Billing result from the operation.
-	 * @param purchases List of Purchase objects received from the query.
-	 */
+	// Wraps onPurchasesUpdated (BillingResult billingResult, List<Purchase> purchases)
 	public void onPurchasesUpdated(Object billingResult, List<Object> purchases) {
-		List<PurchaseBridge> purchasesBridge = new ArrayList<>();
-		for (Object purchase : purchases) {
-			purchasesBridge.add(new PurchaseBridge(purchase));
+		List<PurchaseBridge> purchasesBridge = null;
+		if (purchases != null) {
+			purchasesBridge = new ArrayList<>();
+			for (Object purchase : purchases) {
+				purchasesBridge.add(new PurchaseBridge(purchase));
+			}
 		}
 		if (_purchaseUpdatedResponseListener != null) {
 			_purchaseUpdatedResponseListener.onBillingResponse(new BillingResultBridge(billingResult), purchasesBridge);

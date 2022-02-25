@@ -18,5 +18,3 @@
 -keep class com.unity3d.services.** {
    *;
 }
-
--dontwarn com.google.ar.core.**

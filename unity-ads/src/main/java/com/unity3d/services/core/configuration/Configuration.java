@@ -46,7 +46,6 @@ public class Configuration {
 			"com.unity3d.services.core.configuration.CoreModuleConfiguration",
 			"com.unity3d.services.ads.configuration.AdsModuleConfiguration",
 			"com.unity3d.services.analytics.core.configuration.AnalyticsModuleConfiguration",
-			"com.unity3d.services.ar.configuration.ARModuleConfiguration",
 			"com.unity3d.services.banners.configuration.BannersModuleConfiguration",
 			"com.unity3d.services.store.core.configuration.StoreModuleConfiguration"
 	};

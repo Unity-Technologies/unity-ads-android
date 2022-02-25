@@ -48,8 +48,10 @@ public class StoreMonitor {
 			public void onBillingResponse(BillingResultBridge billingResult, List<PurchaseBridge> purchases) {
 				if (billingResult.getResponseCode() == BillingResultResponseCode.OK) {
 					JSONArray purchasesJson = new JSONArray();
-					for (PurchaseBridge purchaseBridge : purchases) {
-						purchasesJson.put(purchaseBridge.toJson());
+					if (purchases != null) {
+						for (PurchaseBridge purchaseBridge : purchases) {
+							purchasesJson.put(purchaseBridge.toJson());
+						}
 					}
 					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASES_UPDATED_RESULT, purchasesJson);
 				} else {
@@ -104,8 +106,10 @@ public class StoreMonitor {
 				@Override
 				public void onBillingResponse(BillingResultBridge billingResult, List<PurchaseHistoryRecordBridge> purchaseHistoryRecordList) {
 					JSONArray jsonArray = new JSONArray();
-					for(PurchaseHistoryRecordBridge purchaseHistoryRecordBridge : purchaseHistoryRecordList) {
-						jsonArray.put(purchaseHistoryRecordBridge.getOriginalJson());
+					if (purchaseHistoryRecordList != null) {
+						for (PurchaseHistoryRecordBridge purchaseHistoryRecordBridge : purchaseHistoryRecordList) {
+							jsonArray.put(purchaseHistoryRecordBridge.getOriginalJson());
+						}
 					}
 					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.PURCHASE_HISTORY_LIST_REQUEST_RESULT, operationId, jsonArray);
 				}
@@ -121,8 +125,10 @@ public class StoreMonitor {
 				@Override
 				public void onBillingResponse(BillingResultBridge billingResult, List<SkuDetailsBridge> skuDetailsList) {
 					JSONArray skuDetailsJson = new JSONArray();
-					for (SkuDetailsBridge skuDetailsBridge : skuDetailsList) {
-						skuDetailsJson.put(skuDetailsBridge.getOriginalJson());
+					if (skuDetailsList != null) {
+						for (SkuDetailsBridge skuDetailsBridge : skuDetailsList) {
+							skuDetailsJson.put(skuDetailsBridge.getOriginalJson());
+						}
 					}
 					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.SKU_DETAILS_LIST_REQUEST_RESULT, operationId, skuDetailsJson);
 				}

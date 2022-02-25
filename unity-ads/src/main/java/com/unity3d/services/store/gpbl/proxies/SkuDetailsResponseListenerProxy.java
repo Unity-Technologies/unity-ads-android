@@ -39,16 +39,14 @@ public class SkuDetailsResponseListenerProxy extends GenericListenerProxy {
 		return result;
 	}
 
-	/**
-	 * Wraps onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetailsList)
-	 * from the reflected billing library.
-	 * @param billingResult Billing result from the operation.
-	 * @param skuDetailsList List of SkuDetails objects received from the query.
-	 */
+	// Wraps onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetailsList)
 	public void onSkuDetailsResponse(Object billingResult, List<Object> skuDetailsList) {
-		List<SkuDetailsBridge> skuDetailsBridges = new ArrayList<>();
-		for (Object skuDetails : skuDetailsList) {
-			skuDetailsBridges.add(new SkuDetailsBridge(skuDetails));
+		List<SkuDetailsBridge> skuDetailsBridges = null;
+		if (skuDetailsList != null) {
+			skuDetailsBridges = new ArrayList<>();
+			for (Object skuDetails : skuDetailsList) {
+				skuDetailsBridges.add(new SkuDetailsBridge(skuDetails));
+			}
 		}
 		if (_skuDetailsResponseListener != null) {
 			_skuDetailsResponseListener.onBillingResponse(new BillingResultBridge(billingResult), skuDetailsBridges);

@@ -209,7 +209,9 @@ public class UnityAdsFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				bottomBanner.removeAllViews();
-				bottomBanner = null;
+				if (bottomBanner != null) {
+					bottomBanner = null;
+				}
 				showBannerButton.setEnabled(true);
 			}
 		});

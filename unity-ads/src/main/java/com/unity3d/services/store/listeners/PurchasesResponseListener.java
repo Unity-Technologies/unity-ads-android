@@ -36,8 +36,10 @@ public class PurchasesResponseListener implements IPurchasesResponseListener {
 		}
 		if (billingResult.getResponseCode() == BillingResultResponseCode.OK) {
 			JSONArray purchasesJson = new JSONArray();
-			for (PurchaseBridge purchaseBridge : purchases) {
-				purchasesJson.put(purchaseBridge.toJson());
+			if (purchases != null) {
+				for (PurchaseBridge purchaseBridge : purchases) {
+					purchasesJson.put(purchaseBridge.toJson());
+				}
 			}
 			params.add(purchasesJson);
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, _successEvent, params.toArray());

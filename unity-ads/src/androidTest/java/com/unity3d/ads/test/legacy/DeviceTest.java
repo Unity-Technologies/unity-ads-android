@@ -1,17 +1,23 @@
 package com.unity3d.ads.test.legacy;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,8 +25,11 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class DeviceTest {
+	@Mock
+	PackageManager packageManagerMock;
+
 	@BeforeClass
 	public static void prepareTests () {
 		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
@@ -49,9 +58,26 @@ public class DeviceTest {
 	}
 
 	@Test
-	public void testAndroidId () {
-		assertNotNull("AndroidID should never be null", Device.getAndroidId());
-		assertTrue("AndroidID length should be 8 chars or more (64bit)", Device.getAndroidId().length() >= 8);
+	public void testGetPackageInfo () throws PackageManager.NameNotFoundException, JSONException {
+		packageManagerMock = Mockito.mock(PackageManager.class);
+		PackageInfo mockPackageInfo = new PackageInfo();
+		mockPackageInfo.firstInstallTime = 0;
+		mockPackageInfo.lastUpdateTime = 0;
+		mockPackageInfo.versionCode = 4000;
+		mockPackageInfo.versionName = "4.0.0";
+		mockPackageInfo.packageName = "com.unity3d.ads.example";
+
+		JSONObject mockJson = new JSONObject();
+
+		mockJson.put("firstInstallTime", 0);
+		mockJson.put("lastUpdateTime", 0);
+		mockJson.put("versionCode", 4000);
+		mockJson.put("versionName", "4.0.0");
+		mockJson.put("packageName", "com.unity3d.ads.example");
+
+		Mockito.when(packageManagerMock.getPackageInfo(ClientProperties.getAppName(), 0)).thenReturn(mockPackageInfo);
+		JSONObject data = Device.getPackageInfo(packageManagerMock);
+		assertEquals(data.toString(), mockJson.toString());
 	}
 
 	@Test
