@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-public class JsonStorage {
+public class JsonStorage implements IJsonStorageReader {
 	private JSONObject _data;
 
 	public synchronized boolean initData () {
@@ -28,6 +28,7 @@ public class JsonStorage {
 		_data = data;
 	}
 
+	@Override
 	public synchronized JSONObject getData () {
 		return _data;
 	}
@@ -72,6 +73,7 @@ public class JsonStorage {
 		return true;
 	}
 
+	@Override
 	public synchronized Object get (String key) {
 		if (_data == null) {
 			DeviceLog.error("Data is NULL, readStorage probably not called");

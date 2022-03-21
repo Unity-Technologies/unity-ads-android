@@ -3,7 +3,7 @@ package com.unity3d.services.ads.operation.show;
 import android.os.ConditionVariable;
 
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.core.request.SDKMetricEvents;
+import com.unity3d.services.core.request.metrics.SDKMetricEvents;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
 import java.util.concurrent.ExecutorService;
@@ -67,6 +67,6 @@ public class ShowModuleDecoratorTimeout extends ShowModuleDecorator {
 	private void onOperationTimeout(final ShowOperationState state, UnityAds.UnityAdsShowError error, String message) {
 		remove(state.id);
 		state.listener.onUnityAdsShowFailure(state.placementId, error, message);
-		getMetricSender().SendSDKMetricEvent(SDKMetricEvents.native_show_timeout_error);
+		getMetricSender().sendSDKMetricEvent(SDKMetricEvents.native_show_timeout_error);
 	}
 }

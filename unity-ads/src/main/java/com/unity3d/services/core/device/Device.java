@@ -23,6 +23,7 @@ import android.telephony.TelephonyManager;
 
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.preferences.AndroidPreferences;
 import com.unity3d.services.core.properties.ClientProperties;
 
 import org.json.JSONException;
@@ -113,6 +114,29 @@ public class Device {
 		}
 
 		return false;
+	}
+
+	public static String getIdfi() {
+		String idfi = AndroidPreferences.getString("unityads-installinfo", "unityads-idfi");
+
+		if (idfi == null) {
+			idfi = Device.getUniqueEventId();
+			AndroidPreferences.setString("unityads-installinfo", "unityads-idfi", idfi);
+		}
+
+		return idfi;
+	}
+
+	public static String getConnectionType() {
+		String connectionType;
+		if (isUsingWifi()) {
+			connectionType = "wifi";
+		} else if (isActiveNetworkConnected()) {
+			connectionType = "cellular";
+		} else {
+			connectionType = "none";
+		}
+		return connectionType;
 	}
 
 	public static int getNetworkType() {

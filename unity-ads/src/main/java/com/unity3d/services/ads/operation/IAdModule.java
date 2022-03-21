@@ -1,6 +1,6 @@
 package com.unity3d.services.ads.operation;
 
-import com.unity3d.services.core.request.ISDKMetricSender;
+import com.unity3d.services.core.request.metrics.ISDKMetricSender;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeSharedObjectStore;
 import com.unity3d.services.core.webview.bridge.IWebViewSharedObject;

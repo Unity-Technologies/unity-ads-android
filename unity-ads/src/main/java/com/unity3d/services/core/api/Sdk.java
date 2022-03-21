@@ -33,7 +33,8 @@ public class Sdk {
 			// perPlacementLoadEnabled is now always true
 			true,
 			SdkProperties.getLatestConfiguration() != null,
-			Device.getElapsedRealtime()
+			Device.getElapsedRealtime(),
+			WebViewApp.getCurrentApp().getConfiguration().getStateId()
 		};
 
 		callback.invoke(parameters);
@@ -44,7 +45,6 @@ public class Sdk {
 		DeviceLog.debug("Web Application initialized");
 		SdkProperties.setInitialized(true);
 		WebViewApp.getCurrentApp().setWebAppInitialized(true);
-
 		callback.invoke();
 	}
 

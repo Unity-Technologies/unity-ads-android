@@ -113,26 +113,6 @@ public class InitializeThreadTest {
 	}
 
 	@Test
-	public void testInitializeStateLoadConfigFileWrongSdkVersion() throws Exception {
-		String filePath = SdkProperties.getLocalConfigurationFilepath();
-		JSONObject json = getJSONObject("fake-url", "fake-hash", "fake-version");
-		json.put("mr", 1);
-		json.put("sdkv", "fake-sdkv");
-		Configuration initConfig = new Configuration(json);
-		boolean fileWritten = Utilities.writeFile(new File(filePath), initConfig.getJSONString());
-		assertTrue("File was not written properly", fileWritten);
-
-		InitializeThread.InitializeStateLoadConfigFile state = new InitializeThread.InitializeStateLoadConfigFile(new Configuration());
-		Object nextState = state.execute();
-
-		assertTrue("Next state is not InitializeStateReset", nextState instanceof InitializeThread.InitializeStateReset);
-
-		Configuration configuration = ((InitializeThread.InitializeStateReset)nextState).getConfiguration();
-		assertNotEquals("Max Retries should equal the default value", 1, configuration.getMaxRetries());
-		assertNotEquals("SDKVersion should equal the default value", "fake-sdkv", configuration.getSdkVersion());
-	}
-
-	@Test
 	public void testInitializeStateLoadConfigFileNoConfigExists() {
 		String filePath = SdkProperties.getLocalConfigurationFilepath();
 		boolean fileExists = new File(filePath).exists();

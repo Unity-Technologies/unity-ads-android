@@ -1,4 +1,4 @@
-package com.unity3d.services.core.request;
+package com.unity3d.services.core.request.metrics;
 
 public enum SDKMetricEvents {
 	native_load_callback_error,

@@ -4,6 +4,7 @@ import android.os.ConditionVariable;
 
 import com.unity3d.services.ads.UnityAdsImplementation;
 import com.unity3d.services.ads.adunit.AdUnitOpen;
+import com.unity3d.services.ads.token.AsyncTokenStorage;
 import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
@@ -35,6 +36,7 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 		AdUnitOpen.setConfiguration(configuration);
 		UnityAdsImplementation.setConfiguration(configuration);
 		TokenStorage.deleteTokens();
+		AsyncTokenStorage.getInstance().setConfiguration(configuration);
 		return true;
 	}
 
@@ -71,17 +73,21 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 		}
 		AdUnitOpen.setConfiguration(configuration);
 		UnityAdsImplementation.setConfiguration(configuration);
+		AsyncTokenStorage.getInstance().setConfiguration(configuration);
 
 		return true;
 	}
 
 	public boolean initErrorState(Configuration configuration, String state, String errorMessage) {
+		TokenStorage.setInitToken(null);
+		TokenStorage.deleteTokens();
 		return true;
 	}
 
 	public boolean initCompleteState(Configuration configuration) {
 		AdUnitOpen.setConfiguration(configuration);
 		UnityAdsImplementation.setConfiguration(configuration);
+		AsyncTokenStorage.getInstance().setConfiguration(configuration);
 		return true;
 	}
 

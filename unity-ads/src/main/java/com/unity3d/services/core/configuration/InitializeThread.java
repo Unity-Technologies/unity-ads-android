@@ -6,16 +6,20 @@ import android.os.ConditionVariable;
 import android.text.TextUtils;
 
 import com.unity3d.ads.UnityAds;
+import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.api.DownloadLatestWebViewStatus;
 import com.unity3d.services.core.api.Lifecycle;
 import com.unity3d.services.core.connectivity.ConnectivityMonitor;
 import com.unity3d.services.core.connectivity.IConnectivityListener;
+import com.unity3d.services.core.lifecycle.CachedLifecycle;
+import com.unity3d.services.core.lifecycle.LifecycleCache;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.services.core.request.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.WebRequest;
+import com.unity3d.services.core.request.metrics.TSIMetric;
 import com.unity3d.services.core.webview.WebViewApp;
 
 import org.json.JSONObject;
@@ -75,6 +79,8 @@ public class InitializeThread extends Thread  {
 
 	public static synchronized void initialize(Configuration configuration) {
 		if (_thread == null) {
+			InitializeEventsMetricSender.getInstance().didInitStart();
+			CachedLifecycle.register();
 			_thread = new InitializeThread(new InitializeStateLoadConfigFile(configuration));
 			_thread.setName("UnityAdsInitializeThread");
 			_thread.start();
@@ -132,11 +138,7 @@ public class InitializeThread extends Thread  {
 				String fileContent = new String(Utilities.readFileBytes(configFile));
 				JSONObject loadedJson = new JSONObject(fileContent);
 				localConfig = new Configuration(loadedJson);
-
-				// Only accept local configurations from the same version
-				if (SdkProperties.getVersionName().equals(localConfig.getSdkVersion())) {
-					_configuration = localConfig;
-				}
+				_configuration = localConfig;
 			} catch (Exception e) {
 				DeviceLog.debug("Unity Ads init: Using default configuration parameters");
 			} finally {
@@ -270,14 +272,16 @@ public class InitializeThread extends Thread  {
 		private long _retryDelay;
 		private int _maxRetries;
 		private double _scalingFactor;
+		private InitializeState _nextState;
 
 		public InitializeStateConfig(Configuration localConfiguration) {
-			_configuration = new Configuration(SdkProperties.getConfigUrl());
+			_configuration = new Configuration(SdkProperties.getConfigUrl(), localConfiguration.getExperiments());
 			_retries = 0;
 			_retryDelay = localConfiguration.getRetryDelay();
 			_maxRetries = localConfiguration.getMaxRetries();
 			_scalingFactor = localConfiguration.getRetryScalingFactor();
 			_localConfig = localConfiguration;
+			_nextState = null;
 		}
 
 		public Configuration getConfiguration() {
@@ -287,9 +291,18 @@ public class InitializeThread extends Thread  {
 		@Override
 		public InitializeState execute() {
 			DeviceLog.info("Unity Ads init: load configuration from " + SdkProperties.getConfigUrl());
+			InitializeState nextState;
+			if (_configuration.getExperiments() != null && _configuration.getExperiments().isTwoStageInitializationEnabled()) {
+				nextState = executeWithLoader();
+			} else {
+				nextState = executeLegacy(_configuration);
+			}
+			return nextState;
+		}
 
+		public InitializeState executeLegacy(Configuration configuration) {
 			try {
-				_configuration.makeRequest();
+				configuration.makeRequest();
 			} catch (Exception e) {
 				if (_retries < _maxRetries) {
 					_retryDelay *= _scalingFactor;
@@ -300,11 +313,45 @@ public class InitializeThread extends Thread  {
 				return new InitializeStateNetworkError("network config request", e, this, _localConfig);
 			}
 
-			if (_configuration.getDelayWebViewUpdate()) {
-				return new InitializeStateLoadCacheConfigAndWebView(_configuration, _localConfig);
+			if (configuration.getDelayWebViewUpdate()) {
+				return new InitializeStateLoadCacheConfigAndWebView(configuration, _localConfig);
 			}
 
-			return new InitializeStateLoadCache(_configuration);
+			return new InitializeStateLoadCache(configuration);
+		}
+
+		public InitializeState executeWithLoader() {
+			ConfigurationLoader configurationLoader = new ConfigurationLoader(_configuration);
+			final Configuration legacyConfiguration = new Configuration(SdkProperties.getConfigUrl(), new Experiments());
+			try {
+				configurationLoader.loadConfiguration(new IConfigurationLoaderListener() {
+					@Override
+					public void onSuccess(Configuration configuration) {
+						_configuration = configuration;
+						if (_configuration.getDelayWebViewUpdate()) {
+							_nextState = new InitializeStateLoadCacheConfigAndWebView(_configuration, _localConfig);
+						}
+						TokenStorage.setInitToken(_configuration.getUnifiedAuctionToken());
+						_configuration.saveToDisk();
+						_nextState = new InitializeStateLoadCache(_configuration);
+					}
+
+					@Override
+					public void onError(String errorMsg) {
+						SDKMetrics.getInstance().sendMetric(TSIMetric.newEmergencySwitchOff(_configuration.getMetricTags()));
+						_nextState = executeLegacy(legacyConfiguration);
+					}
+				});
+				return _nextState;
+			} catch (Exception e) {
+				if (_retries < _maxRetries) {
+					_retryDelay *= _scalingFactor;
+					_retries++;
+					return new InitializeStateRetry(this, _retryDelay);
+				}
+
+				return new InitializeStateNetworkError("network config request", e, this, _configuration);
+			}
 		}
 	}
 
@@ -502,7 +549,7 @@ public class InitializeThread extends Thread  {
 			}
 
 			// TODO: Fix _state.replaceAll... with Enum values to ensure future compatibility with tag values - This works for now
-			SDKMetrics.getInstance().sendEventWithTags("native_initialization_failed", new HashMap<String, String> (){{
+			SDKMetrics.getInstance().sendEvent("native_initialization_failed", new HashMap<String, String> (){{
 				put("stt", _state.replaceAll(" ", "_"));
 			}});
 			return null;

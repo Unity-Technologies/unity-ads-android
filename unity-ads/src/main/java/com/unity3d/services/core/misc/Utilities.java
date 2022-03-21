@@ -17,7 +17,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class Utilities {
 	public static void runOnUiThread(Runnable runnable) {
@@ -186,5 +188,22 @@ public class Utilities {
 		}
 
 		return newJsonObject;
+	}
+
+	public static Map<String, Object> combineJsonIntoMap(Map<String, Object> outputMap, JSONObject jsonObject, String prependToKey) {
+		Map<String, Object> combinedMap = new HashMap<>(outputMap);
+		for (Iterator<String> it = jsonObject.keys(); it.hasNext(); ) {
+			String key = it.next();
+			combinedMap.put(prependToKey + key, jsonObject.opt(key));
+		}
+		return combinedMap;
+	}
+
+	public static Map<String, Object> combineJsonIntoMap(Map<String, Object> inputMap, JSONObject jsonObject) {
+		return combineJsonIntoMap(inputMap, jsonObject, "");
+	}
+
+	public static Map<String, Object> convertJsonToMap(JSONObject jsonObject) {
+		return combineJsonIntoMap(new HashMap<String, Object>(), jsonObject);
 	}
 }

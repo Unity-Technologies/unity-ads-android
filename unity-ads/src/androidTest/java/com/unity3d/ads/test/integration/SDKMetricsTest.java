@@ -1,8 +1,8 @@
 package com.unity3d.ads.test.integration;
 
 import com.unity3d.services.core.configuration.Configuration;
-import com.unity3d.services.core.request.ISDKMetrics;
-import com.unity3d.services.core.request.SDKMetrics;
+import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 
 import org.json.JSONObject;
 import org.junit.Test;

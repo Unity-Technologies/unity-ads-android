@@ -10,8 +10,8 @@ if (project.rootProject.file('local.properties').exists()) {
 ext {
   GROUP_ID = "com.unity3d.ads"
   ARTIFACT_ID = "unity-ads"
-  VERSION_ID = "4.0.1"
-  VERSION_CODE = 4010
+  VERSION_ID = "4.1.0"
+  VERSION_CODE = 4100
   SIGN_AAR = properties.getProperty("SIGN_AAR") ?: false
 }
 

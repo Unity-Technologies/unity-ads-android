@@ -20,6 +20,12 @@ import java.net.URISyntaxException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 
 @RunWith(AndroidJUnit4.class)
 public class SdkPropertiesTest {
@@ -244,5 +250,74 @@ public class SdkPropertiesTest {
 
 		assertEquals(SdkProperties.InitializationState.INITIALIZED_FAILED, SdkProperties.getCurrentInitializationState());
 		Mockito.<IUnityAdsInitializationListener>verify(initializationListener, times(1)).onInitializationFailed(UnityAds.UnityAdsInitializationError.INTERNAL_ERROR, "Sdk failed to initialize.");
+	}
+
+	@Test
+	public void testConfigVersionWithNullContext() {
+		String actual = SdkProperties.getConfigVersion(null);
+
+		assertEquals("configv2", actual);
+	}
+
+	@Test
+	public void testConfigVersionWithException() throws PackageManager.NameNotFoundException {
+		Context context = Mockito.mock(Context.class);
+		PackageManager packageManager = Mockito.mock(PackageManager.class);
+
+		when(context.getPackageManager()).thenReturn(packageManager);
+		when(context.getPackageName()).thenReturn("com.test.app");
+		when(packageManager.getApplicationInfo("com.test.app", PackageManager.GET_META_DATA)).thenThrow(new PackageManager.NameNotFoundException());
+
+		String actual = SdkProperties.getConfigVersion(context);
+
+		assertEquals("configv2", actual);
+	}
+
+	@Test
+	public void testConfigVersionBundleNull() throws PackageManager.NameNotFoundException {
+		Context context = Mockito.mock(Context.class);
+		PackageManager packageManager = Mockito.mock(PackageManager.class);
+		ApplicationInfo applicationInfo = new ApplicationInfo();
+
+		when(context.getPackageManager()).thenReturn(packageManager);
+		when(context.getPackageName()).thenReturn("com.test.app");
+		when(packageManager.getApplicationInfo("com.test.app", PackageManager.GET_META_DATA)).thenReturn(applicationInfo);
+
+		String actual = SdkProperties.getConfigVersion(context);
+
+		assertEquals("configv2", actual);
+	}
+
+	@Test
+	public void testConfigVersionNoValueInBundle() throws PackageManager.NameNotFoundException {
+		Context context = Mockito.mock(Context.class);
+		PackageManager packageManager = Mockito.mock(PackageManager.class);
+		ApplicationInfo applicationInfo = new ApplicationInfo();
+		applicationInfo.metaData = new Bundle();
+
+		when(context.getPackageManager()).thenReturn(packageManager);
+		when(context.getPackageName()).thenReturn("com.test.app");
+		when(packageManager.getApplicationInfo("com.test.app", PackageManager.GET_META_DATA)).thenReturn(applicationInfo);
+
+		String actual = SdkProperties.getConfigVersion(context);
+
+		assertEquals("configv2", actual);
+	}
+
+	@Test
+	public void testConfigVersionWithValueInBundle() throws PackageManager.NameNotFoundException {
+		Context context = Mockito.mock(Context.class);
+		PackageManager packageManager = Mockito.mock(PackageManager.class);
+		ApplicationInfo applicationInfo = new ApplicationInfo();
+		applicationInfo.metaData = new Bundle();
+		applicationInfo.metaData.putString("com.unity3d.ads.configversion", "testConfig");
+
+		when(context.getPackageManager()).thenReturn(packageManager);
+		when(context.getPackageName()).thenReturn("com.test.app");
+		when(packageManager.getApplicationInfo("com.test.app", PackageManager.GET_META_DATA)).thenReturn(applicationInfo);
+
+		String actual = SdkProperties.getConfigVersion(context);
+
+		assertEquals("testConfig", actual);
 	}
 }

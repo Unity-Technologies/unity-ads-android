@@ -14,8 +14,8 @@ import com.unity3d.ads.UnityAdsLoadOptions;
 import com.unity3d.services.ads.operation.load.LoadModule;
 import com.unity3d.services.ads.operation.load.LoadOperation;
 import com.unity3d.services.ads.operation.load.LoadOperationState;
-import com.unity3d.services.core.request.ISDKMetricSender;
-import com.unity3d.services.core.request.SDKMetricEvents;
+import com.unity3d.services.core.request.metrics.ISDKMetricSender;
+import com.unity3d.services.core.request.metrics.SDKMetricEvents;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocation;
 
@@ -72,7 +72,7 @@ public class LoadModuleTests {
 		loadModule.executeAdOperation(webViewBridgeInvokerMock, loadOperationState);
 
 		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(placementId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "[UnityAds] Internal communication failure");
-		Mockito.verify(sdkMetricSender, times(1)).SendSDKMetricEventWithTag(SDKMetricEvents.native_load_callback_error, new HashMap<String, String> (){{
+		Mockito.verify(sdkMetricSender, times(1)).sendSDKMetricEventWithTag(SDKMetricEvents.native_load_callback_error, new HashMap<String, String> (){{
 			put("cbs", "invocationFailure");
 		}});
 	}
@@ -91,7 +91,7 @@ public class LoadModuleTests {
 		loadModule.executeAdOperation(webViewBridgeInvokerMock, loadOperationState);
 
 		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(placementId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "[UnityAds] Internal communication timeout");
-		Mockito.verify(sdkMetricSender, times(1)).SendSDKMetricEvent(eq(SDKMetricEvents.native_load_callback_timeout));
+		Mockito.verify(sdkMetricSender, times(1)).sendSDKMetricEvent(eq(SDKMetricEvents.native_load_callback_timeout));
 	}
 
 	@Test

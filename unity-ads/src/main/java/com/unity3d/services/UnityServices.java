@@ -8,6 +8,7 @@ import android.text.TextUtils;
 
 import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.UnityAds;
+import com.unity3d.services.core.api.Sdk;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.EnvironmentCheck;
 import com.unity3d.services.core.configuration.InitializeThread;
@@ -82,6 +83,7 @@ public class UnityServices {
 		}
 
 		SdkProperties.setInitializationTime(Device.getElapsedRealtime());
+		SdkProperties.setInitializationTimeSinceEpoch(System.currentTimeMillis());
 
 		if(gameId == null || gameId.length() == 0) {
 			DeviceLog.error("Error while initializing Unity Services: empty game ID, halting Unity Ads init");

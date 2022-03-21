@@ -3,7 +3,7 @@ package com.unity3d.services.ads.operation.load;
 import android.os.ConditionVariable;
 
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.core.request.SDKMetricEvents;
+import com.unity3d.services.core.request.metrics.SDKMetricEvents;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
 import java.util.concurrent.ExecutorService;
@@ -61,6 +61,6 @@ public class LoadModuleDecoratorTimeout extends LoadModuleDecorator {
 	private void onOperationTimeout(final LoadOperationState state) {
 		remove(state.id);
 		state.listener.onUnityAdsFailedToLoad(state.placementId, UnityAds.UnityAdsLoadError.TIMEOUT, errorMsgTimeoutLoading + state.placementId);
-		getMetricSender().SendSDKMetricEvent(SDKMetricEvents.native_load_timeout_error);
+		getMetricSender().sendSDKMetricEvent(SDKMetricEvents.native_load_timeout_error);
 	}
 }

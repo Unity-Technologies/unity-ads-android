@@ -2,17 +2,23 @@ package com.unity3d.services.core.configuration;
 
 import android.text.TextUtils;
 
-import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.ads.token.TokenStorage;
+import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
+import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.WebRequest;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
+import com.unity3d.services.core.request.metrics.TSIMetric;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +45,12 @@ public class Configuration {
 
 	private String _configJsonString;
 	private String _configUrl;
+	private String _unifiedAuctionToken;
+	private String _stateId;
+	private Experiments _experiments;
+	private int _tokenTimeout;
+	private String _src;
+	private ConfigurationRequestFactory _configurationRequestFactory;
 
 	private Map<String, IModuleConfiguration> _moduleConfigurations;
 
@@ -57,12 +69,19 @@ public class Configuration {
 	}
 
 	public Configuration (String configUrl) {
+		this();
 		_configUrl = configUrl;
-		this.setOptionalFields(new JSONObject());
 	}
 
-	public Configuration (JSONObject configData) throws MalformedURLException {
+	public Configuration (JSONObject configData) throws MalformedURLException, JSONException {
 		handleConfigurationData(configData);
+	}
+
+	public Configuration(String configUrl, Experiments experiments) {
+		this(configUrl);
+		DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader());
+		_configurationRequestFactory = new ConfigurationRequestFactory(this, deviceInfoReaderBuilder.build(), _configUrl);
+		_experiments = experiments;
 	}
 
 	public String getConfigUrl () { return _configUrl; }
@@ -121,6 +140,16 @@ public class Configuration {
 
 	public long getWebViewAppCreateTimeout() { return _webViewAppCreateTimeout; }
 
+	public String getStateId() { return (_stateId != null) ? _stateId : ""; }
+
+	public String getUnifiedAuctionToken() { return _unifiedAuctionToken; }
+
+	public Experiments getExperiments() { return _experiments; }
+
+	public int getTokenTimeout() { return _tokenTimeout; }
+
+	public String getSrc() {return (_src != null) ? _src : ""; }
+
 	public IModuleConfiguration getModuleConfiguration(String moduleName) {
 		if (_moduleConfigurations != null && _moduleConfigurations.containsKey(moduleName)) {
 			return _moduleConfigurations.get(moduleName);
@@ -145,21 +174,13 @@ public class Configuration {
 
 	public String getJSONString() { return _configJsonString; }
 
-	protected String buildQueryString () {
-		return "?ts=" + System.currentTimeMillis()
-			+ "&sdkVersion=" + SdkProperties.getVersionCode()
-			+ "&sdkVersionName=" + SdkProperties.getVersionName();
-	}
-
 	protected void makeRequest () throws Exception {
 		if (_configUrl == null) {
 			throw new MalformedURLException("Base URL is null");
 		}
 
-		String url = _configUrl + buildQueryString();
-		DeviceLog.debug("Requesting configuration with: " + url);
-
-		WebRequest request = new WebRequest(url, "GET", null);
+		WebRequest request = _configurationRequestFactory.getWebRequest();
+		InitializeEventsMetricSender.getInstance().didConfigRequestStart();
 		String data = request.makeRequest();
 
 		try {
@@ -167,9 +188,10 @@ public class Configuration {
 		} catch (Exception e) {
 			throw e;
 		}
+		saveToDisk();
 	}
 
-	private void handleConfigurationData(JSONObject configData) throws MalformedURLException {
+	protected void handleConfigurationData(JSONObject configData) throws MalformedURLException, JSONException {
 
 		String url = null;
 
@@ -190,9 +212,11 @@ public class Configuration {
 			_webViewHash = null;
 		}
 
-		this.setOptionalFields(configData);
+		_unifiedAuctionToken = !configData.isNull("tkn") ? configData.optString("tkn") : null;
+		_stateId = !configData.isNull("sid") ? configData.optString("sid") : null;
 
-		_configJsonString = configData.toString();
+		this.setOptionalFields(configData);
+		_configJsonString = getFilteredConfigJson(configData).toString();
 	}
 
 	private void setOptionalFields(JSONObject configData) {
@@ -212,6 +236,9 @@ public class Configuration {
 		_metricsUrl = configData.optString("murl", "");
 		_metricSampleRate = configData.optDouble("msr", 100d);
 		_webViewAppCreateTimeout = configData.optLong("wct", 60000L);
+		_tokenTimeout = configData.optInt("tto", 5000);
+		_src = configData.optString("src", null);
+		_experiments = new Experiments(configData.optJSONObject("exp"));
 	}
 
 	private void createWebAppApiClassList() {
@@ -227,5 +254,34 @@ public class Configuration {
 		}
 
 		_webAppApiClassList = apiList.toArray(new Class[apiList.size()]);
+	}
+
+	public void saveToDisk() {
+
+		Utilities.writeFile(new File(SdkProperties.getLocalConfigurationFilepath()), getJSONString());
+	}
+
+	private JSONObject getFilteredConfigJson(JSONObject jsonConfig) throws JSONException {
+		JSONObject filteredConfig = new JSONObject();
+		for (Iterator<String> it = jsonConfig.keys(); it.hasNext(); ) {
+			String currentKey = it.next();
+			Object currentValue = jsonConfig.opt(currentKey);
+			if (!currentKey.equals("tkn") && !currentKey.equals("sid"))
+			filteredConfig.put(currentKey, currentValue);
+
+		}
+		return filteredConfig;
+	}
+
+	public Map<String, String> getMetricTags() {
+		Map<String, String> tags = new HashMap<>();
+
+		if (_experiments != null) {
+			tags.putAll(_experiments.getExperimentTags());
+		}
+
+		tags.put("src", getSrc());
+
+		return tags;
 	}
 }

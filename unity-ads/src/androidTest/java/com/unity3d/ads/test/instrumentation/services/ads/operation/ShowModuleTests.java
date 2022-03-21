@@ -17,8 +17,8 @@ import com.unity3d.services.ads.operation.show.IShowModule;
 import com.unity3d.services.ads.operation.show.ShowModule;
 import com.unity3d.services.ads.operation.show.ShowOperation;
 import com.unity3d.services.ads.operation.show.ShowOperationState;
-import com.unity3d.services.core.request.ISDKMetricSender;
-import com.unity3d.services.core.request.SDKMetricEvents;
+import com.unity3d.services.core.request.metrics.ISDKMetricSender;
+import com.unity3d.services.core.request.metrics.SDKMetricEvents;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocation;
 
@@ -75,7 +75,7 @@ public class ShowModuleTests {
 		_showModule.executeAdOperation(_webViewBridgeInvokerMock, showOperationState);
 
 		Mockito.verify((_showListenerMock), timeout(maxWaitTime).times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "WebViewBridgeInvocationRunnable:run: invokeMethod failure");
-		Mockito.verify(_sdkMetricSender, timeout(maxWaitTime).times(1)).SendSDKMetricEventWithTag(SDKMetricEvents.native_show_callback_error, new HashMap<String, String> (){{
+		Mockito.verify(_sdkMetricSender, timeout(maxWaitTime).times(1)).sendSDKMetricEventWithTag(SDKMetricEvents.native_show_callback_error, new HashMap<String, String> (){{
 			put("cbs", "invocationFailure");
 		}});
 	}
@@ -94,7 +94,7 @@ public class ShowModuleTests {
 		_showModule.executeAdOperation(_webViewBridgeInvokerMock, showOperationState);
 
 		Mockito.verify((_showListenerMock), timeout(maxWaitTime).times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "[UnityAds] Show Invocation Timeout");
-		Mockito.verify(_sdkMetricSender, timeout(maxWaitTime).times(1)).SendSDKMetricEvent(eq(SDKMetricEvents.native_show_callback_timeout));
+		Mockito.verify(_sdkMetricSender, timeout(maxWaitTime).times(1)).sendSDKMetricEvent(eq(SDKMetricEvents.native_show_callback_timeout));
 	}
 
 	@Test

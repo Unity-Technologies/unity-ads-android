@@ -1,19 +1,19 @@
-package com.unity3d.services.core.request;
+package com.unity3d.services.core.request.metrics;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public class SDKMetricSender implements ISDKMetricSender {
-	public void SendSDKMetricEvent(SDKMetricEvents metricEvent) {
+	public void sendSDKMetricEvent(SDKMetricEvents metricEvent) {
 		if (metricEvent == null) return;
 		ISDKMetrics sdkMetric = SDKMetrics.getInstance();
 		if (sdkMetric == null) return;
 		sdkMetric.sendEvent(metricEvent.toString());
 	}
 
-	public void SendSDKMetricEventWithTag(SDKMetricEvents metricEvent, HashMap tags) {
+	public void sendSDKMetricEventWithTag(SDKMetricEvents metricEvent, Map<String, String> tags) {
 		if (metricEvent == null) return;
 		ISDKMetrics sdkMetric = SDKMetrics.getInstance();
 		if (sdkMetric == null) return;
-		sdkMetric.sendEventWithTags(metricEvent.toString(), tags);
+		sdkMetric.sendEvent(metricEvent.toString(), tags);
 	}
 }

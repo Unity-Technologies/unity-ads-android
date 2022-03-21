@@ -3,7 +3,7 @@ package com.unity3d.services.ads.adunit;
 import android.os.ConditionVariable;
 
 import com.unity3d.services.core.configuration.Configuration;
-import com.unity3d.services.core.request.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 

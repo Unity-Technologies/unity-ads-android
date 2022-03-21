@@ -28,21 +28,21 @@ public class SignalsReaderTest {
 	public void testGetScarSignals() {
 		SignalsReader signalsReader = new SignalsReader(new SignalsStorage());
 		signalsReader.getSCARSignals(context, new String[]{"video"}, new String[]{"rewarded"}, _signalCollectionListener);
-		Mockito.verify(_signalCollectionListener, Mockito.timeout(5000).times(1)).onSignalsCollected(any(String.class));
+		Mockito.verify(_signalCollectionListener, Mockito.timeout(10000).times(1)).onSignalsCollected(any(String.class));
 	}
 
 	@Test
 	public void testGetScarSignalsNoRewarded() {
 		SignalsReader signalsReader = new SignalsReader(new SignalsStorage());
 		signalsReader.getSCARSignals(context, new String[]{"video"}, new String[]{}, _signalCollectionListener);
-		Mockito.verify(_signalCollectionListener, Mockito.timeout(5000).times(1)).onSignalsCollected(any(String.class));
+		Mockito.verify(_signalCollectionListener, Mockito.timeout(10000).times(1)).onSignalsCollected(any(String.class));
 	}
 
 	@Test
 	public void testGetScarSignalsNoInterstitial() {
 		SignalsReader signalsReader = new SignalsReader(new SignalsStorage());
 		signalsReader.getSCARSignals(context, new String[]{}, new String[]{"rewarded"}, _signalCollectionListener);
-		Mockito.verify(_signalCollectionListener, Mockito.timeout(5000).times(1)).onSignalsCollected(any(String.class));
+		Mockito.verify(_signalCollectionListener, Mockito.timeout(10000).times(1)).onSignalsCollected(any(String.class));
 	}
 
 }

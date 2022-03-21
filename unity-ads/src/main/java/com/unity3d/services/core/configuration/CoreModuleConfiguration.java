@@ -11,7 +11,7 @@ import com.unity3d.services.core.device.VolumeChange;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.services.core.request.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.WebRequestThread;
 
 public class CoreModuleConfiguration implements IModuleConfiguration {
@@ -38,6 +38,7 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 
 	public boolean resetState(Configuration configuration) {
 		SDKMetrics.setConfiguration(configuration);
+		InitializeEventsMetricSender.getInstance().setMetricTags(configuration.getMetricTags());
 		BroadcastMonitor.removeAllBroadcastListeners();
 		CacheThread.cancel();
 		WebRequestThread.cancel();
@@ -53,11 +54,13 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 
 	public boolean initModuleState(Configuration configuration) {
 		SDKMetrics.setConfiguration(configuration);
+		InitializeEventsMetricSender.getInstance().setMetricTags(configuration.getMetricTags());
 		return true;
 	}
 
 	public boolean initErrorState(Configuration configuration, String state, String errorMessage) {
 		SDKMetrics.setConfiguration(configuration);
+		InitializeEventsMetricSender.getInstance().setMetricTags(configuration.getMetricTags());
 		final String message;
 		final UnityAds.UnityAdsInitializationError error;
 		switch (state) {
@@ -87,6 +90,7 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 
 	public boolean initCompleteState(Configuration configuration) {
 		SDKMetrics.setConfiguration(configuration);
+		InitializeEventsMetricSender.getInstance().setMetricTags(configuration.getMetricTags());
 		InitializationNotificationCenter.getInstance().triggerOnSdkInitialized();
 
 		Utilities.runOnUiThread(new Runnable() {

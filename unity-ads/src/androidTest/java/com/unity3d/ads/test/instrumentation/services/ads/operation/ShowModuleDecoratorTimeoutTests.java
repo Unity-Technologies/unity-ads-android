@@ -17,7 +17,7 @@ import com.unity3d.services.ads.operation.show.IShowModule;
 import com.unity3d.services.ads.operation.show.ShowModule;
 import com.unity3d.services.ads.operation.show.ShowModuleDecoratorTimeout;
 import com.unity3d.services.ads.operation.show.ShowOperationState;
-import com.unity3d.services.core.request.ISDKMetricSender;
+import com.unity3d.services.core.request.metrics.ISDKMetricSender;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.WebViewBridgeInvocationRunnable;

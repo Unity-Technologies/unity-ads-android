@@ -18,7 +18,7 @@ import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.misc.ViewUtilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.services.core.request.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.Invocation;
 import com.unity3d.services.core.webview.bridge.NativeCallback;
@@ -299,25 +299,34 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 					return;
 				}
 
-				String queryString = "?platform=android";
+				WebViewUrlBuilder webViewUrlBuilder =  new WebViewUrlBuilder("file://" + SdkProperties.getLocalWebViewFile(), configuration);
+				String baseUrl = webViewUrlBuilder.getUrlWithQueryString();
 
-				try {
-					if(configuration.getWebViewUrl() != null) {
-						queryString = queryString + "&origin=" + URLEncoder.encode(configuration.getWebViewUrl(), "UTF-8");
+				if (baseUrl == null) {
+					// Just in case of error, fallback to the old way.
+					String queryString = "?platform=android";
+
+					try {
+						if (configuration.getWebViewUrl() != null) {
+							queryString = queryString + "&origin=" + URLEncoder.encode(configuration.getWebViewUrl(), "UTF-8");
+						}
+					} catch (UnsupportedEncodingException e) {
+						DeviceLog.exception("Unsupported charset when encoding origin url", e);
 					}
-				} catch(UnsupportedEncodingException e) {
-					DeviceLog.exception("Unsupported charset when encoding origin url", e);
+
+					try {
+						if (configuration.getWebViewVersion() != null) {
+							queryString = queryString + "&version=" + URLEncoder.encode(configuration.getWebViewVersion(), "UTF-8");
+						}
+					} catch (UnsupportedEncodingException e) {
+						DeviceLog.exception("Unsupported charset when encoding webview version", e);
+					}
+					webViewApp.getWebView().loadDataWithBaseURL("file://" + SdkProperties.getLocalWebViewFile() + queryString, configuration.getWebViewData(), "text/html", "UTF-8", null);
+
+				} else {
+					webViewApp.getWebView().loadDataWithBaseURL(baseUrl, configuration.getWebViewData(), "text/html", "UTF-8", null);
 				}
 
-				try {
-					if(configuration.getWebViewVersion() != null) {
-						queryString = queryString + "&version=" + URLEncoder.encode(configuration.getWebViewVersion(), "UTF-8");
-					}
-				} catch(UnsupportedEncodingException e) {
-					DeviceLog.exception("Unsupported charset when encoding webview version", e);
-				}
-
-				webViewApp.getWebView().loadDataWithBaseURL("file://" + SdkProperties.getLocalWebViewFile() + queryString, configuration.getWebViewData(), "text/html", "UTF-8", null);
 
 				setCurrentApp(webViewApp);
 			}
@@ -331,7 +340,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 		boolean createdSuccessfully = webViewCreateDidNotTimeout && webAppDefined && webAppInitialized;
 
 		if (!createdSuccessfully) {
-			SDKMetrics.getInstance().sendEventWithTags("native_webview_creation_failed", new HashMap<String, String>() {{
+			SDKMetrics.getInstance().sendEvent("native_webview_creation_failed", new HashMap<String, String>() {{
 				put("wto", "" + !webViewCreateDidNotTimeout);
 				put("wad", "" + webAppDefined);
 				put("wai", "" + webAppInitialized);
@@ -366,7 +375,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 			});
 
 			DeviceLog.error("UnityAds Sdk WebView onRenderProcessGone : " + detail.toString());
-			SDKMetrics.getInstance().sendEventWithTags("native_webview_render_process_gone", new HashMap<String, String>() {{
+			SDKMetrics.getInstance().sendEvent("native_webview_render_process_gone", new HashMap<String, String>() {{
 				// Only apply tags if minimum API Level applies
 				if (Build.VERSION.SDK_INT >= 26) {
 					put("dc", "" + detail.didCrash());

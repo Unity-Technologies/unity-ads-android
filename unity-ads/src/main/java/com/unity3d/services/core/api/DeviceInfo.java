@@ -111,15 +111,7 @@ public class DeviceInfo {
 
 	@WebViewExposed
 	public static void getConnectionType(WebViewCallback callback) {
-		String connectionType;
-		if(Device.isUsingWifi()) {
-			connectionType = "wifi";
-		} else if(Device.isActiveNetworkConnected()) {
-			connectionType = "cellular";
-		} else {
-			connectionType = "none";
-		}
-		callback.invoke(connectionType);
+		callback.invoke(Device.getConnectionType());
 	}
 
 	@WebViewExposed

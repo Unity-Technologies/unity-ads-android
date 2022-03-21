@@ -1,6 +1,9 @@
 package com.unity3d.services.core.properties;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 
 import com.unity3d.ads.BuildConfig;
 import com.unity3d.ads.IUnityAdsInitializationListener;
@@ -25,7 +28,10 @@ public class SdkProperties {
 	private static final String LOCAL_STORAGE_FILE_PREFIX = "UnityAdsStorage-";
 	private static final String CHINA_ISO_ALPHA_2_CODE = "CN";
 	private static final String CHINA_ISO_ALPHA_3_CODE = "CHN";
+	private static final String DEFAULT_CONFIG_VERSION = "configv2";
+	private static final String CONFIG_VERSION_METADATA_KEY = "com.unity3d.ads.configversion";
 	private static long _initializationTime = 0;
+	private static long _initializationTimeEpochMs = 0;
 	private static Configuration _latestConfiguration;
 
 	private static LinkedHashSet<IUnityAdsInitializationListener> _initializationListeners = new LinkedHashSet<IUnityAdsInitializationListener>();
@@ -128,11 +134,29 @@ public class SdkProperties {
 
 	public static String getDefaultConfigUrl(String flavor) {
 		boolean isChinaLocale = isChinaLocale(Device.getNetworkCountryISO());
-		String baseURI = "https://config.unityads.unity3d.com/webview/";
+		String baseURI = "https://" + getConfigVersion(ClientProperties.getApplicationContext()) + ".unityads.unity3d.com/webview/";
 		if (isChinaLocale) {
-			baseURI = "https://config.unityads.unitychina.cn/webview/";
+			baseURI = "https://" + getConfigVersion(ClientProperties.getApplicationContext()) + ".unityads.unitychina.cn/webview/";
 		}
 		return baseURI + getWebViewBranch() + "/" + flavor + "/config.json";
+	}
+
+	public static String getConfigVersion(Context context) {
+		String configVersion = DEFAULT_CONFIG_VERSION;
+
+		try {
+			if (context != null) {
+				ApplicationInfo app = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+				Bundle bundle = app.metaData;
+				if (bundle != null) {
+					configVersion = bundle.getString(CONFIG_VERSION_METADATA_KEY, DEFAULT_CONFIG_VERSION);
+				}
+			}
+		} catch (PackageManager.NameNotFoundException e) {
+			DeviceLog.warning("Failed to retrieve application info for current package");
+		}
+
+		return configVersion;
 	}
 
 	private static String getWebViewBranch() {
@@ -188,6 +212,14 @@ public class SdkProperties {
 
 	public static long getInitializationTime() {
 		return _initializationTime;
+	}
+
+	public static void setInitializationTimeSinceEpoch(long initializationTimeEpochMs) {
+		_initializationTimeEpochMs = initializationTimeEpochMs;
+	}
+
+	public static long getInitializationTimeEpoch() {
+		return _initializationTimeEpochMs;
 	}
 
 	public static void setReinitialized(boolean status) {

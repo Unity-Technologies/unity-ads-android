@@ -7,14 +7,13 @@ import com.unity3d.services.ads.operation.AdModule;
 import com.unity3d.services.core.configuration.InitializationNotificationCenter;
 import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.misc.Utilities;
-import com.unity3d.services.core.request.ISDKMetricSender;
-import com.unity3d.services.core.request.SDKMetricEvents;
-import com.unity3d.services.core.request.SDKMetricSender;
+import com.unity3d.services.core.request.metrics.ISDKMetricSender;
+import com.unity3d.services.core.request.metrics.SDKMetricEvents;
+import com.unity3d.services.core.request.metrics.SDKMetricSender;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocationCallback;
 import com.unity3d.services.core.webview.bridge.invocation.WebViewBridgeInvocation;
-import com.unity3d.services.core.webview.bridge.invocation.WebViewBridgeInvocationSingleThreadedExecutor;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,7 +59,7 @@ public class LoadModule extends AdModule<ILoadOperation, LoadOperationState> imp
 				sendOnUnityAdsFailedToLoad(state, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, errorMsgInternalCommunicationFailure);
 
 				final String cbs = callbackStatus == null ? "invocationFailure" : callbackStatus.toString();
-				_sdkMetricSender.SendSDKMetricEventWithTag(SDKMetricEvents.native_load_callback_error, new HashMap<String, String>(){{
+				_sdkMetricSender.sendSDKMetricEventWithTag(SDKMetricEvents.native_load_callback_error, new HashMap<String, String>(){{
 					put("cbs", cbs);
 				}});
 
@@ -69,7 +68,7 @@ public class LoadModule extends AdModule<ILoadOperation, LoadOperationState> imp
 			@Override
 			public void onTimeout() {
 				sendOnUnityAdsFailedToLoad(state, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, errorMsgInternalCommunicationTimeout);
-				getMetricSender().SendSDKMetricEvent(SDKMetricEvents.native_load_callback_timeout);
+				getMetricSender().sendSDKMetricEvent(SDKMetricEvents.native_load_callback_timeout);
 				remove(state.id);
 			}
 		}));

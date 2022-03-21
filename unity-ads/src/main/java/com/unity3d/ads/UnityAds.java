@@ -295,4 +295,11 @@ public final class UnityAds {
 		return UnityAdsImplementation.getToken();
 	}
 
+	/**
+	 * Get request token in asynchronous way.
+	 */
+	public static void getToken(IUnityAdsTokenListener listener) {
+		UnityAdsImplementation.getToken(listener);
+	}
+
 }

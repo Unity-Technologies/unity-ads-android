@@ -22,7 +22,7 @@ public class CacheDirectory {
 		_cacheDirName = cacheDirName;
 	}
 
-	public File getCacheDirectory(Context context) {
+	public synchronized File getCacheDirectory(Context context) {
 		if(_initialized) {
 			return _cacheDirectory;
 		} else {

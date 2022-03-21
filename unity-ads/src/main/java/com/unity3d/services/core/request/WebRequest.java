@@ -13,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -20,8 +21,8 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class WebRequest {
 	private URL _url;
-	private String _requestType = RequestType.GET.name();
-	private String _body;
+	private String _requestType;
+	private byte[] _body;
 	private Map<String, List<String>> _headers;
 	private Map<String, List<String>> _responseHeaders;
 	private int _responseCode = -1;
@@ -38,6 +39,10 @@ public class WebRequest {
 		POST,
 		GET,
 		HEAD
+	}
+
+	public WebRequest (String url, String requestType) throws MalformedURLException {
+		this(url, requestType, null);
 	}
 
 	public WebRequest (String url, String requestType, Map<String, List<String>> headers) throws MalformedURLException {
@@ -68,11 +73,15 @@ public class WebRequest {
 		return _requestType;
 	}
 
-	public String getBody () {
+	public byte[] getBody () {
 		return _body;
 	}
 
 	public void setBody (String body) {
+		_body = body.getBytes(StandardCharsets.UTF_8);
+	}
+
+	public void setBody (byte[] body) {
 		_body = body;
 	}
 
@@ -124,15 +133,18 @@ public class WebRequest {
 
 		if (getRequestType().equals(RequestType.POST.name())) {
 			connection.setDoOutput(true);
-			PrintWriter pout = null;
+			OutputStream pout = null;
 
 			try {
-				pout = new PrintWriter(new OutputStreamWriter(connection.getOutputStream(), "UTF-8"), true);
+				pout = connection.getOutputStream();
 				if (getBody() == null) {
-					pout.print(getQuery());
+					String query = getQuery();
+					if (query != null) {
+						pout.write(query.getBytes(StandardCharsets.UTF_8));
+					}
 				}
 				else {
-					pout.print(getBody());
+					pout.write(getBody());
 				}
 
 				pout.flush();

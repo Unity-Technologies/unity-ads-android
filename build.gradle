@@ -13,7 +13,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.1'
-        classpath 'org.jacoco:org.jacoco.core:0.8.1'
+        classpath 'org.jacoco:org.jacoco.core:0.8.5'
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.20.0'
         classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
     }

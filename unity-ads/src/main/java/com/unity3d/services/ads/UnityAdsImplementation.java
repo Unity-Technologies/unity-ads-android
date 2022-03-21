@@ -6,6 +6,7 @@ import android.content.Context;
 import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.IUnityAdsShowListener;
+import com.unity3d.ads.IUnityAdsTokenListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.UnityAdsLoadOptions;
 import com.unity3d.ads.UnityAdsShowOptions;
@@ -14,10 +15,12 @@ import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.ads.operation.load.LoadModule;
 import com.unity3d.services.ads.operation.show.ShowOperationState;
 import com.unity3d.services.ads.operation.show.ShowModule;
+import com.unity3d.services.ads.token.AsyncTokenStorage;
 import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.WebViewBridgeInvoker;
 
@@ -168,6 +171,14 @@ public final class UnityAdsImplementation {
 
 	public static String getToken() {
 		return TokenStorage.getToken();
+	}
+
+	public static void getToken(IUnityAdsTokenListener listener) {
+		if (ClientProperties.getApplicationContext() == null) {
+			listener.onUnityAdsTokenReady(null);
+			return;
+		}
+		AsyncTokenStorage.getInstance().getToken(listener);
 	}
 
 	public static void setConfiguration(Configuration configuration) {
