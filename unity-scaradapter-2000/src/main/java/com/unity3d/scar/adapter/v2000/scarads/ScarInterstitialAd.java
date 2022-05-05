@@ -29,7 +29,7 @@ public class ScarInterstitialAd extends ScarAdBase<InterstitialAd> {
 		if (_adObj != null) {
 			_adObj.show(activity);
 		} else {
-			_adsErrorHandler.handleError(GMAAdsError.InternalShowError(_scarAdMetadata));
+			_adsErrorHandler.handleError(GMAAdsError.AdNotLoadedError(_scarAdMetadata));
 		}
 	}
 }

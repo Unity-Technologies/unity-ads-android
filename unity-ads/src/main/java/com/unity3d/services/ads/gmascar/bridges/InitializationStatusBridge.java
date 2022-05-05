@@ -9,7 +9,7 @@ public class InitializationStatusBridge extends GenericBridge {
 	private static final String adapterStatusMapMethodName = "getAdapterStatusMap";
 
 	public InitializationStatusBridge() {
-		super(new HashMap<String, Class[]>() {{
+		super(new HashMap<String, Class<?>[]>() {{
 			put(adapterStatusMapMethodName, new Class[]{});
 		}});
 	}

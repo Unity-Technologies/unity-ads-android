@@ -6,6 +6,7 @@ import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdCallback;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.unity3d.scar.adapter.common.GMAEvent;
 import com.unity3d.scar.adapter.common.IScarRewardedAdListenerWrapper;
 import com.unity3d.scar.adapter.common.scarads.IScarLoadListener;
 
@@ -23,7 +24,7 @@ public class ScarRewardedAdListener {
 	private RewardedAdLoadCallback _rewardedAdLoadCallback = new RewardedAdLoadCallback() {
 		@Override
 		public void onRewardedAdLoaded() {
-			_adListenerWrapper.onRewardedAdLoaded();
+			_adListenerWrapper.onAdLoaded();
 			if (_loadListener != null) {
 				_loadListener.onAdLoaded();
 			}
@@ -31,19 +32,19 @@ public class ScarRewardedAdListener {
 
 		@Override
 		public void onRewardedAdFailedToLoad(LoadAdError adError) {
-			_adListenerWrapper.onRewardedAdFailedToLoad(adError.getCode(), adError.toString());
+			_adListenerWrapper.onAdFailedToLoad(adError.getCode(), adError.toString());
 		}
 	};
 
 	private RewardedAdCallback rewardedAdCallback = new RewardedAdCallback () {
 		@Override
 		public void onRewardedAdOpened() {
-			_adListenerWrapper.onRewardedAdOpened();
+			_adListenerWrapper.onAdOpened();
 		}
 
 		@Override
 		public void onRewardedAdFailedToShow(AdError adError) {
-			_adListenerWrapper.onRewardedAdFailedToShow(adError.getCode(), adError.toString());
+			_adListenerWrapper.onAdFailedToShow(adError.getCode(), adError.toString());
 		}
 
 		@Override
@@ -53,7 +54,7 @@ public class ScarRewardedAdListener {
 
 		@Override
 		public void onRewardedAdClosed() {
-			_adListenerWrapper.onRewardedAdClosed();
+			_adListenerWrapper.onAdClosed();
 		}
 	};
 

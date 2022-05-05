@@ -117,6 +117,12 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 	}
 
 	private void invokeJavascriptMethod(String className, String methodName, JSONArray params) throws JSONException {
+		String javaScript = buildInvokeJavascript(className, methodName, params);
+		DeviceLog.debug("Invoking javascript: %s", javaScript);
+		getWebView().invokeJavascript(javaScript);
+	}
+
+	private String buildInvokeJavascript(String className, String methodName, JSONArray params) throws JSONException {
 		String paramsString = params.toString();
 		int stringLength = INVOKE_JS_CHARS_LENGTH + className.length() + methodName.length() + paramsString.length();
 		StringBuilder sb = new StringBuilder(stringLength);
@@ -127,9 +133,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 		sb.append("(");
 		sb.append(paramsString);
 		sb.append(");");
-		String javaScriptString = sb.toString();
-		DeviceLog.debug("Invoking javascript: " + javaScriptString);
-		getWebView().invokeJavascript(javaScriptString);
+		return sb.toString();
 	}
 
 	public boolean sendEvent (Enum eventCategory, Enum eventId, Object... params) {

@@ -24,37 +24,50 @@ public class ShowOperation extends AdOperation implements IShowOperation  {
 		if (showOperationState == null || showOperationState.listener == null) return;
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
-			public void run() { showOperationState.listener.onUnityAdsShowFailure(placementId, error, message);
+			public void run() {
+				if (showOperationState != null) {
+					showOperationState.onUnityAdsShowFailure( error, message);
+				}
 			}
 		});
 	}
 
 	@Override
 	public void onUnityAdsShowStart(final String placementId) {
-		if (showOperationState == null || showOperationState.listener == null) return;
+		if (showOperationState == null) return;
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
-			public void run() { showOperationState.listener.onUnityAdsShowStart(placementId);
+			public void run() {
+				if (showOperationState != null) {
+					showOperationState.onUnityAdsShowStart(placementId);
+				}
 			}
 		});
 	}
 
 	@Override
 	public void onUnityAdsShowClick(final String placementId) {
-		if (showOperationState == null || showOperationState.listener == null) return;
+		if (showOperationState == null) return;
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
-			public void run() { showOperationState.listener.onUnityAdsShowClick(placementId);
+			public void run() {
+				if (showOperationState != null) {
+					showOperationState.onUnityAdsShowClick();
+				}
 			}
 		});
 	}
 
 	@Override
 	public void onUnityAdsShowComplete(final String placementId, final UnityAds.UnityAdsShowCompletionState state) {
-		if (showOperationState == null || showOperationState.listener == null) return;
+		if (showOperationState == null) return;
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
-			public void run() { showOperationState.listener.onUnityAdsShowComplete(placementId, state); }
+			public void run() {
+				if (showOperationState != null) {
+					showOperationState.onUnityAdsShowComplete(state);
+				}
+			}
 		});
 	}
 

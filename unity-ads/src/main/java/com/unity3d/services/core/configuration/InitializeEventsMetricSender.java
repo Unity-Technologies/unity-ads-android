@@ -8,6 +8,7 @@ import com.unity3d.services.core.request.metrics.TSIMetric;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class InitializeEventsMetricSender implements IInitializeEventsMetricSender, IInitializationListener{
 
@@ -33,13 +34,13 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 
 	@Override
 	public void didInitStart() {
-		_startTime = System.currentTimeMillis();
+		_startTime = System.nanoTime();
 		sendMetric(TSIMetric.newInitStarted(getMetricTags()));
 	}
 
 	@Override
 	public void didConfigRequestStart() {
-		_configStartTime = System.currentTimeMillis();
+		_configStartTime = System.nanoTime();
 	}
 
 	@Override
@@ -91,7 +92,7 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 			return;
 		}
 
-		Long duration = System.currentTimeMillis() - _startTime;
+		Long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - _startTime);
 		Map<String, String> tags = getMetricTags();
 		Metric metric = withConfig
 			? TSIMetric.newTokenAvailabilityLatencyConfig(duration, tags)
@@ -111,12 +112,12 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 
 	@Override
 	public Long duration() {
-		return System.currentTimeMillis() - _startTime;
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - _startTime);
 	}
 
 	@Override
 	public Long tokenDuration() {
-		return System.currentTimeMillis() - _configStartTime;
+		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - _configStartTime);
 	}
 
 	@Override

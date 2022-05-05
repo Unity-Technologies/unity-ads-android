@@ -29,7 +29,7 @@ public class ScarRewardedAd extends ScarAdBase<RewardedAd> {
 		if (_adObj != null) {
 			_adObj.show(activity, ((ScarRewardedAdListener)_scarAdListener).getOnUserEarnedRewardListener());
 		} else {
-			_adsErrorHandler.handleError(GMAAdsError.InternalShowError(_scarAdMetadata));
+			_adsErrorHandler.handleError(GMAAdsError.AdNotLoadedError(_scarAdMetadata));
 		}
 	}
 

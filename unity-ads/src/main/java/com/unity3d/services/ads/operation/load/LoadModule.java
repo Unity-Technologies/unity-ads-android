@@ -54,17 +54,19 @@ public class LoadModule extends AdModule<ILoadOperation, LoadOperationState> imp
 			public void onSuccess() {
 
 			}
+
 			@Override
 			public void onFailure(String message, CallbackStatus callbackStatus) {
 				sendOnUnityAdsFailedToLoad(state, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, errorMsgInternalCommunicationFailure);
 
 				final String cbs = callbackStatus == null ? "invocationFailure" : callbackStatus.toString();
-				_sdkMetricSender.sendSDKMetricEventWithTag(SDKMetricEvents.native_load_callback_error, new HashMap<String, String>(){{
+				_sdkMetricSender.sendSDKMetricEventWithTag(SDKMetricEvents.native_load_callback_error, new HashMap<String, String>() {{
 					put("cbs", cbs);
 				}});
 
 				remove(state.id);
 			}
+
 			@Override
 			public void onTimeout() {
 				sendOnUnityAdsFailedToLoad(state, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, errorMsgInternalCommunicationTimeout);
@@ -113,7 +115,7 @@ public class LoadModule extends AdModule<ILoadOperation, LoadOperationState> imp
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				state.listener.onUnityAdsFailedToLoad(state.placementId, error, message);
+				state.onUnityAdsFailedToLoad(error, message);
 			}
 		});
 	}

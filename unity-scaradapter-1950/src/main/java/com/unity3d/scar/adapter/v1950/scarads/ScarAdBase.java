@@ -32,7 +32,7 @@ public abstract class ScarAdBase implements IScarAd {
 			AdRequest adRequest = new AdRequest.Builder().setAdInfo(adInfo).build();
 			loadAdInternal(loadListener, adRequest);
 		} else {
-			_adsErrorHandler.handleError(GMAAdsError.InternalLoadError(_scarAdMetadata));
+			_adsErrorHandler.handleError(GMAAdsError.QueryNotFoundError(_scarAdMetadata));
 		}
 	}
 

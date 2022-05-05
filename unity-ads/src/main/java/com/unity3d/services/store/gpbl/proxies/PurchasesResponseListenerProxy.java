@@ -1,9 +1,9 @@
 package com.unity3d.services.store.gpbl.proxies;
 
 import com.unity3d.services.core.reflection.GenericListenerProxy;
-import com.unity3d.services.store.listeners.IPurchasesResponseListener;
 import com.unity3d.services.store.gpbl.bridges.BillingResultBridge;
 import com.unity3d.services.store.gpbl.bridges.PurchaseBridge;
+import com.unity3d.services.store.listeners.IPurchasesResponseListener;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -19,6 +19,10 @@ public class PurchasesResponseListenerProxy extends GenericListenerProxy {
 	@Override
 	public Class<?> getProxyClass() throws ClassNotFoundException {
 		return getProxyListenerClass();
+	}
+
+	public IPurchasesResponseListener getPurchasesResponseListener() {
+		return _purchasesResponseListener;
 	}
 
 	public static Class<?> getProxyListenerClass() throws ClassNotFoundException {

@@ -7,6 +7,7 @@ import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.unity3d.scar.adapter.common.GMAEvent;
 import com.unity3d.scar.adapter.common.IScarInterstitialAdListenerWrapper;
 
 public class ScarInterstitialAdListener extends ScarAdListener {

@@ -85,7 +85,7 @@ public class DeviceLog {
 	}
 
 	public static void debug(String message) {
-		if(!LOG_DEBUG && !FORCE_DEBUG_LOG) {
+		if(!isDebugEnabled()) {
 			return;
 		}
 
@@ -104,7 +104,14 @@ public class DeviceLog {
 
 	@SuppressWarnings("unused")
 	public static void debug(String format, Object... args) {
+		if(!isDebugEnabled()) {
+			return;
+		}
 		debug(String.format(format, args));
+	}
+
+	private static boolean isDebugEnabled() {
+		return LOG_DEBUG || FORCE_DEBUG_LOG;
 	}
 
 	public static void warning(String message) {

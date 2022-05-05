@@ -34,13 +34,13 @@ public class SdkProperties {
 	private static long _initializationTimeEpochMs = 0;
 	private static Configuration _latestConfiguration;
 
-	private static LinkedHashSet<IUnityAdsInitializationListener> _initializationListeners = new LinkedHashSet<IUnityAdsInitializationListener>();
+	private static final LinkedHashSet<IUnityAdsInitializationListener> _initializationListeners = new LinkedHashSet<IUnityAdsInitializationListener>();
 
 	private static boolean _initialized = false;
 	private static boolean _reinitialized = false;
 	private static boolean _testMode = false;
 	private static boolean _debugMode = false;
-	private static AtomicReference<InitializationState> _currentInitializationState = new AtomicReference<>(InitializationState.NOT_INITIALIZED);
+	private static final AtomicReference<InitializationState> _currentInitializationState = new AtomicReference<>(InitializationState.NOT_INITIALIZED);
 
 	public enum InitializationState {
 		NOT_INITIALIZED,

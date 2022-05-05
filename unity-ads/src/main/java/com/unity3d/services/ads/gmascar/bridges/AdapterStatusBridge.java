@@ -13,7 +13,7 @@ public class AdapterStatusBridge extends GenericBridge {
 	private Class _adapterStateClass;
 
 	public AdapterStatusBridge() {
-		super(new HashMap<String, Class[]>() {{
+		super(new HashMap<String, Class<?>[]>() {{
 			put(initializeStateMethodName, new Class[]{});
 		}});
 		AdapterStatusStateBridge adapterStatusStateBridge = new AdapterStatusStateBridge();
@@ -36,7 +36,7 @@ public class AdapterStatusBridge extends GenericBridge {
 		}
 
 		// States[0]: AdapterState.NOT_READY | States[1]: AdapterState.READY
-		return (callNonVoidMethod(initializeStateMethodName, adapterState, new Object[]{}) == states[1]);
+		return (callNonVoidMethod(initializeStateMethodName, adapterState) == states[1]);
 	}
 
 	public Object[] getAdapterStatesEnum() {

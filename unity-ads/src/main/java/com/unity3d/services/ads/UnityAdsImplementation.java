@@ -174,6 +174,10 @@ public final class UnityAdsImplementation {
 	}
 
 	public static void getToken(IUnityAdsTokenListener listener) {
+		if (listener == null) {
+			DeviceLog.info("Please provide non-null listener to UnityAds.GetToken method");
+			return;
+		}
 		if (ClientProperties.getApplicationContext() == null) {
 			listener.onUnityAdsTokenReady(null);
 			return;

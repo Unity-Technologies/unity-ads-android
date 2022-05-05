@@ -143,7 +143,7 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				showOperationState.listener.onUnityAdsShowFailure(showOperationState.placementId, errorCode, errorMessage);
+				showOperationState.onUnityAdsShowFailure(errorCode, errorMessage);
 			}
 		});
 	}

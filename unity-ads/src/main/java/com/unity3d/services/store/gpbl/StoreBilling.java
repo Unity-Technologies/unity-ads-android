@@ -2,8 +2,10 @@ package com.unity3d.services.store.gpbl;
 
 import android.content.Context;
 
-import com.unity3d.services.store.gpbl.bridges.BillingClientBridge;
 import com.unity3d.services.store.gpbl.bridges.SkuDetailsParamsBridge;
+import com.unity3d.services.store.gpbl.bridges.billingclient.BillingClientBuilderFactory;
+import com.unity3d.services.store.gpbl.bridges.billingclient.IBillingClient;
+import com.unity3d.services.store.gpbl.bridges.billingclient.IBillingClientBuilderBridge;
 import com.unity3d.services.store.gpbl.proxies.BillingClientStateListenerProxy;
 import com.unity3d.services.store.gpbl.proxies.PurchaseHistoryResponseListenerProxy;
 import com.unity3d.services.store.gpbl.proxies.PurchaseUpdatedListenerProxy;
@@ -18,11 +20,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 public class StoreBilling {
-	private final BillingClientBridge _billingClientBridge;
+	private final IBillingClient _billingClientBridge;
 
 	public StoreBilling(Context context, IPurchaseUpdatedResponseListener purchaseUpdatedResponseListener) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-		BillingClientBridge.BuilderBridge builderBridge = BillingClientBridge.newBuilder(context);
-		_billingClientBridge = builderBridge.setListener(new PurchaseUpdatedListenerProxy(purchaseUpdatedResponseListener)).enablePendingPurchases().build();
+		IBillingClientBuilderBridge builderBridge = BillingClientBuilderFactory.getBillingClientBuilder(context);
+		builderBridge = builderBridge.setListener(new PurchaseUpdatedListenerProxy(purchaseUpdatedResponseListener));
+		builderBridge = builderBridge.enablePendingPurchases();
+		_billingClientBridge = builderBridge.build();
 	}
 
 	public void initialize(IBillingClientStateListener billingClientStateListener) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {

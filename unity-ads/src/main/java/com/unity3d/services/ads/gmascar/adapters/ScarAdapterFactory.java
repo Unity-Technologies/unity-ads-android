@@ -1,7 +1,11 @@
 package com.unity3d.services.ads.gmascar.adapters;
 
+import com.unity3d.scar.adapter.common.GMAAdsError;
+import com.unity3d.scar.adapter.common.GMAEvent;
 import com.unity3d.scar.adapter.common.IAdsErrorHandler;
 import com.unity3d.scar.adapter.common.IScarAdapter;
+import com.unity3d.services.ads.gmascar.utils.GMAEventSender;
+import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.log.DeviceLog;
 
 public class ScarAdapterFactory {
@@ -19,7 +23,9 @@ public class ScarAdapterFactory {
 		} else if (gmaVersionCode >= CODE_19_2) {
 			scarAdapter = new com.unity3d.scar.adapter.v1920.ScarAdapter(adsErrorHandler);
 		} else {
-			DeviceLog.debug("SCAR version %s is not supported.", gmaVersionCode);
+			String errorMessage = String.format("SCAR version %s is not supported.", gmaVersionCode);
+			adsErrorHandler.handleError(GMAAdsError.AdapterCreationError(errorMessage));
+			DeviceLog.debug(errorMessage);
 		}
 		return scarAdapter;
 	}

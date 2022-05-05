@@ -11,19 +11,49 @@ public class GMAAdsErrorTest {
 	private static final String TEST_MESSAGE = "error message";
 
 	@Test
+	public void testAdapterCreationError() {
+		String errorMessage = "Scar version unsupported";
+		GMAAdsError gmaAdsError = GMAAdsError.AdapterCreationError(errorMessage);
+		validateGmaAdsError(gmaAdsError, GMAEvent.SCAR_UNSUPPORTED, errorMessage);
+	}
+
+	@Test
+	public void testNoAdsError() {
+		String formattedErrorMessage = String.format("Could not find ad for placement '", TEST_PLACEMENT, "'");
+		GMAAdsError gmaAdsError = GMAAdsError.NoAdsError(TEST_PLACEMENT, TEST_QUERYID, formattedErrorMessage);
+		validateGmaAdsError(gmaAdsError, GMAEvent.NO_AD_ERROR, formattedErrorMessage, TEST_PLACEMENT, TEST_QUERYID, formattedErrorMessage);
+	}
+
+	@Test
+	public void testNoAdLoadedError() {
+		ScarAdMetadata scarAdMetadata = new ScarAdMetadata(TEST_PLACEMENT, TEST_QUERYID);
+		GMAAdsError gmaAdsError = GMAAdsError.AdNotLoadedError(scarAdMetadata);
+		String formattedErrorMessage = String.format(GMAAdsError.AD_NOT_LOADED_MESSAGE, TEST_PLACEMENT);
+		validateGmaAdsError(gmaAdsError, GMAEvent.AD_NOT_LOADED_ERROR, formattedErrorMessage, TEST_PLACEMENT, TEST_QUERYID, formattedErrorMessage);
+	}
+
+	@Test
 	public void testInternalShowError() {
 		ScarAdMetadata scarAdMetadata = new ScarAdMetadata(TEST_PLACEMENT, TEST_QUERYID);
-		GMAAdsError gmaAdsError = GMAAdsError.InternalShowError(scarAdMetadata);
-		String formattedErrorMessage = String.format(GMAAdsError.INTERNAL_SHOW_MESSAGE_NOT_LOADED, TEST_PLACEMENT);
-		validateGmaAdsError(gmaAdsError, GMAEvent.INTERNAL_SHOW_ERROR, formattedErrorMessage, TEST_PLACEMENT, TEST_QUERYID, formattedErrorMessage);
+		String errorMessage = "Scar Adapter object is null";
+		GMAAdsError gmaAdsError = GMAAdsError.InternalShowError(scarAdMetadata, errorMessage);
+		validateGmaAdsError(gmaAdsError, GMAEvent.INTERNAL_SHOW_ERROR, errorMessage, TEST_PLACEMENT, TEST_QUERYID, errorMessage);
+	}
+
+	@Test
+	public void testQueryNotFoundError() {
+		ScarAdMetadata scarAdMetadata = new ScarAdMetadata(TEST_PLACEMENT, TEST_QUERYID);
+		GMAAdsError gmaAdsError = GMAAdsError.QueryNotFoundError(scarAdMetadata);
+		String formattedErrorMessage = String.format(GMAAdsError.MISSING_QUERYINFO_MESSAGE, TEST_PLACEMENT);
+		validateGmaAdsError(gmaAdsError, GMAEvent.QUERY_NOT_FOUND_ERROR, formattedErrorMessage, TEST_PLACEMENT, TEST_QUERYID, formattedErrorMessage);
 	}
 
 	@Test
 	public void testInternalLoadError() {
 		ScarAdMetadata scarAdMetadata = new ScarAdMetadata(TEST_PLACEMENT, TEST_QUERYID);
-		GMAAdsError gmaAdsError = GMAAdsError.InternalLoadError(scarAdMetadata);
-		String formattedErrorMessage = String.format(GMAAdsError.INTERNAL_LOAD_MESSAGE_MISSING_QUERYINFO, TEST_PLACEMENT);
-		validateGmaAdsError(gmaAdsError, GMAEvent.INTERNAL_LOAD_ERROR, formattedErrorMessage, TEST_PLACEMENT, TEST_QUERYID, formattedErrorMessage);
+		String errorMessage = "Scar Adapter object is null";
+		GMAAdsError gmaAdsError = GMAAdsError.InternalLoadError(scarAdMetadata, errorMessage);
+		validateGmaAdsError(gmaAdsError, GMAEvent.INTERNAL_LOAD_ERROR, errorMessage, TEST_PLACEMENT, TEST_QUERYID, errorMessage);
 	}
 
 	@Test

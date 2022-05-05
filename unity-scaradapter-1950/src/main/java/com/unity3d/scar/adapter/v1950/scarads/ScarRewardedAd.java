@@ -34,7 +34,7 @@ public class ScarRewardedAd extends ScarAdBase {
 		if (_rewardedAd.isLoaded()) {
 			_rewardedAd.show(activity, _rewardedAdDelegate.getRewardedAdCallback());
 		} else {
-			_adsErrorHandler.handleError(GMAAdsError.InternalShowError(_scarAdMetadata));
+			_adsErrorHandler.handleError(GMAAdsError.AdNotLoadedError(_scarAdMetadata));
 		}
 	}
 

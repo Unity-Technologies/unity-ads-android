@@ -2,19 +2,31 @@ package com.unity3d.ads.test.legacy;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.unity3d.ads.IUnityAdsTokenListener;
+import com.unity3d.services.ads.token.AsyncTokenStorage;
 import com.unity3d.services.ads.token.TokenEvent;
 import com.unity3d.services.ads.token.TokenStorage;
+import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.WebViewEventCategory;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @RunWith(AndroidJUnit4.class)
 public class TokenStorageTest {
@@ -25,6 +37,13 @@ public class TokenStorageTest {
 
 		TokenStorage.setPeekMode(false);
 		TokenStorage.deleteTokens();
+	}
+
+	@After
+	public void After() {
+		ClientProperties.setApplicationContext(null);
+		WebViewApp.setCurrentApp(null);
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.NOT_INITIALIZED);
 	}
 
 	@Test
@@ -162,6 +181,55 @@ public class TokenStorageTest {
 		assertEquals("Token peekmode test: event category not TOKEN in third event", currentApp.getLastEventCategory(), WebViewEventCategory.TOKEN);
 		assertEquals("Token peekmode test: event ID not TOKEN_ACCESS in third event", currentApp.getLastEventId(), TokenEvent.TOKEN_ACCESS);
 		assertEquals("Token peekmode test: access counter is not two in third event", currentApp.getLastParams()[0], 2);
+	}
+
+	@Test(timeout = 2000)
+	public void testDeadlockRegression() throws InterruptedException {
+		ClientProperties.setApplicationContext(androidx.test.core.app.ApplicationProvider.getApplicationContext());
+		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZING);
+
+		final int tokenRequestCount = 2;
+		final CountDownLatch appendTokensStart = new CountDownLatch(1);
+		final CountDownLatch tokensReady = new CountDownLatch(tokenRequestCount);
+		final String[] actualToken = {"", ""};
+
+		AsyncTokenStorage.getInstance().setConfiguration(new Configuration());
+
+		Thread appendTokens = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					appendTokensStart.await();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				try {
+					TokenStorage.appendTokens(getTestArray());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		appendTokens.start();
+
+		Thread.sleep(200);
+		appendTokensStart.countDown();
+
+		for (int i = 0; i < tokenRequestCount; i++) {
+			final int finalI = i;
+			AsyncTokenStorage.getInstance().getToken(new IUnityAdsTokenListener() {
+				@Override
+				public void onUnityAdsTokenReady(String token) {
+					tokensReady.countDown();
+					actualToken[finalI] = token;
+				}
+			});
+		}
+
+		tokensReady.await();
+		Assert.assertEquals("one", actualToken[0]);
+		Assert.assertEquals("two", actualToken[1]);
 	}
 
 	private JSONArray getTestArray() {

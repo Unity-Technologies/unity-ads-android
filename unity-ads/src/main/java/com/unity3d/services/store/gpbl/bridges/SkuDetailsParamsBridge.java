@@ -22,7 +22,7 @@ public class SkuDetailsParamsBridge extends GenericBridge {
 	}
 
 	public SkuDetailsParamsBridge(Object skuDetailsParamsInternalInstance) {
-		super(new HashMap<String, Class[]>(){{
+		super(new HashMap<String, Class<?>[]>(){{
 			put(newBuilderMethodName, new Class[]{});
 		}});
 		_skuDetailsParamsInternalInstance = skuDetailsParamsInternalInstance;
@@ -54,7 +54,7 @@ public class SkuDetailsParamsBridge extends GenericBridge {
 		private Object _skuDetailsParamsBuilderInternalInstance;
 
 		public BuilderBridge(Object skuDetailsParamsBuilderInternalInstance) {
-			super(new HashMap<String, Class[]>(){{
+			super(new HashMap<String, Class<?>[]>(){{
 				put(buildMethodName, new Class[]{});
 				put(setSkusListMethodName, new Class[]{List.class});
 				put(setTypeMethodName, new Class[]{String.class});

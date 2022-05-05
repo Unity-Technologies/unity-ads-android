@@ -39,7 +39,7 @@ public abstract class ScarAdBase<T> implements IScarAd {
 			_scarAdListener.setLoadListener(loadListener);
 			loadAdInternal(adRequest, loadListener);
 		} else {
-			_adsErrorHandler.handleError(GMAAdsError.InternalLoadError(_scarAdMetadata));
+			_adsErrorHandler.handleError(GMAAdsError.QueryNotFoundError(_scarAdMetadata));
 		}
 	}
 

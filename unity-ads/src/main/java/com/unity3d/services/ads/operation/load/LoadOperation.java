@@ -20,20 +20,28 @@ public class LoadOperation extends AdOperation implements ILoadOperation {
 
 	@Override
 	public void onUnityAdsAdLoaded(final String placementId) {
-		if (_loadOperationState == null || _loadOperationState.listener == null || placementId == null) return;
+		if (_loadOperationState == null || _loadOperationState.listener == null || placementId == null)
+			return;
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
-			public void run() { _loadOperationState.listener.onUnityAdsAdLoaded(placementId);
+			public void run() {
+				if (_loadOperationState != null) {
+					_loadOperationState.onUnityAdsAdLoaded();
+				}
 			}
 		});
 	}
 
 	@Override
 	public void onUnityAdsFailedToLoad(final String placementId, final UnityAds.UnityAdsLoadError error, final String message) {
-		if (_loadOperationState == null || _loadOperationState.listener == null || placementId == null) return;
+		if (_loadOperationState == null || _loadOperationState.listener == null || placementId == null)
+			return;
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
-			public void run() { _loadOperationState.listener.onUnityAdsFailedToLoad(placementId, error, message);
+			public void run() {
+				if (_loadOperationState != null) {
+					_loadOperationState.onUnityAdsFailedToLoad(error, message);
+				}
 			}
 		});
 	}

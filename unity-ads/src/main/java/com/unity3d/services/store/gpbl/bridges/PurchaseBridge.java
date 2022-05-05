@@ -10,11 +10,10 @@ import java.util.HashMap;
 public class PurchaseBridge extends CommonJsonResponseBridge {
 	private static final String getSignatureMethodName = "getSignature";
 
-	private Object _purchase;
+	private final Object _purchase;
 
 	public PurchaseBridge(Object purchase) {
-		super(purchase, new HashMap<String, Class[]>() {{
-			put(getOriginalJsonMethodName, new Class[]{});
+		super(purchase, new HashMap<String, Class<?>[]>() {{
 			put(getSignatureMethodName, new Class[]{});
 		}});
 		_purchase = purchase;

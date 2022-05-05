@@ -15,31 +15,27 @@ import java.util.Map;
 public abstract class GenericBridge {
 
 	private final String _className;
-	private final Map<String, Class[]> _functionAndParameters;
+	private final Map<String, Class<?>[]> _functionAndParameters;
 	private final Map<String, Method> _methodMap;
 	private boolean _methodMapBuilt = false;
 
 	protected abstract String getClassName();
 
-	public GenericBridge(Map<String, Class[]> functionAndParameters) {
+	public GenericBridge(Map<String, Class<?>[]> functionAndParameters) {
 		_className = getClassName();
 		_functionAndParameters = functionAndParameters;
 		_methodMap = new HashMap<>();
 		buildMethodMap();
 	}
 
-	public Map<String,Class[]> getFunctionMap() {
+	public Map<String,Class<?>[]> getFunctionMap() {
 		return _functionAndParameters;
 	}
 
-	public Class classForName() {
+	public Class<?> classForName() {
 		try {
-			Class getClass = Class.forName(_className);
-			if (getClass != null) {
-				return getClass;
-			} else {
-				return null;
-			}
+			Class<?> getClass = Class.forName(_className);
+			return getClass;
 		} catch (ClassNotFoundException e) {
 			DeviceLog.debug("ERROR: Could not find Class %s %s", _className, e.getLocalizedMessage());
 			return null;
@@ -55,16 +51,12 @@ public abstract class GenericBridge {
 		if (!_methodMapBuilt) {
 			buildMethodMap();
 		}
-		if (_methodMap.size() != getFunctionMap().size()) {
-			return false;
-		}
-
-		return true;
+		return _methodMap.size() == getFunctionMap().size();
 	}
 
 	private void buildMethodMap() {
 		boolean methodMapNoErrors = true;
-		for (Map.Entry<String, Class[]> entry : getFunctionMap().entrySet()) {
+		for (Map.Entry<String, Class<?>[]> entry : getFunctionMap().entrySet()) {
 			Class[] parameterClasses = entry.getValue();
 			try {
 				Method method = getReflectiveMethod(classForName(), entry.getKey(), parameterClasses);
@@ -83,7 +75,7 @@ public abstract class GenericBridge {
 		return _methodMap.get(methodName);
 	}
 
-	private Method getReflectiveMethod(Class methodClass, String methodName, Class... parameterClasses) {
+	private Method getReflectiveMethod(Class<?> methodClass, String methodName, Class<?>... parameterClasses) {
 		Method method = null;
 		try {
 			method = methodClass.getDeclaredMethod(methodName, parameterClasses);
@@ -91,9 +83,8 @@ public abstract class GenericBridge {
 			DeviceLog.debug("ERROR: Could not find method %s in %s", methodName, methodClass.getName() +
 				" " + e.getLocalizedMessage());
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.GMA, GMAEvent.METHOD_ERROR);
-		} finally {
-			return method;
 		}
+		return method;
 	}
 
 	public void callVoidMethod(String methodName, Object callingObj, Object... parameters) {

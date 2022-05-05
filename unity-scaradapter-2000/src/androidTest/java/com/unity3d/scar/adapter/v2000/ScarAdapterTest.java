@@ -7,7 +7,6 @@ import androidx.test.core.app.ActivityScenario;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.unity3d.scar.adapter.common.GMAAdsError;
-import com.unity3d.scar.adapter.common.GMAEvent;
 import com.unity3d.scar.adapter.common.IAdsErrorHandler;
 import com.unity3d.scar.adapter.common.IScarInterstitialAdListenerWrapper;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;

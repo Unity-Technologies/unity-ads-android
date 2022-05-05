@@ -58,7 +58,9 @@ public class BannerViewCache {
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onBannerLoaded(bannerView);
+					if (listener != null) {
+						listener.onBannerLoaded(bannerView);
+					}
 				}
 			});
 		}
@@ -71,7 +73,9 @@ public class BannerViewCache {
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onBannerClick(bannerView);
+					if (listener != null) {
+						listener.onBannerClick(bannerView);
+					}
 				}
 			});
 		}
@@ -84,7 +88,9 @@ public class BannerViewCache {
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onBannerFailedToLoad(bannerView, bannerErrorInfo);
+					if (listener != null) {
+						listener.onBannerFailedToLoad(bannerView, bannerErrorInfo);
+					}
 				}
 			});
 		}
@@ -97,7 +103,9 @@ public class BannerViewCache {
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onBannerLeftApplication(bannerView);
+					if (listener != null) {
+						listener.onBannerLeftApplication(bannerView);
+					}
 				}
 			});
 		}

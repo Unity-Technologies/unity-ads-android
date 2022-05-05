@@ -5,6 +5,7 @@ import com.unity3d.services.ads.gmascar.bridges.AdapterStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializationStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializeListenerBridge;
 import com.unity3d.services.ads.gmascar.bridges.MobileAdsBridge;
+import com.unity3d.services.ads.gmascar.utils.GMAEventSender;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.webview.WebViewApp;
@@ -18,6 +19,7 @@ public class GMAInitializer {
 	private InitializeListenerBridge _initializationListenerBridge;
 	private InitializationStatusBridge _initializationStatusBridge;
 	private AdapterStatusBridge _adapterStatusBridge;
+	private GMAEventSender _gmaEventSender;
 
 	public GMAInitializer(MobileAdsBridge mobileAdsBridge, InitializeListenerBridge initializeListenerBridge,
 						  InitializationStatusBridge initializationStatusBridge, AdapterStatusBridge adapterStatusBridge) {
@@ -25,11 +27,13 @@ public class GMAInitializer {
 		_initializationListenerBridge = initializeListenerBridge;
 		_initializationStatusBridge = initializationStatusBridge;
 		_adapterStatusBridge = adapterStatusBridge;
+		_gmaEventSender = new GMAEventSender();
 	}
 
 	// We need to initialize GMA SDK in order to get the version string
 	public void initializeGMA() {
 		if (isInitialized()) {
+			_gmaEventSender.send(GMAEvent.ALREADY_INITIALIZED);
 			return;
 		} else {
 			_mobileAdsBridge.initialize(ClientProperties.getApplicationContext(), _initializationListenerBridge.createInitializeListenerProxy());

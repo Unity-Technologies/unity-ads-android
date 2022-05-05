@@ -14,7 +14,7 @@ public class InitializeListenerBridge extends GenericBridge {
 	private IInitializationStatusListener _initializationStatusListener;
 
 	public InitializeListenerBridge() {
-		super(new HashMap<String, Class[]>(){{
+		super(new HashMap<String, Class<?>[]>(){{
 			try {
 				put(initializationCompleteMethodName, new Class[]{Class.forName("com.google.android.gms.ads.initialization.InitializationStatus")});
 			} catch (ClassNotFoundException e) {

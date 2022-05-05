@@ -65,8 +65,10 @@ public class ShowModuleDecoratorTimeout extends ShowModuleDecorator {
 	}
 
 	private void onOperationTimeout(final ShowOperationState state, UnityAds.UnityAdsShowError error, String message) {
-		remove(state.id);
-		state.listener.onUnityAdsShowFailure(state.placementId, error, message);
+		if (state != null) {
+			remove(state.id);
+			state.onUnityAdsShowFailure(error, message);
+		}
 		getMetricSender().sendSDKMetricEvent(SDKMetricEvents.native_show_timeout_error);
 	}
 }

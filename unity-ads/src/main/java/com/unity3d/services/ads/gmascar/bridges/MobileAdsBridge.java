@@ -13,7 +13,7 @@ public class MobileAdsBridge extends GenericBridge {
 	private static final String versionStringMethodName = "getVersionString";
 
 	public MobileAdsBridge() {
-		super(new HashMap<String, Class[]>() {{
+		super(new HashMap<String, Class<?>[]>() {{
 			try {
 				put(initializeMethodName, new Class[]{Context.class, Class.forName("com.google.android.gms.ads.initialization.OnInitializationCompleteListener")});
 			} catch (ClassNotFoundException e) {
@@ -29,11 +29,11 @@ public class MobileAdsBridge extends GenericBridge {
 	}
 
 	public void initialize(Context context, Object initializeListener) {
-		callVoidMethod(initializeMethodName, null, new Object[]{context, initializeListener});
+		callVoidMethod(initializeMethodName, null, context, initializeListener);
 	}
 
 	public String getVersionString() {
-		Object versionString = callNonVoidMethod(versionStringMethodName, null, new Object[]{});
+		Object versionString = callNonVoidMethod(versionStringMethodName, null);
 		if (versionString == null) {
 			return "0.0.0";
 		}
@@ -41,7 +41,7 @@ public class MobileAdsBridge extends GenericBridge {
 	}
 
 	public Object getInitializationStatus () {
-		return callNonVoidMethod(initializationStatusMethodName, null, new Object[]{});
+		return callNonVoidMethod(initializationStatusMethodName, null);
 	}
 
 }

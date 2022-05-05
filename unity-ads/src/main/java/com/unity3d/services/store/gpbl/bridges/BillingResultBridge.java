@@ -10,7 +10,7 @@ public class BillingResultBridge extends GenericBridge {
 	private final Object _billingResult;
 
 	public BillingResultBridge(Object billingResult) {
-		super(new HashMap<String, Class[]>() {{
+		super(new HashMap<String, Class<?>[]>() {{
 			put(getResponseCodeMethodName, new Class[]{});
 		}});
 		_billingResult = billingResult;

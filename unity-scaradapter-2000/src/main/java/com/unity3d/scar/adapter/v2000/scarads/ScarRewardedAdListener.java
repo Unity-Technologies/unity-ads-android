@@ -9,6 +9,7 @@ import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.unity3d.scar.adapter.common.GMAEvent;
 import com.unity3d.scar.adapter.common.IScarRewardedAdListenerWrapper;
 
 public class ScarRewardedAdListener extends ScarAdListener {
@@ -25,7 +26,7 @@ public class ScarRewardedAdListener extends ScarAdListener {
 		@Override
 		public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
 			super.onAdLoaded(rewardedAd);
-			_adListenerWrapper.onRewardedAdLoaded();
+			_adListenerWrapper.onAdLoaded();
 			rewardedAd.setFullScreenContentCallback(_fullScreenContentCallback);
 			_scarRewardedAd.setGmaAd(rewardedAd);
 			if (_loadListener != null) {
@@ -36,7 +37,7 @@ public class ScarRewardedAdListener extends ScarAdListener {
 		@Override
 		public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
 			super.onAdFailedToLoad(loadAdError);
-			_adListenerWrapper.onRewardedAdFailedToLoad(loadAdError.getCode(), loadAdError.toString());
+			_adListenerWrapper.onAdFailedToLoad(loadAdError.getCode(), loadAdError.toString());
 		}
 	};
 
@@ -51,19 +52,19 @@ public class ScarRewardedAdListener extends ScarAdListener {
 		@Override
 		public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
 			super.onAdFailedToShowFullScreenContent(adError);
-			_adListenerWrapper.onRewardedAdFailedToShow(adError.getCode(), adError.toString());
+			_adListenerWrapper.onAdFailedToShow(adError.getCode(), adError.toString());
 		}
 
 		@Override
 		public void onAdShowedFullScreenContent() {
 			super.onAdShowedFullScreenContent();
-			_adListenerWrapper.onRewardedAdOpened();
+			_adListenerWrapper.onAdOpened();
 		}
 
 		@Override
 		public void onAdDismissedFullScreenContent() {
 			super.onAdDismissedFullScreenContent();
-			_adListenerWrapper.onRewardedAdClosed();
+			_adListenerWrapper.onAdClosed();
 		}
 
 		@Override
