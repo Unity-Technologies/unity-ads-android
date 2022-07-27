@@ -3,10 +3,12 @@ package com.unity3d.ads.test.instrumentation.services.core.configuration;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.ConfigurationRequestFactory;
 import com.unity3d.services.core.configuration.Experiments;
+import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.device.reader.IDeviceInfoReader;
 import com.unity3d.services.core.request.WebRequest;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -29,15 +31,22 @@ public class ConfigurationRequestFactoryTest {
 	@Mock
 	IDeviceInfoReader _deviceInfoReaderMock;
 
+	@Mock
+	DeviceInfoReaderBuilder _deviceInfoReaderBuilderMock;
+
 	static final String CONFIG_URL = "http://configurl/";
 
-	@Test
-	public void testConfigurationRequestFactoryPost() throws MalformedURLException {
-		Mockito.when(_experimentsMock.isTwoStageInitializationEnabled()).thenReturn(true);
-		Mockito.when(_experimentsMock.isPOSTMethodInConfigRequestEnabled()).thenReturn(true);
+	@Before
+	public void setup() {
+		Mockito.when(_deviceInfoReaderBuilderMock.build()).thenReturn(_deviceInfoReaderMock);
 		Mockito.when(_configurationMock.getExperiments()).thenReturn(_experimentsMock);
+		Mockito.when(_configurationMock.getConfigUrl()).thenReturn(CONFIG_URL);
+	}
 
-		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoReaderMock, CONFIG_URL);
+	@Test
+	public void testConfigurationRequestFactoryGetIfTsiEnabled() throws MalformedURLException {
+		Mockito.when(_experimentsMock.isTwoStageInitializationEnabled()).thenReturn(true);
+		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoReaderBuilderMock);
 		WebRequest webRequest = configurationRequestFactory.getWebRequest();
 		Assert.assertEquals("POST", webRequest.getRequestType());
 		Map<String, List<String>> headers = webRequest.getHeaders();
@@ -47,47 +56,25 @@ public class ConfigurationRequestFactoryTest {
 	@Test
 	public void testConfigurationRequestFactoryGetIfTsiDisabled() throws MalformedURLException {
 		Mockito.when(_experimentsMock.isTwoStageInitializationEnabled()).thenReturn(false);
-		Mockito.when(_experimentsMock.isPOSTMethodInConfigRequestEnabled()).thenReturn(true);
-		Mockito.when(_configurationMock.getExperiments()).thenReturn(_experimentsMock);
-
-		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoReaderMock, CONFIG_URL);
+		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoReaderBuilderMock);
 		WebRequest webRequest = configurationRequestFactory.getWebRequest();
-		Assert.assertEquals("GET", webRequest.getRequestType());
-		Assert.assertTrue("ts missing from query", webRequest.getQuery().contains("ts"));
-		Assert.assertTrue("sdkVersion missing from query", webRequest.getQuery().contains("sdkVersion"));
-		Assert.assertTrue("sdkVersionName missing from query", webRequest.getQuery().contains("sdkVersionName"));
-		Assert.assertTrue("gameId missing from query", webRequest.getQuery().contains("gameId"));
-	}
-
-	@Test
-	public void testConfigurationRequestFactoryGetIfTsiEnabled() throws MalformedURLException {
-		Mockito.when(_experimentsMock.isTwoStageInitializationEnabled()).thenReturn(true);
-		Mockito.when(_experimentsMock.isPOSTMethodInConfigRequestEnabled()).thenReturn(false);
-		Mockito.when(_configurationMock.getExperiments()).thenReturn(_experimentsMock);
-
-		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoReaderMock, CONFIG_URL);
-		WebRequest webRequest = configurationRequestFactory.getWebRequest();
-		Assert.assertEquals("GET", webRequest.getRequestType());
-		Assert.assertEquals("c=H4sIAAAAAAAAAKuuBQBDv6ajAgAAAA%3D%3D", webRequest.getQuery());
-	}
-
-	@Test
-	public void testConfigurationRequestFactoryGetIfPostDisabled() throws MalformedURLException {
-		Mockito.when(_experimentsMock.isTwoStageInitializationEnabled()).thenReturn(true);
-		Mockito.when(_experimentsMock.isPOSTMethodInConfigRequestEnabled()).thenReturn(false);
-		Mockito.when(_configurationMock.getExperiments()).thenReturn(_experimentsMock);
-
-		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoReaderMock, CONFIG_URL);
-		WebRequest webRequest = configurationRequestFactory.getWebRequest();
-		Assert.assertEquals("GET", webRequest.getRequestType());
+		validateGetRequest(webRequest);
 	}
 
 	@Test
 	public void testConfigurationRequestFactoryGetNullExperiments() throws MalformedURLException {
 		Mockito.when(_configurationMock.getExperiments()).thenReturn(null);
-
-		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoReaderMock, CONFIG_URL);
+		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoReaderBuilderMock);
 		WebRequest webRequest = configurationRequestFactory.getWebRequest();
+		validateGetRequest(webRequest);
+	}
+
+	private void validateGetRequest(WebRequest webRequest) {
 		Assert.assertEquals("GET", webRequest.getRequestType());
+		Assert.assertTrue("base url missing from query", webRequest.getUrl().toString().contains(CONFIG_URL));
+		Assert.assertTrue("ts missing from query", webRequest.getQuery().contains("ts"));
+		Assert.assertTrue("sdkVersion missing from query", webRequest.getQuery().contains("sdkVersion"));
+		Assert.assertTrue("sdkVersionName missing from query", webRequest.getQuery().contains("sdkVersionName"));
+		Assert.assertTrue("gameId missing from query", webRequest.getQuery().contains("gameId"));
 	}
 }

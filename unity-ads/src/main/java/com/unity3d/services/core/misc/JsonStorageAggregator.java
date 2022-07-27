@@ -33,6 +33,7 @@ public class JsonStorageAggregator implements IJsonStorageReader {
 	public Object get(String key) {
 		Object foundValue = null;
 		for(IJsonStorageReader jsonStorageReader : _jsonStorageReaders) {
+			if (jsonStorageReader == null) continue;
 			foundValue = jsonStorageReader.get(key);
 			if (foundValue != null) break;
 		}

@@ -65,12 +65,14 @@ public class SDKMetricsTest {
 	@Test
 	public void testSettingMsr100Then0() throws NoSuchFieldException, IllegalAccessException {
 		validateAndTestChangingSampleRate("testUrl", 100.0, 0.0, MetricSender.class);
+		Assert.assertTrue("Metrics expected to be enabled for session", SDKMetrics.getInstance().areMetricsEnabledForCurrentSession());
 	}
 
 	@Test
 	public void testSettingMsr0Then100() throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException {
 		Class expectedClass = Class.forName("com.unity3d.services.core.request.metrics.SDKMetrics$NullInstance");
 		validateAndTestChangingSampleRate("testUrl", 0.0, 100.0, expectedClass);
+		Assert.assertFalse("Metrics expected to be disabled for session", SDKMetrics.getInstance().areMetricsEnabledForCurrentSession());
 	}
 
 	@Test

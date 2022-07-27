@@ -2,13 +2,10 @@ package com.unity3d.services.core.configuration;
 
 import android.text.TextUtils;
 
-import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.WebRequest;
-import com.unity3d.services.core.request.metrics.SDKMetrics;
-import com.unity3d.services.core.request.metrics.TSIMetric;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,8 +44,9 @@ public class Configuration {
 	private String _configUrl;
 	private String _unifiedAuctionToken;
 	private String _stateId;
-	private Experiments _experiments;
+	private ExperimentsReader _experimentReader;
 	private int _tokenTimeout;
+	private int _privacyRequestWaitTimeout;
 	private String _src;
 	private ConfigurationRequestFactory _configurationRequestFactory;
 
@@ -65,23 +63,30 @@ public class Configuration {
 	private Class[] _webAppApiClassList;
 
 	public Configuration () {
-		this.setOptionalFields(new JSONObject());
+		_experimentReader = new ExperimentsReader();
+		this.setOptionalFields(new JSONObject(), false);
 	}
 
 	public Configuration (String configUrl) {
-		this();
-		_configUrl = configUrl;
+		this(configUrl, new Experiments());
 	}
 
 	public Configuration (JSONObject configData) throws MalformedURLException, JSONException {
-		handleConfigurationData(configData);
+		_experimentReader = new ExperimentsReader();
+		handleConfigurationData(configData, false);
+	}
+
+	public Configuration(String configUrl, ExperimentsReader experimentsReader) {
+		this(configUrl, experimentsReader.getCurrentlyActiveExperiments());
+		_experimentReader = experimentsReader;
 	}
 
 	public Configuration(String configUrl, Experiments experiments) {
-		this(configUrl);
-		DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader());
-		_configurationRequestFactory = new ConfigurationRequestFactory(this, deviceInfoReaderBuilder.build(), _configUrl);
-		_experiments = experiments;
+		this();
+		_configUrl = configUrl;
+		DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance());
+		_configurationRequestFactory = new ConfigurationRequestFactory(this, deviceInfoReaderBuilder);
+		_experimentReader.updateLocalExperiments(experiments);
 	}
 
 	public String getConfigUrl () { return _configUrl; }
@@ -144,9 +149,17 @@ public class Configuration {
 
 	public String getUnifiedAuctionToken() { return _unifiedAuctionToken; }
 
-	public Experiments getExperiments() { return _experiments; }
+	public Experiments getExperiments() {
+		return _experimentReader.getCurrentlyActiveExperiments();
+	}
+
+	public ExperimentsReader getExperimentsReader() {
+		return _experimentReader;
+	}
 
 	public int getTokenTimeout() { return _tokenTimeout; }
+
+	public int getPrivacyRequestWaitTimeout() { return _privacyRequestWaitTimeout; }
 
 	public String getSrc() {return (_src != null) ? _src : ""; }
 
@@ -184,14 +197,14 @@ public class Configuration {
 		String data = request.makeRequest();
 
 		try {
-			handleConfigurationData(new JSONObject(data));
+			handleConfigurationData(new JSONObject(data), true);
 		} catch (Exception e) {
 			throw e;
 		}
 		saveToDisk();
 	}
 
-	protected void handleConfigurationData(JSONObject configData) throws MalformedURLException, JSONException {
+	protected void handleConfigurationData(JSONObject configData, boolean isRemoteConfig) throws MalformedURLException, JSONException {
 
 		String url = null;
 
@@ -215,11 +228,11 @@ public class Configuration {
 		_unifiedAuctionToken = !configData.isNull("tkn") ? configData.optString("tkn") : null;
 		_stateId = !configData.isNull("sid") ? configData.optString("sid") : null;
 
-		this.setOptionalFields(configData);
+		this.setOptionalFields(configData, isRemoteConfig);
 		_configJsonString = getFilteredConfigJson(configData).toString();
 	}
 
-	private void setOptionalFields(JSONObject configData) {
+	private void setOptionalFields(JSONObject configData, boolean isRemoteConfig) {
 		_webViewVersion = configData.optString("version", null);
 		_delayWebViewUpdate = configData.optBoolean("dwu", false);
 		_resetWebAppTimeout = configData.optInt("rwt", 10000);
@@ -237,8 +250,13 @@ public class Configuration {
 		_metricSampleRate = configData.optDouble("msr", 100d);
 		_webViewAppCreateTimeout = configData.optLong("wct", 60000L);
 		_tokenTimeout = configData.optInt("tto", 5000);
+		_privacyRequestWaitTimeout = configData.optInt("prwto", 3000);
 		_src = configData.optString("src", null);
-		_experiments = new Experiments(configData.optJSONObject("exp"));
+		if (isRemoteConfig) {
+			_experimentReader.updateRemoteExperiments(new Experiments(configData.optJSONObject("exp")));
+		} else {
+			_experimentReader.updateLocalExperiments(new Experiments(configData.optJSONObject("exp")));
+		}
 	}
 
 	private void createWebAppApiClassList() {
@@ -257,7 +275,6 @@ public class Configuration {
 	}
 
 	public void saveToDisk() {
-
 		Utilities.writeFile(new File(SdkProperties.getLocalConfigurationFilepath()), getJSONString());
 	}
 
@@ -268,20 +285,8 @@ public class Configuration {
 			Object currentValue = jsonConfig.opt(currentKey);
 			if (!currentKey.equals("tkn") && !currentKey.equals("sid"))
 			filteredConfig.put(currentKey, currentValue);
-
 		}
 		return filteredConfig;
 	}
 
-	public Map<String, String> getMetricTags() {
-		Map<String, String> tags = new HashMap<>();
-
-		if (_experiments != null) {
-			tags.putAll(_experiments.getExperimentTags());
-		}
-
-		tags.put("src", getSrc());
-
-		return tags;
-	}
 }

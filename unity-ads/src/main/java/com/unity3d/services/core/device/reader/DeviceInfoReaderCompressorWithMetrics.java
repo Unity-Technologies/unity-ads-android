@@ -1,6 +1,5 @@
 package com.unity3d.services.core.device.reader;
 
-import com.unity3d.services.core.configuration.Experiments;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.metrics.TSIMetric;
 
@@ -10,15 +9,13 @@ import java.util.concurrent.TimeUnit;
 public class DeviceInfoReaderCompressorWithMetrics implements IDeviceInfoDataCompressor {
 
 	private final IDeviceInfoDataCompressor _deviceInfoDataCompressor;
-	private final Experiments _experiments;
 
 	private long _startTimeInfo;
 	private long _startTimeCompression;
 	private long _endTime;
 
-	public DeviceInfoReaderCompressorWithMetrics(IDeviceInfoDataCompressor deviceInfoDataCompressor, Experiments experiments) {
+	public DeviceInfoReaderCompressorWithMetrics(IDeviceInfoDataCompressor deviceInfoDataCompressor) {
 		_deviceInfoDataCompressor = deviceInfoDataCompressor;
-		_experiments = experiments;
 	}
 
 	@Override
@@ -53,12 +50,7 @@ public class DeviceInfoReaderCompressorWithMetrics implements IDeviceInfoDataCom
 	}
 
 	private void sendDeviceInfoMetrics() {
-		Map<String, String> tags = null;
-		if (_experiments != null) {
-			tags = _experiments.getExperimentTags();
-		}
-
-		SDKMetrics.getInstance().sendMetric(TSIMetric.newDeviceInfoCollectionLatency(getDeviceInfoCollectionDuration(), tags));
-		SDKMetrics.getInstance().sendMetric(TSIMetric.newDeviceInfoCompressionLatency(getCompressionDuration(), tags));
+		SDKMetrics.getInstance().sendMetric(TSIMetric.newDeviceInfoCollectionLatency(getDeviceInfoCollectionDuration()));
+		SDKMetrics.getInstance().sendMetric(TSIMetric.newDeviceInfoCompressionLatency(getCompressionDuration()));
 	}
 }

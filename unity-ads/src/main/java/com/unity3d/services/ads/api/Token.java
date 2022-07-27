@@ -45,4 +45,11 @@ public class Token {
 
 		callback.invoke();
 	}
+
+	@WebViewExposed
+	public static void getNativeGeneratedToken(WebViewCallback callback) {
+		com.unity3d.services.ads.token.TokenStorage.getNativeGeneratedToken();
+
+		callback.invoke();
+	}
 }

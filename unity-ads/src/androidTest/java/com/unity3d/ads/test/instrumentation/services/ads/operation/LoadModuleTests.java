@@ -2,11 +2,9 @@ package com.unity3d.ads.test.instrumentation.services.ads.operation;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
 
 import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.UnityAds;
@@ -14,19 +12,22 @@ import com.unity3d.ads.UnityAdsLoadOptions;
 import com.unity3d.services.ads.operation.load.LoadModule;
 import com.unity3d.services.ads.operation.load.LoadOperation;
 import com.unity3d.services.ads.operation.load.LoadOperationState;
-import com.unity3d.services.core.request.metrics.ISDKMetricSender;
-import com.unity3d.services.core.request.metrics.SDKMetricEvents;
+import com.unity3d.services.core.request.metrics.AdOperationError;
+import com.unity3d.services.core.request.metrics.AdOperationMetric;
+import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.Metric;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocation;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 
 public class LoadModuleTests {
 	private static final String placementId = "TestPlacementId";
@@ -39,15 +40,15 @@ public class LoadModuleTests {
 
 	private IWebViewBridgeInvoker webViewBridgeInvokerMock;
 	private IUnityAdsLoadListener loadListenerMock;
-	private ISDKMetricSender sdkMetricSender;
 	private LoadModule loadModule;
+	private ISDKMetrics sdkMetrics;
 
 	@Before
 	public void beforeEachTest() {
 		webViewBridgeInvokerMock = mock(IWebViewBridgeInvoker.class);
 		loadListenerMock = mock(IUnityAdsLoadListener.class);
-		sdkMetricSender = mock(ISDKMetricSender.class);
-		loadModule = new LoadModule(sdkMetricSender);
+		sdkMetrics = mock(ISDKMetrics.class);
+		loadModule = new LoadModule(sdkMetrics);
 	}
 
 	@Test
@@ -60,6 +61,8 @@ public class LoadModuleTests {
 
 	@Test
 	public void executeAdOperationCallsOnUnityAdsFailedToLoadWhenWebViewBridgeInvocationFails() {
+		final ArgumentCaptor<Metric> metricsCaptor = ArgumentCaptor.forClass(Metric.class);
+		final Metric desiredMetric = AdOperationMetric.newAdLoadFailure(AdOperationError.callback_error, 0L);
 		LoadOperationState loadOperationState = new LoadOperationState(placementId, loadListenerMock, unityAdsLoadOptions, OperationTestUtilities.createConfigurationWithWebviewTimeout(webViewTimeout));
 
 		doAnswer(new Answer() {
@@ -72,13 +75,15 @@ public class LoadModuleTests {
 		loadModule.executeAdOperation(webViewBridgeInvokerMock, loadOperationState);
 
 		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(placementId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "[UnityAds] Internal communication failure");
-		Mockito.verify(sdkMetricSender, times(1)).sendSDKMetricEventWithTag(SDKMetricEvents.native_load_callback_error, new HashMap<String, String> (){{
-			put("cbs", "invocationFailure");
-		}});
+		Mockito.verify(sdkMetrics, timeout(maxWaitTime).times(1)).sendMetricWithInitState(metricsCaptor.capture());
+		final Metric capturedMetric = metricsCaptor.getValue();
+		Assert.assertEquals(desiredMetric.getName(), capturedMetric.getName());
 	}
 
 	@Test
 	public void executeAdOperationCallsOnUnityAdsFailedToLoadWhenWebViewBridgeInvocationTimesOut() {
+		final ArgumentCaptor<Metric> metricsCaptor = ArgumentCaptor.forClass((Class) Metric.class);
+		final Metric desiredMetric = AdOperationMetric.newAdLoadFailure(AdOperationError.callback_timeout, 0L);
 		LoadOperationState loadOperationState = new LoadOperationState(placementId, loadListenerMock, unityAdsLoadOptions, OperationTestUtilities.createConfigurationWithWebviewTimeout(50));
 
 		doAnswer(new Answer() {
@@ -91,7 +96,10 @@ public class LoadModuleTests {
 		loadModule.executeAdOperation(webViewBridgeInvokerMock, loadOperationState);
 
 		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(placementId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "[UnityAds] Internal communication timeout");
-		Mockito.verify(sdkMetricSender, times(1)).sendSDKMetricEvent(eq(SDKMetricEvents.native_load_callback_timeout));
+		Mockito.verify(sdkMetrics, timeout(maxWaitTime).times(1)).sendMetricWithInitState(metricsCaptor.capture());
+		final Metric capturedMetric = metricsCaptor.getValue();
+		Assert.assertEquals(desiredMetric.getName(), capturedMetric.getName());
+
 	}
 
 	@Test

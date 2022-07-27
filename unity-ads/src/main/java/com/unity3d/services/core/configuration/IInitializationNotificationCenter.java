@@ -8,5 +8,5 @@ public interface IInitializationNotificationCenter {
 
 	void triggerOnSdkInitialized();
 
-	void triggerOnSdkInitializationFailed(String message, int code);
+	void triggerOnSdkInitializationFailed(String message, ErrorState errorState, int code);
 }

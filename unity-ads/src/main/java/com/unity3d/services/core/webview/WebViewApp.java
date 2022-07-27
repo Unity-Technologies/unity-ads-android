@@ -10,6 +10,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebViewClient;
 
 import com.unity3d.services.ads.api.AdUnit;
+import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.InitializeThread;
@@ -50,10 +51,10 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 	private static AtomicReference<String> _webAppFailureMessage = new AtomicReference<>();
 	private static AtomicReference<Integer> _webAppFailureCode = new AtomicReference<>();
 
-	private WebViewApp (Configuration configuration) {
+	private WebViewApp (Configuration configuration, boolean useWebViewWithCache) {
 		setConfiguration(configuration);
 		WebViewBridge.setClassTable(getConfiguration().getWebAppApiClassList());
-		_webView = new WebView(ClientProperties.getApplicationContext());
+		_webView = useWebViewWithCache ? new WebViewWithCache(ClientProperties.getApplicationContext()) : new WebView(ClientProperties.getApplicationContext());
 		_webView.setWebViewClient(new WebAppClient());
 		_webView.setWebChromeClient(new WebAppChromeClient());
 	}
@@ -282,8 +283,14 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 		_currentApp = app;
 	}
 
-	public static boolean create (final Configuration configuration) throws IllegalThreadStateException {
+	public static ErrorState create (final Configuration configuration) throws IllegalThreadStateException {
+		return create(configuration, false);
+	}
+
+	public static ErrorState create (final Configuration configuration, final boolean useRemoteUrl) throws IllegalThreadStateException {
 		DeviceLog.entered();
+
+		if (useRemoteUrl) return createWithRemoteUrl(configuration);
 
 		if (Thread.currentThread().equals(Looper.getMainLooper().getThread())) {
 			throw new IllegalThreadStateException("Cannot call create() from main thread!");
@@ -295,7 +302,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 				WebViewApp webViewApp;
 
 				try {
-					webViewApp = new WebViewApp(configuration);
+					webViewApp = new WebViewApp(configuration, configuration.getExperiments().isWebAssetAdCaching());
 				}
 				catch (Exception e) {
 					DeviceLog.error("Couldn't construct WebViewApp");
@@ -344,13 +351,71 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 		boolean createdSuccessfully = webViewCreateDidNotTimeout && webAppDefined && webAppInitialized;
 
 		if (!createdSuccessfully) {
-			SDKMetrics.getInstance().sendEvent("native_webview_creation_failed", new HashMap<String, String>() {{
-				put("wto", "" + !webViewCreateDidNotTimeout);
-				put("wad", "" + webAppDefined);
-				put("wai", "" + webAppInitialized);
-			}});
+			if (!webViewCreateDidNotTimeout) {
+				return ErrorState.CreateWebviewTimeout;
+			}
+			return WebViewApp.getCurrentApp().getErrorStateFromWebAppCode();
 		}
-		return createdSuccessfully;
+		return null;
+	}
+
+	private static ErrorState createWithRemoteUrl(final Configuration configuration) {
+		if (Thread.currentThread().equals(Looper.getMainLooper().getThread())) {
+			throw new IllegalThreadStateException("Cannot call create() from main thread!");
+		}
+
+		Utilities.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				WebViewApp webViewApp;
+
+				try {
+					webViewApp = new WebViewApp(configuration, true);
+				}
+				catch (Exception e) {
+					DeviceLog.error("Couldn't construct WebViewApp");
+					_conditionVariable.open();
+					return;
+				}
+
+				WebViewUrlBuilder webViewUrlBuilder =  new WebViewUrlBuilder(configuration.getWebViewUrl(),  configuration);
+				String baseUrl = webViewUrlBuilder.getUrlWithQueryString();
+
+				webViewApp.getWebView().loadUrl(baseUrl);
+
+				setCurrentApp(webViewApp);
+			}
+		});
+
+		_conditionVariable = new ConditionVariable();
+		final boolean webViewCreateDidNotTimeout = _conditionVariable.block(configuration.getWebViewAppCreateTimeout());
+		final boolean webAppDefined = WebViewApp.getCurrentApp() != null;
+		final boolean webAppInitialized = webAppDefined && WebViewApp.getCurrentApp().isWebAppInitialized();
+
+		boolean createdSuccessfully = webViewCreateDidNotTimeout && webAppDefined && webAppInitialized;
+
+		if (!createdSuccessfully) {
+			if (!webViewCreateDidNotTimeout) {
+				return ErrorState.CreateWebviewTimeout;
+			}
+			return WebViewApp.getCurrentApp().getErrorStateFromWebAppCode();
+		}
+		return null;
+	}
+
+
+	private ErrorState getErrorStateFromWebAppCode() {
+		int failureCode = getWebAppFailureCode();
+		if (failureCode == 1) {
+			return ErrorState.CreateWebviewGameIdDisabled;
+		}
+		if (failureCode == 2) {
+			return ErrorState.CreateWebviewConfigError;
+		}
+		if (failureCode == 3) {
+			return ErrorState.CreateWebviewInvalidArgument;
+		}
+		return ErrorState.CreateWebview; //unknown
 	}
 
 	/* PRIVATE CLASSES */

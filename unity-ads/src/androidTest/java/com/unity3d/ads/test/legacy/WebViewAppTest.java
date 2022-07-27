@@ -8,6 +8,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.ads.test.TestUtilities;
@@ -65,11 +66,11 @@ public class WebViewAppTest {
 				WebViewApp.getCurrentApp().setWebAppInitialized(false);
 			}
 		}, 100);
-		boolean isWebViewInitialized = WebViewApp.create(conf);
+		ErrorState webViewErrorState = WebViewApp.create(conf);
 
 		assertFalse(WebViewApp.getCurrentApp().isWebAppInitialized());
 		assertTrue(WebViewApp.getCurrentApp().isWebAppLoaded());
-		assertFalse(isWebViewInitialized);
+		assertNotNull(webViewErrorState);
 	}
 
 	@Test
@@ -86,11 +87,11 @@ public class WebViewAppTest {
 				WebViewApp.getCurrentApp().setWebAppInitialized(false);
 			}
 		}, 100);
-		boolean isWebViewInitialized = WebViewApp.create(conf);
+		ErrorState webViewErrorState = WebViewApp.create(conf);
 
 		assertFalse(WebViewApp.getCurrentApp().isWebAppInitialized());
 		assertTrue(WebViewApp.getCurrentApp().isWebAppLoaded());
-		assertFalse(isWebViewInitialized);
+		assertNotNull(webViewErrorState);
 		assertEquals("Webview failed to initialize", WebViewApp.getCurrentApp().getWebAppFailureMessage());
 		assertEquals(2, WebViewApp.getCurrentApp().getWebAppFailureCode());
 	}
@@ -495,7 +496,7 @@ public class WebViewAppTest {
 				WebViewApp.getCurrentApp().setWebAppInitialized(false);
 			}
 		}, 100);
-		boolean isWebViewInitialized = WebViewApp.create(conf);
+		ErrorState webviewErrorState = WebViewApp.create(conf);
 
 		assertFalse(WebViewApp.getCurrentApp().isWebAppInitialized());
 		assertTrue(WebViewApp.getCurrentApp().isWebAppLoaded());

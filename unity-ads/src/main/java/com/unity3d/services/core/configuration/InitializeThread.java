@@ -11,14 +11,16 @@ import com.unity3d.services.core.api.DownloadLatestWebViewStatus;
 import com.unity3d.services.core.api.Lifecycle;
 import com.unity3d.services.core.connectivity.ConnectivityMonitor;
 import com.unity3d.services.core.connectivity.IConnectivityListener;
+import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
+import com.unity3d.services.core.device.reader.DeviceInfoReaderPrivacyBuilder;
 import com.unity3d.services.core.lifecycle.CachedLifecycle;
-import com.unity3d.services.core.lifecycle.LifecycleCache;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.WebRequest;
+import com.unity3d.services.core.request.metrics.Metric;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.metrics.TSIMetric;
 import com.unity3d.services.core.webview.WebViewApp;
 
@@ -28,11 +30,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 public class InitializeThread extends Thread  {
 	private static InitializeThread _thread;
 	private InitializeState _state;
+	private String _stateName;
 	private boolean _stopThread = false;
+	private boolean _didRetry = false;
+	private long _stateStartTimestamp;
 
 	private InitializeThread(InitializeState state) {
 		super();
@@ -44,7 +50,9 @@ public class InitializeThread extends Thread  {
 		try {
 			while (_state != null && !_stopThread) {
 				try {
+					handleStateStartMetrics(_state);
 					_state = _state.execute();
+					handleStateEndMetrics(_state);
 				} catch (Exception e) {
 					final String message = "Unity Ads SDK encountered an error during initialization, cancel initialization";
 					DeviceLog.exception(message, e);
@@ -109,6 +117,43 @@ public class InitializeThread extends Thread  {
 		_thread.setName("UnityAdsDownloadThread");
 		_thread.start();
 		return DownloadLatestWebViewStatus.BACKGROUND_DOWNLOAD_STARTED;
+	}
+
+	private void handleStateStartMetrics(InitializeState state) {
+		if (isRetryState(state)) {
+			_didRetry = true;
+		} else {
+			if (!_didRetry) {
+				_stateStartTimestamp = System.nanoTime();
+			}
+			_didRetry = false;
+		}
+		_stateName = getMetricNameForState(state);
+	}
+
+	private void handleStateEndMetrics(InitializeState nextState) {
+		if (_stateName == null || isRetryState(nextState) || _stateName.equals("native_retry_state")) return;
+		long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - _stateStartTimestamp);
+		SDKMetrics.getInstance().sendMetric(new Metric(_stateName, duration, null));
+	}
+
+	private String getMetricNameForState(InitializeState state) {
+		if (state == null) return null;
+		final String nativePrefix = "native_";
+		final String statePostfix = "_state";
+		String className = state.getClass().getSimpleName();
+		if (className.length() == 0) return null;
+		className = className.substring(getStatePrefixLength()).toLowerCase(); // remove InitializeState prefix
+		return new StringBuilder(nativePrefix.length() + className.length() + statePostfix.length()).append(nativePrefix).append(className).append(statePostfix).toString();
+	}
+
+	private int getStatePrefixLength() {
+		final String initStatePrefix = "InitializeState";
+		return initStatePrefix.length();
+	}
+
+	private boolean isRetryState(InitializeState state) {
+		return state instanceof InitializeStateRetry;
 	}
 	/* STATE CLASSES */
 
@@ -185,7 +230,7 @@ public class InitializeThread extends Thread  {
 				}
 
 				if (!success) {
-					return new InitializeThread.InitializeStateError("reset webapp", new Exception("Reset failed on opening ConditionVariable"), _configuration);
+					return new InitializeThread.InitializeStateError(ErrorState.ResetWebApp, new Exception("Reset failed on opening ConditionVariable"), _configuration);
 				}
 			}
 
@@ -196,7 +241,7 @@ public class InitializeThread extends Thread  {
 			SdkProperties.setCacheDirectory(null);
 			File cacheDir = SdkProperties.getCacheDirectory();
 			if (cacheDir == null) {
-				return new InitializeThread.InitializeStateError("reset webapp", new Exception("Cache directory is NULL"), _configuration);
+				return new InitializeThread.InitializeStateError(ErrorState.ResetWebApp, new Exception("Cache directory is NULL"), _configuration);
 			}
 
 			SdkProperties.setInitialized(false);
@@ -248,15 +293,13 @@ public class InitializeThread extends Thread  {
 			return _configuration;
 		}
 
-		public static final String InitializeStateInitModuleStateName = "init modules";
-
 		@Override
 		public InitializeState execute() {
 			for (String moduleName : _configuration.getModuleConfigurationList()) {
 				IModuleConfiguration moduleConfiguration = _configuration.getModuleConfiguration(moduleName);
 				if (moduleConfiguration != null) {
 					if(!moduleConfiguration.initModuleState(_configuration)) {
-						return new InitializeStateError(InitializeStateInitModuleStateName, new Exception("Unity Ads config server resolves to loopback address (due to ad blocker?)"), _configuration);
+						return new InitializeStateError(ErrorState.InitModules, new Exception("Unity Ads config server resolves to loopback address (due to ad blocker?)"), _configuration);
 					}
 				}
 			}
@@ -275,7 +318,7 @@ public class InitializeThread extends Thread  {
 		private InitializeState _nextState;
 
 		public InitializeStateConfig(Configuration localConfiguration) {
-			_configuration = new Configuration(SdkProperties.getConfigUrl(), localConfiguration.getExperiments());
+			_configuration = new Configuration(SdkProperties.getConfigUrl(), localConfiguration.getExperimentsReader());
 			_retries = 0;
 			_retryDelay = localConfiguration.getRetryDelay();
 			_maxRetries = localConfiguration.getMaxRetries();
@@ -307,38 +350,47 @@ public class InitializeThread extends Thread  {
 				if (_retries < _maxRetries) {
 					_retryDelay *= _scalingFactor;
 					_retries++;
+					InitializeEventsMetricSender.getInstance().onRetryConfig();
 					return new InitializeStateRetry(this, _retryDelay);
 				}
 
-				return new InitializeStateNetworkError("network config request", e, this, _localConfig);
+				return new InitializeStateNetworkError(ErrorState.NetworkConfigRequest, e, this, _localConfig);
 			}
 
 			if (configuration.getDelayWebViewUpdate()) {
 				return new InitializeStateLoadCacheConfigAndWebView(configuration, _localConfig);
 			}
-
-			return new InitializeStateLoadCache(configuration);
+			boolean isNativeWebViewCache = configuration.getExperiments().isNativeWebViewCacheEnabled();
+			_nextState = isNativeWebViewCache ? new InitializeStateCreateWithRemote(configuration) : new InitializeStateLoadCache(configuration);
+			return _nextState;
 		}
 
 		public InitializeState executeWithLoader() {
-			ConfigurationLoader configurationLoader = new ConfigurationLoader(_configuration);
-			final Configuration legacyConfiguration = new Configuration(SdkProperties.getConfigUrl(), new Experiments());
+			PrivacyConfigStorage privacyConfigStorage = PrivacyConfigStorage.getInstance();
+			DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), privacyConfigStorage);
+			IConfigurationLoader configurationLoader = new ConfigurationLoader(new ConfigurationRequestFactory(_configuration, deviceInfoReaderBuilder));
+			if (_configuration.getExperiments().isPrivacyRequestEnabled()) {
+				DeviceInfoReaderBuilder deviceInfoReaderPrivacyBuilder = new DeviceInfoReaderPrivacyBuilder(new ConfigurationReader(), privacyConfigStorage);
+				configurationLoader = new PrivacyConfigurationLoader(configurationLoader, new ConfigurationRequestFactory(_configuration, deviceInfoReaderPrivacyBuilder), privacyConfigStorage);
+			}
+			final Configuration legacyConfiguration = new Configuration(SdkProperties.getConfigUrl());
 			try {
 				configurationLoader.loadConfiguration(new IConfigurationLoaderListener() {
 					@Override
 					public void onSuccess(Configuration configuration) {
 						_configuration = configuration;
+						_configuration.saveToDisk();
 						if (_configuration.getDelayWebViewUpdate()) {
 							_nextState = new InitializeStateLoadCacheConfigAndWebView(_configuration, _localConfig);
 						}
 						TokenStorage.setInitToken(_configuration.getUnifiedAuctionToken());
-						_configuration.saveToDisk();
-						_nextState = new InitializeStateLoadCache(_configuration);
+						boolean isNativeWebViewCache = _configuration.getExperiments().isNativeWebViewCacheEnabled();
+						_nextState = isNativeWebViewCache ? new InitializeStateCreateWithRemote(_configuration) : new InitializeStateLoadCache(_configuration);
 					}
 
 					@Override
 					public void onError(String errorMsg) {
-						SDKMetrics.getInstance().sendMetric(TSIMetric.newEmergencySwitchOff(_configuration.getMetricTags()));
+						SDKMetrics.getInstance().sendMetric(TSIMetric.newEmergencySwitchOff());
 						_nextState = executeLegacy(legacyConfiguration);
 					}
 				});
@@ -347,10 +399,11 @@ public class InitializeThread extends Thread  {
 				if (_retries < _maxRetries) {
 					_retryDelay *= _scalingFactor;
 					_retries++;
+					InitializeEventsMetricSender.getInstance().onRetryConfig();
 					return new InitializeStateRetry(this, _retryDelay);
 				}
 
-				return new InitializeStateNetworkError("network config request", e, this, _configuration);
+				return new InitializeStateNetworkError(ErrorState.NetworkConfigRequest, e, this, _configuration);
 			}
 		}
 	}
@@ -387,7 +440,7 @@ public class InitializeThread extends Thread  {
 				try {
 					webViewDataString = new String(localWebViewData, "UTF-8");
 				} catch (Exception e) {
-					return new InitializeStateError("load cache", e, _configuration);
+					return new InitializeStateError(ErrorState.LoadCache, e, _configuration);
 				}
 
 				DeviceLog.info("Unity Ads init: webapp loaded from local cache");
@@ -428,7 +481,7 @@ public class InitializeThread extends Thread  {
 			}
 			catch (MalformedURLException e) {
 				DeviceLog.exception("Malformed URL", e);
-				return new InitializeStateError("malformed webview request", e, _configuration);
+				return new InitializeStateError(ErrorState.MalformedWebviewRequest, e, _configuration);
 			}
 
 			String webViewData;
@@ -439,15 +492,16 @@ public class InitializeThread extends Thread  {
 				if (_retries < _maxRetries) {
 					_retryDelay *= _scalingFactor;
 					_retries++;
+					InitializeEventsMetricSender.getInstance().onRetryWebview();
 					return new InitializeStateRetry(this, _retryDelay);
 				}
 
-				return new InitializeStateNetworkError("network webview request", e, this, _configuration);
+				return new InitializeStateNetworkError(ErrorState.NetworkWebviewRequest, e, this, _configuration);
 			}
 
 			String webViewHash = _configuration.getWebViewHash();
 			if (webViewHash != null && !Utilities.Sha256(webViewData).equals(webViewHash)) {
-				return new InitializeStateError("invalid hash", new Exception("Invalid webViewHash"), _configuration);
+				return new InitializeStateError(ErrorState.InvalidHash, new Exception("Invalid webViewHash"), _configuration);
 			}
 
 			if(webViewHash != null) {
@@ -474,7 +528,6 @@ public class InitializeThread extends Thread  {
 		public String getWebData() {
 			return _webViewData;
 		}
-		public static final String InitializeStateCreateStateName = "create webapp";
 
 		@Override
 		public InitializeState execute() {
@@ -482,17 +535,17 @@ public class InitializeThread extends Thread  {
 
 			final Configuration configuration = _configuration;
 			configuration.setWebViewData(_webViewData);
-			boolean createSuccessFull;
+			ErrorState createErrorState;
 
 			try {
-				createSuccessFull = WebViewApp.create(configuration);
+				createErrorState = WebViewApp.create(configuration, false);
 			}
 			catch (IllegalThreadStateException e) {
 				DeviceLog.exception("Illegal Thread", e);
-				return new InitializeStateError(InitializeStateCreateStateName, e, _configuration);
+				return new InitializeStateError(ErrorState.CreateWebApp, e, _configuration);
 			}
 
-			if (createSuccessFull) {
+			if (createErrorState == null) {
 				return new InitializeStateComplete(_configuration);
 			}
 			else {
@@ -501,7 +554,46 @@ public class InitializeThread extends Thread  {
 					errorMessage = WebViewApp.getCurrentApp().getWebAppFailureMessage();
 				}
 				DeviceLog.error(errorMessage);
-				return new InitializeStateError(InitializeStateCreateStateName, new Exception(errorMessage), _configuration);
+				return new InitializeStateError(createErrorState, new Exception(errorMessage), _configuration);
+			}
+		}
+	}
+	public static class InitializeStateCreateWithRemote extends InitializeState {
+		private Configuration _configuration;
+
+		public InitializeStateCreateWithRemote(Configuration configuration) {
+			_configuration = configuration;
+		}
+
+		public Configuration getConfiguration() {
+			return _configuration;
+		}
+
+		@Override
+		public InitializeState execute() {
+			DeviceLog.debug("Unity Ads init: creating webapp");
+
+			final Configuration configuration = _configuration;
+			ErrorState createErrorState;
+
+			try {
+				createErrorState = WebViewApp.create(configuration, true);
+			}
+			catch (IllegalThreadStateException e) {
+				DeviceLog.exception("Illegal Thread", e);
+				return new InitializeStateError(ErrorState.CreateWebApp, e, _configuration);
+			}
+
+			if (createErrorState == null) {
+				return new InitializeStateComplete(_configuration);
+			}
+			else {
+				String errorMessage = "Unity Ads WebApp creation failed";
+				if (WebViewApp.getCurrentApp().getWebAppFailureMessage() != null) {
+					errorMessage = WebViewApp.getCurrentApp().getWebAppFailureMessage();
+				}
+				DeviceLog.error(errorMessage);
+				return new InitializeStateError(createErrorState, new Exception(errorMessage), _configuration);
 			}
 		}
 	}
@@ -527,31 +619,27 @@ public class InitializeThread extends Thread  {
 	}
 
 	public static class InitializeStateError extends InitializeState {
-		String _state;
+		ErrorState _errorState;
 		Exception _exception;
 		protected Configuration _configuration;
 
-		public InitializeStateError(String state, Exception exception, Configuration configuration) {
-			_state = state;
+		public InitializeStateError(ErrorState errorState, Exception exception, Configuration configuration) {
+			_errorState = errorState;
 			_exception = exception;
 			_configuration = configuration;
 		}
 
 		@Override
 		public InitializeState execute() {
-			DeviceLog.error("Unity Ads init: halting init in " + _state + ": " + _exception.getMessage());
+			DeviceLog.error("Unity Ads init: halting init in " + _errorState.getMetricName() + ": " + _exception.getMessage());
 
 			for (String moduleName : _configuration.getModuleConfigurationList()) {
 				IModuleConfiguration moduleConfiguration = _configuration.getModuleConfiguration(moduleName);
 				if (moduleConfiguration != null) {
-					moduleConfiguration.initErrorState(_configuration, _state, _exception.getMessage());
+					moduleConfiguration.initErrorState(_configuration, _errorState, _exception.getMessage());
 				}
 			}
 
-			// TODO: Fix _state.replaceAll... with Enum values to ensure future compatibility with tag values - This works for now
-			SDKMetrics.getInstance().sendEvent("native_initialization_failed", new HashMap<String, String> (){{
-				put("stt", _state.replaceAll(" ", "_"));
-			}});
 			return null;
 		}
 	}
@@ -560,14 +648,14 @@ public class InitializeThread extends Thread  {
 		private static int _receivedConnectedEvents;
 		private static long _lastConnectedEventTimeMs;
 
-		private String _state;
+		private ErrorState _state;
 		private InitializeState _erroredState;
 		private ConditionVariable _conditionVariable;
 		private long _networkErrorTimeout;
 		private int _maximumConnectedEvents;
 		private int _connectedEventThreshold;
 
-		public InitializeStateNetworkError(String state, Exception exception, InitializeState errorState, Configuration configuration) {
+		public InitializeStateNetworkError(ErrorState state, Exception exception, InitializeState errorState, Configuration configuration) {
 			super(state, exception, configuration);
 			_state = state;
 			_receivedConnectedEvents = 0;

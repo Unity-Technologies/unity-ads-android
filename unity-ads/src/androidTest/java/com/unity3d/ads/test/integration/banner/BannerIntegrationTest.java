@@ -11,6 +11,7 @@ import com.unity3d.services.banners.IUnityBannerListener;
 import com.unity3d.services.banners.UnityBannerSize;
 import com.unity3d.services.banners.UnityBanners;
 import com.unity3d.services.banners.view.BannerPosition;
+import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.configuration.IInitializationListener;
 import com.unity3d.services.core.configuration.InitializationNotificationCenter;
 import com.unity3d.services.core.misc.Utilities;
@@ -43,7 +44,7 @@ public class BannerIntegrationTest {
 			}
 
 			@Override
-			public void onSdkInitializationFailed(String message, int code) {
+			public void onSdkInitializationFailed(String message, ErrorState errorState, int code) {
 				InitializationNotificationCenter.getInstance().removeListener(initializationListener);
 				fail("Failed to initialize");
 				initializeSemaphore.release();

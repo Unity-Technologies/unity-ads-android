@@ -1,36 +1,27 @@
 package com.unity3d.services.core.configuration;
 
-import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.request.WebRequest;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.metrics.TSIMetric;
 
 import org.json.JSONObject;
 
-import java.util.Map;
-
-public class ConfigurationLoader {
+public class ConfigurationLoader implements IConfigurationLoader {
 	private final Configuration _localConfiguration;
 	private final ConfigurationRequestFactory _configurationRequestFactory;
 
-	public ConfigurationLoader(Configuration localConfiguration) {
-		_localConfiguration = localConfiguration;
-		DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader());
-		_configurationRequestFactory = new ConfigurationRequestFactory(localConfiguration, deviceInfoReaderBuilder.build(), localConfiguration.getConfigUrl());
-
+	public ConfigurationLoader(ConfigurationRequestFactory configurationRequestFactory) {
+		_localConfiguration = configurationRequestFactory.getConfiguration();
+		_configurationRequestFactory = configurationRequestFactory;
 	}
 
+	@Override
 	public void loadConfiguration(IConfigurationLoaderListener configurationLoaderListener) throws Exception {
-		if (_localConfiguration.getConfigUrl() == null) {
-			configurationLoaderListener.onError("Base URL is null");
-			return;
-		}
-
 		WebRequest request;
 		try {
 			request = _configurationRequestFactory.getWebRequest();
-		} catch (Exception e) {
-			configurationLoaderListener.onError("Could not create web request");
+		} catch (Exception ex) {
+			configurationLoaderListener.onError("Could not create web request: " + ex);
 			return;
 		}
 
@@ -43,7 +34,7 @@ public class ConfigurationLoader {
 			return;
 		}
 		try {
-			_localConfiguration.handleConfigurationData(new JSONObject(data));
+			_localConfiguration.handleConfigurationData(new JSONObject(data), true);
 		} catch (Exception e) {
 			configurationLoaderListener.onError("Could not create web request");
 			return;
@@ -52,16 +43,19 @@ public class ConfigurationLoader {
 		configurationLoaderListener.onSuccess(_localConfiguration);
 	}
 
-	private void sendConfigMetrics(String unifiedAuctionToken, String stateId) {
-		Map<String, String> tags = _localConfiguration.getMetricTags();
+	@Override
+	public Configuration getLocalConfiguration() {
+		return _localConfiguration;
+	}
 
+	private void sendConfigMetrics(String unifiedAuctionToken, String stateId) {
 		if (_localConfiguration.getExperiments() != null && _localConfiguration.getExperiments().isTwoStageInitializationEnabled()) {
 			if (unifiedAuctionToken == null || unifiedAuctionToken.isEmpty()) {
-				SDKMetrics.getInstance().sendMetric(TSIMetric.newMissingToken(tags));
+				SDKMetrics.getInstance().sendMetric(TSIMetric.newMissingToken());
 			}
 
 			if (stateId == null || stateId.isEmpty()) {
-				SDKMetrics.getInstance().sendMetric(TSIMetric.newMissingStateId(tags));
+				SDKMetrics.getInstance().sendMetric(TSIMetric.newMissingStateId());
 			}
 		}
 	}

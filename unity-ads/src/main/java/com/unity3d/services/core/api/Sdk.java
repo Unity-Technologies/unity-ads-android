@@ -1,10 +1,12 @@
 package com.unity3d.services.core.api;
 
 import com.unity3d.services.core.configuration.InitializeThread;
+import com.unity3d.services.core.configuration.PrivacyConfigStorage;
 import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
 import com.unity3d.services.core.webview.bridge.WebViewExposed;
@@ -34,7 +36,8 @@ public class Sdk {
 			true,
 			SdkProperties.getLatestConfiguration() != null,
 			Device.getElapsedRealtime(),
-			WebViewApp.getCurrentApp().getConfiguration().getStateId()
+			WebViewApp.getCurrentApp().getConfiguration().getStateId(),
+			PrivacyConfigStorage.getInstance().getPrivacyConfig().getPrivacyStatus().toLowerCase()
 		};
 
 		callback.invoke(parameters);

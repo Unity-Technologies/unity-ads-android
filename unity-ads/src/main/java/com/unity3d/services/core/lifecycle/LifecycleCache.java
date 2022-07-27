@@ -5,8 +5,8 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 @TargetApi(14)
 public class LifecycleCache implements Application.ActivityLifecycleCallbacks {
@@ -14,7 +14,7 @@ public class LifecycleCache implements Application.ActivityLifecycleCallbacks {
 	private LifecycleEvent _currentState = LifecycleEvent.RESUMED;
 	private boolean _appActive = true;
 
-	private Map<String, IAppActiveListener> _appActiveListeners = new ConcurrentHashMap<>();
+	private Set<IAppActiveListener> _appActiveListeners = new HashSet<>();
 
 	@Override
 	public void onActivityCreated(Activity activity, Bundle bundle) {
@@ -30,18 +30,14 @@ public class LifecycleCache implements Application.ActivityLifecycleCallbacks {
 	public void onActivityResumed(Activity activity) {
 		_currentState = LifecycleEvent.RESUMED;
 		_appActive = true;
-		if (_appActiveListeners.containsKey(activity.getClass().getName())) {
-			notifyListeners(activity.getClass().getName());
-		}
+		notifyListeners();
 	}
 
 	@Override
 	public void onActivityPaused(Activity activity) {
 		_currentState = LifecycleEvent.PAUSED;
 		_appActive = false;
-		if (_appActiveListeners.containsKey(activity.getClass().getName())) {
-			notifyListeners(activity.getClass().getName());
-		}
+		notifyListeners();
 	}
 
 	@Override
@@ -67,18 +63,18 @@ public class LifecycleCache implements Application.ActivityLifecycleCallbacks {
 		return _appActive;
 	}
 
-	public void notifyListeners(String activityName) {
-		if (_appActiveListeners.get(activityName) != null) {
-			LifecycleEvent event = _appActive ? LifecycleEvent.RESUMED : LifecycleEvent.PAUSED;
-			_appActiveListeners.get(activityName).onAppStateChanged(event);
+	public synchronized void notifyListeners() {
+		LifecycleEvent event = _appActive ? LifecycleEvent.RESUMED : LifecycleEvent.PAUSED;
+		for(IAppActiveListener listener: _appActiveListeners) {
+			listener.onAppStateChanged(event);
 		}
 	}
 
-	public void addListener(String activityName, IAppActiveListener activeListener) {
-		_appActiveListeners.put(activityName, activeListener);
+	public synchronized void addListener(IAppActiveListener listener) {
+		_appActiveListeners.add(listener);
 	}
 
-	public void removeListener(String activityName) {
-		_appActiveListeners.remove(activityName);
+	public synchronized void removeListener(IAppActiveListener listener) {
+		_appActiveListeners.remove(listener);
 	}
 }

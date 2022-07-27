@@ -3,6 +3,7 @@ package com.unity3d.ads.test.instrumentation.services.core.device;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderWithStorageInfo;
 import com.unity3d.services.core.device.reader.IDeviceInfoReader;
 import com.unity3d.services.core.misc.IJsonStorageReader;
+import com.unity3d.services.core.misc.JsonFlattenerRules;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,6 +11,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +42,7 @@ public class DeviceInfoReaderWithStorageInfoTest {
 	public void testDeviceInfoReaderWithStorageInfoNoStorage() {
 		IDeviceInfoReader deviceInfoReader = Mockito.mock(IDeviceInfoReader.class);
 		Mockito.when(deviceInfoReader.getDeviceInfoData()).thenReturn(DEVICE_INFO_TEST_DATA);
-		DeviceInfoReaderWithStorageInfo deviceInfoReaderWithStorageInfo = new DeviceInfoReaderWithStorageInfo(deviceInfoReader);
+		DeviceInfoReaderWithStorageInfo deviceInfoReaderWithStorageInfo = new DeviceInfoReaderWithStorageInfo(deviceInfoReader, getTsiRequestStorageRules());
 		Map<String, Object> resultData = deviceInfoReaderWithStorageInfo.getDeviceInfoData();
 		Assert.assertEquals(DEVICE_INFO_TEST_DATA.get("test"), resultData.get("test"));
 	}
@@ -50,7 +53,7 @@ public class DeviceInfoReaderWithStorageInfoTest {
 		Mockito.when(deviceInfoReader.getDeviceInfoData()).thenReturn(DEVICE_INFO_TEST_DATA);
 		IJsonStorageReader jsonStorageReaderPublic = Mockito.mock(IJsonStorageReader.class);
 		Mockito.when(jsonStorageReaderPublic.getData()).thenReturn(PUBLIC_STORAGE_TEST_DATA);
-		DeviceInfoReaderWithStorageInfo deviceInfoReaderWithStorageInfo = new DeviceInfoReaderWithStorageInfo(deviceInfoReader, jsonStorageReaderPublic);
+		DeviceInfoReaderWithStorageInfo deviceInfoReaderWithStorageInfo = new DeviceInfoReaderWithStorageInfo(deviceInfoReader, getTsiRequestStorageRules(), jsonStorageReaderPublic);
 		Map<String, Object> resultData = deviceInfoReaderWithStorageInfo.getDeviceInfoData();
 		Assert.assertEquals(DEVICE_INFO_TEST_DATA.get("test"), resultData.get("test"));
 		Assert.assertEquals(PUBLIC_STORAGE_TEST_DATA.opt("privacy"), resultData.get("privacy"));
@@ -64,10 +67,34 @@ public class DeviceInfoReaderWithStorageInfoTest {
 		Mockito.when(jsonStorageReaderPublic.getData()).thenReturn(PUBLIC_STORAGE_TEST_DATA);
 		IJsonStorageReader jsonStorageReaderPrivate = Mockito.mock(IJsonStorageReader.class);
 		Mockito.when(jsonStorageReaderPrivate.getData()).thenReturn(PRIVATE_STORAGE_TEST_DATA);
-		DeviceInfoReaderWithStorageInfo deviceInfoReaderWithStorageInfo = new DeviceInfoReaderWithStorageInfo(deviceInfoReader, jsonStorageReaderPublic, jsonStorageReaderPrivate);
+		DeviceInfoReaderWithStorageInfo deviceInfoReaderWithStorageInfo = new DeviceInfoReaderWithStorageInfo(deviceInfoReader, getTsiRequestStorageRules(), jsonStorageReaderPublic, jsonStorageReaderPrivate);
 		Map<String, Object> resultData = deviceInfoReaderWithStorageInfo.getDeviceInfoData();
 		Assert.assertEquals(DEVICE_INFO_TEST_DATA.get("test"), resultData.get("test"));
 		Assert.assertEquals(PUBLIC_STORAGE_TEST_DATA.opt("privacy"), resultData.get("privacy"));
 		Assert.assertEquals(PRIVATE_STORAGE_TEST_DATA.opt("gdpr"), resultData.get("gdpr"));
+	}
+
+	private JsonFlattenerRules getTsiRequestStorageRules() {
+		return new JsonFlattenerRules(Arrays.asList(
+			"privacy",
+			"gdpr",
+			"framework",
+			"adapter",
+			"mediation",
+			"unity",
+			"pipl",
+			"configuration",
+			"user",
+			"unifiedconfig"
+		),
+			Collections.singletonList("value"),
+			Arrays.asList(
+				"ts",
+				"exclude",
+				"pii",
+				"nonBehavioral",
+				"nonbehavioral"
+			)
+		);
 	}
 }

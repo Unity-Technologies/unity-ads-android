@@ -7,6 +7,7 @@ import com.unity3d.services.ads.adunit.AdUnitOpen;
 import com.unity3d.services.ads.token.AsyncTokenStorage;
 import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.log.DeviceLog;
 
 import java.net.InetAddress;
@@ -78,7 +79,7 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 		return true;
 	}
 
-	public boolean initErrorState(Configuration configuration, String state, String errorMessage) {
+	public boolean initErrorState(Configuration configuration, ErrorState state, String errorMessage) {
 		TokenStorage.setInitToken(null);
 		TokenStorage.deleteTokens();
 		return true;

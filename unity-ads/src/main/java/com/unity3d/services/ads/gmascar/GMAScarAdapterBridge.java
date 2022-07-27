@@ -29,20 +29,18 @@ import java.util.Arrays;
  */
 public class GMAScarAdapterBridge {
 
-	final private String SCAR_ACTIVITY_CLASS_NAME = "com.google.android.gms.ads.AdActivity";
-
 	private IScarAdapter _scarAdapter;
-	private MobileAdsBridge _mobileAdsBridge;
-	private ScarVersionFinder _scarVersionFinder;
+	private final MobileAdsBridge _mobileAdsBridge;
+	private final ScarVersionFinder _scarVersionFinder;
 
-	private InitializeListenerBridge _initializationListenerBridge;
-	private InitializationStatusBridge _initializationStatusBridge;
-	private AdapterStatusBridge _adapterStatusBridge;
-	private PresenceDetector _presenceDetector;
-	private GMAInitializer _gmaInitializer;
-	private WebViewErrorHandler _webViewErrorHandler;
-	private ScarAdapterFactory _scarAdapterFactory;
-	private GMAEventSender _gmaEventSender;
+	private final InitializeListenerBridge _initializationListenerBridge;
+	private final InitializationStatusBridge _initializationStatusBridge;
+	private final AdapterStatusBridge _adapterStatusBridge;
+	private final PresenceDetector _presenceDetector;
+	private final GMAInitializer _gmaInitializer;
+	private final WebViewErrorHandler _webViewErrorHandler;
+	private final ScarAdapterFactory _scarAdapterFactory;
+	private final GMAEventSender _gmaEventSender;
 
 	public GMAScarAdapterBridge() {
 		_mobileAdsBridge = new MobileAdsBridge();
@@ -120,7 +118,7 @@ public class GMAScarAdapterBridge {
 	}
 
 	private EventSubject getScarEventSubject(Integer videoLengthMs) {
-		return new EventSubject<>(SCAR_ACTIVITY_CLASS_NAME, new ArrayDeque<>(Arrays.asList(GMAEvent.FIRST_QUARTILE, GMAEvent.MIDPOINT, GMAEvent.THIRD_QUARTILE, GMAEvent.LAST_QUARTILE)), videoLengthMs, new DefaultIntervalTimerFactory());
+		return new EventSubject<>(new ArrayDeque<>(Arrays.asList(GMAEvent.FIRST_QUARTILE, GMAEvent.MIDPOINT, GMAEvent.THIRD_QUARTILE, GMAEvent.LAST_QUARTILE)), videoLengthMs, new DefaultIntervalTimerFactory());
 	}
 
 	private IScarAdapter getScarAdapterObject() {

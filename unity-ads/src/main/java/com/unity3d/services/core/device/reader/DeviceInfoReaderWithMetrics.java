@@ -8,11 +8,9 @@ import java.util.Map;
 public class DeviceInfoReaderWithMetrics implements IDeviceInfoReader{
 
 	private final IDeviceInfoReader _deviceInfoReader;
-	private final Map<String, String> _metricTags;
 
-	public DeviceInfoReaderWithMetrics(IDeviceInfoReader deviceInfoReader, Map<String, String>  metricTags) {
+	public DeviceInfoReaderWithMetrics(IDeviceInfoReader deviceInfoReader) {
 		_deviceInfoReader = deviceInfoReader;
-		_metricTags = metricTags;
 	}
 
 	@Override
@@ -24,10 +22,10 @@ public class DeviceInfoReaderWithMetrics implements IDeviceInfoReader{
 	}
 
 	private void sendMetrics(Map<String, Object> deviceInfoData) {
-		if (deviceInfoData != null && _metricTags != null) {
+		if (deviceInfoData != null ) {
 			Object gameSessionId = deviceInfoData.get("unifiedconfig.data.gameSessionId");
 			if (gameSessionId instanceof Long && ((Long) gameSessionId) == 0L) {
-				SDKMetrics.getInstance().sendMetric(TSIMetric.newMissingGameSessionId(_metricTags));
+				SDKMetrics.getInstance().sendMetric(TSIMetric.newMissingGameSessionId());
 			}
 		}
 	}

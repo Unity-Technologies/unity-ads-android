@@ -15,6 +15,11 @@ public class JsonFlattener {
 		_jsonData = jsonData;
 	}
 
+	public JSONObject flattenJson(String separator, JsonFlattenerRules jsonFlattenerRules) {
+		if (jsonFlattenerRules == null) return new JSONObject();
+		return flattenJson(separator, jsonFlattenerRules.getTopLevelToInclude(), jsonFlattenerRules.getReduceKeys(), jsonFlattenerRules.getSkipKeys());
+	}
+
 	public JSONObject flattenJson(String separator, List<String> topLevelToInclude, List<String> reduceKeys, List<String> skipKeys) {
 		JSONObject flattenedJson = new JSONObject();
 		try {
@@ -36,19 +41,6 @@ public class JsonFlattener {
 			DeviceLog.error("Could not flatten JSON: %s", e.getMessage());
 		}
 		return flattenedJson;
-	}
-
-
-	public boolean shouldIncludeKey(String keyToInclude, List<String> includeList, List<String> skipKeys) {
-		if (skipKeys.contains(keyToInclude)) {
-			return false;
-		}
-
-		if (includeList.size() <= 0) {
-			return false;
-		}
-
-		return includeList.contains(keyToInclude);
 	}
 
 	public void flattenJson(String separator, String parentName, JSONObject outputDictionary, List<String> reduceKeys, List<String> skipKeys) throws JSONException {
@@ -74,5 +66,17 @@ public class JsonFlattener {
 				outputDictionary.put(newKey, value);
 			}
 		}
+	}
+
+	private boolean shouldIncludeKey(String keyToInclude, List<String> includeList, List<String> skipKeys) {
+		if (skipKeys.contains(keyToInclude)) {
+			return false;
+		}
+
+		if (includeList.size() <= 0) {
+			return false;
+		}
+
+		return includeList.contains(keyToInclude);
 	}
 }

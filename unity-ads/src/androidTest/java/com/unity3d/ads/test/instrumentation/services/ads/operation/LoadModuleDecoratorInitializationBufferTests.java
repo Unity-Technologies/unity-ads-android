@@ -11,8 +11,10 @@ import com.unity3d.services.ads.operation.load.ILoadModule;
 import com.unity3d.services.ads.operation.load.LoadModuleDecoratorInitializationBuffer;
 import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.configuration.IInitializationNotificationCenter;
 import com.unity3d.services.core.properties.SdkProperties;
+import com.unity3d.services.core.request.metrics.ISDKMetrics;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
 import org.junit.Before;
@@ -27,6 +29,7 @@ public class LoadModuleDecoratorInitializationBufferTests {
 	private IInitializationNotificationCenter initializationNotificationCenterMock;
 	private IWebViewBridgeInvoker webViewBridgeInvokerMock;
 	private LoadOperationState loadOperationStateMock;
+	private ISDKMetrics sdkMetrics;
 
 	@Before
 	public void beforeEachTest() {
@@ -34,6 +37,7 @@ public class LoadModuleDecoratorInitializationBufferTests {
 		initializationNotificationCenterMock = mock(IInitializationNotificationCenter.class);
 		webViewBridgeInvokerMock = mock(IWebViewBridgeInvoker.class);
 		loadOperationStateMock = mock(LoadOperationState.class);
+		sdkMetrics = mock(ISDKMetrics.class);
 	}
 
 	@Test
@@ -48,6 +52,7 @@ public class LoadModuleDecoratorInitializationBufferTests {
 
 	@Test
 	public void executeAdOperationCallsListenerOnUnityAdsFailedToLoadWhenInitHasFailed() {
+		Mockito.when(loadModuleMock.getMetricSender()).thenReturn(sdkMetrics);
 		IUnityAdsLoadListener loadListenerMock = mock(IUnityAdsLoadListener.class);
 		LoadOperationState loadOperationState = new LoadOperationState(testPlacementId, loadListenerMock, new UnityAdsLoadOptions(), new Configuration());
 		LoadModuleDecoratorInitializationBuffer loadModuleInitBuffer = new LoadModuleDecoratorInitializationBuffer(loadModuleMock, initializationNotificationCenterMock);
@@ -94,6 +99,7 @@ public class LoadModuleDecoratorInitializationBufferTests {
 
 	@Test
 	public void onUnityAdsFailedToLoadIsCalledWhenOnSdkInitializationFailedIsCalledAfterCallingExecuteAdOperation() {
+		Mockito.when(loadModuleMock.getMetricSender()).thenReturn(sdkMetrics);
 		IUnityAdsLoadListener loadListenerMock = mock(IUnityAdsLoadListener.class);
 		LoadOperationState loadOperationStateMock = new LoadOperationState(testPlacementId, loadListenerMock, new UnityAdsLoadOptions(), new Configuration());
 		LoadModuleDecoratorInitializationBuffer loadModuleInitBuffer = new LoadModuleDecoratorInitializationBuffer(loadModuleMock, initializationNotificationCenterMock);
@@ -102,7 +108,7 @@ public class LoadModuleDecoratorInitializationBufferTests {
 		loadModuleInitBuffer.executeAdOperation(webViewBridgeInvokerMock, loadOperationStateMock);
 		Mockito.verify(initializationNotificationCenterMock, times(1)).addListener(loadModuleInitBuffer);
 
-		loadModuleInitBuffer.onSdkInitializationFailed("UntestableMessage", 0);
+		loadModuleInitBuffer.onSdkInitializationFailed("UntestableMessage", ErrorState.InitModules, 0);
 		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(testPlacementId, UnityAds.UnityAdsLoadError.INITIALIZE_FAILED, "[UnityAds] SDK Initialization Failure");
 	}
 }

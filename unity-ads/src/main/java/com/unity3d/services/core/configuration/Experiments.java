@@ -1,21 +1,22 @@
 package com.unity3d.services.core.configuration;
 
-import com.unity3d.services.core.log.DeviceLog;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class Experiments {
 
 	private static final String TSI_TAG_INIT_ENABLED = "tsi";
-	private static final String TSI_TAG_INIT_POST = "tsi_p";
 	private static final String TSI_TAG_FORWARD_FEATURE_FLAGS = "fff";
 	private static final String TSI_TAG_UPDATE_PII_FIELDS  = "tsi_upii";
-	private static final String TSI_TAG_DEVELOPER_CONSENT = "tsi_dc";
 	private static final String TSI_TAG_NATIVE_TOKEN = "tsi_nt";
+	private static final String TSI_TAG_PRIVACY_REQUEST = "tsi_prr";
+	private static final String TSI_TAG_NATIVE_TOKEN_AWAIT_PRIVACY = "tsi_prw";
+	private static final String EXP_TAG_NATIVE_WEBVIEW_CACHE = "nwc";
+	private static final String EXP_TAG_WEB_AD_ASSET_CACHING = "wac";
+	private static final String EXP_TAG_NEW_LIFECYCLE_TIMER = "nlt";
 
 	private final JSONObject _experimentData;
 
@@ -31,20 +32,8 @@ public class Experiments {
 		}
 	}
 
-	public void setTwoStageInitializationEnabled(boolean tsiEnabled) {
-		try {
-			_experimentData.put(TSI_TAG_INIT_ENABLED, tsiEnabled);
-		} catch (JSONException e) {
-			DeviceLog.warning("Could not set TSI flag to " + tsiEnabled);
-		}
-	}
-
 	public boolean isTwoStageInitializationEnabled() {
 		return _experimentData.optBoolean(TSI_TAG_INIT_ENABLED, false);
-	}
-
-	public boolean isPOSTMethodInConfigRequestEnabled() {
-		return _experimentData.optBoolean(TSI_TAG_INIT_POST, false);
 	}
 
 	public boolean isForwardExperimentsToWebViewEnabled() {
@@ -59,8 +48,24 @@ public class Experiments {
 		return _experimentData.optBoolean(TSI_TAG_UPDATE_PII_FIELDS, false);
 	}
 
-	public boolean isHandleDeveloperConsent() {
-		return _experimentData.optBoolean(TSI_TAG_DEVELOPER_CONSENT, false);
+	public boolean isPrivacyRequestEnabled() {
+		return _experimentData.optBoolean(TSI_TAG_PRIVACY_REQUEST, false);
+	}
+
+	public boolean shouldNativeTokenAwaitPrivacy() {
+		return _experimentData.optBoolean(TSI_TAG_NATIVE_TOKEN_AWAIT_PRIVACY, false);
+	}
+
+	public boolean isNativeWebViewCacheEnabled() {
+		return _experimentData.optBoolean(EXP_TAG_NATIVE_WEBVIEW_CACHE, false);
+	}
+
+	public boolean isWebAssetAdCaching() {
+		return _experimentData.optBoolean(EXP_TAG_WEB_AD_ASSET_CACHING, false);
+	}
+
+	public boolean isNewLifecycleTimer() {
+		return _experimentData.optBoolean(EXP_TAG_NEW_LIFECYCLE_TIMER, false);
 	}
 
 	public JSONObject getExperimentData() {
@@ -69,14 +74,10 @@ public class Experiments {
 
 	public Map<String, String> getExperimentTags() {
 		Map<String, String> map = new HashMap<>();
-
-		map.put(TSI_TAG_INIT_ENABLED, String.valueOf(isTwoStageInitializationEnabled()));
-		map.put(TSI_TAG_INIT_POST, String.valueOf(isPOSTMethodInConfigRequestEnabled()));
-		map.put(TSI_TAG_FORWARD_FEATURE_FLAGS, String.valueOf(isForwardExperimentsToWebViewEnabled()));
-		map.put(TSI_TAG_UPDATE_PII_FIELDS, String.valueOf(isUpdatePiiFields()));
-		map.put(TSI_TAG_DEVELOPER_CONSENT, String.valueOf(isHandleDeveloperConsent()));
-		map.put(TSI_TAG_NATIVE_TOKEN, String.valueOf(isNativeTokenEnabled()));
-
+		for (Iterator<String> keyItor = _experimentData.keys(); keyItor.hasNext(); ) {
+			String key = keyItor.next();
+			map.put(key, String.valueOf(_experimentData.opt(key)));
+		}
 		return map;
 	}
 

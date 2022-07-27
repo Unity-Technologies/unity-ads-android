@@ -72,7 +72,6 @@ public class WebPlayerView extends WebView {
 			}
 		}
 
-		settings.setAppCacheEnabled(false);
 		settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 		settings.setDatabaseEnabled(false);
 

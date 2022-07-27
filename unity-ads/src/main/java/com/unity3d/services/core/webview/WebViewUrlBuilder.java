@@ -2,6 +2,7 @@ package com.unity3d.services.core.webview;
 
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -17,6 +18,7 @@ public class WebViewUrlBuilder {
 		if (configuration.getExperiments() != null && configuration.getExperiments().isForwardExperimentsToWebViewEnabled()) {
 			queryString += buildQueryParam("experiments", configuration.getExperiments().getExperimentData().toString());
 		}
+		queryString += buildQueryParam("isNativeCollectingMetrics", String.valueOf(SDKMetrics.getInstance().areMetricsEnabledForCurrentSession()));
 
 		_urlWithQueryString = baseUrl + queryString;
 	}

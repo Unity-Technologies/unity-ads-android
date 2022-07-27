@@ -1,6 +1,7 @@
 package com.unity3d.ads.test.instrumentation.services.core.device;
 
 import static com.unity3d.services.core.device.TokenType.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -401,6 +402,29 @@ public class AsyncTokenStorageTest {
 		_asyncTokenStorage.setConfiguration(null);
 
 		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+	}
+
+	@Test
+	public void testGetTokenWhenQueueEmptyWaitForNextToken() throws JSONException {
+		JSONArray array = new JSONArray();
+		array.put("create_token_1");
+		TokenStorage.createTokens(array);
+		_asyncTokenStorage.onTokenAvailable(TOKEN_REMOTE);
+
+		assertEquals("create_token_1", TokenStorage.getToken());
+
+		_asyncTokenStorage.getToken(_listener);
+
+		Mockito.verify(_handler, times(1)).sendMessageAtTime(any(Message.class), anyLong());
+		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+
+		array = new JSONArray();
+		array.put("append_token_1");
+		TokenStorage.appendTokens(array);
+		_asyncTokenStorage.onTokenAvailable(TOKEN_REMOTE);
+
+		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("append_token_1");
+		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 	}
 
 	private class MockWebViewApp extends WebViewApp {

@@ -60,10 +60,12 @@ public class PiiDataSelector {
 	}
 
 	private Map<String, Object> getPiiContentFromStorage() {
-		Object piiData = _jsonStorageReader.get(UNIFIED_CONFIG_PII_KEY);
 		Map<String, Object> piiDataMap = new HashMap<>();
-		if (piiData instanceof JSONObject) {
-			piiDataMap = Utilities.combineJsonIntoMap(piiDataMap, (JSONObject) piiData, UNIFIED_CONFIG_PII_KEY + ".");
+		if (_jsonStorageReader != null) {
+			Object piiData = _jsonStorageReader.get(UNIFIED_CONFIG_PII_KEY);
+			if (piiData instanceof JSONObject) {
+				piiDataMap = Utilities.combineJsonIntoMap(piiDataMap, (JSONObject) piiData, UNIFIED_CONFIG_PII_KEY + ".");
+			}
 		}
 		return piiDataMap;
 	}

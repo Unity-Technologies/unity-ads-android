@@ -1,5 +1,6 @@
 package com.unity3d.ads.test.instrumentation.services.core.configuration;
 
+import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.configuration.IInitializationListener;
 import com.unity3d.services.core.configuration.InitializationNotificationCenter;
 
@@ -121,11 +122,11 @@ public class InitializationNotificationCenterTest {
 		IInitializationListener listener = mock(IInitializationListener.class);
 		initializationNotificationCenter.addListener(listener);
 
-		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", 0);
+		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", ErrorState.InitModules, 0);
 
 		InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-		verify(listener, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", 0);
+		verify(listener, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", ErrorState.InitModules, 0);
 	}
 
 	@Test
@@ -134,11 +135,11 @@ public class InitializationNotificationCenterTest {
 		initializationNotificationCenter.addListener(listener);
 		initializationNotificationCenter.addListener(listener);
 
-		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", 0);
+		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", ErrorState.InitModules, 0);
 
 		InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-		verify(listener, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", 0);
+		verify(listener, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", ErrorState.InitModules, 0);
 	}
 
 	@Test
@@ -151,13 +152,13 @@ public class InitializationNotificationCenterTest {
 		initializationNotificationCenter.addListener(listener2);
 		initializationNotificationCenter.addListener(listener3);
 
-		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", 0);
+		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", ErrorState.InitModules, 0);
 
 		InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-		verify(listener1, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", 0);
-		verify(listener2, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", 0);
-		verify(listener3, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", 0);
+		verify(listener1, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", ErrorState.InitModules, 0);
+		verify(listener2, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", ErrorState.InitModules, 0);
+		verify(listener3, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", ErrorState.InitModules, 0);
 
 	}
 
@@ -167,12 +168,12 @@ public class InitializationNotificationCenterTest {
 
 		initializationNotificationCenter.addListener(listener);
 
-		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", 0);
-		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", 0);
+		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", ErrorState.InitModules, 0);
+		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", ErrorState.InitModules, 0);
 
 		InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-		verify(listener, times(2)).onSdkInitializationFailed("SDK Failed to Initialize due to test", 0);
+		verify(listener, times(2)).onSdkInitializationFailed("SDK Failed to Initialize due to test", ErrorState.InitModules, 0);
 	}
 
 	@Test
@@ -181,17 +182,17 @@ public class InitializationNotificationCenterTest {
 
 		initializationNotificationCenter.addListener(listener);
 
-		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", 0);
+		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", ErrorState.InitModules, 0);
 
 		InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
 		initializationNotificationCenter.removeListener(listener);
 
-		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", 0);
+		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", ErrorState.InitModules, 0);
 
 		InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-		verify(listener, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", 0);
+		verify(listener, times(1)).onSdkInitializationFailed("SDK Failed to Initialize due to test", ErrorState.InitModules, 0);
 	}
 
 	@Test
@@ -199,11 +200,11 @@ public class InitializationNotificationCenterTest {
 		IInitializationListener listener = mock(IInitializationListener.class);
 
 		initializationNotificationCenter.removeListener(listener);
-		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", 0);
+		initializationNotificationCenter.triggerOnSdkInitializationFailed("test", ErrorState.InitModules, 0);
 
 		InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-		verify(listener, times(0)).onSdkInitializationFailed("SDK Failed to Initialize due to test", 0);
+		verify(listener, times(0)).onSdkInitializationFailed("SDK Failed to Initialize due to test", ErrorState.InitModules, 0);
 	}
 
 }

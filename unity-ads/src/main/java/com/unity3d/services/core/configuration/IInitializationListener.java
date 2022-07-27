@@ -4,6 +4,6 @@ public interface IInitializationListener {
 
 	void onSdkInitialized();
 
-	void onSdkInitializationFailed(String message, int code);
+	void onSdkInitializationFailed(String message, ErrorState errorState, int code);
 
 }

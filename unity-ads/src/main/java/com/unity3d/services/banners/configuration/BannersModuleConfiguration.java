@@ -3,6 +3,7 @@ package com.unity3d.services.banners.configuration;
 import com.unity3d.services.banners.api.Banner;
 import com.unity3d.services.banners.api.BannerListener;
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.configuration.IModuleConfiguration;
 
 public class BannersModuleConfiguration implements IModuleConfiguration {
@@ -27,7 +28,7 @@ public class BannersModuleConfiguration implements IModuleConfiguration {
     }
 
     @Override
-    public boolean initErrorState(Configuration configuration, String state, String message) {
+    public boolean initErrorState(Configuration configuration, ErrorState state, String message) {
         return true;
     }
 

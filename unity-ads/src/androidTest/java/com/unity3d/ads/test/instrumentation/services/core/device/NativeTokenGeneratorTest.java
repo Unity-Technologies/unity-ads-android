@@ -9,8 +9,12 @@ import static org.mockito.Mockito.when;
 
 import com.unity3d.services.ads.token.INativeTokenGeneratorListener;
 import com.unity3d.services.ads.token.NativeTokenGenerator;
+import com.unity3d.services.core.configuration.PrivacyConfig;
+import com.unity3d.services.core.configuration.PrivacyConfigStorage;
+import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.device.reader.IDeviceInfoReader;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -27,21 +31,28 @@ public class NativeTokenGeneratorTest {
 	@Mock
 	ExecutorService _executorService;
 	@Mock
+	DeviceInfoReaderBuilder _deviceInfoReaderBuilder;
+	@Mock
 	IDeviceInfoReader _deviceInfoReader;
 	@Mock
 	INativeTokenGeneratorListener _callback;
 
-	@Test
-	public void testGenerateToken() {
+	@Before
+	public void setup() {
 		doAnswer(new Answer() {
 			public Object answer(InvocationOnMock invocation) {
 				invocation.getArgument(0, Runnable.class).run();
 				return null;
 			}}).when(_executorService).execute(any(Runnable.class));
 
+		when(_deviceInfoReaderBuilder.build()).thenReturn(_deviceInfoReader);
+	}
+
+	@Test
+	public void testGenerateToken() {
 		when(_deviceInfoReader.getDeviceInfoData()).thenReturn(new HashMap<String, Object>());
 
-		NativeTokenGenerator nativeTokenGenerator = new NativeTokenGenerator(_executorService, _deviceInfoReader);
+		NativeTokenGenerator nativeTokenGenerator = new NativeTokenGenerator(_executorService, _deviceInfoReaderBuilder);
 		nativeTokenGenerator.generateToken(_callback);
 
 		Mockito.verify(_callback, times(1))
@@ -51,16 +62,23 @@ public class NativeTokenGeneratorTest {
 	}
 
 	@Test
-	public void testGenerateTokenWithException() {
-		doAnswer(new Answer() {
-			public Object answer(InvocationOnMock invocation) {
-				invocation.getArgument(0, Runnable.class).run();
-				return null;
-			}}).when(_executorService).execute(any(Runnable.class));
+	public void testGenerateTokenWithSuffix() {
+		when(_deviceInfoReader.getDeviceInfoData()).thenReturn(new HashMap<String, Object>());
 
+		NativeTokenGenerator nativeTokenGenerator = new NativeTokenGenerator(_executorService, _deviceInfoReaderBuilder, "test:");
+		nativeTokenGenerator.generateToken(_callback);
+
+		Mockito.verify(_callback, times(1))
+			.onReady("test:H4sIAAAAAAAAAKuuBQBDv6ajAgAAAA==");
+		Mockito.verify(_callback, times(1))
+			.onReady(anyString());
+	}
+
+	@Test
+	public void testGenerateTokenWithException() {
 		when(_deviceInfoReader.getDeviceInfoData()).thenThrow(new RuntimeException());
 
-		NativeTokenGenerator nativeTokenGenerator = new NativeTokenGenerator(_executorService, _deviceInfoReader);
+		NativeTokenGenerator nativeTokenGenerator = new NativeTokenGenerator(_executorService, _deviceInfoReaderBuilder);
 		nativeTokenGenerator.generateToken(_callback);
 
 		Mockito.verify(_callback, times(1))

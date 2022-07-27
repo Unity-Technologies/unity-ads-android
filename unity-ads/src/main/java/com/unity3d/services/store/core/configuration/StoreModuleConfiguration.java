@@ -1,6 +1,7 @@
 package com.unity3d.services.store.core.configuration;
 
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.configuration.IModuleConfiguration;
 import com.unity3d.services.store.core.api.Store;
 
@@ -25,7 +26,7 @@ public class StoreModuleConfiguration implements IModuleConfiguration {
 	}
 
 	@Override
-	public boolean initErrorState(Configuration configuration, String state, String message) {
+	public boolean initErrorState(Configuration configuration, ErrorState state, String message) {
 		return true;
 	}
 

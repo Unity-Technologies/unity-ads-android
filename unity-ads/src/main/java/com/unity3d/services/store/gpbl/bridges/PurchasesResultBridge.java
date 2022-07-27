@@ -32,8 +32,10 @@ public class PurchasesResultBridge extends GenericBridge {
 	public List<PurchaseBridge> getPurchasesList() {
 		List<Object> purchases = callNonVoidMethod(getPurchasesListMethodName, _purchasesResult);
 		List<PurchaseBridge> purchasesBridge = new ArrayList<>();
-		for (Object purchase : purchases) {
-			purchasesBridge.add(new PurchaseBridge(purchase));
+		if (purchases != null) {
+			for (Object purchase : purchases) {
+				purchasesBridge.add(new PurchaseBridge(purchase));
+			}
 		}
 		return purchasesBridge;
 	}

@@ -10,8 +10,8 @@ if (project.rootProject.file('local.properties').exists()) {
 ext {
   GROUP_ID = "com.unity3d.ads"
   ARTIFACT_ID = "unity-ads"
-  VERSION_ID = "4.2.1"
-  VERSION_CODE = 4210
+  VERSION_ID = "4.3.0"
+  VERSION_CODE = 4300
   SIGN_AAR = properties.getProperty("SIGN_AAR") ?: false
 }
 
@@ -51,8 +51,8 @@ android {
 
   buildTypes {
     release {
-      minifyEnabled false
-      proguardFiles getDefaultProguardFile('proguard-android.txt')
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
       consumerProguardFiles 'proguard-rules.pro'
     }
     debug {

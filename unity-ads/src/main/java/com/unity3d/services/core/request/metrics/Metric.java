@@ -39,6 +39,18 @@ public class Metric {
 		return result;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public Object getValue() {
+		return value;
+	}
+
+	public Map<String, String> getTags() {
+		return tags;
+	}
+
 	@Override
 	public String toString() {
 		return "Metric{" +

@@ -14,10 +14,12 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 
 	private static InitializeEventsMetricSender _instance;
 
-    private Map<String, String> _metricTags;
-
 	private long _startTime = 0L;
+	private long _privacyConfigStartTime = 0L;
+	private long _privacyConfigEndTime = 0L;
 	private long _configStartTime = 0L;
+	private int _configRetryCount = 0;
+	private int _webviewRetryCount = 0;
 	private boolean _initMetricSent = false;
 	private boolean _tokenMetricSent = false;
 
@@ -35,7 +37,9 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	@Override
 	public void didInitStart() {
 		_startTime = System.nanoTime();
-		sendMetric(TSIMetric.newInitStarted(getMetricTags()));
+		_configRetryCount = 0;
+		_webviewRetryCount = 0;
+		sendMetric(TSIMetric.newInitStarted());
 	}
 
 	@Override
@@ -44,14 +48,26 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	}
 
 	@Override
+	public void didPrivacyConfigRequestStart() {
+		_privacyConfigStartTime = System.nanoTime();
+	}
+
+	@Override
+	public void didPrivacyConfigRequestEnd(boolean success) {
+		_privacyConfigEndTime = System.nanoTime();
+
+		sendPrivacyResolutionRequestIfNeeded(success);
+	}
+
+	@Override
 	public synchronized void sdkDidInitialize() {
-		if (_startTime == 0L) {
+		if (initializationStartTimeStamp() == 0L) {
 			DeviceLog.debug("sdkDidInitialize called before didInitStart, skipping metric");
 			return;
 		}
 
 		if (!_initMetricSent) {
-			sendMetric(TSIMetric.newInitTimeSuccess(duration(), getMetricTags()));
+			sendMetric(TSIMetric.newInitTimeSuccess(duration(), getRetryTags()));
 			_initMetricSent = true;
 		}
 	}
@@ -62,14 +78,14 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	}
 
 	@Override
-	public synchronized void sdkInitializeFailed(String message) {
+	public synchronized void sdkInitializeFailed(String message, ErrorState errorState) {
 		if (_startTime == 0L) {
 			DeviceLog.debug("sdkInitializeFailed called before didInitStart, skipping metric");
 			return;
 		}
 
 		if (!_initMetricSent) {
-			sendMetric(TSIMetric.newInitTimeFailure(duration(), getMetricTags()));
+			sendMetric(TSIMetric.newInitTimeFailure(duration(), getErrorStateTags(errorState)));
 			_initMetricSent = true;
 		}
 	}
@@ -93,7 +109,8 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 		}
 
 		Long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - _startTime);
-		Map<String, String> tags = getMetricTags();
+		Map<String, String> tags = getRetryTags();
+
 		Metric metric = withConfig
 			? TSIMetric.newTokenAvailabilityLatencyConfig(duration, tags)
 			: TSIMetric.newTokenAvailabilityLatencyWebview(duration, tags);
@@ -107,7 +124,30 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 			return;
 		}
 
-		sendMetric(TSIMetric.newTokenResolutionRequestLatency(tokenDuration(), getMetricTags()));
+		sendMetric(TSIMetric.newTokenResolutionRequestLatency(tokenDuration(), getRetryTags()));
+	}
+
+	private void sendPrivacyResolutionRequestIfNeeded(boolean success) {
+		if (_privacyConfigStartTime == 0L || _privacyConfigEndTime == 0L) {
+			DeviceLog.debug("sendTokenResolutionRequestMetricIfNeeded called before didInitStart, skipping metric");
+			return;
+		}
+
+		if (success) {
+			sendMetric(TSIMetric.newPrivacyResolutionRequestLatencySuccess(privacyConfigDuration()));
+		} else {
+			sendMetric(TSIMetric.newPrivacyResolutionRequestLatencyFailure(privacyConfigDuration()));
+		}
+	}
+
+	@Override
+	public void onRetryConfig() {
+		_configRetryCount++;
+	}
+
+	@Override
+	public void onRetryWebview() {
+		_webviewRetryCount++;
 	}
 
 	@Override
@@ -121,17 +161,22 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	}
 
 	@Override
-	public void setMetricTags(Map<String, String> metricTags) {
-		_metricTags = metricTags;
+	public Long privacyConfigDuration() {
+		return TimeUnit.NANOSECONDS.toMillis(_privacyConfigEndTime - _privacyConfigStartTime);
+	}
+
+	public Map<String, String> getErrorStateTags(ErrorState errorState) {
+		Map<String, String> tags = getRetryTags();
+		tags.put("stt", errorState.getMetricName());
+		return tags;
 	}
 
 	@Override
-	public Map<String, String> getMetricTags() {
-		if (_metricTags != null) {
-			return _metricTags;
-		} else {
-			return new HashMap<>();
-		}
+	public Map<String, String> getRetryTags() {
+		return new HashMap<String, String>(){{
+			put("c_retry", String.valueOf(_configRetryCount));
+			put("wv_retry", String.valueOf(_webviewRetryCount));
+		}};
 	}
 
 	@Override
@@ -145,7 +190,7 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	}
 
 	@Override
-	public void onSdkInitializationFailed(String message, int code) {
-		sdkInitializeFailed(message);
+	public void onSdkInitializationFailed(String message, ErrorState errorState, int code) {
+		sdkInitializeFailed(message, errorState);
 	}
 }

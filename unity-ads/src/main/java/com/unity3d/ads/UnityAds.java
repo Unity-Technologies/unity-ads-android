@@ -5,7 +5,6 @@ import android.content.Context;
 
 import com.unity3d.services.UnityServices;
 import com.unity3d.services.ads.UnityAdsImplementation;
-import com.unity3d.services.core.log.DeviceLog;
 
 public final class UnityAds {
 	
@@ -108,6 +107,11 @@ public final class UnityAds {
 		 * Error related to environment or internal services
 		 */
 		INTERNAL_ERROR,
+
+		/**
+		 * Error related to an Ad being unable to show within a specified time frame
+		 */
+		TIMEOUT
 	}
 
 	/**

@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.properties.InitializationStatusReader;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,7 @@ public final class SDKMetrics {
 		}
 
 		if (configuration.getMetricSampleRate() >= new Random().nextInt(99) + 1) {
-			_instance = new MetricSender(configuration.getMetricsUrl());
+			_instance = new MetricSender(configuration, new InitializationStatusReader());
 		} else {
 			DeviceLog.debug("Metrics will not be sent from the device for this session");
 			_instance = new NullInstance(NULL_INSTANCE_METRICS_URL);
@@ -75,6 +76,11 @@ public final class SDKMetrics {
 			_metricEndpoint = url;
 		}
 
+		@Override
+		public boolean areMetricsEnabledForCurrentSession() {
+			return false;
+		}
+
 		public void sendEvent(final String event) {
 			DeviceLog.debug("Metric " + event + " was skipped from being sent");
 		}
@@ -93,6 +99,10 @@ public final class SDKMetrics {
 
 		public void sendMetrics(List<Metric> metrics) {
 			DeviceLog.debug("Metrics: " + metrics + " was skipped from being sent");
+		}
+
+		public void sendMetricWithInitState(Metric metric) {
+			sendMetric(metric);
 		}
 
 		public String getMetricEndPoint() {

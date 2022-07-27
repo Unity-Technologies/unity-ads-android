@@ -1,6 +1,7 @@
 package com.unity3d.ads.test.hybrid;
 
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.configuration.IModuleConfiguration;
 
 public class HybridTestModuleConfiguration implements IModuleConfiguration {
@@ -16,7 +17,7 @@ public class HybridTestModuleConfiguration implements IModuleConfiguration {
   public boolean initModuleState(Configuration configuration) {
     return true;
   }
-  public boolean initErrorState(Configuration configuration, String state, String message) {
+  public boolean initErrorState(Configuration configuration, ErrorState state, String message) {
     return true;
   }
   public boolean initCompleteState(Configuration configuration) {

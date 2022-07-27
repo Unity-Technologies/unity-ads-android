@@ -10,11 +10,19 @@ public interface IInitializeEventsMetricSender {
 
 	void didConfigRequestStart();
 
+	void didPrivacyConfigRequestStart();
+
+	void didPrivacyConfigRequestEnd(boolean success);
+
 	void sdkDidInitialize();
+
+	void onRetryConfig();
+
+	void onRetryWebview();
 
 	Long initializationStartTimeStamp();
 
-	void sdkInitializeFailed(String message);
+	void sdkInitializeFailed(String message, ErrorState errorState);
 
 	void sdkTokenDidBecomeAvailableWithConfig(boolean withConfig);
 
@@ -22,9 +30,9 @@ public interface IInitializeEventsMetricSender {
 
 	Long tokenDuration();
 
-	void setMetricTags(Map<String, String> metricTags);
+	Long privacyConfigDuration();
 
-	Map<String, String> getMetricTags();
+	Map<String, String> getRetryTags();
 
 	void sendMetric(Metric metric);
 }

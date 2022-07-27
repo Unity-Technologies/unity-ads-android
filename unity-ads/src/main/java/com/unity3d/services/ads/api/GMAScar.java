@@ -9,7 +9,7 @@ import org.json.JSONException;
 
 public class GMAScar {
 
-	private static GMAScarAdapterBridge gmaScarAdapterBridge = new GMAScarAdapterBridge();
+	private static final GMAScarAdapterBridge gmaScarAdapterBridge = new GMAScarAdapterBridge();
 
 	@WebViewExposed
 	public static void initializeScar(final WebViewCallback callback) {

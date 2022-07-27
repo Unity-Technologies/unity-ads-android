@@ -3,6 +3,8 @@ package com.unity3d.services.ads.adunit;
 import android.os.ConditionVariable;
 
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.request.metrics.AdOperationError;
+import com.unity3d.services.core.request.metrics.AdOperationMetric;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
@@ -25,7 +27,7 @@ public class AdUnitOpen {
 		boolean success = _waitShowStatus.block(_configuration.getShowTimeout());
 		_waitShowStatus = null;
 		if (!success) {
-			SDKMetrics.getInstance().sendEvent("native_show_callback_failed");
+			SDKMetrics.getInstance().sendMetric(AdOperationMetric.newAdShowFailure(AdOperationError.timeout, Long.valueOf(_configuration.getShowTimeout())));
 		}
 		return success;
 	}

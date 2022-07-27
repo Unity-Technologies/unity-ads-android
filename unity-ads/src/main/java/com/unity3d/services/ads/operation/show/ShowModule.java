@@ -8,12 +8,14 @@ import android.view.WindowManager;
 
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.ads.operation.AdModule;
+import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
-import com.unity3d.services.core.request.metrics.ISDKMetricSender;
-import com.unity3d.services.core.request.metrics.SDKMetricEvents;
-import com.unity3d.services.core.request.metrics.SDKMetricSender;
+import com.unity3d.services.core.request.metrics.AdOperationError;
+import com.unity3d.services.core.request.metrics.AdOperationMetric;
+import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocationCallback;
@@ -22,7 +24,6 @@ import com.unity3d.services.core.webview.bridge.invocation.WebViewBridgeInvocati
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
 
 public class ShowModule extends AdModule<IShowOperation, ShowOperationState> implements IShowModule {
 	private static IShowModule instance;
@@ -31,40 +32,38 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 
 	public static IShowModule getInstance() {
 		if (instance == null) {
-			instance = new ShowModuleDecoratorTimeout(new ShowModule(new SDKMetricSender()));
+			instance = new ShowModuleDecoratorTimeout(new ShowModule(SDKMetrics.getInstance()), new ConfigurationReader());
 		}
 		return instance;
 	}
 
-	public ShowModule(ISDKMetricSender sdkMetricSender) {
-		super(sdkMetricSender);
+	public ShowModule(ISDKMetrics sdkMetrics) {
+		super(sdkMetrics);
 	}
 
 	@Override
 	public void executeAdOperation(IWebViewBridgeInvoker webViewBridgeInvoker, final ShowOperationState state) {
 		if (TextUtils.isEmpty(state.placementId)) {
-			sendOnUnityAdsFailedToShow(state, errorMsgPlacementIdNull, UnityAds.UnityAdsShowError.INVALID_ARGUMENT);
+			sendOnUnityAdsFailedToShow(state, errorMsgPlacementIdNull, UnityAds.UnityAdsShowError.INVALID_ARGUMENT, true);
 			return;
 		}
+
 		IShowOperation showOperation = new ShowOperation(state, new WebViewBridgeInvocation(_executorService, webViewBridgeInvoker, new IWebViewBridgeInvocationCallback() {
 			@Override
 			public void onSuccess() {
 			}
+
 			@Override
 			public void onFailure(String message, CallbackStatus callbackStatus) {
-				sendOnUnityAdsFailedToShow(state, message, UnityAds.UnityAdsShowError.INTERNAL_ERROR);
-
-				final String cbs = callbackStatus == null ? "invocationFailure" : callbackStatus.toString();
-				_sdkMetricSender.sendSDKMetricEventWithTag(SDKMetricEvents.native_show_callback_error, new HashMap<String, String>(){{
-					put("cbs", cbs);
-				}});
-
+				getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdShowFailure(AdOperationError.callback_error, state.duration()));
+				sendOnUnityAdsFailedToShow(state, message, UnityAds.UnityAdsShowError.INTERNAL_ERROR, false);
 				remove(state.id);
 			}
+
 			@Override
 			public void onTimeout() {
-				sendOnUnityAdsFailedToShow(state, "[UnityAds] Show Invocation Timeout", UnityAds.UnityAdsShowError.INTERNAL_ERROR);
-				_sdkMetricSender.sendSDKMetricEvent(SDKMetricEvents.native_show_callback_timeout);
+				getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdShowFailure(AdOperationError.callback_timeout, state.duration()));
+				sendOnUnityAdsFailedToShow(state, "[UnityAds] Show Invocation Timeout", UnityAds.UnityAdsShowError.INTERNAL_ERROR, false);
 				remove(state.id);
 			}
 		}));
@@ -95,10 +94,10 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 			parameters.put("placementId", state.placementId);
 			parameters.put("time", Device.getElapsedRealtime());
 		} catch (JSONException e) {
-			sendOnUnityAdsFailedToShow(state, "[UnityAds] Error creating show options", UnityAds.UnityAdsShowError.INTERNAL_ERROR);
+			sendOnUnityAdsFailedToShow(state, "[UnityAds] Error creating show options", UnityAds.UnityAdsShowError.INTERNAL_ERROR, true);
 			return;
 		} catch (NullPointerException e) {
-			sendOnUnityAdsFailedToShow(state, "[UnityAds] Error creating show options", UnityAds.UnityAdsShowError.INTERNAL_ERROR);
+			sendOnUnityAdsFailedToShow(state, "[UnityAds] Error creating show options", UnityAds.UnityAdsShowError.INTERNAL_ERROR, true);
 			return;
 		}
 
@@ -109,7 +108,9 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 	public void onUnityAdsShowFailure(String id, UnityAds.UnityAdsShowError error, String message) {
 		final IShowOperation showOperation = get(id);
 		if (showOperation == null || showOperation.getShowOperationState() == null) return;
-		showOperation.onUnityAdsShowFailure(showOperation.getShowOperationState().placementId, error, message);
+		final ShowOperationState state = showOperation.getShowOperationState();
+		getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdShowFailure(error, state.duration()));
+		showOperation.onUnityAdsShowFailure(state.placementId, error, message);
 		remove(id);
 	}
 
@@ -134,16 +135,21 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 	public void onUnityAdsShowComplete(String id, UnityAds.UnityAdsShowCompletionState state) {
 		final IShowOperation showOperation = get(id);
 		if (showOperation == null || showOperation.getShowOperationState() == null) return;
-		showOperation.onUnityAdsShowComplete(showOperation.getShowOperationState().placementId, state);
+		final ShowOperationState showState = showOperation.getShowOperationState();
+		getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdShowSuccess(showState.duration()));
+		showOperation.onUnityAdsShowComplete(showState.placementId, state);
 		remove(id);
 	}
 
-	private void sendOnUnityAdsFailedToShow(final ShowOperationState showOperationState, final String errorMessage, final UnityAds.UnityAdsShowError errorCode) {
-		if (showOperationState == null || showOperationState.listener == null) return;
+	private void sendOnUnityAdsFailedToShow(final ShowOperationState state, final String message, final UnityAds.UnityAdsShowError error, final boolean sendMetrics) {
+		if (state == null || state.listener == null) return;
+		if (sendMetrics) {
+			getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdShowFailure(error, state.duration()));
+		}
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				showOperationState.onUnityAdsShowFailure(errorCode, errorMessage);
+				state.onUnityAdsShowFailure(error, message);
 			}
 		});
 	}

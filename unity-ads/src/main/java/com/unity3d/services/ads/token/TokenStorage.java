@@ -2,7 +2,10 @@ package com.unity3d.services.ads.token;
 
 import static com.unity3d.services.core.device.TokenType.TOKEN_REMOTE;
 
+import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.configuration.InitializeEventsMetricSender;
+import com.unity3d.services.core.configuration.PrivacyConfigStorage;
+import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.WebViewEventCategory;
 
@@ -10,6 +13,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class TokenStorage {
 	private static final Object _lock = new Object();
@@ -17,6 +23,7 @@ public class TokenStorage {
 	private static int _accessCounter = 0;
 	private static boolean _peekMode = false;
 	private static String _initToken = null;
+	private static ExecutorService _executorService = Executors.newSingleThreadExecutor();
 
 	public static void createTokens(JSONArray tokens) throws JSONException {
 		boolean shouldTriggerEvent;
@@ -88,6 +95,16 @@ public class TokenStorage {
 		synchronized (_lock) {
 			_peekMode = mode;
 		}
+	}
+
+	public static void getNativeGeneratedToken() {
+		NativeTokenGenerator nativeTokenGenerator = new NativeTokenGenerator(_executorService, new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance()), null);
+		nativeTokenGenerator.generateToken(new INativeTokenGeneratorListener() {
+			@Override
+			public void onReady(String token) {
+				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.TOKEN, TokenEvent.TOKEN_NATIVE_DATA, token);
+			}
+		});
 	}
 
 	public static void setInitToken(String value) {

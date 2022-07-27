@@ -9,6 +9,7 @@ import android.widget.RelativeLayout;
 import com.unity3d.services.ads.webplayer.WebPlayerSettingsCache;
 import com.unity3d.services.banners.bridge.BannerBridge;
 import com.unity3d.services.banners.view.BannerWebPlayerContainer;
+import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.configuration.IInitializationListener;
 import com.unity3d.services.core.configuration.InitializationNotificationCenter;
 import com.unity3d.services.core.log.DeviceLog;
@@ -168,7 +169,7 @@ public class BannerView extends RelativeLayout {
 			}
 
 			@Override
-			public void onSdkInitializationFailed(String message, int code) {
+			public void onSdkInitializationFailed(String message, ErrorState errorState, int code) {
 				bannerView.unregisterInitializeListener();
 				if (bannerView.getListener() != null) {
 					bannerView.getListener().onBannerFailedToLoad(bannerView, new BannerErrorInfo("UnityAds sdk initialization failed", BannerErrorCode.NATIVE_ERROR));

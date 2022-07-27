@@ -9,11 +9,14 @@ public class MetricsContainer {
 
 	private static final String METRICS_CONTAINER = "m";
 	private static final String METRICS_CONTAINER_TAGS = "t";
+	private static final String METRIC_CONTAINER_SAMPLE_RATE = "msr";
 
 	private final MetricCommonTags _commonTags;
 	private final List<Metric> _metrics;
+	private final String _metricSampleRate;
 
-	public MetricsContainer(MetricCommonTags commonTags, List<Metric> metrics) {
+	public MetricsContainer(String metricSampleRate, MetricCommonTags commonTags, List<Metric> metrics) {
+		this._metricSampleRate = metricSampleRate;
 		this._commonTags = commonTags;
 		this._metrics = metrics;
 	}
@@ -26,6 +29,7 @@ public class MetricsContainer {
 			metricsMaps.add(metric.asMap());
 		}
 
+		result.put(METRIC_CONTAINER_SAMPLE_RATE, _metricSampleRate);
 		result.put(METRICS_CONTAINER, metricsMaps);
 		result.put(METRICS_CONTAINER_TAGS, _commonTags.asMap());
 

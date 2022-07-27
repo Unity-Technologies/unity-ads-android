@@ -3,6 +3,8 @@ package com.unity3d.services.core.request.metrics;
 import android.text.TextUtils;
 
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.properties.InitializationStatusReader;
+import com.unity3d.services.core.properties.SdkProperties;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +16,7 @@ public class MetricSenderWithBatch implements IMetricSenderWithBatch {
 
 	private final LinkedBlockingQueue<Metric> _queue = new LinkedBlockingQueue<>();
 	private ISDKMetrics _original;
+	private final InitializationStatusReader _initStatusReader = new InitializationStatusReader();
 
 	public MetricSenderWithBatch(ISDKMetrics metrics) {
 		this._original = metrics;
@@ -21,6 +24,11 @@ public class MetricSenderWithBatch implements IMetricSenderWithBatch {
 	@Override
 	public void updateOriginal(ISDKMetrics metrics) {
 		_original = metrics;
+	}
+
+	@Override
+	public boolean areMetricsEnabledForCurrentSession() {
+		return _original.areMetricsEnabledForCurrentSession();
 	}
 
 	@Override
@@ -58,6 +66,13 @@ public class MetricSenderWithBatch implements IMetricSenderWithBatch {
 			_original.sendMetrics(eventsToSend);
 		}
 
+	}
+
+	@Override
+	public void sendMetricWithInitState(Metric metric) {
+		if (metric == null || metric.getTags() == null) return;
+		metric.getTags().put("state", _initStatusReader.getInitializationStateString(SdkProperties.getCurrentInitializationState()));
+		sendMetric(metric);
 	}
 
 	@Override

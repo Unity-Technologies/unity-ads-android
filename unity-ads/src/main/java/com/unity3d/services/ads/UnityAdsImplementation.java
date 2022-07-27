@@ -20,7 +20,8 @@ import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
-import com.unity3d.services.core.properties.SdkProperties;
+import com.unity3d.services.core.request.metrics.AdOperationMetric;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.WebViewBridgeInvoker;
 
@@ -142,6 +143,7 @@ public final class UnityAdsImplementation {
 	}
 
 	private static void handleShowError(IUnityAdsShowListener showListener, String placementId, UnityAds.UnityAdsShowError error, String message) {
+		SDKMetrics.getInstance().sendMetricWithInitState(AdOperationMetric.newAdShowFailure(error,0L));
 		if (showListener == null) return;
 		showListener.onUnityAdsShowFailure(placementId, error, message);
 	}

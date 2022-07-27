@@ -1,11 +1,10 @@
 package com.unity3d.services.core.request.metrics;
 
-import static com.unity3d.services.core.request.metrics.MetricCommonTags.METRIC_COMMON_TAG_PLATFORM_ANDROID;
-
 import android.text.TextUtils;
 
-import com.unity3d.services.core.device.Device;
+import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.properties.InitializationStatusReader;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.WebRequest;
 
@@ -22,18 +21,23 @@ public class MetricSender implements ISDKMetrics {
 
 	private final MetricCommonTags _commonTags;
 	private final String _metricEndpoint;
+	private final String _metricSampleRate;
 	private final ExecutorService _executorService;
+	private final InitializationStatusReader _initStatusReader;
 
-	public MetricSender(String url) {
-		_metricEndpoint = url;
+	public MetricSender(Configuration configuration, InitializationStatusReader initializationStatusReader) {
+		_metricEndpoint = configuration.getMetricsUrl();
 		_executorService = Executors.newSingleThreadExecutor();
-		_commonTags = new MetricCommonTags(
-			Device.getNetworkCountryISO(),
-			METRIC_COMMON_TAG_PLATFORM_ANDROID,
-			SdkProperties.getVersionName(),
-			Device.getOsVersion());
+		_metricSampleRate = String.valueOf((int) Math.round(configuration.getMetricSampleRate()));
+		_initStatusReader = initializationStatusReader;
+		_commonTags = new MetricCommonTags();
+		_commonTags.updateWithConfig(configuration);
 	}
 
+	@Override
+	public boolean areMetricsEnabledForCurrentSession() {
+		return true;
+	}
 
 	public void sendEvent(String event) {
 		sendEvent(event, null);
@@ -77,7 +81,7 @@ public class MetricSender implements ISDKMetrics {
 			@Override
 			public void run() {
 				try {
-					MetricsContainer container = new MetricsContainer(_commonTags, metrics);
+					MetricsContainer container = new MetricsContainer(_metricSampleRate, _commonTags, metrics);
 					String postBody = new JSONObject(container.asMap()).toString();
 
 					WebRequest request = new WebRequest(_metricEndpoint, "POST", null);
@@ -98,11 +102,18 @@ public class MetricSender implements ISDKMetrics {
 
 	}
 
+	public void sendMetricWithInitState(Metric metric) {
+		if (metric == null || metric.getTags() == null) return;
+		metric.getTags().put("state", _initStatusReader.getInitializationStateString(SdkProperties.getCurrentInitializationState()));
+		sendMetric(metric);
+	}
+
 	public String getMetricEndPoint() {
 		return _metricEndpoint;
 	}
 
 	void shutdown() {
+		_commonTags.shutdown();
 		// Allow scheduled tasks to finish execution
 		_executorService.shutdown();
 	}

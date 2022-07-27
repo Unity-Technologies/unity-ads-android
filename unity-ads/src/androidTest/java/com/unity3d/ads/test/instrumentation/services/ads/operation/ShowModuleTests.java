@@ -2,7 +2,6 @@ package com.unity3d.ads.test.instrumentation.services.ads.operation;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -17,20 +16,23 @@ import com.unity3d.services.ads.operation.show.IShowModule;
 import com.unity3d.services.ads.operation.show.ShowModule;
 import com.unity3d.services.ads.operation.show.ShowOperation;
 import com.unity3d.services.ads.operation.show.ShowOperationState;
-import com.unity3d.services.core.request.metrics.ISDKMetricSender;
-import com.unity3d.services.core.request.metrics.SDKMetricEvents;
+import com.unity3d.services.core.request.metrics.AdOperationError;
+import com.unity3d.services.core.request.metrics.AdOperationMetric;
+import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.Metric;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocation;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 
 public class ShowModuleTests {
 	private static final String placementId = "TestPlacementId";
@@ -41,7 +43,7 @@ public class ShowModuleTests {
 
 	private IUnityAdsShowListener _showListenerMock;
 	private IShowModule _showModule;
-	private ISDKMetricSender _sdkMetricSender;
+	private ISDKMetrics _sdkMetrics;
 	private IWebViewBridgeInvoker _webViewBridgeInvokerMock;
 
 	@Rule
@@ -51,8 +53,8 @@ public class ShowModuleTests {
 	public void beforeEachTest() {
 		_showListenerMock = mock(IUnityAdsShowListener.class);
 		_webViewBridgeInvokerMock = mock(IWebViewBridgeInvoker.class);
-		_sdkMetricSender = mock(ISDKMetricSender.class);
-		_showModule = new ShowModule(_sdkMetricSender);
+		_sdkMetrics = mock(ISDKMetrics.class);
+		_showModule = new ShowModule(_sdkMetrics);
 	}
 
 	@Test
@@ -65,6 +67,8 @@ public class ShowModuleTests {
 
 	@Test
 	public void showModuleCallsOnUnityAdsFailedToShowWhenInvocationCallbackFails() {
+		final ArgumentCaptor<Metric> metricsCaptor = ArgumentCaptor.forClass(Metric.class);
+		final Metric desiredMetric = AdOperationMetric.newAdShowFailure(AdOperationError.callback_error, 0L);
 		ShowOperationState showOperationState = new ShowOperationState(placementId, _showListenerMock, _activityRule.getActivity(), showOptions, OperationTestUtilities.createConfigurationWithShowTimeout(showTimeout));
 
 		doAnswer(new Answer<Object>() {
@@ -75,13 +79,15 @@ public class ShowModuleTests {
 		_showModule.executeAdOperation(_webViewBridgeInvokerMock, showOperationState);
 
 		Mockito.verify((_showListenerMock), timeout(maxWaitTime).times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "WebViewBridgeInvocationRunnable:run: invokeMethod failure");
-		Mockito.verify(_sdkMetricSender, timeout(maxWaitTime).times(1)).sendSDKMetricEventWithTag(SDKMetricEvents.native_show_callback_error, new HashMap<String, String> (){{
-			put("cbs", "invocationFailure");
-		}});
+		Mockito.verify(_sdkMetrics, timeout(maxWaitTime).times(1)).sendMetricWithInitState(metricsCaptor.capture());
+		final Metric capturedMetric = metricsCaptor.getValue();
+		Assert.assertEquals(desiredMetric.getName(), capturedMetric.getName());
 	}
 
 	@Test
 	public void showModuleCallsOnUnityAdsFailedToShowWhenInvocationCallbackTimesOut() {
+		final ArgumentCaptor<Metric> metricsCaptor = ArgumentCaptor.forClass((Class) Metric.class);
+		final Metric desiredMetric = AdOperationMetric.newAdShowFailure(AdOperationError.callback_timeout, 0L);
 		ShowOperationState showOperationState = new ShowOperationState(placementId, _showListenerMock, _activityRule.getActivity(), showOptions, OperationTestUtilities.createConfigurationWithWebviewTimeout(50));
 
 		doAnswer(new Answer<Object>() {
@@ -94,7 +100,9 @@ public class ShowModuleTests {
 		_showModule.executeAdOperation(_webViewBridgeInvokerMock, showOperationState);
 
 		Mockito.verify((_showListenerMock), timeout(maxWaitTime).times(1)).onUnityAdsShowFailure(placementId, UnityAds.UnityAdsShowError.INTERNAL_ERROR, "[UnityAds] Show Invocation Timeout");
-		Mockito.verify(_sdkMetricSender, timeout(maxWaitTime).times(1)).sendSDKMetricEvent(eq(SDKMetricEvents.native_show_callback_timeout));
+		Mockito.verify(_sdkMetrics, timeout(maxWaitTime).times(1)).sendMetricWithInitState(metricsCaptor.capture());
+		final Metric capturedMetric = metricsCaptor.getValue();
+		Assert.assertEquals(desiredMetric.getName(), capturedMetric.getName());
 	}
 
 	@Test

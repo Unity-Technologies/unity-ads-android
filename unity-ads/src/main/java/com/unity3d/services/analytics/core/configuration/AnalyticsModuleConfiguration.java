@@ -2,6 +2,7 @@ package com.unity3d.services.analytics.core.configuration;
 
 import com.unity3d.services.analytics.core.api.Analytics;
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.configuration.IModuleConfiguration;
 
 public class AnalyticsModuleConfiguration implements IModuleConfiguration {
@@ -26,7 +27,7 @@ public class AnalyticsModuleConfiguration implements IModuleConfiguration {
     }
 
     @Override
-    public boolean initErrorState(Configuration configuration, String state, String message) {
+    public boolean initErrorState(Configuration configuration, ErrorState state, String message) {
         return true;
     }
 

@@ -1,26 +1,37 @@
 package com.unity3d.ads.test.legacy;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import androidx.test.platform.app.InstrumentationRegistry;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.test.TestUtilities;
 import com.unity3d.services.core.api.DownloadLatestWebViewStatus;
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.ErrorState;
+import com.unity3d.services.core.configuration.Experiments;
+import com.unity3d.services.core.configuration.ExperimentsReader;
 import com.unity3d.services.core.configuration.InitializeThread;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.ads.test.TestUtilities;
 import com.unity3d.services.core.webview.WebView;
 import com.unity3d.services.core.webview.WebViewApp;
 
-import org.json.JSONException;
 import org.hamcrest.core.Is;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
@@ -36,14 +47,6 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 
 @RunWith(AndroidJUnit4.class)
 public class InitializeThreadTest {
@@ -184,6 +187,36 @@ public class InitializeThreadTest {
 	@Test
 	public void testInitializeStateConfig() {
 		Configuration initConfig = new Configuration(SdkProperties.getConfigUrl());
+		InitializeThread.InitializeStateConfig state = new InitializeThread.InitializeStateConfig(initConfig);
+		Object nextState = state.execute();
+
+		assertTrue("Init state config test: next state is not load cache", nextState instanceof InitializeThread.InitializeStateLoadCache);
+
+		Configuration config = ((InitializeThread.InitializeStateLoadCache)nextState).getConfiguration();
+
+		assertEquals("Init state config test: config webview url does not match url in testconfig.json", config.getWebViewUrl(), TEST_WEBVIEW_URL);
+		assertEquals("Init state config test: config webview hash does not match hash in testconfig.json", config.getWebViewHash(), _testConfigHash);
+	}
+
+	@Test
+	public void testInitializeStateConfigWithNwc() throws JSONException {
+		ExperimentsReader mockExperimentReader = Mockito.mock(ExperimentsReader.class);
+		Mockito.when(mockExperimentReader.getCurrentlyActiveExperiments()).thenReturn(new Experiments(new JSONObject("{\"nwc\": true}")));
+		Configuration initConfig = new Configuration(SdkProperties.getConfigUrl(), mockExperimentReader);
+		InitializeThread.InitializeStateConfig state = new InitializeThread.InitializeStateConfig(initConfig);
+		Object nextState = state.execute();
+
+		assertTrue("Init state config test: next state is not create with remote", nextState instanceof InitializeThread.InitializeStateCreateWithRemote);
+
+		Configuration config = ((InitializeThread.InitializeStateCreateWithRemote)nextState).getConfiguration();
+
+		assertEquals("Init state config test: config webview url does not match url in testconfig.json", config.getWebViewUrl(), TEST_WEBVIEW_URL);
+		assertEquals("Init state config test: config webview hash does not match hash in testconfig.json", config.getWebViewHash(), _testConfigHash);
+	}
+
+	@Test
+	public void testInitializeStateConfigWithWac() throws JSONException {
+		Configuration initConfig = new Configuration(SdkProperties.getConfigUrl(), new Experiments(new JSONObject("{\"wac\": true}")));
 		InitializeThread.InitializeStateConfig state = new InitializeThread.InitializeStateConfig(initConfig);
 		Object nextState = state.execute();
 
@@ -396,7 +429,7 @@ public class InitializeThreadTest {
 		Exception exception = new Exception();
 		Configuration config = new Configuration();
 
-		InitializeThread.InitializeStateError state = new InitializeThread.InitializeStateError("create", exception, config);
+		InitializeThread.InitializeStateError state = new InitializeThread.InitializeStateError(ErrorState.ResetWebApp, exception, config);
 		Object nextState = state.execute();
 		InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
@@ -414,7 +447,7 @@ public class InitializeThreadTest {
 		Exception exception = new Exception("Web view failed to initialize");
 		Configuration config = new Configuration();
 
-		InitializeThread.InitializeStateError state = new InitializeThread.InitializeStateError("create webapp", exception, config);
+		InitializeThread.InitializeStateError state = new InitializeThread.InitializeStateError(ErrorState.CreateWebApp, exception, config);
 		Object nextState = state.execute();
 		InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
@@ -432,7 +465,7 @@ public class InitializeThreadTest {
 		Exception exception = new Exception("Unity Ads config server resolves to loopback address (due to ad blocker?)");
 		Configuration config = new Configuration();
 
-		InitializeThread.InitializeStateError state = new InitializeThread.InitializeStateError("init modules", exception, config);
+		InitializeThread.InitializeStateError state = new InitializeThread.InitializeStateError(ErrorState.InitModules, exception, config);
 		Object nextState = state.execute();
 		InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 

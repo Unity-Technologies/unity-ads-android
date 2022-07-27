@@ -7,21 +7,23 @@ import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class DeviceInfoReader implements IDeviceInfoReader {
+public class DeviceInfoReaderExtended implements IDeviceInfoReader {
+	private final IDeviceInfoReader _deviceInfoReader;
+
+	public DeviceInfoReaderExtended(IDeviceInfoReader deviceInfoReader) {
+		_deviceInfoReader = deviceInfoReader;
+	}
 
 	@Override
 	public Map<String, Object> getDeviceInfoData() {
-		Map<String, Object> deviceInfoData = new HashMap<>();
+		Map<String, Object> deviceInfoData = _deviceInfoReader.getDeviceInfoData();
 		deviceInfoData.put("bundleId", ClientProperties.getAppName());
 		deviceInfoData.put("encrypted", ClientProperties.isAppDebuggable());
 		deviceInfoData.put("rooted", Device.isRooted());
-		deviceInfoData.put("platform", "android");
-		deviceInfoData.put("sdkVersion", SdkProperties.getVersionCode());
 		deviceInfoData.put("osVersion", Device.getOsVersion());
 		deviceInfoData.put("deviceModel", Device.getModel());
 		deviceInfoData.put("language", Locale.getDefault().toString());
@@ -32,7 +34,6 @@ public class DeviceInfoReader implements IDeviceInfoReader {
 		deviceInfoData.put("screenDensity", Device.getScreenDensity());
 		deviceInfoData.put("screenSize",  Device.getScreenLayout());
 		deviceInfoData.put("limitAdTracking",  Device.isLimitAdTrackingEnabled());
-		deviceInfoData.put("idfi", Device.getIdfi());
 		deviceInfoData.put("networkOperator", Device.getNetworkOperator());
 		deviceInfoData.put("volume", Device.getStreamVolume(1));
 		deviceInfoData.put("deviceFreeSpace", Device.getFreeSpace(ClientProperties.getApplicationContext().getCacheDir()));
@@ -72,8 +73,6 @@ public class DeviceInfoReader implements IDeviceInfoReader {
 		deviceInfoData.put("networkMetered", Device.getNetworkMetered());
 
 		// Misc
-		deviceInfoData.put("ts", System.currentTimeMillis());
-		deviceInfoData.put("gameId", ClientProperties.getGameId());
 		deviceInfoData.put("test", SdkProperties.isTestMode());
 		deviceInfoData.put("callType", "token");
 		return deviceInfoData;

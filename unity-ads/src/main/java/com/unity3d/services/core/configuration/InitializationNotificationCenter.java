@@ -56,7 +56,7 @@ public class InitializationNotificationCenter implements IInitializationNotifica
 		}
 	}
 
-	public void triggerOnSdkInitializationFailed(String message, final int code) {
+	public void triggerOnSdkInitializationFailed(String message, final ErrorState errorState, final int code) {
 		synchronized (_sdkListeners) {
 			final String exceptionMessage = "SDK Failed to Initialize due to " + message;
 			DeviceLog.error(exceptionMessage);
@@ -67,7 +67,7 @@ public class InitializationNotificationCenter implements IInitializationNotifica
 					Utilities.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							entry.getValue().onSdkInitializationFailed(exceptionMessage, code);
+							entry.getValue().onSdkInitializationFailed(exceptionMessage, errorState, code);
 						}
 					});
 				} else {

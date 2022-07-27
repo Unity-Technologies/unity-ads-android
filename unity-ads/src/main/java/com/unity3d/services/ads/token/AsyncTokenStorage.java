@@ -1,6 +1,7 @@
 package com.unity3d.services.ads.token;
 
-import static com.unity3d.services.core.device.TokenType.*;
+import static com.unity3d.services.core.device.TokenType.TOKEN_NATIVE;
+import static com.unity3d.services.core.device.TokenType.TOKEN_REMOTE;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -8,6 +9,7 @@ import android.os.Looper;
 import com.unity3d.ads.IUnityAdsTokenListener;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.ConfigurationReader;
+import com.unity3d.services.core.configuration.PrivacyConfigStorage;
 import com.unity3d.services.core.device.TokenType;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.log.DeviceLog;
@@ -17,9 +19,11 @@ import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.metrics.TSIMetric;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AsyncTokenStorage {
@@ -63,7 +67,12 @@ public class AsyncTokenStorage {
 		}
 
 		if (_nativeTokenGenerator == null) {
-			_nativeTokenGenerator = new NativeTokenGenerator(Executors.newSingleThreadExecutor(), new DeviceInfoReaderBuilder(new ConfigurationReader()).build());
+			DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance());
+			ExecutorService executorService = Executors.newSingleThreadExecutor();
+			_nativeTokenGenerator = new NativeTokenGenerator(executorService, deviceInfoReaderBuilder);
+			if (configuration.getExperiments().shouldNativeTokenAwaitPrivacy()) {
+				_nativeTokenGenerator = new NativeTokenGeneratorWithPrivacyAwait(executorService, _nativeTokenGenerator, configuration.getPrivacyRequestWaitTimeout());
+			}
 		}
 
 		ArrayList<TokenListenerState> tempList = new ArrayList<>(_tokenListeners);
@@ -153,7 +162,7 @@ public class AsyncTokenStorage {
 		} else {
 			String token = TokenStorage.getToken();
 
-			if (token == null) {
+			if (token == null || token.isEmpty()) {
 				return;
 			}
 
@@ -195,13 +204,15 @@ public class AsyncTokenStorage {
 	}
 
 	private void sendRemoteTokenMetrics(String token) {
-		if (token == null) {
+		if (token == null || token.isEmpty()) {
 			SDKMetrics.getInstance().sendMetric(TSIMetric.newAsyncTokenNull(getMetricTags()));
+		} else {
+			SDKMetrics.getInstance().sendMetric(TSIMetric.newAsyncTokenAvailable(getMetricTags()));
 		}
 	}
 
 	private Map<String, String> getMetricTags() {
-		Map<String, String> tags = _configuration.getMetricTags();
+		Map<String, String> tags = new HashMap<>();
 		tags.put("state", _initStatusReader.getInitializationStateString(SdkProperties.getCurrentInitializationState()));
 		return tags;
 	}

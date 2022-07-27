@@ -38,7 +38,6 @@ public class WebView extends android.webkit.WebView {
 			}
 		}
 
-		settings.setAppCacheEnabled(false);
 		settings.setBlockNetworkImage(false);
 		settings.setBlockNetworkLoads(false);
 		settings.setBuiltInZoomControls(false);

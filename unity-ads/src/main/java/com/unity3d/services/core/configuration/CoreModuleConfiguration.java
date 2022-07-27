@@ -11,8 +11,8 @@ import com.unity3d.services.core.device.VolumeChange;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.WebRequestThread;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 
 public class CoreModuleConfiguration implements IModuleConfiguration {
 	public Class[] getWebAppApiClassList() {
@@ -38,7 +38,6 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 
 	public boolean resetState(Configuration configuration) {
 		SDKMetrics.setConfiguration(configuration);
-		InitializeEventsMetricSender.getInstance().setMetricTags(configuration.getMetricTags());
 		BroadcastMonitor.removeAllBroadcastListeners();
 		CacheThread.cancel();
 		WebRequestThread.cancel();
@@ -54,21 +53,19 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 
 	public boolean initModuleState(Configuration configuration) {
 		SDKMetrics.setConfiguration(configuration);
-		InitializeEventsMetricSender.getInstance().setMetricTags(configuration.getMetricTags());
 		return true;
 	}
 
-	public boolean initErrorState(Configuration configuration, String state, String errorMessage) {
+	public boolean initErrorState(Configuration configuration, ErrorState state, String errorMessage) {
 		SDKMetrics.setConfiguration(configuration);
-		InitializeEventsMetricSender.getInstance().setMetricTags(configuration.getMetricTags());
 		final String message;
 		final UnityAds.UnityAdsInitializationError error;
 		switch (state) {
-			case InitializeThread.InitializeStateCreate.InitializeStateCreateStateName:
+			case CreateWebApp:
 				message = errorMessage;
 				error = UnityAds.UnityAdsInitializationError.INTERNAL_ERROR;
 				break;
-			case InitializeThread.InitializeStateInitModules.InitializeStateInitModuleStateName:
+			case InitModules:
 				message = errorMessage;
 				error = UnityAds.UnityAdsInitializationError.AD_BLOCKER_DETECTED;
 				break;
@@ -77,7 +74,7 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 				error = UnityAds.UnityAdsInitializationError.INTERNAL_ERROR;
 		}
     
-		InitializationNotificationCenter.getInstance().triggerOnSdkInitializationFailed(message, 0);
+		InitializationNotificationCenter.getInstance().triggerOnSdkInitializationFailed(message, state, 0);
 
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
@@ -90,7 +87,6 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 
 	public boolean initCompleteState(Configuration configuration) {
 		SDKMetrics.setConfiguration(configuration);
-		InitializeEventsMetricSender.getInstance().setMetricTags(configuration.getMetricTags());
 		InitializationNotificationCenter.getInstance().triggerOnSdkInitialized();
 
 		Utilities.runOnUiThread(new Runnable() {

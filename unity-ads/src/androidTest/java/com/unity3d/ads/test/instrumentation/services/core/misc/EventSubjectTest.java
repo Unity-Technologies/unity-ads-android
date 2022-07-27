@@ -33,32 +33,31 @@ public class EventSubjectTest<T> {
 	@Mock
 	IEventListener mockEventListener;
 
-	private String TEST_ACTIVITY_NAME = "com.test.activity";
-	private Integer TEST_DURATION_MS = 1000;
+	private final Integer TEST_DURATION_MS = 1000;
 
 	@Before
 	public void setup() {
-		Mockito.when(mockTimerFactory.createTimer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt(), Mockito.<IIntervalTimerListener>any())).thenReturn(mockIntervalTimer);
+		Mockito.when(mockTimerFactory.createTimer(Mockito.anyInt(), Mockito.anyInt(), Mockito.<IIntervalTimerListener>any())).thenReturn(mockIntervalTimer);
 	}
 
 	@Test
 	public void testSubscribeWithEmptyEventQueue() {
-		EventSubject<Integer> eventSubject = new EventSubject(TEST_ACTIVITY_NAME, new ArrayDeque<Integer>(), TEST_DURATION_MS, mockTimerFactory);
+		EventSubject<Integer> eventSubject = new EventSubject(new ArrayDeque<Integer>(), TEST_DURATION_MS, mockTimerFactory);
 		eventSubject.subscribe(mockEventListener);
 		Mockito.verify(mockIntervalTimer, times(0)).start(Mockito.<ScheduledExecutorService>any());
 	}
 
 	@Test
 	public void testSubscribeWithNullIntervalTimer() {
-		Mockito.when(mockTimerFactory.createTimer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt(), Mockito.<IIntervalTimerListener>any())).thenReturn(null);
-		EventSubject<Integer> eventSubject = new EventSubject(TEST_ACTIVITY_NAME, new ArrayDeque<Integer>(), TEST_DURATION_MS, mockTimerFactory);
+		Mockito.when(mockTimerFactory.createTimer(Mockito.anyInt(), Mockito.anyInt(), Mockito.<IIntervalTimerListener>any())).thenReturn(null);
+		EventSubject<Integer> eventSubject = new EventSubject(new ArrayDeque<Integer>(), TEST_DURATION_MS, mockTimerFactory);
 		eventSubject.subscribe(mockEventListener);
 		Mockito.verify(mockIntervalTimer, times(0)).start(Mockito.<ScheduledExecutorService>any());
 	}
 
 	@Test
 	public void testSubscribeWithNullEventListener() {
-		EventSubject<Integer> eventSubject = new EventSubject(TEST_ACTIVITY_NAME, new ArrayDeque<>(Arrays.asList(0, 1)), TEST_DURATION_MS, mockTimerFactory);
+		EventSubject<Integer> eventSubject = new EventSubject(new ArrayDeque<>(Arrays.asList(0, 1)), TEST_DURATION_MS, mockTimerFactory);
 		eventSubject.subscribe(null);
 		Mockito.verify(mockIntervalTimer, times(0)).start(Mockito.<ScheduledExecutorService>any());
 	}
@@ -67,7 +66,7 @@ public class EventSubjectTest<T> {
 	public void testSubscribeAndEventQueueIsEmpty() {
 		final Queue<Integer> testQueue = new ArrayDeque<>(Arrays.asList(0, 1));
 
-		EventSubject<Integer> eventSubject = new EventSubject(TEST_ACTIVITY_NAME, testQueue, TEST_DURATION_MS, mockTimerFactory);
+		EventSubject<Integer> eventSubject = new EventSubject(testQueue, TEST_DURATION_MS, mockTimerFactory);
    		eventSubject.subscribe(mockEventListener);
 
 		int originalQueueSize = testQueue.size();
@@ -82,7 +81,7 @@ public class EventSubjectTest<T> {
 
 	@Test
 	public void testUnsubscribe() {
-		EventSubject<Integer> eventSubject = new EventSubject(TEST_ACTIVITY_NAME, new ArrayDeque<Integer>(), TEST_DURATION_MS, mockTimerFactory);
+		EventSubject<Integer> eventSubject = new EventSubject(new ArrayDeque<Integer>(), TEST_DURATION_MS, mockTimerFactory);
 		eventSubject.unsubscribe();
 		Mockito.verify(mockIntervalTimer, times(1)).kill();
 	}
