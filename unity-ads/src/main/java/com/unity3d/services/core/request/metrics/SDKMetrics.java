@@ -42,7 +42,7 @@ public final class SDKMetrics {
 		}
 
 		if (_batchedSender == null) {
-			_batchedSender = new MetricSenderWithBatch(_instance);
+			_batchedSender = new MetricSenderWithBatch(_instance, new InitializationStatusReader());
 		} else {
 			_batchedSender.updateOriginal(_instance);
 		}
@@ -57,7 +57,7 @@ public final class SDKMetrics {
 		}
 
 		if (_batchedSender == null) {
-			_batchedSender = new MetricSenderWithBatch(_instance);
+			_batchedSender = new MetricSenderWithBatch(_instance, new InitializationStatusReader());
 		}
 
 		return _batchedSender;

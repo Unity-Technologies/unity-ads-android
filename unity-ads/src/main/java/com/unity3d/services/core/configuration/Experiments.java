@@ -2,21 +2,16 @@ package com.unity3d.services.core.configuration;
 
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
-public class Experiments {
+public class Experiments extends ExperimentsBase {
 
-	private static final String TSI_TAG_INIT_ENABLED = "tsi";
-	private static final String TSI_TAG_FORWARD_FEATURE_FLAGS = "fff";
-	private static final String TSI_TAG_UPDATE_PII_FIELDS  = "tsi_upii";
-	private static final String TSI_TAG_NATIVE_TOKEN = "tsi_nt";
-	private static final String TSI_TAG_PRIVACY_REQUEST = "tsi_prr";
-	private static final String TSI_TAG_NATIVE_TOKEN_AWAIT_PRIVACY = "tsi_prw";
-	private static final String EXP_TAG_NATIVE_WEBVIEW_CACHE = "nwc";
-	private static final String EXP_TAG_WEB_AD_ASSET_CACHING = "wac";
-	private static final String EXP_TAG_NEW_LIFECYCLE_TIMER = "nlt";
+	private static final Set<String> NEXT_SESSION_FLAGS = new HashSet<>(Arrays.asList("tsi", "tsi_upii", "tsi_p", "tsi_nt", "tsi_prr", "tsi_prw"));
 
 	private final JSONObject _experimentData;
 
@@ -32,43 +27,52 @@ public class Experiments {
 		}
 	}
 
+	@Override
 	public boolean isTwoStageInitializationEnabled() {
 		return _experimentData.optBoolean(TSI_TAG_INIT_ENABLED, false);
 	}
 
+	@Override
 	public boolean isForwardExperimentsToWebViewEnabled() {
 		return _experimentData.optBoolean(TSI_TAG_FORWARD_FEATURE_FLAGS, false);
 	}
 
+	@Override
 	public boolean isNativeTokenEnabled() {
 		return _experimentData.optBoolean(TSI_TAG_NATIVE_TOKEN, false);
 	}
 
+	@Override
 	public boolean isUpdatePiiFields() {
 		return _experimentData.optBoolean(TSI_TAG_UPDATE_PII_FIELDS, false);
 	}
 
+	@Override
 	public boolean isPrivacyRequestEnabled() {
 		return _experimentData.optBoolean(TSI_TAG_PRIVACY_REQUEST, false);
 	}
 
+	@Override
 	public boolean shouldNativeTokenAwaitPrivacy() {
 		return _experimentData.optBoolean(TSI_TAG_NATIVE_TOKEN_AWAIT_PRIVACY, false);
 	}
 
+	@Override
 	public boolean isNativeWebViewCacheEnabled() {
 		return _experimentData.optBoolean(EXP_TAG_NATIVE_WEBVIEW_CACHE, false);
 	}
 
+	@Override
 	public boolean isWebAssetAdCaching() {
 		return _experimentData.optBoolean(EXP_TAG_WEB_AD_ASSET_CACHING, false);
 	}
 
+	@Override
 	public boolean isNewLifecycleTimer() {
 		return _experimentData.optBoolean(EXP_TAG_NEW_LIFECYCLE_TIMER, false);
 	}
 
-	public JSONObject getExperimentData() {
+	public JSONObject getExperimentsAsJson() {
 		return _experimentData;
 	}
 
@@ -79,6 +83,32 @@ public class Experiments {
 			map.put(key, String.valueOf(_experimentData.opt(key)));
 		}
 		return map;
+	}
+
+	@Override
+	public JSONObject getNextSessionExperiments() {
+		if (_experimentData == null) return null;
+		Map<String, String> nextSessionFlags = new HashMap<>();
+		for (Iterator<String> it = _experimentData.keys(); it.hasNext();) {
+			String currentKey = it.next();
+			if (NEXT_SESSION_FLAGS.contains(currentKey)) {
+				nextSessionFlags.put(currentKey, String.valueOf(_experimentData.optBoolean(currentKey)));
+			}
+		}
+		return new JSONObject(nextSessionFlags);
+	}
+
+	@Override
+	public JSONObject getCurrentSessionExperiments() {
+		if (_experimentData == null) return null;
+		Map<String, String> currentSessionFlags = new HashMap<>();
+		for (Iterator<String> it = _experimentData.keys(); it.hasNext();) {
+			String currentKey = it.next();
+			if (!NEXT_SESSION_FLAGS.contains(currentKey)) {
+				currentSessionFlags.put(currentKey, String.valueOf(_experimentData.optBoolean(currentKey)));
+			}
+		}
+		return new JSONObject(currentSessionFlags);
 	}
 
 }

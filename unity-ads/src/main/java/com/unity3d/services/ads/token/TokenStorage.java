@@ -1,6 +1,5 @@
 package com.unity3d.services.ads.token;
 
-import static com.unity3d.services.core.device.TokenType.TOKEN_REMOTE;
 
 import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.configuration.InitializeEventsMetricSender;
@@ -15,7 +14,6 @@ import org.json.JSONException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class TokenStorage {
 	private static final Object _lock = new Object();
@@ -40,7 +38,7 @@ public class TokenStorage {
 
 		if (shouldTriggerEvent) {
 			triggerTokenAvailable(false);
-			AsyncTokenStorage.getInstance().onTokenAvailable(TOKEN_REMOTE);
+			AsyncTokenStorage.getInstance().onTokenAvailable();
 		}
 	}
 
@@ -61,7 +59,7 @@ public class TokenStorage {
 
 		if (shouldTriggerEvent) {
 			triggerTokenAvailable(false);
-			AsyncTokenStorage.getInstance().onTokenAvailable(TOKEN_REMOTE);
+			AsyncTokenStorage.getInstance().onTokenAvailable();
 		}
 	}
 
@@ -115,8 +113,8 @@ public class TokenStorage {
 		}
 
 		if (shouldTriggerEvent) {
-			AsyncTokenStorage.getInstance().onTokenAvailable(TOKEN_REMOTE);
 			triggerTokenAvailable(true);
+			AsyncTokenStorage.getInstance().onTokenAvailable();
 		}
 	}
 

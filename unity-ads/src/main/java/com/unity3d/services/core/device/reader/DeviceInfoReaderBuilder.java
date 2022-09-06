@@ -2,6 +2,7 @@ package com.unity3d.services.core.device.reader;
 
 import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.configuration.Experiments;
+import com.unity3d.services.core.configuration.IExperiments;
 import com.unity3d.services.core.configuration.InitRequestType;
 import com.unity3d.services.core.configuration.PrivacyConfigStorage;
 import com.unity3d.services.core.device.Storage;
@@ -50,7 +51,7 @@ public class DeviceInfoReaderBuilder {
 		return new DeviceInfoReaderWithRequestType(new MinimalDeviceInfoReader(), initRequestType);
 	}
 
-	private Experiments getCurrentExperiments() {
+	private IExperiments getCurrentExperiments() {
 		if (_configurationReader == null || _configurationReader.getCurrentConfiguration() == null) return new Experiments();
 		return _configurationReader.getCurrentConfiguration().getExperiments();
 	}

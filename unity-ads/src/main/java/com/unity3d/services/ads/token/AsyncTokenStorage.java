@@ -15,6 +15,7 @@ import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.InitializationStatusReader;
 import com.unity3d.services.core.properties.SdkProperties;
+import com.unity3d.services.core.request.metrics.ISDKMetrics;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.metrics.TSIMetric;
 
@@ -34,6 +35,7 @@ public class AsyncTokenStorage {
 	private Configuration _configuration = new Configuration();
 	private INativeTokenGenerator _nativeTokenGenerator;
 	private final InitializationStatusReader  _initStatusReader = new InitializationStatusReader();
+	private final ISDKMetrics _sdkMetrics;
 
 	private static AsyncTokenStorage _instance;
 
@@ -41,7 +43,8 @@ public class AsyncTokenStorage {
 		if (_instance == null) {
 			_instance = new AsyncTokenStorage(
 				null,
-				new Handler(Looper.getMainLooper()));
+				new Handler(Looper.getMainLooper()),
+				SDKMetrics.getInstance());
 		}
 		return _instance;
 	}
@@ -51,11 +54,13 @@ public class AsyncTokenStorage {
 		public IUnityAdsTokenListener listener;
 		public Runnable runnable;
 		public boolean invoked;
+		public TokenType tokenType;
 	}
 
-	public AsyncTokenStorage(INativeTokenGenerator nativeTokenGenerator, Handler handler) {
+	public AsyncTokenStorage(INativeTokenGenerator nativeTokenGenerator, Handler handler, ISDKMetrics sdkMetrics) {
 		_handler = handler;
 		_nativeTokenGenerator = nativeTokenGenerator;
+		_sdkMetrics = sdkMetrics;
 	}
 
 	public synchronized void setConfiguration(Configuration configuration) {
@@ -81,14 +86,14 @@ public class AsyncTokenStorage {
 		}
 	}
 
-	public synchronized void onTokenAvailable(TokenType type) {
+	public synchronized void onTokenAvailable() {
 		_tokenAvailable = true;
 
 		if (!_configurationWasSet) {
 			return;
 		}
 
-		notifyListenersTokenReady(type);
+		notifyListenersTokenReady();
 	}
 
 	public synchronized void getToken(IUnityAdsTokenListener listener) {
@@ -116,10 +121,11 @@ public class AsyncTokenStorage {
 	private synchronized AsyncTokenStorage.TokenListenerState addTimeoutHandler(IUnityAdsTokenListener listener) {
 		final AsyncTokenStorage.TokenListenerState state = new AsyncTokenStorage.TokenListenerState();
 		state.listener = listener;
+		state.tokenType = TOKEN_REMOTE;
 		state.runnable = new Runnable() {
 			@Override
 			public void run() {
-				notifyTokenReady(state, null, TOKEN_NATIVE);
+				notifyTokenReady(state, null);
 			}
 		};
 
@@ -129,7 +135,7 @@ public class AsyncTokenStorage {
 		return state;
 	}
 
-	private synchronized void notifyListenersTokenReady(TokenType type) {
+	private synchronized void notifyListenersTokenReady() {
 		while(!_tokenListeners.isEmpty()) {
 			String token = TokenStorage.getToken();
 
@@ -137,7 +143,7 @@ public class AsyncTokenStorage {
 				break;
 			}
 
-			notifyTokenReady(_tokenListeners.get(0), token, type);
+			notifyTokenReady(_tokenListeners.get(0), token);
 		}
 	}
 
@@ -148,29 +154,31 @@ public class AsyncTokenStorage {
 		state.invoked = true;
 
 		if (!_tokenAvailable && _configuration.getExperiments().isNativeTokenEnabled()) {
+			state.tokenType = TOKEN_NATIVE;
 			_nativeTokenGenerator.generateToken(new INativeTokenGeneratorListener() {
 				@Override
 				public void onReady(final String token) {
 					_handler.post(new Runnable() {
 						@Override
 						public void run() {
-							notifyTokenReady(state, token, TOKEN_NATIVE);
+							notifyTokenReady(state, token);
 						}
 					});
 				}
 			});
 		} else {
+			state.tokenType = TOKEN_REMOTE;
 			String token = TokenStorage.getToken();
 
 			if (token == null || token.isEmpty()) {
 				return;
 			}
 
-			notifyTokenReady(state, token, TOKEN_REMOTE);
+			notifyTokenReady(state, token);
 		}
 	}
 
-	private synchronized void notifyTokenReady(AsyncTokenStorage.TokenListenerState state, String token, TokenType type) {
+	private synchronized void notifyTokenReady(AsyncTokenStorage.TokenListenerState state, String token) {
 		if (_tokenListeners.remove(state)) {
 			state.listener.onUnityAdsTokenReady(token);
 			try {
@@ -179,7 +187,7 @@ public class AsyncTokenStorage {
 				DeviceLog.exception("Failed to remove callback from a handler", ex);
 			}
 		}
-		sendTokenMetrics(token, type);
+		sendTokenMetrics(token, state.tokenType);
 	}
 
 	private void sendTokenMetrics(String token, TokenType type) {
@@ -196,18 +204,20 @@ public class AsyncTokenStorage {
 	}
 
 	private void sendNativeTokenMetrics(String token) {
+		if (_sdkMetrics == null) return;
 		if (token == null) {
-			SDKMetrics.getInstance().sendMetric(TSIMetric.newNativeGeneratedTokenNull(getMetricTags()));
+			_sdkMetrics.sendMetric(TSIMetric.newNativeGeneratedTokenNull(getMetricTags()));
 		} else {
-			SDKMetrics.getInstance().sendMetric(TSIMetric.newNativeGeneratedTokenAvailable(getMetricTags()));
+			_sdkMetrics.sendMetric(TSIMetric.newNativeGeneratedTokenAvailable(getMetricTags()));
 		}
 	}
 
 	private void sendRemoteTokenMetrics(String token) {
+		if (_sdkMetrics == null) return;
 		if (token == null || token.isEmpty()) {
-			SDKMetrics.getInstance().sendMetric(TSIMetric.newAsyncTokenNull(getMetricTags()));
+			_sdkMetrics.sendMetric(TSIMetric.newAsyncTokenNull(getMetricTags()));
 		} else {
-			SDKMetrics.getInstance().sendMetric(TSIMetric.newAsyncTokenAvailable(getMetricTags()));
+			_sdkMetrics.sendMetric(TSIMetric.newAsyncTokenAvailable(getMetricTags()));
 		}
 	}
 

@@ -93,6 +93,20 @@ public class ExperimentsTest {
 		validateDefaultExperiments(experiments);
 	}
 
+	@Test
+	public void testExperimentsGetNextSessionExperiments() throws JSONException {
+		JSONObject experimentJson = new JSONObject("{\"tsi\": true, \"fff\":false}");
+		Experiments experiments = new Experiments(experimentJson);
+		Assert.assertTrue(experiments.getNextSessionExperiments().getBoolean("tsi"));
+	}
+
+	@Test
+	public void testExperimentsGetCurrentSessionExperiments() throws JSONException {
+		JSONObject experimentJson = new JSONObject("{\"tsi\": true, \"fff\":true}");
+		Experiments experiments = new Experiments(experimentJson);
+		Assert.assertTrue(experiments.getCurrentSessionExperiments().getBoolean("fff"));
+	}
+
 	private void validateDefaultExperiments(Experiments experiments) {
 		Assert.assertFalse(experiments.shouldNativeTokenAwaitPrivacy());
 		Assert.assertFalse(experiments.isTwoStageInitializationEnabled());

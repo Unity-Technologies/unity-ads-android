@@ -31,7 +31,7 @@ public class ConfigurationRequestFactory {
 		String configBaseUrl = _configuration.getConfigUrl();
 		if (configBaseUrl == null) throw new MalformedURLException("Base URL is null");
 		StringBuilder urlBuilder = new StringBuilder(configBaseUrl);
-		Experiments experiments = _configuration.getExperiments();
+		IExperiments experiments = _configuration.getExperiments();
 		WebRequest webRequest;
 		if (experiments != null && experiments.isTwoStageInitializationEnabled()) {
 			Map<String, List<String>> headers = new HashMap<>();

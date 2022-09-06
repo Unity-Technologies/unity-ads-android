@@ -16,7 +16,7 @@ public class WebViewUrlBuilder {
 		queryString += buildQueryParam("origin", configuration.getWebViewUrl());
 		queryString += buildQueryParam("version", configuration.getWebViewVersion());
 		if (configuration.getExperiments() != null && configuration.getExperiments().isForwardExperimentsToWebViewEnabled()) {
-			queryString += buildQueryParam("experiments", configuration.getExperiments().getExperimentData().toString());
+			queryString += buildQueryParam("experiments", configuration.getExperiments().getExperimentsAsJson().toString());
 		}
 		queryString += buildQueryParam("isNativeCollectingMetrics", String.valueOf(SDKMetrics.getInstance().areMetricsEnabledForCurrentSession()));
 

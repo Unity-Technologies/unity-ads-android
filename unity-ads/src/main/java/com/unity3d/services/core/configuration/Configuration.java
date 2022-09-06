@@ -81,7 +81,7 @@ public class Configuration {
 		_experimentReader = experimentsReader;
 	}
 
-	public Configuration(String configUrl, Experiments experiments) {
+	public Configuration(String configUrl, IExperiments experiments) {
 		this();
 		_configUrl = configUrl;
 		DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance());
@@ -149,7 +149,7 @@ public class Configuration {
 
 	public String getUnifiedAuctionToken() { return _unifiedAuctionToken; }
 
-	public Experiments getExperiments() {
+	public IExperiments getExperiments() {
 		return _experimentReader.getCurrentlyActiveExperiments();
 	}
 
@@ -252,10 +252,16 @@ public class Configuration {
 		_tokenTimeout = configData.optInt("tto", 5000);
 		_privacyRequestWaitTimeout = configData.optInt("prwto", 3000);
 		_src = configData.optString("src", null);
-		if (isRemoteConfig) {
-			_experimentReader.updateRemoteExperiments(new Experiments(configData.optJSONObject("exp")));
+		IExperiments experiments;
+		if (configData.has("expo")) {
+			experiments = new ExperimentObjects(configData.optJSONObject("expo"));
 		} else {
-			_experimentReader.updateLocalExperiments(new Experiments(configData.optJSONObject("exp")));
+			experiments = new Experiments(configData.optJSONObject("exp"));
+		}
+		if (isRemoteConfig) {
+			_experimentReader.updateRemoteExperiments(experiments);
+		} else {
+			_experimentReader.updateLocalExperiments(experiments);
 		}
 	}
 

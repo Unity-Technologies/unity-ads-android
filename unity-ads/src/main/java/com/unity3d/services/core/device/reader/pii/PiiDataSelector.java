@@ -3,7 +3,7 @@ package com.unity3d.services.core.device.reader.pii;
 import static com.unity3d.services.core.device.reader.JsonStorageKeyNames.UNIFIED_CONFIG_PII_KEY;
 import static com.unity3d.services.core.device.reader.JsonStorageKeyNames.USER_NON_BEHAVIORAL_KEY;
 
-import com.unity3d.services.core.configuration.Experiments;
+import com.unity3d.services.core.configuration.IExperiments;
 import com.unity3d.services.core.misc.IJsonStorageReader;
 import com.unity3d.services.core.misc.Utilities;
 
@@ -15,9 +15,9 @@ import java.util.Map;
 public class PiiDataSelector {
 	private final PiiTrackingStatusReader _piiTrackingStatusReader;
 	private final IJsonStorageReader _jsonStorageReader;
-	private final Experiments _experiments;
+	private final IExperiments _experiments;
 
-	public PiiDataSelector(PiiTrackingStatusReader piiTrackingStatusReader, IJsonStorageReader jsonStorageReader, Experiments experiments) {
+	public PiiDataSelector(PiiTrackingStatusReader piiTrackingStatusReader, IJsonStorageReader jsonStorageReader, IExperiments experiments) {
 		_piiTrackingStatusReader = piiTrackingStatusReader;
 		_jsonStorageReader = jsonStorageReader;
 		_experiments = experiments;

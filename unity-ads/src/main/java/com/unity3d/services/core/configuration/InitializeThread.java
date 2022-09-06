@@ -29,7 +29,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class InitializeThread extends Thread  {
@@ -134,7 +134,11 @@ public class InitializeThread extends Thread  {
 	private void handleStateEndMetrics(InitializeState nextState) {
 		if (_stateName == null || isRetryState(nextState) || _stateName.equals("native_retry_state")) return;
 		long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - _stateStartTimestamp);
-		SDKMetrics.getInstance().sendMetric(new Metric(_stateName, duration, null));
+		SDKMetrics.getInstance().sendMetric(new Metric(_stateName, duration, getMetricTagsForState()));
+	}
+
+	private Map<String, String> getMetricTagsForState() {
+		return InitializeEventsMetricSender.getInstance().getRetryTags();
 	}
 
 	private String getMetricNameForState(InitializeState state) {

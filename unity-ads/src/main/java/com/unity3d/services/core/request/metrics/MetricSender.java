@@ -1,11 +1,11 @@
 package com.unity3d.services.core.request.metrics;
 
+
 import android.text.TextUtils;
 
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.InitializationStatusReader;
-import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.WebRequest;
 
 import org.json.JSONObject;
@@ -17,19 +17,18 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MetricSender implements ISDKMetrics {
+public class MetricSender extends MetricSenderBase {
 
 	private final MetricCommonTags _commonTags;
 	private final String _metricEndpoint;
 	private final String _metricSampleRate;
 	private final ExecutorService _executorService;
-	private final InitializationStatusReader _initStatusReader;
 
 	public MetricSender(Configuration configuration, InitializationStatusReader initializationStatusReader) {
+		super(initializationStatusReader);
 		_metricEndpoint = configuration.getMetricsUrl();
 		_executorService = Executors.newSingleThreadExecutor();
 		_metricSampleRate = String.valueOf((int) Math.round(configuration.getMetricSampleRate()));
-		_initStatusReader = initializationStatusReader;
 		_commonTags = new MetricCommonTags();
 		_commonTags.updateWithConfig(configuration);
 	}
@@ -100,12 +99,6 @@ public class MetricSender implements ISDKMetrics {
 			}
 		});
 
-	}
-
-	public void sendMetricWithInitState(Metric metric) {
-		if (metric == null || metric.getTags() == null) return;
-		metric.getTags().put("state", _initStatusReader.getInitializationStateString(SdkProperties.getCurrentInitializationState()));
-		sendMetric(metric);
 	}
 
 	public String getMetricEndPoint() {

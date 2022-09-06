@@ -15,7 +15,7 @@ public class AdOperationMetric {
 
 	private static final String UNKNOWN = "unknown";
 	private static final String REASON = "reason";
-	private static final String INIT_STATE = "state";
+	public static final String INIT_STATE = "state";
 
 	public static Metric newAdLoadStart() {
 		return new Metric(

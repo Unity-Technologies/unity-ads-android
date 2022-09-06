@@ -11,6 +11,8 @@ import com.unity3d.ads.test.instrumentation.services.ads.operation.ShowModuleTes
 import com.unity3d.ads.test.instrumentation.services.ads.webplayer.WebPlayerViewCacheTest;
 import com.unity3d.ads.test.instrumentation.services.ads.webplayer.WebPlayerViewSettingsCacheTest;
 import com.unity3d.ads.test.instrumentation.services.banners.BannerViewCacheTests;
+import com.unity3d.ads.test.instrumentation.services.core.configuration.ExperimentObjectTest;
+import com.unity3d.ads.test.instrumentation.services.core.configuration.ExperimentObjectsTest;
 import com.unity3d.ads.test.instrumentation.services.core.configuration.ExperimentsReaderTest;
 import com.unity3d.ads.test.instrumentation.services.core.configuration.ExperimentsTest;
 import com.unity3d.ads.test.instrumentation.services.core.configuration.InitializationNotificationCenterTest;
@@ -49,6 +51,8 @@ import org.junit.runners.Suite;
 	UnityAnalyticsTest.class,
 	AcquisitionTypeTest.class,
 	InitializationNotificationCenterTest.class,
+	ExperimentObjectTest.class,
+	ExperimentObjectsTest.class,
 	ExperimentsTest.class,
 	ExperimentsReaderTest.class,
 	PrivacyConfigStatusTest.class,

@@ -63,9 +63,9 @@ public class Metric {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (!(o instanceof Metric)) return false;
 		Metric metric = (Metric) o;
-		return name.equals(metric.name) && value.equals(metric.value) && tags.equals(metric.tags);
+		return Objects.equals(name, metric.name) && Objects.equals(value, metric.value) && Objects.equals(tags, metric.tags);
 	}
 
 	@Override
