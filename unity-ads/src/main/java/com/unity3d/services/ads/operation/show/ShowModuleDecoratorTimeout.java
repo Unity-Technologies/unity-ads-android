@@ -4,6 +4,7 @@ import android.os.ConditionVariable;
 
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.core.configuration.ConfigurationReader;
+import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.request.metrics.AdOperationError;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
 import com.unity3d.services.core.timer.BaseTimer;
@@ -44,7 +45,7 @@ public class ShowModuleDecoratorTimeout extends ShowModuleDecorator {
 			});
 			showOperationState.timeoutTimer.start(Executors.newSingleThreadScheduledExecutor());
 		} else {
-			_executorService.submit(new Runnable() {
+			_executorService.execute(new Runnable() {
 				@Override
 				public void run() {
 					if (!showOperationState.timeoutCV.block(showOperationState.configuration.getShowTimeout())) {
@@ -89,11 +90,16 @@ public class ShowModuleDecoratorTimeout extends ShowModuleDecorator {
 		}
 	}
 
-	private void onOperationTimeout(final ShowOperationState state, UnityAds.UnityAdsShowError error, String message) {
+	private void onOperationTimeout(final ShowOperationState state, final UnityAds.UnityAdsShowError error,final String message) {
 		if (state != null) {
 			getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdShowFailure(AdOperationError.timeout, state.duration()));
 			remove(state.id);
-			state.onUnityAdsShowFailure(error, message);
+			Utilities.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					state.onUnityAdsShowFailure(error, message);
+				}
+			});
 		}
 	}
 }

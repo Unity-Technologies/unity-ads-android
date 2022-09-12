@@ -23,7 +23,7 @@ public class WebViewBridgeInvocation implements IWebViewBridgeInvocation {
 
 	@Override
 	public synchronized void invoke(final String className, final String methodName, final int timeoutLengthInMilliSeconds, final Object... invocationParameters) {
-		_executorService.submit(
+		_executorService.execute(
 			new WebViewBridgeInvocationRunnable(invocationCallback, _webViewBridgeInvoker, className, methodName, timeoutLengthInMilliSeconds, invocationParameters));
 	}
 }

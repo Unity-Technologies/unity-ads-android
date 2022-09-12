@@ -76,7 +76,7 @@ public class MetricSender extends MetricSenderBase {
 			return;
 		}
 
-		_executorService.submit(new Runnable() {
+		_executorService.execute(new Runnable() {
 			@Override
 			public void run() {
 				try {
