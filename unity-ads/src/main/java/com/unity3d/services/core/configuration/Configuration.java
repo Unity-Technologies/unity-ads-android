@@ -3,6 +3,7 @@ package com.unity3d.services.core.configuration;
 import android.text.TextUtils;
 
 import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
+import com.unity3d.services.core.device.reader.GameSessionIdReader;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.WebRequest;
@@ -84,7 +85,7 @@ public class Configuration {
 	public Configuration(String configUrl, IExperiments experiments) {
 		this();
 		_configUrl = configUrl;
-		DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance());
+		DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance(), GameSessionIdReader.getInstance());
 		_configurationRequestFactory = new ConfigurationRequestFactory(this, deviceInfoReaderBuilder);
 		_experimentReader.updateLocalExperiments(experiments);
 	}

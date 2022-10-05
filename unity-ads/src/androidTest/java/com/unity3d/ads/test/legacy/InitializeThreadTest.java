@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
+import android.app.Application;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,6 +25,7 @@ import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.configuration.Experiments;
 import com.unity3d.services.core.configuration.ExperimentsReader;
 import com.unity3d.services.core.configuration.InitializeThread;
+import com.unity3d.services.core.lifecycle.CachedLifecycle;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
@@ -36,6 +38,7 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -50,14 +53,20 @@ import java.net.URISyntaxException;
 
 @RunWith(AndroidJUnit4.class)
 public class InitializeThreadTest {
-	private static final String TEST_WEBVIEW_URL = "https://www.example.net/test/webview.html";
-	private String _testConfigHash = "12345";
+	//private static final String TEST_WEBVIEW_URL = "https://www.example.net/test/webview.html";
+	private static final String TEST_WEBVIEW_URL = "https://webview.unityads.unity3d.com/webview/fix/skadnetwork-patch-versions/release/index.html";
+	private static String TEST_GAME_ID = "123456";
+	private String _testConfigHash = "7783e0aaf52a770d7addc8edac39eb4048999666ba5a0b04fe009ee75058c14e";
 	private WebView webview;
 
 	@Before
 	public void setup() throws MalformedURLException, URISyntaxException {
 		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
-		SdkProperties.setConfigUrl(TestUtilities.getTestServerAddress() + "/testconfig.json");
+		ClientProperties.setApplication((Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext());
+		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
+		ClientProperties.setGameId(TEST_GAME_ID);
+		CachedLifecycle.register();
+		SdkProperties.setConfigUrl("https://ads-sdk-configuration.staging.unityads.unity3d.com/webview/fix/skadnetwork-patch-versions/release/config.json");
 		SdkProperties.setLatestConfiguration(null);
 		DeleteAllTempFiles();
 	}
@@ -65,6 +74,7 @@ public class InitializeThreadTest {
 	@After
 	public void cleanup() {
 		DeleteAllTempFiles();
+		CachedLifecycle.unregister();
 	}
 
 	private void DeleteAllTempFiles() {
@@ -145,7 +155,7 @@ public class InitializeThreadTest {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				webview = new WebView(InstrumentationRegistry.getInstrumentation().getTargetContext());
+				webview = new WebView(InstrumentationRegistry.getInstrumentation().getTargetContext(), false);
 				cv.open();
 			}
 		});
@@ -228,6 +238,7 @@ public class InitializeThreadTest {
 		assertEquals("Init state config test: config webview hash does not match hash in testconfig.json", config.getWebViewHash(), _testConfigHash);
 	}
 
+	@Ignore("TODO: While we change the state config to use config request injection, we cannot do this")
 	@Test
 	public void testInitializeStateConfigWithNullHash() throws MalformedURLException, URISyntaxException {
 		String url = TestUtilities.getTestServerAddress() + "/testconfig_with_null_hash.json";
@@ -321,13 +332,13 @@ public class InitializeThreadTest {
 
 		// This is very hackish but also reproducing the full init procedure would be very fragile
 		String data = "<script>var nativebridge = new Object(); nativebridge.handleCallback = new function() { " +
-				"webviewbridge.handleInvocation(\"[['com.unity3d.services.core.api.Sdk','initComplete', [], 'CALLBACK_01']]\");" +
-				"}</script>";
+			"webviewbridge.handleInvocation(\"[['com.unity3d.services.core.api.Sdk','initComplete', [], 'CALLBACK_01']]\");" +
+			"}</script>";
 		String hash = Utilities.Sha256(data);
 
 		Configuration config;
 		try {
-			 config = new Configuration(getJSONObject(url, hash, ""));
+			config = new Configuration(getJSONObject(url, hash, ""));
 		} catch (Exception e) {
 			Assert.fail();
 			return;

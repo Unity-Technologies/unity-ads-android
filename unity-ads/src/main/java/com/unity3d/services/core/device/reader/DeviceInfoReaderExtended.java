@@ -42,7 +42,12 @@ public class DeviceInfoReaderExtended implements IDeviceInfoReader {
 		deviceInfoData.put("apiLevel", String.valueOf(Device.getApiLevel()));
 		deviceInfoData.put("networkType",  Device.getNetworkType());
 		deviceInfoData.put("bundleVersion", ClientProperties.getAppVersion());
-		deviceInfoData.put("timeZone", TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT, Locale.US));
+		try {
+			deviceInfoData.put("timeZone", TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT, Locale.US));
+		} catch (AssertionError assertionError) {
+			// This can occur on some flavours of Android 8.1 and is a workaround for an OS bug
+			DeviceLog.error("Could not read timeZone information: %s", assertionError.getMessage());
+		}
 		deviceInfoData.put("timeZoneOffset", TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 1000);
 		deviceInfoData.put("webviewUa", WebSettings.getDefaultUserAgent(ClientProperties.getApplicationContext()));
 		deviceInfoData.put("networkOperatorName", Device.getNetworkOperatorName());

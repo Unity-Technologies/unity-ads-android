@@ -1,7 +1,5 @@
 package com.unity3d.ads.test.instrumentation.services.core.configuration;
 
-import com.unity3d.services.core.configuration.ExperimentAppliedRule;
-import com.unity3d.services.core.configuration.ExperimentObject;
 import com.unity3d.services.core.configuration.ExperimentObjects;
 import com.unity3d.services.core.configuration.IExperiments;
 
@@ -18,22 +16,23 @@ public class ExperimentObjectsTest {
 	@Test
 	public void testExperimentObjectsNull() {
 		IExperiments expo = new ExperimentObjects(null);
-		Assert.assertFalse(expo.isTwoStageInitializationEnabled());
-		Assert.assertFalse(expo.isNativeTokenEnabled());
+		Assert.assertTrue(expo.isTwoStageInitializationEnabled());
+		Assert.assertTrue(expo.isNativeTokenEnabled());
 	}
 
 	@Test
 	public void testExperimentObjectsWithInvalid() throws JSONException {
 		ExperimentObjects expo = new ExperimentObjects(new JSONObject("{\"something\": false}"));
-		Assert.assertFalse(expo.isTwoStageInitializationEnabled());
-		Assert.assertFalse(expo.isNativeTokenEnabled());
+		Assert.assertTrue(expo.isTwoStageInitializationEnabled());
+		Assert.assertTrue(expo.isNativeTokenEnabled());
 	}
 
 	@Test
 	public void testExperimentObjects() throws JSONException {
 		IExperiments expo = new ExperimentObjects(new JSONObject("{\"tsi\": {\"value\": \"true\"}}"));
 		Assert.assertTrue(expo.isTwoStageInitializationEnabled());
-		Assert.assertFalse(expo.isNativeTokenEnabled());
+		Assert.assertTrue(expo.isNativeTokenEnabled());
+		Assert.assertFalse(expo.isForwardExperimentsToWebViewEnabled());
 	}
 
 	@Test

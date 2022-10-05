@@ -102,7 +102,7 @@ public class InvocationTest {
 		handler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				WebViewApp.getCurrentApp().setWebView(new WebView(ClientProperties.getApplicationContext()) {
+				WebViewApp.getCurrentApp().setWebView(new WebView(ClientProperties.getApplicationContext(), false) {
 					@Override
 					public void invokeJavascript(String data) {
 						BatchInvocationTestApi.JAVASCRIPT_INVOKED = true;
@@ -140,7 +140,7 @@ public class InvocationTest {
 		handler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				WebViewApp.getCurrentApp().setWebView(new WebView(ClientProperties.getApplicationContext()) {
+				WebViewApp.getCurrentApp().setWebView(new WebView(ClientProperties.getApplicationContext(), false) {
 					@Override
 					public void invokeJavascript(String data) {
 						BatchInvocationTestApi.JAVASCRIPT_INVOKED = true;

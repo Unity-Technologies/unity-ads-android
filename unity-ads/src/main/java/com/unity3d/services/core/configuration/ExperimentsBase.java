@@ -9,6 +9,7 @@ public abstract class ExperimentsBase implements IExperiments {
 	static final String TSI_TAG_NATIVE_TOKEN_AWAIT_PRIVACY = "tsi_prw";
 	static final String EXP_TAG_NATIVE_WEBVIEW_CACHE = "nwc";
 	static final String EXP_TAG_WEB_AD_ASSET_CACHING = "wac";
+	static final String EXP_TAG_WEB_GESTURE_NOT_REQUIRED = "wgr";
 	static final String EXP_TAG_NEW_LIFECYCLE_TIMER = "nlt";
 
 	static final boolean EXP_DEFAULT_VALUE = false;

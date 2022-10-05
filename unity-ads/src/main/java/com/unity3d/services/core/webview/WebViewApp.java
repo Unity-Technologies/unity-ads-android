@@ -51,10 +51,10 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 	private static AtomicReference<String> _webAppFailureMessage = new AtomicReference<>();
 	private static AtomicReference<Integer> _webAppFailureCode = new AtomicReference<>();
 
-	private WebViewApp (Configuration configuration, boolean useWebViewWithCache) {
+	private WebViewApp (Configuration configuration, boolean useWebViewWithCache, boolean shouldNotRequireGesturePlayback) {
 		setConfiguration(configuration);
 		WebViewBridge.setClassTable(getConfiguration().getWebAppApiClassList());
-		_webView = useWebViewWithCache ? new WebViewWithCache(ClientProperties.getApplicationContext()) : new WebView(ClientProperties.getApplicationContext());
+		_webView = useWebViewWithCache ? new WebViewWithCache(ClientProperties.getApplicationContext(), shouldNotRequireGesturePlayback) : new WebView(ClientProperties.getApplicationContext(), shouldNotRequireGesturePlayback);
 		_webView.setWebViewClient(new WebAppClient());
 		_webView.setWebChromeClient(new WebAppChromeClient());
 	}
@@ -302,7 +302,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 				WebViewApp webViewApp;
 
 				try {
-					webViewApp = new WebViewApp(configuration, configuration.getExperiments().isWebAssetAdCaching());
+					webViewApp = new WebViewApp(configuration, configuration.getExperiments().isWebAssetAdCaching(), configuration.getExperiments().isWebGestureNotRequired());
 				}
 				catch (Exception e) {
 					DeviceLog.error("Couldn't construct WebViewApp");
@@ -370,7 +370,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 				WebViewApp webViewApp;
 
 				try {
-					webViewApp = new WebViewApp(configuration, true);
+					webViewApp = new WebViewApp(configuration, true, configuration.getExperiments().isWebGestureNotRequired());
 				}
 				catch (Exception e) {
 					DeviceLog.error("Couldn't construct WebViewApp");

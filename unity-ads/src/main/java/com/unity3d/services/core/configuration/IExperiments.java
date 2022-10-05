@@ -13,6 +13,7 @@ public interface IExperiments {
 	boolean shouldNativeTokenAwaitPrivacy();
 	boolean isNativeWebViewCacheEnabled();
 	boolean isWebAssetAdCaching();
+	boolean isWebGestureNotRequired();
 	boolean isNewLifecycleTimer();
 
 	JSONObject getCurrentSessionExperiments();

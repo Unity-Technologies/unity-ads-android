@@ -13,6 +13,7 @@ import com.unity3d.services.core.configuration.PrivacyConfig;
 import com.unity3d.services.core.configuration.PrivacyConfigStorage;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.device.reader.IDeviceInfoReader;
+import com.unity3d.services.core.device.reader.IGameSessionIdReader;
 import com.unity3d.services.core.lifecycle.CachedLifecycle;
 import com.unity3d.services.core.properties.ClientProperties;
 
@@ -45,6 +46,9 @@ public class DeviceInfoReaderBuilderTest {
 	@Mock
 	PrivacyConfigStorage _privacyConfigStorageMock;
 
+	@Mock
+	IGameSessionIdReader _gameSessionIdReaderMock;
+
 	@Before
 	public void setup() {
 		ClientProperties.setApplication((Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext());
@@ -60,7 +64,7 @@ public class DeviceInfoReaderBuilderTest {
 	@Test
 	public void testDeviceInfoReaderBuilderWithPrivacy() {
 		Mockito.when(_privacyConfigMock.allowedToSendPii()).thenReturn(true);
-		DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(_configReaderMock, _privacyConfigStorageMock);
+		DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(_configReaderMock, _privacyConfigStorageMock, _gameSessionIdReaderMock);
 		IDeviceInfoReader deviceInfoReader = deviceInfoReaderBuilder.build();
 		Map<String, Object> deviceInfoData = deviceInfoReader.getDeviceInfoData();
 		Assert.assertNotNull(deviceInfoData.get(USER_NON_BEHAVIORAL_KEY));

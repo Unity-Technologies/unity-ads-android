@@ -167,7 +167,7 @@ public class WebViewAppTest {
 			@Override
 			public void run() {
 				WebViewApp.setCurrentApp(new WebViewApp());
-				WebView webView = new WebView(InstrumentationRegistry.getInstrumentation().getTargetContext());
+				WebView webView = new WebView(InstrumentationRegistry.getInstrumentation().getTargetContext(), false);
 				WebViewApp.getCurrentApp().setWebView(webView);
 				assertEquals("Local and WebApps WebView should be the same object", webView, WebViewApp.getCurrentApp().getWebView());
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
@@ -534,7 +534,7 @@ public class WebViewAppTest {
 		public String JS_CALL = null;
 
 		public MockWebView(Context context) {
-			super(context);
+			super(context, false);
 		}
 
 		@Override

@@ -32,6 +32,7 @@ public class ExperimentObjectTest {
 	public void testExperimentObjectWithValueOnly() throws JSONException {
 		ExperimentObject exp = new ExperimentObject(new JSONObject("{\"value\": \"true\"}"));
 		Assert.assertTrue(exp.getBooleanValue());
+		Assert.assertEquals(ExperimentAppliedRule.NEXT, exp.getAppliedRule());
 	}
 
 	@Test

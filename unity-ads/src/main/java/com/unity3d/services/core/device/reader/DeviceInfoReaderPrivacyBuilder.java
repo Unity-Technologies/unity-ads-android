@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class DeviceInfoReaderPrivacyBuilder extends DeviceInfoReaderBuilder {
-	public DeviceInfoReaderPrivacyBuilder(ConfigurationReader configurationReader, PrivacyConfigStorage privacyConfigStorage) {
-		super(configurationReader, privacyConfigStorage);
+	public DeviceInfoReaderPrivacyBuilder(ConfigurationReader configurationReader, PrivacyConfigStorage privacyConfigStorage, IGameSessionIdReader gameSessionIdReader) {
+		super(configurationReader, privacyConfigStorage, gameSessionIdReader);
 	}
 
 	@Override

@@ -116,7 +116,7 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testGetTokenBeforeInitAndTimeout() {
-		Metric _metric = TSIMetric.newAsyncTokenNull(new HashMap<String, String>(){{
+		Metric _metric = TSIMetric.newNativeGeneratedTokenNull(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
@@ -133,7 +133,7 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testGetTokenBeforeInitAndTimeoutGuard() {
-		Metric _metric = TSIMetric.newAsyncTokenNull(new HashMap<String, String>(){{
+		Metric _metric = TSIMetric.newNativeGeneratedTokenNull(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
@@ -152,7 +152,7 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testGetTokenBeforeInitAndInitTimeTokenReady() {
-		Metric _metric = TSIMetric.newAsyncTokenAvailable(new HashMap<String, String>(){{
+		Metric _metric = TSIMetric.newNativeGeneratedTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
@@ -181,7 +181,7 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testGetTokenBeforeInitAndCreateQueueTokenReady() throws JSONException {
-		Metric _metric = TSIMetric.newAsyncTokenAvailable(new HashMap<String, String>(){{
+		Metric _metric = TSIMetric.newNativeGeneratedTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
@@ -243,7 +243,7 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testMultipleCallsBeforeInit() throws JSONException {
-		Metric _metric = TSIMetric.newAsyncTokenAvailable(new HashMap<String, String>(){{
+		Metric _metric = TSIMetric.newNativeGeneratedTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
@@ -265,7 +265,7 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testMultipleCallsBeforeInitAndQueue() throws JSONException {
-		Metric _metric = TSIMetric.newAsyncTokenAvailable(new HashMap<String, String>(){{
+		Metric _metric = TSIMetric.newNativeGeneratedTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
@@ -294,7 +294,7 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testMultipleCallsBeforeInitAndSingleAfterInit() throws JSONException {
-		Metric _metric = TSIMetric.newAsyncTokenAvailable(new HashMap<String, String>(){{
+		Metric _metric = TSIMetric.newNativeGeneratedTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
@@ -479,7 +479,7 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testDelayedConfigurationConfigurationArrivedFirst() throws JSONException {
-		Metric _metric = TSIMetric.newAsyncTokenAvailable(new HashMap<String, String>(){{
+		Metric _metric = TSIMetric.newNativeGeneratedTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 		_asyncTokenStorage = new AsyncTokenStorage(_nativeTokenGenerator, _handler, _sdkMetrics);

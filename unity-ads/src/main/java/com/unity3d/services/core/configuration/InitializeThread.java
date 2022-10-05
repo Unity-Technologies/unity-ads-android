@@ -13,6 +13,7 @@ import com.unity3d.services.core.connectivity.ConnectivityMonitor;
 import com.unity3d.services.core.connectivity.IConnectivityListener;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderPrivacyBuilder;
+import com.unity3d.services.core.device.reader.GameSessionIdReader;
 import com.unity3d.services.core.lifecycle.CachedLifecycle;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
@@ -371,10 +372,10 @@ public class InitializeThread extends Thread  {
 
 		public InitializeState executeWithLoader() {
 			PrivacyConfigStorage privacyConfigStorage = PrivacyConfigStorage.getInstance();
-			DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), privacyConfigStorage);
+			DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), privacyConfigStorage, GameSessionIdReader.getInstance());
 			IConfigurationLoader configurationLoader = new ConfigurationLoader(new ConfigurationRequestFactory(_configuration, deviceInfoReaderBuilder));
 			if (_configuration.getExperiments().isPrivacyRequestEnabled()) {
-				DeviceInfoReaderBuilder deviceInfoReaderPrivacyBuilder = new DeviceInfoReaderPrivacyBuilder(new ConfigurationReader(), privacyConfigStorage);
+				DeviceInfoReaderBuilder deviceInfoReaderPrivacyBuilder = new DeviceInfoReaderPrivacyBuilder(new ConfigurationReader(), privacyConfigStorage, GameSessionIdReader.getInstance());
 				configurationLoader = new PrivacyConfigurationLoader(configurationLoader, new ConfigurationRequestFactory(_configuration, deviceInfoReaderPrivacyBuilder), privacyConfigStorage);
 			}
 			final Configuration legacyConfiguration = new Configuration(SdkProperties.getConfigUrl());

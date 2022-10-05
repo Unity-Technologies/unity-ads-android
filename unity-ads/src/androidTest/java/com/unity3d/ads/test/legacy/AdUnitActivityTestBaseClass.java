@@ -184,7 +184,7 @@ public class AdUnitActivityTestBaseClass extends ActivityTestRule<AdUnitActivity
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				WebViewApp.getCurrentApp().setWebView(new WebView(InstrumentationRegistry.getInstrumentation().getTargetContext()));
+				WebViewApp.getCurrentApp().setWebView(new WebView(InstrumentationRegistry.getInstrumentation().getTargetContext(), false));
 				webViewCV.open();
 			}
 		});

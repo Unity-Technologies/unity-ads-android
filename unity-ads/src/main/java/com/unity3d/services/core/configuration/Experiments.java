@@ -29,7 +29,7 @@ public class Experiments extends ExperimentsBase {
 
 	@Override
 	public boolean isTwoStageInitializationEnabled() {
-		return _experimentData.optBoolean(TSI_TAG_INIT_ENABLED, false);
+		return _experimentData.optBoolean(TSI_TAG_INIT_ENABLED, true);
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class Experiments extends ExperimentsBase {
 
 	@Override
 	public boolean isNativeTokenEnabled() {
-		return _experimentData.optBoolean(TSI_TAG_NATIVE_TOKEN, false);
+		return _experimentData.optBoolean(TSI_TAG_NATIVE_TOKEN, true);
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class Experiments extends ExperimentsBase {
 
 	@Override
 	public boolean isPrivacyRequestEnabled() {
-		return _experimentData.optBoolean(TSI_TAG_PRIVACY_REQUEST, false);
+		return _experimentData.optBoolean(TSI_TAG_PRIVACY_REQUEST, true);
 	}
 
 	@Override
@@ -68,6 +68,12 @@ public class Experiments extends ExperimentsBase {
 	}
 
 	@Override
+	public boolean isWebGestureNotRequired() {
+		return _experimentData.optBoolean(EXP_TAG_WEB_GESTURE_NOT_REQUIRED, false);
+	}
+
+
+		@Override
 	public boolean isNewLifecycleTimer() {
 		return _experimentData.optBoolean(EXP_TAG_NEW_LIFECYCLE_TIMER, false);
 	}

@@ -24,10 +24,13 @@ public class ExperimentObject {
 	public ExperimentAppliedRule getAppliedRule() {
 		ExperimentAppliedRule experimentAppliedRule = ExperimentAppliedRule.NEXT;
 		String appliedRules = _experimentData.optString(APPLIED_KEY);
-		try {
-			experimentAppliedRule = ExperimentAppliedRule.valueOf(appliedRules.toUpperCase());
-		} catch (IllegalArgumentException ex) {
-			DeviceLog.error("Invalid rule %s for experiment", appliedRules);
+		// If the applied rule is missing (empty) we just don't try to parse it and fallback to NEXT
+		if (!appliedRules.isEmpty()) {
+			try {
+				experimentAppliedRule = ExperimentAppliedRule.valueOf(appliedRules.toUpperCase());
+			} catch (IllegalArgumentException ex) {
+				DeviceLog.warning("Invalid rule %s for experiment", appliedRules);
+			}
 		}
 		return experimentAppliedRule;
 	}

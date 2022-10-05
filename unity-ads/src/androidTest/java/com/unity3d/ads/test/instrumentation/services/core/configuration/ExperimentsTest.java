@@ -109,7 +109,9 @@ public class ExperimentsTest {
 
 	private void validateDefaultExperiments(Experiments experiments) {
 		Assert.assertFalse(experiments.shouldNativeTokenAwaitPrivacy());
-		Assert.assertFalse(experiments.isTwoStageInitializationEnabled());
+		Assert.assertTrue(experiments.isTwoStageInitializationEnabled());
+		Assert.assertTrue(experiments.isNativeTokenEnabled());
+		Assert.assertTrue(experiments.isPrivacyRequestEnabled());
 		Assert.assertFalse(experiments.isNativeWebViewCacheEnabled());
 		Assert.assertFalse(experiments.isWebAssetAdCaching());
 		Assert.assertFalse(experiments.isNewLifecycleTimer());

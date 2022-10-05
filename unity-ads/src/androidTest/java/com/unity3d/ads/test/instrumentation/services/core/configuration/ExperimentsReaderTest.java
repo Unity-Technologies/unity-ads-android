@@ -32,20 +32,21 @@ public class ExperimentsReaderTest {
 	public void testExperimentsReaderWithLocalOnly() {
 		ExperimentsReader experimentsReader = new ExperimentsReader();
 		experimentsReader.updateLocalExperiments(_localExperimentsMock);
+		Mockito.when(_localExperimentsMock.isTwoStageInitializationEnabled()).thenReturn(true);
 		Assert.assertEquals(_localExperimentsMock, experimentsReader.getCurrentlyActiveExperiments());
 		validateDefaultExperiments(experimentsReader.getCurrentlyActiveExperiments());
 	}
 
 	@Test
 	public void testExperimentsReaderWithRemoteOnly() throws JSONException {
-		Mockito.when(_remoteExperimentsMock.getNextSessionExperiments()).thenReturn(new JSONObject("{\"tsi\":true}"));
+		Mockito.when(_remoteExperimentsMock.getNextSessionExperiments()).thenReturn(new JSONObject("{\"tsi_upii\":true}"));
 		Mockito.when(_remoteExperimentsMock.getCurrentSessionExperiments()).thenReturn(new JSONObject("{\"fff\":true}"));
 
 		ExperimentsReader experimentsReader = new ExperimentsReader();
 		experimentsReader.updateRemoteExperiments(_remoteExperimentsMock);
 
 		IExperiments resultExperiments = experimentsReader.getCurrentlyActiveExperiments();
-		Assert.assertFalse("Expected TSI flag to be false", resultExperiments.isTwoStageInitializationEnabled());
+		Assert.assertFalse("Expected TSI_UPII flag to be false", resultExperiments.isUpdatePiiFields());
 		Assert.assertTrue("Expected FFF flag to be true", resultExperiments.isForwardExperimentsToWebViewEnabled());
 
 	}
@@ -94,7 +95,7 @@ public class ExperimentsReaderTest {
 
 	private void validateDefaultExperiments(IExperiments experiments) {
 		Assert.assertFalse(experiments.shouldNativeTokenAwaitPrivacy());
-		Assert.assertFalse(experiments.isTwoStageInitializationEnabled());
+		Assert.assertTrue(experiments.isTwoStageInitializationEnabled());
 		Assert.assertFalse(experiments.isNativeWebViewCacheEnabled());
 		Assert.assertFalse(experiments.isWebAssetAdCaching());
 	}

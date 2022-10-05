@@ -28,53 +28,63 @@ public class ExperimentObjects extends ExperimentsBase {
 
 	@Override
 	public boolean isTwoStageInitializationEnabled() {
-		return getExperimentValue(TSI_TAG_INIT_ENABLED);
+		return getExperimentValue(TSI_TAG_INIT_ENABLED, true);
 	}
 
 	@Override
 	public boolean isForwardExperimentsToWebViewEnabled() {
-		return getExperimentValue(TSI_TAG_FORWARD_FEATURE_FLAGS);
+		return getExperimentValueOrDefault(TSI_TAG_FORWARD_FEATURE_FLAGS);
 	}
 
 	@Override
 	public boolean isNativeTokenEnabled() {
-		return getExperimentValue(TSI_TAG_NATIVE_TOKEN);
+		return getExperimentValue(TSI_TAG_NATIVE_TOKEN, true);
 	}
 
 	@Override
 	public boolean isUpdatePiiFields() {
-		return getExperimentValue(TSI_TAG_UPDATE_PII_FIELDS);
+		return getExperimentValueOrDefault(TSI_TAG_UPDATE_PII_FIELDS);
 	}
 
 	@Override
 	public boolean isPrivacyRequestEnabled() {
-		return getExperimentValue(TSI_TAG_PRIVACY_REQUEST);
+		return getExperimentValue(TSI_TAG_PRIVACY_REQUEST, true);
 	}
 
 	@Override
 	public boolean shouldNativeTokenAwaitPrivacy() {
-		return getExperimentValue(TSI_TAG_NATIVE_TOKEN_AWAIT_PRIVACY);
+		return getExperimentValueOrDefault(TSI_TAG_NATIVE_TOKEN_AWAIT_PRIVACY);
 	}
 
 	@Override
 	public boolean isNativeWebViewCacheEnabled() {
-		return getExperimentValue(EXP_TAG_NATIVE_WEBVIEW_CACHE);
+		return getExperimentValueOrDefault(EXP_TAG_NATIVE_WEBVIEW_CACHE);
 	}
 
 	@Override
 	public boolean isWebAssetAdCaching() {
-		return getExperimentValue(EXP_TAG_WEB_AD_ASSET_CACHING);
+		return getExperimentValueOrDefault(EXP_TAG_WEB_AD_ASSET_CACHING);
+	}
+
+	@Override
+	public boolean isWebGestureNotRequired() {
+		return getExperimentValueOrDefault(EXP_TAG_WEB_GESTURE_NOT_REQUIRED);
 	}
 
 	@Override
 	public boolean isNewLifecycleTimer() {
-		return getExperimentValue(EXP_TAG_NEW_LIFECYCLE_TIMER);
+		return getExperimentValueOrDefault(EXP_TAG_NEW_LIFECYCLE_TIMER);
 	}
 
-	private boolean getExperimentValue(String experimentName) {
+	private boolean getExperimentValue(String experimentName, boolean defaultValue) {
 		ExperimentObject expo = getExperimentObject(experimentName);
-		return (expo != null) ? expo.getBooleanValue() : EXP_DEFAULT_VALUE;
+		return (expo != null) ? expo.getBooleanValue() : defaultValue;
 	}
+
+	private boolean getExperimentValueOrDefault(String experimentName) {
+		return getExperimentValue(experimentName, EXP_DEFAULT_VALUE);
+	}
+
 
 	@Override
 	public JSONObject getExperimentsAsJson() {

@@ -20,11 +20,13 @@ import java.util.Collections;
 
 public class DeviceInfoReaderBuilder {
 	private final ConfigurationReader _configurationReader;
-	private PrivacyConfigStorage _privacyConfigStorage;
+	private final PrivacyConfigStorage _privacyConfigStorage;
+	private final IGameSessionIdReader _gameSessionIdReader;
 
-	public DeviceInfoReaderBuilder(ConfigurationReader configurationReader, PrivacyConfigStorage privacyConfigStorage) {
+	public DeviceInfoReaderBuilder(ConfigurationReader configurationReader, PrivacyConfigStorage privacyConfigStorage, IGameSessionIdReader gameSessionIdReader) {
 		_configurationReader = configurationReader;
 		_privacyConfigStorage = privacyConfigStorage;
+		_gameSessionIdReader = gameSessionIdReader;
 	}
 
 	public IDeviceInfoReader build() {
@@ -48,7 +50,7 @@ public class DeviceInfoReaderBuilder {
 	}
 
 	protected IDeviceInfoReader buildWithRequestType(InitRequestType initRequestType) {
-		return new DeviceInfoReaderWithRequestType(new MinimalDeviceInfoReader(), initRequestType);
+		return new DeviceInfoReaderWithRequestType(new MinimalDeviceInfoReader(_gameSessionIdReader), initRequestType);
 	}
 
 	private IExperiments getCurrentExperiments() {
@@ -68,7 +70,7 @@ public class DeviceInfoReaderBuilder {
 			"configuration",
 			"user",
 			"unifiedconfig"
-			),
+		),
 			Collections.singletonList("value"),
 			Arrays.asList(
 				"ts",

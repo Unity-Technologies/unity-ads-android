@@ -18,7 +18,7 @@ public class WebView extends android.webkit.WebView {
 
 	private static Method _evaluateJavascript = null;
 
-	public WebView(Context context) {
+	public WebView(Context context, boolean shouldNotRequireGesturePlayback) {
 		super(context);
 		WebSettings settings = getSettings();
 
@@ -77,6 +77,10 @@ public class WebView extends android.webkit.WebView {
 		settings.setSupportMultipleWindows(false);
 		settings.setSupportZoom(false);
 		settings.setUseWideViewPort(true);
+
+		if (shouldNotRequireGesturePlayback) {
+			settings.setMediaPlaybackRequiresUserGesture(false);
+		}
 
 		setHorizontalScrollBarEnabled(false);
 		setVerticalScrollBarEnabled(false);

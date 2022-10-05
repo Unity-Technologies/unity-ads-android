@@ -96,7 +96,7 @@ public class WebViewBridgeInterfaceTest {
 			public void run() {
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
-				WebViewApp.getCurrentApp().setWebView(new WebView(ClientProperties.getApplicationContext()) {
+				WebViewApp.getCurrentApp().setWebView(new WebView(ClientProperties.getApplicationContext(), false) {
 					@Override
 					public void invokeJavascript(String data) {
 					}

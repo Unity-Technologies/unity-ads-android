@@ -5,6 +5,7 @@ import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.configuration.InitializeEventsMetricSender;
 import com.unity3d.services.core.configuration.PrivacyConfigStorage;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
+import com.unity3d.services.core.device.reader.GameSessionIdReader;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.WebViewEventCategory;
 
@@ -96,7 +97,7 @@ public class TokenStorage {
 	}
 
 	public static void getNativeGeneratedToken() {
-		NativeTokenGenerator nativeTokenGenerator = new NativeTokenGenerator(_executorService, new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance()), null);
+		NativeTokenGenerator nativeTokenGenerator = new NativeTokenGenerator(_executorService, new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance(), GameSessionIdReader.getInstance()), null);
 		nativeTokenGenerator.generateToken(new INativeTokenGeneratorListener() {
 			@Override
 			public void onReady(String token) {

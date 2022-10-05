@@ -12,6 +12,7 @@ import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.configuration.PrivacyConfigStorage;
 import com.unity3d.services.core.device.TokenType;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
+import com.unity3d.services.core.device.reader.GameSessionIdReader;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.InitializationStatusReader;
 import com.unity3d.services.core.properties.SdkProperties;
@@ -72,7 +73,7 @@ public class AsyncTokenStorage {
 		}
 
 		if (_nativeTokenGenerator == null) {
-			DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance());
+			DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance(), GameSessionIdReader.getInstance());
 			ExecutorService executorService = Executors.newSingleThreadExecutor();
 			_nativeTokenGenerator = new NativeTokenGenerator(executorService, deviceInfoReaderBuilder);
 			if (configuration.getExperiments().shouldNativeTokenAwaitPrivacy()) {

@@ -12,13 +12,15 @@ import java.io.File;
 import java.io.IOException;
 
 public class ConfigurationReader {
-	private Configuration localConfiguration;
+	private Configuration _localConfiguration;
 
 	public Configuration getCurrentConfiguration() {
 		if (getRemoteConfiguration() != null) {
 			return getRemoteConfiguration();
 		}
-		return getLocalConfiguration();
+		Configuration localConfig = getLocalConfiguration();
+
+		return localConfig != null ? localConfig : new Configuration();
 	}
 
 	private Configuration getRemoteConfiguration() {
@@ -27,8 +29,8 @@ public class ConfigurationReader {
 	}
 
 	private Configuration getLocalConfiguration() {
-		if (localConfiguration != null) {
-			return localConfiguration;
+		if (_localConfiguration != null) {
+			return _localConfiguration;
 		}
 
 		File configFile = new File(SdkProperties.getLocalConfigurationFilepath());
@@ -36,14 +38,14 @@ public class ConfigurationReader {
 			try {
 				String fileContent = new String(Utilities.readFileBytes(configFile));
 				JSONObject loadedJson = new JSONObject(fileContent);
-				localConfiguration = new Configuration(loadedJson);
+				_localConfiguration = new Configuration(loadedJson);
 			} catch (IOException | JSONException exception) {
 				DeviceLog.debug("Unable to read configuration from storage");
-				localConfiguration = null;
+				_localConfiguration = null;
 			}
 		}
 
-		return localConfiguration;
+		return _localConfiguration;
 
 	}
 }
