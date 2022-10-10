@@ -4,6 +4,7 @@ import android.os.ConditionVariable;
 
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.core.configuration.ConfigurationReader;
+import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.request.metrics.AdOperationError;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
 import com.unity3d.services.core.timer.BaseTimer;
@@ -44,7 +45,7 @@ public class LoadModuleDecoratorTimeout extends LoadModuleDecorator {
 			});
 			loadOperationState.timeoutTimer.start(Executors.newSingleThreadScheduledExecutor());
 		} else {
-			_executorService.submit(new Runnable() {
+			_executorService.execute(new Runnable() {
 				@Override
 				public void run() {
 					if (!loadOperationState.timeoutCV.block(loadOperationState.configuration.getLoadTimeout())) {
@@ -87,7 +88,12 @@ public class LoadModuleDecoratorTimeout extends LoadModuleDecorator {
 		if (state != null) {
 			getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdLoadFailure(AdOperationError.timeout, state.duration()));
 			remove(state.id);
-			state.onUnityAdsFailedToLoad(UnityAds.UnityAdsLoadError.TIMEOUT, errorMsgTimeoutLoading + state.placementId);
+			Utilities.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					state.onUnityAdsFailedToLoad(UnityAds.UnityAdsLoadError.TIMEOUT, errorMsgTimeoutLoading + state.placementId);
+				}
+			});
 		}
 	}
 }
