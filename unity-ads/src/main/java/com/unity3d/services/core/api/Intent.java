@@ -50,8 +50,11 @@ public class Intent {
 		else {
 			intent = new android.content.Intent();
 
-			if (className != null && packageName != null)
+			if (className != null && packageName != null) {
 				intent.setClassName(packageName, className);
+			} else if (packageName != null) {
+				intent.setPackage(packageName);
+			}
 
 			if (action != null)
 				intent.setAction(action);

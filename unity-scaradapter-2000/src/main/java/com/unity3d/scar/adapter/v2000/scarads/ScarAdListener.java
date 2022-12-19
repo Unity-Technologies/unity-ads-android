@@ -8,5 +8,4 @@ public class ScarAdListener {
 	public void setLoadListener(IScarLoadListener loadListener) {
 		_loadListener = loadListener;
 	}
-
 }

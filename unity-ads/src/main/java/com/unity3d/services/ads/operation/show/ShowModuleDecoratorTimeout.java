@@ -10,18 +10,15 @@ import com.unity3d.services.core.timer.BaseTimer;
 import com.unity3d.services.core.timer.ITimerListener;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ShowModuleDecoratorTimeout extends ShowModuleDecorator {
 	private static final String errorMsgTimeout = "[UnityAds] Timeout while trying to show ";
 
-	private final ExecutorService _executorService;
 	private final boolean _useNewTimer;
 
 	public ShowModuleDecoratorTimeout(IShowModule showModule, ConfigurationReader configurationReader) {
 		super(showModule);
-		_executorService = Executors.newSingleThreadExecutor();
 		_useNewTimer = configurationReader.getCurrentConfiguration().getExperiments().isNewLifecycleTimer();
 	}
 
@@ -34,25 +31,14 @@ public class ShowModuleDecoratorTimeout extends ShowModuleDecorator {
 	}
 
 	private void startShowTimeout(final ShowOperationState showOperationState) {
-		if (_useNewTimer) {
-			if (showOperationState == null) return;
-			showOperationState.timeoutTimer = new BaseTimer(showOperationState.configuration.getShowTimeout(), new ITimerListener() {
-				@Override
-				public void onTimerFinished() {
-					onOperationTimeout(showOperationState, UnityAds.UnityAdsShowError.TIMEOUT, errorMsgTimeout + showOperationState.placementId);
-				}
-			});
-			showOperationState.timeoutTimer.start(Executors.newSingleThreadScheduledExecutor());
-		} else {
-			_executorService.submit(new Runnable() {
-				@Override
-				public void run() {
-					if (!showOperationState.timeoutCV.block(showOperationState.configuration.getShowTimeout())) {
-						onOperationTimeout(showOperationState, UnityAds.UnityAdsShowError.TIMEOUT, errorMsgTimeout + showOperationState.placementId);
-					}
-				}
-			});
-		}
+		if (showOperationState == null) return;
+		showOperationState.timeoutTimer = new BaseTimer(showOperationState.configuration.getShowTimeout(), _useNewTimer, new ITimerListener() {
+			@Override
+			public void onTimerFinished() {
+				onOperationTimeout(showOperationState, UnityAds.UnityAdsShowError.TIMEOUT, errorMsgTimeout + showOperationState.placementId);
+			}
+		});
+		showOperationState.timeoutTimer.start(Executors.newSingleThreadScheduledExecutor());
 	}
 
 	@Override
@@ -78,15 +64,9 @@ public class ShowModuleDecoratorTimeout extends ShowModuleDecorator {
 		if (showOperation == null) return;
 		ShowOperationState showOperationState = showOperation.getShowOperationState();
 		if (showOperationState == null) return;
-		if (_useNewTimer) {
-			BaseTimer timeoutTimer = showOperationState.timeoutTimer;
-			if (timeoutTimer == null) return;
-			timeoutTimer.kill();
-		} else {
-			ConditionVariable timeoutCV = showOperation.getShowOperationState().timeoutCV;
-			if (timeoutCV == null) return;
-			showOperation.getShowOperationState().timeoutCV.open();
-		}
+		BaseTimer timeoutTimer = showOperationState.timeoutTimer;
+		if (timeoutTimer == null) return;
+		timeoutTimer.kill();
 	}
 
 	private void onOperationTimeout(final ShowOperationState state, UnityAds.UnityAdsShowError error, String message) {

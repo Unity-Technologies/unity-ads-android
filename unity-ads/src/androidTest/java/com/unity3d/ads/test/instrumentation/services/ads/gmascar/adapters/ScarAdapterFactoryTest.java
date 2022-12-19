@@ -3,6 +3,7 @@ package com.unity3d.ads.test.instrumentation.services.ads.gmascar.adapters;
 import com.unity3d.scar.adapter.common.IAdsErrorHandler;
 import com.unity3d.scar.adapter.common.IScarAdapter;
 import com.unity3d.services.ads.gmascar.adapters.ScarAdapterFactory;
+import com.unity3d.services.ads.gmascar.finder.ScarAdapterVersion;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,31 +20,25 @@ public class ScarAdapterFactoryTest {
 
 	@Test
 	public void testScarAdapterFactory1920() {
-		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterFactory.CODE_19_2, adsErrorHandlerMock);
+		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterVersion.V192, adsErrorHandlerMock);
 		Assert.assertTrue(adapter instanceof com.unity3d.scar.adapter.v1920.ScarAdapter);
 	}
 
 	@Test
 	public void testScarAdapterFactory1950() {
-		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterFactory.CODE_19_5, adsErrorHandlerMock);
-		Assert.assertTrue(adapter instanceof com.unity3d.scar.adapter.v1950.ScarAdapter);
-	}
-
-	@Test
-	public void testScarAdapterFactory1980() {
-		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterFactory.CODE_19_8, adsErrorHandlerMock);
+		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterVersion.V195, adsErrorHandlerMock);
 		Assert.assertTrue(adapter instanceof com.unity3d.scar.adapter.v1950.ScarAdapter);
 	}
 
 	@Test
 	public void testScarAdapterFactory2000() {
-		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterFactory.CODE_20_0, adsErrorHandlerMock);
+		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterVersion.V20, adsErrorHandlerMock);
 		Assert.assertTrue(adapter instanceof com.unity3d.scar.adapter.v2000.ScarAdapter);
 	}
 
 	@Test
 	public void testScarAdapterFactoryUnsupported() {
-		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(-1, adsErrorHandlerMock);
+		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterVersion.NA, adsErrorHandlerMock);
 		Assert.assertNull(adapter);
 	}
 }

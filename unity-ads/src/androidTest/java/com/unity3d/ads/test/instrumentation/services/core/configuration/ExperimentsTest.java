@@ -22,7 +22,9 @@ public class ExperimentsTest {
 	private static final String TSI_TAG_NATIVE_TOKEN_AWAIT_PRIVACY = "tsi_prw";
 	private static final String TSI_TAG_NATIVE_WEBVIEW_CACHE = "nwc";
 	private static final String TSI_TAG_WEB_AD_ASSET_CACHING = "wac";
-	private static final String EXP_TAG_NEW_LIFECYCLE_TIMER = "nlt";
+	private static final String EXP_TAG_NEW_LIFECYCLE_TIMER = "nilt";
+	private static final String EXP_TAG_SCAR_INIT = "scar_init";
+	private static final String EXP_TAG_NEW_INIT_FLOW = "s_init";
 
 	@Test
 	public void testExperimentsWithData() throws JSONException {
@@ -36,6 +38,8 @@ public class ExperimentsTest {
 		jsonObject.put(TSI_TAG_NATIVE_WEBVIEW_CACHE, true);
 		jsonObject.put(TSI_TAG_WEB_AD_ASSET_CACHING, true);
 		jsonObject.put(EXP_TAG_NEW_LIFECYCLE_TIMER, true);
+		jsonObject.put(EXP_TAG_SCAR_INIT, true);
+		jsonObject.put(EXP_TAG_NEW_INIT_FLOW, true);
 		Experiments experiments = new Experiments(jsonObject);
 		Assert.assertTrue(experiments.shouldNativeTokenAwaitPrivacy());
 		Assert.assertFalse(experiments.isTwoStageInitializationEnabled());
@@ -45,6 +49,8 @@ public class ExperimentsTest {
 		Assert.assertTrue(experiments.isNativeWebViewCacheEnabled());
 		Assert.assertTrue(experiments.isWebAssetAdCaching());
 		Assert.assertTrue(experiments.isNewLifecycleTimer());
+		Assert.assertTrue(experiments.isScarInitEnabled());
+		Assert.assertTrue(experiments.isNewInitFlowEnabled());
 	}
 
 	@Test
@@ -95,16 +101,20 @@ public class ExperimentsTest {
 
 	@Test
 	public void testExperimentsGetNextSessionExperiments() throws JSONException {
-		JSONObject experimentJson = new JSONObject("{\"tsi\": true, \"fff\":false}");
+		JSONObject experimentJson = new JSONObject("{\"tsi\": true, \"fff\":false, \"s_init\":true}");
 		Experiments experiments = new Experiments(experimentJson);
-		Assert.assertTrue(experiments.getNextSessionExperiments().getBoolean("tsi"));
+		Assert.assertTrue(experiments.getNextSessionExperiments().optBoolean("tsi"));
+		Assert.assertFalse(experiments.getCurrentSessionExperiments().optBoolean("fff"));
+		Assert.assertTrue(experiments.getNextSessionExperiments().optBoolean("s_init"));
 	}
 
 	@Test
 	public void testExperimentsGetCurrentSessionExperiments() throws JSONException {
-		JSONObject experimentJson = new JSONObject("{\"tsi\": true, \"fff\":true}");
+		JSONObject experimentJson = new JSONObject("{\"tsi\": true, \"fff\":true, \"s_init\":true}");
 		Experiments experiments = new Experiments(experimentJson);
-		Assert.assertTrue(experiments.getCurrentSessionExperiments().getBoolean("fff"));
+		Assert.assertFalse(experiments.getCurrentSessionExperiments().optBoolean("tsi"));
+		Assert.assertTrue(experiments.getCurrentSessionExperiments().optBoolean("fff"));
+		Assert.assertFalse(experiments.getCurrentSessionExperiments().optBoolean("s_init"));
 	}
 
 	private void validateDefaultExperiments(Experiments experiments) {
@@ -115,6 +125,8 @@ public class ExperimentsTest {
 		Assert.assertFalse(experiments.isNativeWebViewCacheEnabled());
 		Assert.assertFalse(experiments.isWebAssetAdCaching());
 		Assert.assertFalse(experiments.isNewLifecycleTimer());
+		Assert.assertFalse(experiments.isScarInitEnabled());
+		Assert.assertFalse(experiments.isNewInitFlowEnabled());
 	}
 
 }

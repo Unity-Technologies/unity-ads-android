@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.configuration.Configuration;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
@@ -14,9 +15,29 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
+import java.net.MalformedURLException;
+
 @RunWith(AndroidJUnit4.class)
 public class ConfigurationTest {
 	private Configuration config;
+	private static final String webViewUrl = "url.com";
+	private static final String hash = "hash";
+	private static final String version = "version";
+	private static final boolean delayUpdate = true;
+	private static final int resetTimeout = 1;
+	private static final int maxRetries = 2;
+	private static final long retryDelay = 3;
+	private static final double scalingFactor = 4;
+	private static final int connectEventThreshold = 5;
+	private static final int maxConnectedEvents = 6;
+	private static final long networkErrorTimeout = 7;
+	private static final int showTimeout = 8;
+	private static final int loadTimeout = 9;
+	private static final int noFillTimeout = 10;
+	private static final String sdkVersion = "sdkVersion";
+	private static final String metricsUrl = "unity3d.com";
+	private static final double metricSampleRate = 22.2;
+	private static final long webviewCreateTimeout = 11;
 
 	@After
 	public void cleanup() {
@@ -57,6 +78,26 @@ public class ConfigurationTest {
 		return json;
 	}
 
+	private JSONObject getDefaultData() {
+		return getAllConfigDataJSON(webViewUrl, hash, version,
+			delayUpdate, resetTimeout, maxRetries, retryDelay, scalingFactor, connectEventThreshold,
+			maxConnectedEvents, networkErrorTimeout, showTimeout, loadTimeout, noFillTimeout, sdkVersion, metricsUrl,
+			metricSampleRate, webviewCreateTimeout);
+	}
+
+	@Test
+	public void testConfigWithSsrData() throws JSONException, MalformedURLException {
+		JSONObject configData = getDefaultData();
+		String srrDataStr = "{\"srrKey\":\"srrValue\"}";
+		JSONObject srrData = new JSONObject(srrDataStr);
+		configData.put("srr", srrData);
+		Configuration config = new Configuration(configData);
+		Assert.assertEquals(configData, config.getRawConfigData());
+		Assert.assertEquals(config.getRawConfigData().get("srr"), srrData);
+		Assert.assertTrue(config.getFilteredJsonString().contains("murl"));
+		Assert.assertFalse(config.getFilteredJsonString().contains("srr"));
+	}
+
 	@Test
 	public void testInitForOptionalParameterFallback() {
 		try {
@@ -89,30 +130,8 @@ public class ConfigurationTest {
 
 	@Test
 	public void testInitWithAllOptionalParameters() {
-		String webViewUrl = "url.com";
-		String hash = "hash";
-		String version = "version";
-		boolean delayUpdate = true;
-		int resetTimeout = 1;
-		int maxRetries = 2;
-		long retryDelay = 3;
-		double scalingFactor = 4;
-		int connectEventThreshold = 5;
-		int maxConnectedEvents = 6;
-		long networkErrorTimeout = 7;
-		int showTimeout = 8;
-		int loadTimeout = 9;
-		int noFillTimeout = 10;
-		String sdkVersion = "sdkVersion";
-		String metricsUrl = "unity3d.com";
-		double metricSampleRate = 22.2;
-		long webviewCreateTimeout = 11;
-
 		try {
-			config = new Configuration(getAllConfigDataJSON(webViewUrl, hash, version,
-				delayUpdate, resetTimeout, maxRetries, retryDelay, scalingFactor, connectEventThreshold,
-				maxConnectedEvents, networkErrorTimeout, showTimeout, loadTimeout, noFillTimeout, sdkVersion, metricsUrl,
-				metricSampleRate, webviewCreateTimeout));
+			config = new Configuration(getDefaultData());
 		} catch (Exception e) {
 			Assert.fail();
 			return;

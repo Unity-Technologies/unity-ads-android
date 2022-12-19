@@ -404,7 +404,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 	}
 
 
-	private ErrorState getErrorStateFromWebAppCode() {
+	public ErrorState getErrorStateFromWebAppCode() {
 		int failureCode = getWebAppFailureCode();
 		if (failureCode == 1) {
 			return ErrorState.CreateWebviewGameIdDisabled;

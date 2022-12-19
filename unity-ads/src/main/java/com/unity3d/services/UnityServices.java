@@ -8,9 +8,10 @@ import android.text.TextUtils;
 
 import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.core.api.Sdk;
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.configuration.EnvironmentCheck;
+import com.unity3d.services.core.configuration.InitializeEventsMetricSender;
 import com.unity3d.services.core.configuration.InitializeThread;
 import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.log.DeviceLog;
@@ -136,8 +137,15 @@ public class UnityServices {
 		}
 		DeviceLog.info("Unity Services environment check OK");
 
-		Configuration configuration = new Configuration();
-		InitializeThread.initialize(configuration);
+		ConfigurationReader configurationReader = new ConfigurationReader();
+		Configuration configuration = configurationReader.getCurrentConfiguration();
+		boolean isNewInitFlow = configuration.getExperiments().isNewInitFlowEnabled();
+		InitializeEventsMetricSender.getInstance().setNewInitFlow(isNewInitFlow);
+		if (isNewInitFlow) {
+			UnityAdsSDK.INSTANCE.initialize();
+		} else {
+			InitializeThread.initialize(configuration);
+		}
 	}
 
 	public static boolean isSupported() {

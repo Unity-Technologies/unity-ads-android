@@ -1,13 +1,19 @@
 package com.unity3d.ads.test.legacy;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.ads.test.TestUtilities;
+import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.NativeCallback;
@@ -15,11 +21,6 @@ import com.unity3d.services.core.webview.bridge.WebViewBridge;
 import com.unity3d.services.core.webview.bridge.WebViewBridgeError;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
 import com.unity3d.services.core.webview.bridge.WebViewExposed;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -251,7 +252,7 @@ public class WebViewBridgeTest {
 		assertEquals("Method name was not the same than originally was called", "", webViewCallbackMethodname);
 	}
 
-	@Test (expected = NullPointerException.class)
+	@Test (expected = IllegalArgumentException.class)
 	public void testOthersSetCallbackNull () throws Exception {
 		WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, null);
 	}

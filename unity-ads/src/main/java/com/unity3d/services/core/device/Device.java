@@ -1,6 +1,5 @@
 package com.unity3d.services.core.device;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -13,6 +12,8 @@ import android.content.pm.Signature;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
@@ -25,6 +26,8 @@ import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.preferences.AndroidPreferences;
 import com.unity3d.services.core.properties.ClientProperties;
+import com.unity3d.services.core.request.metrics.Metric;
+import com.unity3d.services.core.request.metrics.SDKMetrics;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -388,10 +392,12 @@ public class Device {
 		} catch (IOException e) {
 			DeviceLog.exception("Error while reading memory info: " + infoType, e);
 		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				DeviceLog.exception("Error closing RandomAccessFile", e);
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					DeviceLog.exception("Error closing RandomAccessFile", e);
+				}
 			}
 		}
 
@@ -509,11 +515,15 @@ public class Device {
 		String apkDigest = null;
 		String apkPath = ClientProperties.getApplicationContext().getPackageCodePath();
 		InputStream inputStream = null;
+		long startTime = System.nanoTime();
+		long apkSize = 0L;
+		long timeout = 5000L;
 		try {
-			inputStream = new FileInputStream(new File(apkPath));
+			File apkFile = new File(apkPath);
+			apkSize = apkFile.length() / (1024 * 1024); // MegaBytes
+			inputStream = new FileInputStream(apkFile);
 			apkDigest = Utilities.Sha256(inputStream);
-		}
-		finally {
+		} finally {
 			try {
 				if (inputStream != null) {
 					inputStream.close();
@@ -521,6 +531,11 @@ public class Device {
 			} catch (IOException e) {
 			}
 		}
+		long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
+		if (duration > timeout) {
+			SDKMetrics.getInstance().sendMetric(new Metric("native_device_info_apk_digest_timeout", apkSize, null));
+		}
+		SDKMetrics.getInstance().sendMetric(new Metric("native_device_info_apk_size", apkSize, null));
 		return apkDigest;
 	}
 
@@ -652,13 +667,90 @@ public class Device {
 		} catch (IOException e) {
 			DeviceLog.exception("Error while reading processor info: ", e);
 		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				DeviceLog.exception("Error closing RandomAccessFile", e);
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					DeviceLog.exception("Error closing RandomAccessFile", e);
+				}
 			}
 		}
 
 		return retData;
+	}
+
+	public static boolean hasX264Decoder() {
+		return Device.selectAllDecodeCodecs(MimeTypes.VIDEO_H264).size() > 0;
+	}
+
+	public static boolean hasX265Decoder() {
+		return Device.selectAllDecodeCodecs(MimeTypes.VIDEO_H265).size() > 0;
+	}
+
+	public static List<MediaCodecInfo> selectAllDecodeCodecs(String mimeType) {
+		List<MediaCodecInfo> result = new ArrayList<>();
+		int numCodecs = MediaCodecList.getCodecCount();
+		for (int i = 0; i < numCodecs; i++) {
+			MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
+
+			if (codecInfo.isEncoder()) {
+				continue;
+			}
+
+			String[] types = codecInfo.getSupportedTypes();
+			for (int j = 0; j < types.length; j++) {
+				if (types[j].equalsIgnoreCase(mimeType)) {
+					if (isHardwareAccelerated(codecInfo, mimeType)) {
+						result.add(codecInfo);
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * The result of {@link android.media.MediaCodecInfo#isHardwareAccelerated()} for API levels 29+,
+	 * or a best-effort approximation for lower levels.
+	 */
+	private static boolean isHardwareAccelerated(MediaCodecInfo codecInfo, String mimeType) {
+		if (getApiLevel() >= 29) {
+			return isHardwareAcceleratedV29(codecInfo);
+		}
+		// codecInfo.isHardwareAccelerated() != codecInfo.isSoftwareOnly() is not necessarily true.
+		// However, we assume this to be true as an approximation.
+		return !isSoftwareOnly(codecInfo, mimeType);
+	}
+
+	@TargetApi(29)
+	private static boolean isHardwareAcceleratedV29(MediaCodecInfo codecInfo) {
+		return codecInfo.isHardwareAccelerated();
+	}
+
+	/**
+	 * The result of {@link android.media.MediaCodecInfo#isSoftwareOnly()} for API levels 29+, or a
+	 * best-effort approximation for lower levels.
+	 */
+	private static boolean isSoftwareOnly(MediaCodecInfo codecInfo, String mimeType) {
+		if (getApiLevel() >= 29) {
+			return isSoftwareOnlyV29(codecInfo);
+		}
+		String codecName = codecInfo.getName().toLowerCase();
+		if (codecName.startsWith("arc.")) {
+			// App Runtime for Chrome (ARC) codecs
+			return false;
+		}
+		return codecName.startsWith("omx.google.")
+			|| codecName.startsWith("omx.ffmpeg.")
+			|| (codecName.startsWith("omx.sec.") && codecName.contains(".sw."))
+			|| codecName.equals("omx.qcom.video.decoder.hevcswvdec")
+			|| codecName.startsWith("c2.android.")
+			|| codecName.startsWith("c2.google.")
+			|| (!codecName.startsWith("omx.") && !codecName.startsWith("c2."));
+	}
+
+	@TargetApi(29)
+	private static boolean isSoftwareOnlyV29(MediaCodecInfo codecInfo) {
+		return codecInfo.isSoftwareOnly();
 	}
 }

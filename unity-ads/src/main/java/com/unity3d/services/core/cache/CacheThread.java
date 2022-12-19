@@ -32,6 +32,7 @@ public class CacheThread extends Thread {
 				}
 			} catch (InterruptedException e) {
 				DeviceLog.debug("Couldn't synchronize thread");
+				Thread.currentThread().interrupt();
 			}
 		}
 	}
@@ -42,7 +43,7 @@ public class CacheThread extends Thread {
 		_handler = new CacheThreadHandler();
 		_ready = true;
 		synchronized(_readyLock) {
-			_readyLock.notify();
+			_readyLock.notifyAll();
 		}
 		Looper.loop();
 	}

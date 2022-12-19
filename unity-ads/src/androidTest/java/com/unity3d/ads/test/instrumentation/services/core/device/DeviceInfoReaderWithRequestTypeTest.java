@@ -22,14 +22,14 @@ public class DeviceInfoReaderWithRequestTypeTest {
 	public void testDeviceInfoReaderWithRequestTypeToken() {
 		DeviceInfoReaderWithRequestType deviceInfoReaderWithRequestType = new DeviceInfoReaderWithRequestType(_deviceInfoReaderMock, InitRequestType.TOKEN);
 		Map<String, Object> deviceInfoData = deviceInfoReaderWithRequestType.getDeviceInfoData();
-		Assert.assertEquals("token", deviceInfoData.get("callType"));
+		Assert.assertEquals(InitRequestType.TOKEN.getCallType(), deviceInfoData.get("callType"));
 	}
 
 	@Test
 	public void testDeviceInfoReaderWithRequestTypePrivacy() {
 		DeviceInfoReaderWithRequestType deviceInfoReaderWithRequestType = new DeviceInfoReaderWithRequestType(_deviceInfoReaderMock, InitRequestType.PRIVACY);
 		Map<String, Object> deviceInfoData = deviceInfoReaderWithRequestType.getDeviceInfoData();
-		Assert.assertEquals("privacy", deviceInfoData.get("callType"));
+		Assert.assertEquals(InitRequestType.PRIVACY.getCallType(), deviceInfoData.get("callType"));
 	}
 
 	@Test

@@ -15,6 +15,10 @@ public class TSIMetric {
 	private static final String TSI_METRIC_TOKEN_RESOLUTION	= "native_token_resolution_request_latency";
 	private static final String TSI_METRIC_PRIVACY_RESOLUTION_SUCCESS = "native_privacy_resolution_request_latency_success";
 	private static final String TSI_METRIC_PRIVACY_RESOLUTION_FAILURE = "native_privacy_resolution_request_latency_failure";
+	private static final String TSI_METRIC_PRIVACY_REQUEST_SUCCESS = "native_privacy_request_success_time";
+	private static final String TSI_METRIC_PRIVACY_REQUEST_FAILURE = "native_privacy_request_failure_time";
+	private static final String TSI_METRIC_CONFIG_REQUEST_SUCCESS = "native_config_request_success_time";
+	private static final String TSI_METRIC_CONFIG_REQUEST_FAILURE = "native_config_request_failure_time";
 	private static final String TSI_METRIC_EMERGENCY_OFF = "native_emergency_switch_off";
 	private static final String TSI_METRIC_COLLECTION_LATENCY = "native_device_info_collection_latency";
 	private static final String TSI_METRIC_COMPRESSION_LATENCY = "native_device_info_compression_latency";
@@ -96,6 +100,34 @@ public class TSIMetric {
 	public static Metric newPrivacyResolutionRequestLatencyFailure(Long value) {
 		return new Metric(
 			TSI_METRIC_PRIVACY_RESOLUTION_FAILURE,
+			value,
+			null);
+	}
+
+	public static Metric newPrivacyRequestLatencySuccess(Long value) {
+		return new Metric(
+			TSI_METRIC_PRIVACY_REQUEST_SUCCESS,
+			value,
+			null);
+	}
+
+	public static Metric newPrivacyRequestLatencyFailure(Long value) {
+		return new Metric(
+			TSI_METRIC_PRIVACY_REQUEST_FAILURE,
+			value,
+			null);
+	}
+
+	public static Metric newConfigRequestLatencySuccess(Long value) {
+		return new Metric(
+			TSI_METRIC_CONFIG_REQUEST_SUCCESS,
+			value,
+			null);
+	}
+
+	public static Metric newConfigRequestLatencyFailure(Long value) {
+		return new Metric(
+			TSI_METRIC_CONFIG_REQUEST_FAILURE,
 			value,
 			null);
 	}

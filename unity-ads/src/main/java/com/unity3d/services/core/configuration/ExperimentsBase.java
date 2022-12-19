@@ -10,7 +10,9 @@ public abstract class ExperimentsBase implements IExperiments {
 	static final String EXP_TAG_NATIVE_WEBVIEW_CACHE = "nwc";
 	static final String EXP_TAG_WEB_AD_ASSET_CACHING = "wac";
 	static final String EXP_TAG_WEB_GESTURE_NOT_REQUIRED = "wgr";
-	static final String EXP_TAG_NEW_LIFECYCLE_TIMER = "nlt";
+	static final String EXP_TAG_NEW_LIFECYCLE_TIMER = "nilt";
+	static final String EXP_TAG_SCAR_INIT = "scar_init";
+	static final String EXP_TAG_NEW_INIT_FLOW = "s_init";
 
 	static final boolean EXP_DEFAULT_VALUE = false;
 }

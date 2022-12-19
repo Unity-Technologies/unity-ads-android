@@ -120,7 +120,9 @@ public class WebViewBridge {
 			Object[] values = getValues(parameters, callback);
 			method.invoke(null, values);
 		} catch (JSONException | InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
-			callback.error(WebViewBridgeError.INVOCATION_FAILED, className, methodName, parameters, e.getMessage());
+			if (callback != null) {
+				callback.error(WebViewBridgeError.INVOCATION_FAILED, className, methodName, parameters, e.getMessage());
+			}
 			throw e;
 		}
 	}

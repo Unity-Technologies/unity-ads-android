@@ -1,0 +1,59 @@
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    compileSdkVersion 31
+
+    defaultConfig {
+        gradle.startParameter.taskNames.each {
+            if (it.contains("AndroidTest")) {
+                minSdkVersion 19
+            } else {
+                minSdkVersion 16
+            }
+        }
+        targetSdkVersion 31
+        multiDexEnabled true
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    compileOptions {
+        gradle.startParameter.taskNames.each {
+            if (it.contains("AndroidTest")) {
+                sourceCompatibility JavaVersion.VERSION_1_8
+                targetCompatibility JavaVersion.VERSION_1_8
+            } else {
+                sourceCompatibility JavaVersion.VERSION_1_7
+                targetCompatibility JavaVersion.VERSION_1_7
+            }
+        }
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+            testCoverageEnabled true
+        }
+    }
+}
+
+dependencies {
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+    androidTestImplementation 'androidx.test:runner:1.5.1'
+    androidTestImplementation "org.mockito:mockito-android:2.25.0"
+    androidTestImplementation 'com.google.android.gms:play-services-ads:21.0.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:2.28.2'
+    testImplementation 'com.google.android.gms:play-services-ads:21.0.0'
+    api project(':unity-scaradapter-common')
+    compileOnly 'com.google.android.gms:play-services-ads:21.0.0'
+}
+
+apply from: '../fatAar.gradle'

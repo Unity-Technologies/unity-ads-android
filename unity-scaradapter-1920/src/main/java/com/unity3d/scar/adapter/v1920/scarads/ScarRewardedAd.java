@@ -4,21 +4,21 @@ import android.app.Activity;
 import android.content.Context;
 
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.query.QueryInfo;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.unity3d.scar.adapter.common.GMAAdsError;
 import com.unity3d.scar.adapter.common.IAdsErrorHandler;
 import com.unity3d.scar.adapter.common.IScarRewardedAdListenerWrapper;
 import com.unity3d.scar.adapter.common.scarads.IScarLoadListener;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
-import com.unity3d.scar.adapter.v1920.signals.QueryInfoMetadata;
 
 public class ScarRewardedAd extends ScarAdBase {
 
 	private RewardedAd _rewardedAd;
 	private ScarRewardedAdListener _rewardedAdDelegate;
 
-	public ScarRewardedAd(Context context, QueryInfoMetadata queryInfoMetadata, ScarAdMetadata scarAdMetadata, IAdsErrorHandler adsErrorHandler, IScarRewardedAdListenerWrapper adListener) {
-		super(context, scarAdMetadata, queryInfoMetadata, adsErrorHandler);
+	public ScarRewardedAd(Context context, QueryInfo queryInfo, ScarAdMetadata scarAdMetadata, IAdsErrorHandler adsErrorHandler, IScarRewardedAdListenerWrapper adListener) {
+		super(context, scarAdMetadata, queryInfo, adsErrorHandler);
 		_rewardedAd = new RewardedAd(_context, _scarAdMetadata.getAdUnitId());
 		_rewardedAdDelegate = new ScarRewardedAdListener(_rewardedAd, adListener);
 	}

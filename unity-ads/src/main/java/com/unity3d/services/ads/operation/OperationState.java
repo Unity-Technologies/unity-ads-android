@@ -1,6 +1,5 @@
 package com.unity3d.services.ads.operation;
 
-import android.os.ConditionVariable;
 
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.timer.BaseTimer;
@@ -15,14 +14,12 @@ public class OperationState  implements IWebViewSharedObject {
 	public String id;
 	public String placementId;
 	public Configuration configuration;
-	public ConditionVariable timeoutCV;
 	public long startTime;
 	public BaseTimer timeoutTimer;
 
 	public OperationState(String placementId, Configuration configuration) {
 		this.placementId = placementId == null ? _emptyPlacementId : placementId;
 		this.configuration = configuration;
-		this.timeoutCV = new ConditionVariable();
 		id = UUID.randomUUID().toString();
 	}
 

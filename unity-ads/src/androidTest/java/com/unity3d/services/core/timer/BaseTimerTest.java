@@ -3,9 +3,15 @@ package com.unity3d.services.core.timer;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
 
+import android.app.Application;
+
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.unity3d.services.core.lifecycle.CachedLifecycle;
 import com.unity3d.services.core.lifecycle.IAppActiveListener;
 import com.unity3d.services.core.lifecycle.LifecycleCache;
 import com.unity3d.services.core.lifecycle.LifecycleEvent;
+import com.unity3d.services.core.properties.ClientProperties;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,17 +38,18 @@ public class BaseTimerTest {
 
 	private final Integer TEST_DURATION_MS = 4000;
 	private final long TEST_DELAY_MS = 1000;
+	private LifecycleCache _lifecycleCache = CachedLifecycle.getLifecycleListener();
 
 	BaseTimer timer;
+	BaseTimer timerLifecycle;
 
 	@Before
 	public void setup() {
-		timer = new BaseTimer(TEST_DURATION_MS, mockTimerListener, mockLifecycleCache);
-	}
-
-	@Test
-	public void testAddAppActiveListener() {
-		Mockito.verify(mockLifecycleCache, times(1)).addListener(timer);
+		ClientProperties.setApplication((Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext());
+		CachedLifecycle.register();
+		_lifecycleCache = CachedLifecycle.getLifecycleListener();
+		timer = new BaseTimer(TEST_DURATION_MS, false, mockTimerListener, CachedLifecycle.getLifecycleListener());
+		timerLifecycle = new BaseTimer(TEST_DURATION_MS, true, mockTimerListener, CachedLifecycle.getLifecycleListener());
 	}
 
 	@Test
@@ -69,7 +76,6 @@ public class BaseTimerTest {
 
 		assertFalse(timer.isRunning());
 		Mockito.verify(mockExecutor, times(1)).shutdown();
-		Mockito.verify(mockLifecycleCache, times(1)).removeListener(Mockito.<IAppActiveListener>any());
 	}
 
 	@Test
@@ -87,10 +93,44 @@ public class BaseTimerTest {
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 		timer.start(executorService);
 
-		timer.onAppStateChanged(LifecycleEvent.PAUSED);
+		_lifecycleCache.notifyStateListeners(LifecycleEvent.PAUSED);
 		assertFalse(timer.isRunning());
 
-		timer.onAppStateChanged(LifecycleEvent.RESUMED);
+		_lifecycleCache.notifyStateListeners(LifecycleEvent.RESUMED);
+		assertTrue(timer.isRunning());
+
+		Thread.sleep(5000);
+		Mockito.verify(mockTimerListener, times(1)).onTimerFinished();
+		assertFalse(timer.isRunning());
+		assertTrue(executorService.isShutdown());
+	}
+
+	@Test
+	public void testLifecycleOnBackgroundForegroundPauseResume() throws InterruptedException {
+		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+		timerLifecycle.start(executorService);
+
+		_lifecycleCache.onActivityStopped(null);
+		assertFalse(timerLifecycle.isRunning());
+
+		_lifecycleCache.onActivityStarted(null);
+		assertTrue(timerLifecycle.isRunning());
+
+		Thread.sleep(5000);
+		Mockito.verify(mockTimerListener, times(1)).onTimerFinished();
+		assertFalse(timerLifecycle.isRunning());
+		assertTrue(executorService.isShutdown());
+	}
+
+	@Test
+	public void testLifecycleOnForegroundNoChange() throws InterruptedException {
+		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+		timer.start(executorService);
+
+		mockLifecycleCache.notifyStateListeners(LifecycleEvent.PAUSED);
+		assertTrue(timer.isRunning());
+
+		mockLifecycleCache.notifyStateListeners(LifecycleEvent.RESUMED);
 		assertTrue(timer.isRunning());
 
 		Thread.sleep(5000);
@@ -130,14 +170,21 @@ public class BaseTimerTest {
 	@Test
 	public void testOnAppStateChangedToResumed() {
 		timer.start(mockExecutor);
-		timer.onAppStateChanged(LifecycleEvent.RESUMED);
+		mockLifecycleCache.notifyStateListeners(LifecycleEvent.RESUMED);
 
 		Mockito.verify(mockExecutor, times(1)).scheduleAtFixedRate(Mockito.<Runnable>any(), Mockito.eq(TEST_DELAY_MS), Mockito.eq(TEST_DELAY_MS), Mockito.eq(TimeUnit.MILLISECONDS));
 	}
 
 	@Test
 	public void testOnAppStateChangedToResumedWontStartInActiveTimer() {
-		timer.onAppStateChanged(LifecycleEvent.RESUMED);
+		mockLifecycleCache.notifyStateListeners(LifecycleEvent.RESUMED);
+
+		assertFalse(timer.isRunning());
+	}
+
+	@Test
+	public void testLifecycleToForegroundWontStartInActiveTimer() {
+		mockLifecycleCache.notifyStateListeners(LifecycleEvent.RESUMED);
 
 		assertFalse(timer.isRunning());
 	}
@@ -145,7 +192,15 @@ public class BaseTimerTest {
 	@Test
 	public void testOnAppStateChangedToResumedStartedTimerWillBeRunning() {
 		timer.start(mockExecutor);
-		timer.onAppStateChanged(LifecycleEvent.RESUMED);
+		mockLifecycleCache.notifyStateListeners(LifecycleEvent.RESUMED);
+
+		assertTrue(timer.isRunning());
+	}
+
+	@Test
+	public void testLifecycleToForegroundStartedTimerWillBeRunning() {
+		timer.start(mockExecutor);
+		mockLifecycleCache.notifyStateListeners(LifecycleEvent.RESUMED);
 
 		assertTrue(timer.isRunning());
 	}

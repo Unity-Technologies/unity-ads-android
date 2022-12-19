@@ -28,6 +28,6 @@ public class DeviceInfoReaderExtendedTest {
 		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getContext());
 		DeviceInfoReaderExtended deviceInfoReader = new DeviceInfoReaderExtended(_deviceInfoReaderMock);
 		Map<String, Object> deviceData = deviceInfoReader.getDeviceInfoData();
-		Assert.assertEquals(42, deviceData.size());
+		Assert.assertEquals(41, deviceData.size());
 	}
 }

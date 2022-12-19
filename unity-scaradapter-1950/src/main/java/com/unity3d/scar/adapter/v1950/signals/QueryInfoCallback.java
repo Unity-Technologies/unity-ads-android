@@ -1,33 +1,26 @@
 package com.unity3d.scar.adapter.v1950.signals;
 
-import android.util.Log;
-
 import com.google.android.gms.ads.query.QueryInfo;
 import com.google.android.gms.ads.query.QueryInfoGenerationCallback;
-import com.unity3d.scar.adapter.common.DispatchGroup;
-import com.unity3d.scar.adapter.v1950.ScarAdapter;
+import com.unity3d.scar.adapter.common.signals.ISignalCallbackListener;
 
 public class QueryInfoCallback extends QueryInfoGenerationCallback {
 
-	private DispatchGroup _dispatchGroup;
-	private QueryInfoMetadata _gmaQueryInfoMetadata;
+	private String _placementId;
+	private ISignalCallbackListener _signalCallbackListener;
 
-	public QueryInfoCallback(final QueryInfoMetadata gmaQueryInfoMetadata, final DispatchGroup dispatchGroup) {
-		_dispatchGroup = dispatchGroup;
-		_gmaQueryInfoMetadata = gmaQueryInfoMetadata;
+	public QueryInfoCallback(final String placementId, final ISignalCallbackListener signalCallbackListener) {
+		_placementId = placementId;
+		_signalCallbackListener = signalCallbackListener;
 	}
 
-	// Called when QueryInfo generation succeeds
 	@Override
 	public void onSuccess(final QueryInfo queryInfo) {
-		_gmaQueryInfoMetadata.setQueryInfo(queryInfo);
-		_dispatchGroup.leave();
+		_signalCallbackListener.onSuccess(_placementId, queryInfo.getQuery(), queryInfo);
 	}
 
-	// Called when QueryInfo generation fails
 	@Override
-	public void onFailure(String failureMsg) {
-		_gmaQueryInfoMetadata.setError(failureMsg);
-		_dispatchGroup.leave();
+	public void onFailure(String errorMessage) {
+		_signalCallbackListener.onFailure(errorMessage);
 	}
 }

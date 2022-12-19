@@ -11,11 +11,6 @@ public interface IScarInterstitialAdListenerWrapper extends IScarAdListenerWrapp
 	void onAdFailedToShow(int errorCode, String errorString);
 
 	/**
-	 * Called when a click is recorded for an ad.
-	 */
-	void onAdClicked();
-
-	/**
 	 * Called when the user has left the app.
 	 */
 	void onAdLeftApplication();

@@ -8,9 +8,11 @@ import com.unity3d.services.ads.gmascar.adapters.ScarAdapterFactory;
 import com.unity3d.services.ads.gmascar.bridges.AdapterStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializationStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializeListenerBridge;
-import com.unity3d.services.ads.gmascar.bridges.MobileAdsBridge;
+import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridgeBase;
+import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridgeFactory;
 import com.unity3d.services.ads.gmascar.finder.GMAInitializer;
 import com.unity3d.services.ads.gmascar.finder.PresenceDetector;
+import com.unity3d.services.ads.gmascar.finder.ScarAdapterVersion;
 import com.unity3d.services.ads.gmascar.finder.ScarVersionFinder;
 import com.unity3d.services.ads.gmascar.handlers.ScarInterstitialAdHandler;
 import com.unity3d.services.ads.gmascar.handlers.ScarRewardedAdHandler;
@@ -30,9 +32,9 @@ import java.util.Arrays;
 public class GMAScarAdapterBridge {
 
 	private IScarAdapter _scarAdapter;
-	private final MobileAdsBridge _mobileAdsBridge;
 	private final ScarVersionFinder _scarVersionFinder;
 
+	private final MobileAdsBridgeBase _mobileAdsBridge;
 	private final InitializeListenerBridge _initializationListenerBridge;
 	private final InitializationStatusBridge _initializationStatusBridge;
 	private final AdapterStatusBridge _adapterStatusBridge;
@@ -43,12 +45,12 @@ public class GMAScarAdapterBridge {
 	private final GMAEventSender _gmaEventSender;
 
 	public GMAScarAdapterBridge() {
-		_mobileAdsBridge = new MobileAdsBridge();
 		_initializationStatusBridge = new InitializationStatusBridge();
 		_initializationListenerBridge = new InitializeListenerBridge();
 		_adapterStatusBridge = new AdapterStatusBridge();
 		_webViewErrorHandler = new WebViewErrorHandler();
 		_scarAdapterFactory = new ScarAdapterFactory();
+		_mobileAdsBridge = new MobileAdsBridgeFactory().createMobileAdsBridge();
 		_presenceDetector = new PresenceDetector(_mobileAdsBridge, _initializationListenerBridge, _initializationStatusBridge, _adapterStatusBridge);
 		_gmaInitializer = new GMAInitializer(_mobileAdsBridge, _initializationListenerBridge, _initializationStatusBridge, _adapterStatusBridge);
 		_scarVersionFinder = new ScarVersionFinder(_mobileAdsBridge, _presenceDetector, _gmaInitializer);
@@ -123,8 +125,8 @@ public class GMAScarAdapterBridge {
 
 	private IScarAdapter getScarAdapterObject() {
 		if (_scarAdapter == null) {
-			long minorVersion = _scarVersionFinder.getGoogleSdkVersionCode();
-			_scarAdapter = _scarAdapterFactory.createScarAdapter(minorVersion, _webViewErrorHandler);
+			ScarAdapterVersion adapterVersion = _mobileAdsBridge.getAdapterVersion(_scarVersionFinder.getVersionCode());
+			_scarAdapter = _scarAdapterFactory.createScarAdapter(adapterVersion, _webViewErrorHandler);
 		}
 		return _scarAdapter;
 	}

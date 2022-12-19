@@ -2,6 +2,7 @@ package com.unity3d.scar.adapter.v1950;
 
 import android.content.Context;
 
+import com.google.android.gms.ads.query.QueryInfo;
 import com.unity3d.scar.adapter.common.IAdsErrorHandler;
 import com.unity3d.scar.adapter.common.IScarAdapter;
 import com.unity3d.scar.adapter.common.IScarInterstitialAdListenerWrapper;
@@ -9,25 +10,25 @@ import com.unity3d.scar.adapter.common.IScarRewardedAdListenerWrapper;
 import com.unity3d.scar.adapter.common.ScarAdapterBase;
 import com.unity3d.scar.adapter.common.scarads.IScarLoadListener;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
+import com.unity3d.scar.adapter.common.signals.SignalsStorage;
 import com.unity3d.scar.adapter.v1950.scarads.ScarInterstitialAd;
 import com.unity3d.scar.adapter.v1950.scarads.ScarRewardedAd;
-import com.unity3d.scar.adapter.v1950.signals.SignalsReader;
-import com.unity3d.scar.adapter.v1950.signals.SignalsStorage;
+import com.unity3d.scar.adapter.v1950.signals.SignalsCollector;
 
 import static com.unity3d.scar.adapter.common.Utils.runOnUiThread;
 
 public class ScarAdapter extends ScarAdapterBase implements IScarAdapter {
 
-	private SignalsStorage _scarSignalStorage;
+	private SignalsStorage<QueryInfo> _signalsStorage;
 
 	public ScarAdapter(IAdsErrorHandler adsErrorHandler) {
 		super(adsErrorHandler);
-		_scarSignalStorage = new SignalsStorage();
-		_scarSignalReader = new SignalsReader(_scarSignalStorage);
+		_signalsStorage = new SignalsStorage();
+		_signalCollector = new SignalsCollector(_signalsStorage);
 	}
 
 	public void loadInterstitialAd(Context context, final ScarAdMetadata scarAd, final IScarInterstitialAdListenerWrapper adListenerWrapper) {
-		final ScarInterstitialAd interstitialAd = new ScarInterstitialAd(context, _scarSignalStorage.getQueryInfoMetadata(scarAd.getPlacementId()), scarAd, _adsErrorHandler, adListenerWrapper);
+		final ScarInterstitialAd interstitialAd = new ScarInterstitialAd(context, _signalsStorage.getQueryInfo(scarAd.getPlacementId()), scarAd, _adsErrorHandler, adListenerWrapper);
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -42,7 +43,7 @@ public class ScarAdapter extends ScarAdapterBase implements IScarAdapter {
 	}
 
 	public void loadRewardedAd(Context context, final ScarAdMetadata scarAd, final IScarRewardedAdListenerWrapper adListenerWrapper) {
-		final ScarRewardedAd rewardedAd = new ScarRewardedAd(context, _scarSignalStorage.getQueryInfoMetadata(scarAd.getPlacementId()), scarAd, _adsErrorHandler, adListenerWrapper);
+		final ScarRewardedAd rewardedAd = new ScarRewardedAd(context, _signalsStorage.getQueryInfo(scarAd.getPlacementId()), scarAd, _adsErrorHandler, adListenerWrapper);
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {

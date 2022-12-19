@@ -22,6 +22,7 @@ public class MetricSender extends MetricSenderBase {
 	private final MetricCommonTags _commonTags;
 	private final String _metricEndpoint;
 	private final String _metricSampleRate;
+	private final String _sessionToken;
 	private final ExecutorService _executorService;
 
 	public MetricSender(Configuration configuration, InitializationStatusReader initializationStatusReader) {
@@ -29,6 +30,7 @@ public class MetricSender extends MetricSenderBase {
 		_metricEndpoint = configuration.getMetricsUrl();
 		_executorService = Executors.newSingleThreadExecutor();
 		_metricSampleRate = String.valueOf((int) Math.round(configuration.getMetricSampleRate()));
+		_sessionToken = configuration.getSessionToken();
 		_commonTags = new MetricCommonTags();
 		_commonTags.updateWithConfig(configuration);
 	}
@@ -80,7 +82,7 @@ public class MetricSender extends MetricSenderBase {
 			@Override
 			public void run() {
 				try {
-					MetricsContainer container = new MetricsContainer(_metricSampleRate, _commonTags, metrics);
+					MetricsContainer container = new MetricsContainer(_metricSampleRate, _commonTags, metrics, _sessionToken);
 					String postBody = new JSONObject(container.asMap()).toString();
 
 					WebRequest request = new WebRequest(_metricEndpoint, "POST", null);

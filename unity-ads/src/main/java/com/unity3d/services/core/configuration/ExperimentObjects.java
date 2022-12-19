@@ -76,6 +76,16 @@ public class ExperimentObjects extends ExperimentsBase {
 		return getExperimentValueOrDefault(EXP_TAG_NEW_LIFECYCLE_TIMER);
 	}
 
+	@Override
+	public boolean isScarInitEnabled() {
+		return getExperimentValueOrDefault(EXP_TAG_SCAR_INIT);
+	}
+
+	@Override
+	public boolean isNewInitFlowEnabled() {
+		return getExperimentValueOrDefault(EXP_TAG_NEW_INIT_FLOW);
+	}
+
 	private boolean getExperimentValue(String experimentName, boolean defaultValue) {
 		ExperimentObject expo = getExperimentObject(experimentName);
 		return (expo != null) ? expo.getBooleanValue() : defaultValue;

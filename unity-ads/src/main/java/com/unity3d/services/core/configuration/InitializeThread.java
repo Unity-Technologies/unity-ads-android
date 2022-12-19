@@ -11,9 +11,13 @@ import com.unity3d.services.core.api.DownloadLatestWebViewStatus;
 import com.unity3d.services.core.api.Lifecycle;
 import com.unity3d.services.core.connectivity.ConnectivityMonitor;
 import com.unity3d.services.core.connectivity.IConnectivityListener;
+import com.unity3d.services.core.device.reader.DeviceInfoDataFactory;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
+import com.unity3d.services.core.device.reader.DeviceInfoReaderCompressor;
+import com.unity3d.services.core.device.reader.DeviceInfoReaderCompressorWithMetrics;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderPrivacyBuilder;
 import com.unity3d.services.core.device.reader.GameSessionIdReader;
+import com.unity3d.services.core.device.reader.IDeviceInfoDataContainer;
 import com.unity3d.services.core.lifecycle.CachedLifecycle;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
@@ -191,9 +195,8 @@ public class InitializeThread extends Thread  {
 				_configuration = localConfig;
 			} catch (Exception e) {
 				DeviceLog.debug("Unity Ads init: Using default configuration parameters");
-			} finally {
-				return new InitializeStateReset(_configuration);
 			}
+			return new InitializeStateReset(_configuration);
 		}
 	}
 
@@ -372,11 +375,12 @@ public class InitializeThread extends Thread  {
 
 		public InitializeState executeWithLoader() {
 			PrivacyConfigStorage privacyConfigStorage = PrivacyConfigStorage.getInstance();
-			DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), privacyConfigStorage, GameSessionIdReader.getInstance());
-			IConfigurationLoader configurationLoader = new ConfigurationLoader(new ConfigurationRequestFactory(_configuration, deviceInfoReaderBuilder));
+			DeviceInfoDataFactory deviceInfoDataFactory = new DeviceInfoDataFactory();
+			IDeviceInfoDataContainer infoReaderCompressor = deviceInfoDataFactory.getDeviceInfoData(InitRequestType.TOKEN);
+			IConfigurationLoader configurationLoader = new ConfigurationLoader(new ConfigurationRequestFactory(_configuration, infoReaderCompressor));
 			if (_configuration.getExperiments().isPrivacyRequestEnabled()) {
-				DeviceInfoReaderBuilder deviceInfoReaderPrivacyBuilder = new DeviceInfoReaderPrivacyBuilder(new ConfigurationReader(), privacyConfigStorage, GameSessionIdReader.getInstance());
-				configurationLoader = new PrivacyConfigurationLoader(configurationLoader, new ConfigurationRequestFactory(_configuration, deviceInfoReaderPrivacyBuilder), privacyConfigStorage);
+				IDeviceInfoDataContainer privacyInfoReaderCompressor = deviceInfoDataFactory.getDeviceInfoData(InitRequestType.PRIVACY);
+				configurationLoader = new PrivacyConfigurationLoader(configurationLoader, new ConfigurationRequestFactory(_configuration, privacyInfoReaderCompressor), privacyConfigStorage);
 			}
 			final Configuration legacyConfiguration = new Configuration(SdkProperties.getConfigUrl());
 			try {
@@ -735,6 +739,7 @@ public class InitializeThread extends Thread  {
 				Thread.sleep(_delay);
 			} catch(Exception e) {
 				DeviceLog.exception("Init retry interrupted", e);
+				Thread.currentThread().interrupt();
 			}
 
 			return _state;
@@ -933,7 +938,7 @@ public class InitializeThread extends Thread  {
 			if(_configuration != null && _webViewData != null) {
 				try {
 					Utilities.writeFile(new File(SdkProperties.getLocalWebViewFile()), _webViewData);
-					Utilities.writeFile(new File(SdkProperties.getLocalConfigurationFilepath()), _configuration.getJSONString());
+					Utilities.writeFile(new File(SdkProperties.getLocalConfigurationFilepath()), _configuration.getFilteredJsonString());
 				} catch (Exception exception) {
 					return new InitializeStateCleanCacheIgnoreError(_configuration, null);
 				}

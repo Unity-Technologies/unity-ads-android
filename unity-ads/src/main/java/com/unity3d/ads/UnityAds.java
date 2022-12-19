@@ -122,7 +122,7 @@ public final class UnityAds {
 	 */
 	public static void initialize(final Context context, final String gameId) {
 		boolean testMode = false;
-		UnityAdsImplementation.initialize(context, gameId, testMode, null);
+		UnityAdsImplementation.getInstance().initialize(context, gameId, testMode, null);
 	}
 
 	/**
@@ -134,7 +134,7 @@ public final class UnityAds {
 	 */
 	public static void initialize(final Context context, final String gameId, final IUnityAdsInitializationListener initializationListener) {
 		boolean testMode = false;
-		UnityAdsImplementation.initialize(context, gameId, testMode, initializationListener);
+		UnityAdsImplementation.getInstance().initialize(context, gameId, testMode, initializationListener);
 	}
 
 	/**
@@ -145,7 +145,7 @@ public final class UnityAds {
 	 * @param testMode If true, only test ads are shown
 	 */
 	public static void initialize(final Context context, final String gameId, final boolean testMode) {
-		UnityAdsImplementation.initialize(context, gameId, testMode, null);
+		UnityAdsImplementation.getInstance().initialize(context, gameId, testMode, null);
 	}
 
 	/**
@@ -157,7 +157,7 @@ public final class UnityAds {
 	 * @param initializationListener Listener for IUnityAdsInitializationListener callbacks
 	 */
 	public static void initialize(final Context context, final String gameId, final boolean testMode, final IUnityAdsInitializationListener initializationListener) {
-		UnityAdsImplementation.initialize(context, gameId, testMode, initializationListener);
+		UnityAdsImplementation.getInstance().initialize(context, gameId, testMode, initializationListener);
 	}
 
 	/**
@@ -166,7 +166,7 @@ public final class UnityAds {
 	 * @return If true, Unity Ads has been successfully initialized
 	 */
 	public static boolean isInitialized() {
-		return UnityServices.isInitialized();
+		return UnityAdsImplementation.getInstance().isInitialized();
 	}
 
 	/**
@@ -175,7 +175,7 @@ public final class UnityAds {
 	 * @return If true, device supports Unity Ads. If false, device can't initialize or show Unity Ads.
 	 */
 	public static boolean isSupported() {
-		return UnityAdsImplementation.isSupported();
+		return UnityAdsImplementation.getInstance().isSupported();
 	}
 
 	/**
@@ -184,7 +184,7 @@ public final class UnityAds {
 	 * @return Current SDK version name
 	 */
 	public static String getVersion() {
-		return UnityAdsImplementation.getVersion();
+		return UnityAdsImplementation.getInstance().getVersion();
 	}
 
 	/**
@@ -195,7 +195,7 @@ public final class UnityAds {
 	 */
 	@Deprecated
 	public static void show(final Activity activity, final String placementId) {
-		UnityAdsImplementation.show(activity, placementId, null);
+		UnityAdsImplementation.getInstance().show(activity, placementId, new UnityAdsShowOptions(), null);
 	}
 
 	/**
@@ -206,7 +206,7 @@ public final class UnityAds {
 	 * @param showListener Listener for IUnityAdsShowListener callbacks
 	 */
 	public static void show(final Activity activity, final String placementId, final IUnityAdsShowListener showListener) {
-		UnityAdsImplementation.show(activity, placementId, showListener);
+		UnityAdsImplementation.getInstance().show(activity, placementId, new UnityAdsShowOptions(), showListener);
 	}
 
 	/**
@@ -218,7 +218,7 @@ public final class UnityAds {
 	 */
 	@Deprecated
 	public static void show(final Activity activity, final String placementId, final UnityAdsShowOptions options) {
-		UnityAdsImplementation.show(activity, placementId, options, null);
+		UnityAdsImplementation.getInstance().show(activity, placementId, options, null);
 	}
 
 	/**
@@ -230,7 +230,7 @@ public final class UnityAds {
 	 * @param showListener Listener for IUnityAdsShowListener callbacks
 	 */
 	public static void show(final Activity activity, final String placementId, final UnityAdsShowOptions options, final IUnityAdsShowListener showListener) {
-		UnityAdsImplementation.show(activity, placementId, options, showListener);
+		UnityAdsImplementation.getInstance().show(activity, placementId, options, showListener);
 	}
 
 	/**
@@ -239,7 +239,7 @@ public final class UnityAds {
 	 * @param debugMode If true, debug mode is on and there will be lots of debug output from Unity Ads. If false, there will be only some short log messages from Unity Ads.
 	 */
 	public static void setDebugMode(boolean debugMode) {
-		UnityAdsImplementation.setDebugMode(debugMode);
+		UnityAdsImplementation.getInstance().setDebugMode(debugMode);
 	}
 
 	/**
@@ -248,7 +248,7 @@ public final class UnityAds {
 	 * @return If true, debug mode is on. If false, debug mode is off.
 	 */
 	public static boolean getDebugMode() {
-		return UnityAdsImplementation.getDebugMode();
+		return UnityAdsImplementation.getInstance().getDebugMode();
 	}
 
 	/**
@@ -278,7 +278,7 @@ public final class UnityAds {
 	 * @param listener The listener which is going to be notified about load request result.
 	 */
 	public static void load(final String placementId, final IUnityAdsLoadListener listener) {
-		UnityAdsImplementation.load(placementId, new UnityAdsLoadOptions(), listener);
+		UnityAdsImplementation.getInstance().load(placementId, new UnityAdsLoadOptions(), listener);
 	}
 
 	/**
@@ -289,21 +289,21 @@ public final class UnityAds {
 	 * @param listener The listener which is going to be notified about load request result.
 	 */
 	public static void load(final String placementId, final UnityAdsLoadOptions loadOptions, final IUnityAdsLoadListener listener) {
-		UnityAdsImplementation.load(placementId, loadOptions, listener);
+		UnityAdsImplementation.getInstance().load(placementId, loadOptions, listener);
 	}
 
 	/**
 	 * Get request token.
 	 */
 	public static String getToken() {
-		return UnityAdsImplementation.getToken();
+		return UnityAdsImplementation.getInstance().getToken();
 	}
 
 	/**
 	 * Get request token in asynchronous way.
 	 */
 	public static void getToken(IUnityAdsTokenListener listener) {
-		UnityAdsImplementation.getToken(listener);
+		UnityAdsImplementation.getInstance().getToken(listener);
 	}
 
 }

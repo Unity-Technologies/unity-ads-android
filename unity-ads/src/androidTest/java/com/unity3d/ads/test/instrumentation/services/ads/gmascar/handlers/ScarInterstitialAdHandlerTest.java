@@ -91,6 +91,14 @@ public class ScarInterstitialAdHandlerTest {
 		Mockito.verify(mockWebViewApp, times(1)).sendEvent(WebViewEventCategory.GMA, GMAEvent.INTERSTITIAL_IMPRESSION_RECORDED);
 	}
 
+	@Test
+	public void testOnAdClicked() {
+		ScarInterstitialAdHandler adHandler = new ScarInterstitialAdHandler(getDefaultScarMeta(), mockEventSubject);
+		adHandler.onAdClicked();
+
+		Mockito.verify(mockWebViewApp, times(1)).sendEvent(WebViewEventCategory.GMA, GMAEvent.AD_CLICKED);
+	}
+
 	private ScarAdMetadata getDefaultScarMeta() {
 		return new ScarAdMetadata("test-placementId", "test-queryId", "test-adUnitId", "test-scarAdString", 30000);
 	}

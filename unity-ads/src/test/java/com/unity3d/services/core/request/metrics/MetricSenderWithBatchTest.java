@@ -8,6 +8,8 @@ import static org.mockito.Mockito.times;
 
 import static java.lang.Thread.currentThread;
 
+import com.unity3d.services.core.properties.InitializationStatusReader;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -68,7 +70,7 @@ public class MetricSenderWithBatchTest{
 
 		Mockito.when(_original.getMetricEndPoint()).thenReturn("url");
 
-		MetricSenderWithBatch senderWithBatch = new MetricSenderWithBatch(_original);
+		MetricSenderWithBatch senderWithBatch = new MetricSenderWithBatch(_original, new InitializationStatusReader());
 		List<Metric> metrics = new ArrayList<>();
 
 		for (int i = 0; i < METRICS_SIZE; i++) {
@@ -93,7 +95,7 @@ public class MetricSenderWithBatchTest{
 
 		Mockito.when(_original.getMetricEndPoint()).thenReturn("url");
 
-		final MetricSenderWithBatch senderWithBatch = new MetricSenderWithBatch(_original);
+		final MetricSenderWithBatch senderWithBatch = new MetricSenderWithBatch(_original, new InitializationStatusReader());
 
 		for (int i = 0; i < NUM_THREADS; i++) {
 			service.execute(new Runnable() {

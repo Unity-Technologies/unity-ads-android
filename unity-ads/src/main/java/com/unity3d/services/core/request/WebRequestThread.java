@@ -32,7 +32,7 @@ public class WebRequestThread {
 				_ready = true;
 
 				synchronized(_readyLock) {
-					_readyLock.notify();
+					_readyLock.notifyAll();
 				}
 			}
 		});
@@ -44,6 +44,7 @@ public class WebRequestThread {
 				}
 			} catch (InterruptedException e) {
 				DeviceLog.debug("Couldn't synchronize thread");
+				Thread.currentThread().interrupt();
 				return;
 			}
 		}
@@ -57,6 +58,7 @@ public class WebRequestThread {
 			try {
 				_pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 			}
 			_queue.clear();
 			_pool = null;

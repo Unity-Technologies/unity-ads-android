@@ -5,20 +5,20 @@ import android.content.Context;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.query.QueryInfo;
 import com.unity3d.scar.adapter.common.GMAAdsError;
 import com.unity3d.scar.adapter.common.IAdsErrorHandler;
 import com.unity3d.scar.adapter.common.IScarInterstitialAdListenerWrapper;
 import com.unity3d.scar.adapter.common.scarads.IScarLoadListener;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
-import com.unity3d.scar.adapter.v1920.signals.QueryInfoMetadata;
 
 public class ScarInterstitialAd extends ScarAdBase {
 
 	private InterstitialAd _interstitialAd;
 	private ScarInterstitialAdListener _interstitialAdDelegate;
 
-	public ScarInterstitialAd(Context context, QueryInfoMetadata queryInfoMetadata, ScarAdMetadata scarAdMetadata, IAdsErrorHandler adsErrorHandler, IScarInterstitialAdListenerWrapper adListener) {
-		super(context, scarAdMetadata, queryInfoMetadata, adsErrorHandler);
+	public ScarInterstitialAd(Context context, QueryInfo queryInfo, ScarAdMetadata scarAdMetadata, IAdsErrorHandler adsErrorHandler, IScarInterstitialAdListenerWrapper adListener) {
+		super(context, scarAdMetadata, queryInfo, adsErrorHandler);
 		_interstitialAd = new InterstitialAd(_context);
 		_interstitialAd.setAdUnitId(_scarAdMetadata.getAdUnitId());
 		_interstitialAdDelegate = new ScarInterstitialAdListener(_interstitialAd, adListener);

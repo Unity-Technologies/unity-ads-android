@@ -94,14 +94,14 @@ public class CacheDirectory {
 			byte[] outData = new byte[inData.length];
 			File testFile = new File(directory, TEST_FILE_NAME);
 
-			FileOutputStream fos = new FileOutputStream(testFile);
-			fos.write(inData);
-			fos.flush();
-			fos.close();
-
-			FileInputStream fis = new FileInputStream(testFile);
-			int readCount = fis.read(outData, 0, outData.length);
-			fis.close();
+			try(FileOutputStream fos = new FileOutputStream(testFile)) {
+				fos.write(inData);
+				fos.flush();
+			}
+			int readCount;
+			try(FileInputStream fis = new FileInputStream(testFile)) {
+				readCount = fis.read(outData, 0, outData.length);
+			}
 
 			if(!testFile.delete()) {
 				DeviceLog.debug("Failed to delete testfile " + testFile.getAbsoluteFile());

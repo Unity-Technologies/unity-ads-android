@@ -3,9 +3,8 @@ package com.unity3d.ads.test.instrumentation.services.ads.gmascar.finder;
 import com.unity3d.services.ads.gmascar.bridges.AdapterStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializationStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializeListenerBridge;
+import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridgeBase;
 import com.unity3d.services.ads.gmascar.finder.PresenceDetector;
-import com.unity3d.services.ads.gmascar.finder.ScarVersionFinder;
-import com.unity3d.services.ads.gmascar.bridges.MobileAdsBridge;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,7 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class PresenceDetectorTest {
 	@Mock
-	MobileAdsBridge mobileAdsBridgeMock;
+	MobileAdsBridgeBase mobileAdsBridgeMock;
 	@Mock
 	InitializeListenerBridge initializeListenerBridgeMock;
 	@Mock

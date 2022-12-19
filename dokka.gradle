@@ -1,0 +1,52 @@
+apply plugin: 'org.jetbrains.dokka'
+
+tasks.dokkaJavadoc.configure {
+
+    def docs = new File("$rootDir/../javadoc/")
+
+    if (!docs.exists()) {
+        docs.mkdir()
+        println(docs.toString())
+    }
+
+    outputDirectory.set(docs)
+
+    def pkgToInclude = [
+        "com.unity3d.ads",
+        "com.unity3d.services",
+    ]
+
+    def fileNamesToExclude = [
+        "R.java"
+    ]
+
+    def filesToExclude = []
+    for (def fileName : fileNamesToExclude) {
+        filesToExclude << "src/main/java/com/unity3d/ads/$fileName"
+    }
+
+    dokkaSourceSets {
+        configureEach {
+            includeNonPublic.set(false)
+            skipEmptyPackages.set(true)
+            reportUndocumented.set(false)
+            jdkVersion.set(7)
+
+            // By default all packages are suppressed.
+            perPackageOption {
+                matchingRegex.set("com.unity3d.*")
+                suppress.set(true)
+            }
+
+            // Reverse suppression for packages to be included.
+            for (def pkg : pkgToInclude) {
+                perPackageOption {
+                    matchingRegex.set(pkg)
+                    suppress.set(false)
+                }
+            }
+
+            suppressedFiles.setFrom(files(filesToExclude))
+        }
+    }
+}

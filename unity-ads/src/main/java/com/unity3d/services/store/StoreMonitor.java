@@ -35,7 +35,7 @@ public class StoreMonitor {
 	private static StoreExceptionHandler _storeExceptionHandler;
 	private static StoreLifecycleListener _lifecycleListener;
 
-	public static void initialize(StoreExceptionHandler storeExceptionHandler) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InterruptedException, InvocationTargetException {
+	public static void initialize(StoreExceptionHandler storeExceptionHandler) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		if (_isInitialized.get()) {
 			// Already initialized
 			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.STORE, StoreEvent.INITIALIZATION_REQUEST_RESULT, BillingResultResponseCode.OK.getResponseCode());

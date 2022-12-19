@@ -5,6 +5,7 @@ import com.unity3d.services.core.broadcast.BroadcastMonitor;
 import com.unity3d.services.core.cache.CacheThread;
 import com.unity3d.services.core.connectivity.ConnectivityMonitor;
 import com.unity3d.services.core.device.AdvertisingId;
+import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.device.OpenAdvertisingId;
 import com.unity3d.services.core.device.StorageManager;
 import com.unity3d.services.core.device.VolumeChange;
@@ -12,7 +13,11 @@ import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.WebRequestThread;
+import com.unity3d.services.core.request.metrics.Metric;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CoreModuleConfiguration implements IModuleConfiguration {
 	public Class[] getWebAppApiClassList() {
@@ -37,7 +42,6 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 	}
 
 	public boolean resetState(Configuration configuration) {
-		SDKMetrics.setConfiguration(configuration);
 		BroadcastMonitor.removeAllBroadcastListeners();
 		CacheThread.cancel();
 		WebRequestThread.cancel();
@@ -52,7 +56,6 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 	}
 
 	public boolean initModuleState(Configuration configuration) {
-		SDKMetrics.setConfiguration(configuration);
 		return true;
 	}
 
@@ -95,6 +98,16 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 				SdkProperties.notifyInitializationComplete();
 			}
 		});
+		collectMetrics();
 		return true;
+	}
+
+	private void collectMetrics() {
+		List<Metric> metrics = new ArrayList<>();
+		int hasX264 = Device.hasX264Decoder() ? 1 : 0;
+		int hasX265 = Device.hasX265Decoder() ? 1 : 0;
+		metrics.add(new Metric("native_device_decoder_x264", hasX264, null));
+		metrics.add(new Metric("native_device_decoder_x265", hasX265, null));
+		SDKMetrics.getInstance().sendMetrics(metrics);
 	}
 }

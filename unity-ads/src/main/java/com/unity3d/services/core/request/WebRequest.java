@@ -159,9 +159,8 @@ public class WebRequest {
 						pout.close();
 					}
 				}
-				catch (Exception e) {
+				catch (IOException e) {
 					DeviceLog.exception("Error closing writer", e);
-					throw e;
 				}
 			}
 		}

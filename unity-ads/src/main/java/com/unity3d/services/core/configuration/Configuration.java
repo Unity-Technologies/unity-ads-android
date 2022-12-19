@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class Configuration {
@@ -41,9 +42,11 @@ public class Configuration {
 	private double _metricSampleRate;
 	private long _webViewAppCreateTimeout;
 
-	private String _configJsonString;
+	private String _filteredJsonString;
+	private JSONObject _rawJsonData;
 	private String _configUrl;
 	private String _unifiedAuctionToken;
+	private String _sTkn;
 	private String _stateId;
 	private ExperimentsReader _experimentReader;
 	private int _tokenTimeout;
@@ -85,8 +88,7 @@ public class Configuration {
 	public Configuration(String configUrl, IExperiments experiments) {
 		this();
 		_configUrl = configUrl;
-		DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance(), GameSessionIdReader.getInstance());
-		_configurationRequestFactory = new ConfigurationRequestFactory(this, deviceInfoReaderBuilder);
+		_configurationRequestFactory = new ConfigurationRequestFactory(this);
 		_experimentReader.updateLocalExperiments(experiments);
 	}
 
@@ -150,6 +152,8 @@ public class Configuration {
 
 	public String getUnifiedAuctionToken() { return _unifiedAuctionToken; }
 
+	public String getSessionToken() { return _sTkn; }
+
 	public IExperiments getExperiments() {
 		return _experimentReader.getCurrentlyActiveExperiments();
 	}
@@ -186,9 +190,11 @@ public class Configuration {
 		}
 	}
 
-	public String getJSONString() { return _configJsonString; }
+	public String getFilteredJsonString() { return _filteredJsonString; }
 
-	protected void makeRequest () throws Exception {
+	public JSONObject getRawConfigData() { return _rawJsonData; }
+
+	public void makeRequest () throws Exception {
 		if (_configUrl == null) {
 			throw new MalformedURLException("Base URL is null");
 		}
@@ -200,8 +206,10 @@ public class Configuration {
 		try {
 			handleConfigurationData(new JSONObject(data), true);
 		} catch (Exception e) {
+			InitializeEventsMetricSender.getInstance().didConfigRequestEnd(false);
 			throw e;
 		}
+		InitializeEventsMetricSender.getInstance().didConfigRequestEnd(true);
 		saveToDisk();
 	}
 
@@ -228,9 +236,11 @@ public class Configuration {
 
 		_unifiedAuctionToken = !configData.isNull("tkn") ? configData.optString("tkn") : null;
 		_stateId = !configData.isNull("sid") ? configData.optString("sid") : null;
+		_sTkn = !configData.isNull("sTkn") ? configData.optString("sTkn") : null;
 
 		this.setOptionalFields(configData, isRemoteConfig);
-		_configJsonString = getFilteredConfigJson(configData).toString();
+		_filteredJsonString = getFilteredConfigJson(configData).toString();
+		_rawJsonData = configData;
 	}
 
 	private void setOptionalFields(JSONObject configData, boolean isRemoteConfig) {
@@ -282,7 +292,7 @@ public class Configuration {
 	}
 
 	public void saveToDisk() {
-		Utilities.writeFile(new File(SdkProperties.getLocalConfigurationFilepath()), getJSONString());
+		Utilities.writeFile(new File(SdkProperties.getLocalConfigurationFilepath()), getFilteredJsonString());
 	}
 
 	private JSONObject getFilteredConfigJson(JSONObject jsonConfig) throws JSONException {
@@ -290,8 +300,10 @@ public class Configuration {
 		for (Iterator<String> it = jsonConfig.keys(); it.hasNext(); ) {
 			String currentKey = it.next();
 			Object currentValue = jsonConfig.opt(currentKey);
-			if (!currentKey.equals("tkn") && !currentKey.equals("sid"))
-			filteredConfig.put(currentKey, currentValue);
+			// Filters out Token, State ID and SRR data from jsonConfig
+			if (!currentKey.equalsIgnoreCase("tkn") && !currentKey.equalsIgnoreCase("sid") && !currentKey.equalsIgnoreCase("srr") && !currentKey.equalsIgnoreCase("sTkn")) {
+				filteredConfig.put(currentKey, currentValue);
+			}
 		}
 		return filteredConfig;
 	}

@@ -14,8 +14,8 @@ public class IntervalTimer extends BaseTimer implements IIntervalTimer {
 
 	private final AtomicInteger _currentPosition = new AtomicInteger(0);
 
-	public IntervalTimer(final Integer totalDurationMs, final Integer totalIntervals, IIntervalTimerListener timerListener, LifecycleCache lifecycleCache) {
-		super(totalDurationMs, null, lifecycleCache);
+	public IntervalTimer(final Integer totalDurationMs, final Integer totalIntervals, boolean useNewTimer, IIntervalTimerListener timerListener, LifecycleCache lifecycleCache) {
+		super(totalDurationMs, useNewTimer, null, lifecycleCache);
 		_totalIntervals = totalIntervals;
 		_timerListener = timerListener;
 

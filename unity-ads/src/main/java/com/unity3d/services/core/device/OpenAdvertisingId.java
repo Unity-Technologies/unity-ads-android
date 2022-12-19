@@ -174,6 +174,7 @@ public class OpenAdvertisingId {
 				_binderQueue.put(service);
 			} catch (InterruptedException localInterruptedException) {
 				DeviceLog.debug("Couldn't put service to binder que");
+				Thread.currentThread().interrupt();
 			}
 		}
 

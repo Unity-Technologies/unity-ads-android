@@ -3,6 +3,7 @@ package com.unity3d.services.core.configuration;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderCompressor;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderCompressorWithMetrics;
+import com.unity3d.services.core.device.reader.IDeviceInfoDataContainer;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
@@ -16,11 +17,15 @@ import java.util.Map;
 
 public class ConfigurationRequestFactory {
 	private final Configuration _configuration;
-	private final DeviceInfoReaderBuilder _deviceInfoReaderBuilder;
+	private final IDeviceInfoDataContainer _deviceInfoDataContainer;
 
-	public ConfigurationRequestFactory(Configuration configuration, DeviceInfoReaderBuilder deviceInfoReaderBuilder) {
+	public ConfigurationRequestFactory(Configuration configuration) {
+		this(configuration, null);
+	}
+
+	public ConfigurationRequestFactory(Configuration configuration, IDeviceInfoDataContainer deviceInfoDataContainer) {
 		_configuration = configuration;
-		_deviceInfoReaderBuilder = deviceInfoReaderBuilder;
+		_deviceInfoDataContainer = deviceInfoDataContainer;
 	}
 
 	public Configuration getConfiguration() {
@@ -37,8 +42,7 @@ public class ConfigurationRequestFactory {
 			Map<String, List<String>> headers = new HashMap<>();
 			headers.put("Content-Encoding", Collections.singletonList("gzip"));
 			webRequest = new WebRequest(urlBuilder.toString(), "POST", headers);
-			DeviceInfoReaderCompressorWithMetrics infoReaderCompressor = new DeviceInfoReaderCompressorWithMetrics(new DeviceInfoReaderCompressor(_deviceInfoReaderBuilder.build()));
-			byte[] queryData = infoReaderCompressor.getDeviceData();
+			byte[] queryData = (_deviceInfoDataContainer != null) ? _deviceInfoDataContainer.getDeviceData() : null;
 			webRequest.setBody(queryData);
 		} else {
 			urlBuilder.append("?ts=").append(System.currentTimeMillis());

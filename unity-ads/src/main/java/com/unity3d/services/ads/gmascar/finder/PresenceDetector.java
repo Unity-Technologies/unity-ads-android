@@ -3,15 +3,15 @@ package com.unity3d.services.ads.gmascar.finder;
 import com.unity3d.services.ads.gmascar.bridges.AdapterStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializationStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializeListenerBridge;
-import com.unity3d.services.ads.gmascar.bridges.MobileAdsBridge;
+import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridgeBase;
 
 public class PresenceDetector {
-	private MobileAdsBridge _mobileAdsBridge;
+	private MobileAdsBridgeBase _mobileAdsBridge;
 	private InitializeListenerBridge _initializationListenerBridge;
 	private InitializationStatusBridge _initializationStatusBridge;
 	private AdapterStatusBridge _adapterStatusBridge;
 
-	public PresenceDetector(MobileAdsBridge mobileAdsBridge, InitializeListenerBridge initializeListenerBridge,
+	public PresenceDetector(MobileAdsBridgeBase mobileAdsBridge, InitializeListenerBridge initializeListenerBridge,
 							InitializationStatusBridge initializationStatusBridge, AdapterStatusBridge adapterStatusBridge) {
 		_mobileAdsBridge = mobileAdsBridge;
 		_initializationListenerBridge = initializeListenerBridge;

@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class Experiments extends ExperimentsBase {
 
-	private static final Set<String> NEXT_SESSION_FLAGS = new HashSet<>(Arrays.asList("tsi", "tsi_upii", "tsi_p", "tsi_nt", "tsi_prr", "tsi_prw"));
+	private static final Set<String> NEXT_SESSION_FLAGS = new HashSet<>(Arrays.asList("tsi", "tsi_upii", "tsi_p", "tsi_nt", "tsi_prr", "tsi_prw", "s_init"));
 
 	private final JSONObject _experimentData;
 
@@ -72,10 +72,19 @@ public class Experiments extends ExperimentsBase {
 		return _experimentData.optBoolean(EXP_TAG_WEB_GESTURE_NOT_REQUIRED, false);
 	}
 
-
-		@Override
+	@Override
 	public boolean isNewLifecycleTimer() {
 		return _experimentData.optBoolean(EXP_TAG_NEW_LIFECYCLE_TIMER, false);
+	}
+
+	@Override
+	public boolean isScarInitEnabled() {
+		return _experimentData.optBoolean(EXP_TAG_SCAR_INIT, false);
+	}
+
+	@Override
+	public boolean isNewInitFlowEnabled() {
+		return _experimentData.optBoolean(EXP_TAG_NEW_INIT_FLOW, false);
 	}
 
 	public JSONObject getExperimentsAsJson() {

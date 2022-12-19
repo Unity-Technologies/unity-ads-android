@@ -4,7 +4,7 @@ import com.unity3d.scar.adapter.common.GMAEvent;
 import com.unity3d.services.ads.gmascar.bridges.AdapterStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializationStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializeListenerBridge;
-import com.unity3d.services.ads.gmascar.bridges.MobileAdsBridge;
+import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridgeBase;
 import com.unity3d.services.ads.gmascar.utils.GMAEventSender;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
@@ -15,27 +15,25 @@ import java.util.Map;
 
 public class GMAInitializer {
 
-	private MobileAdsBridge _mobileAdsBridge;
+	private MobileAdsBridgeBase _mobileAdsBridge;
 	private InitializeListenerBridge _initializationListenerBridge;
 	private InitializationStatusBridge _initializationStatusBridge;
 	private AdapterStatusBridge _adapterStatusBridge;
 	private GMAEventSender _gmaEventSender;
 
-	public GMAInitializer(MobileAdsBridge mobileAdsBridge, InitializeListenerBridge initializeListenerBridge,
+	public GMAInitializer(MobileAdsBridgeBase mobileAdsBridge, InitializeListenerBridge initializeListenerBridge,
 						  InitializationStatusBridge initializationStatusBridge, AdapterStatusBridge adapterStatusBridge) {
 		_mobileAdsBridge = mobileAdsBridge;
 		_initializationListenerBridge = initializeListenerBridge;
 		_initializationStatusBridge = initializationStatusBridge;
 		_adapterStatusBridge = adapterStatusBridge;
+
 		_gmaEventSender = new GMAEventSender();
 	}
 
-	// We need to initialize GMA SDK in order to get the version string
+	// We need to initialize GMA SDK in order to get the version string in GMA SDK V20 and below or if part of the isScarInitEnabled experiment group
 	public void initializeGMA() {
-		if (isInitialized()) {
-			_gmaEventSender.send(GMAEvent.ALREADY_INITIALIZED);
-			return;
-		} else {
+		if (shouldInitialize()) {
 			_mobileAdsBridge.initialize(ClientProperties.getApplicationContext(), _initializationListenerBridge.createInitializeListenerProxy());
 		}
 	}
@@ -62,11 +60,18 @@ public class GMAInitializer {
 		try {
 			isInitialized = initSuccessful(_mobileAdsBridge.getInitializationStatus());
 		} catch (Exception e) {
-			isInitialized = false;
 			DeviceLog.debug("ERROR: Could not get initialization status of GMA SDK - %s", e.getLocalizedMessage());
-		} finally {
-			return isInitialized;
 		}
+		return isInitialized;
+	}
+
+	public boolean shouldInitialize() {
+		if (isInitialized()) {
+			_gmaEventSender.send(GMAEvent.ALREADY_INITIALIZED);
+			return false;
+		}
+
+		return _mobileAdsBridge.shouldInitialize();
 	}
 
 	public InitializeListenerBridge getInitializeListenerBridge() {

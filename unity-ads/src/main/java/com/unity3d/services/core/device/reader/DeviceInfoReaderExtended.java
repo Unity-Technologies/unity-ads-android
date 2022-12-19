@@ -2,6 +2,7 @@ package com.unity3d.services.core.device.reader;
 
 import android.webkit.WebSettings;
 
+import com.unity3d.services.core.configuration.InitRequestType;
 import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
@@ -63,11 +64,6 @@ public class DeviceInfoReaderExtended implements IDeviceInfoReader {
 		deviceInfoData.put("eventTimeStamp", System.currentTimeMillis() / 1000);
 		deviceInfoData.put("cpuCount", Device.getCPUCount());
 		deviceInfoData.put("usbConnected", Device.isUSBConnected());
-		try {
-			deviceInfoData.put("apkHash", Device.getApkDigest());
-		} catch (Exception e) {
-			DeviceLog.error("Could not get APK Digest");
-		}
 		deviceInfoData.put("apkDeveloperSigningCertificateHash", Device.getCertificateFingerprint());
 		deviceInfoData.put("deviceUpTime", Device.getUptime());
 		deviceInfoData.put("deviceElapsedRealtime", Device.getElapsedRealtime());
@@ -79,7 +75,7 @@ public class DeviceInfoReaderExtended implements IDeviceInfoReader {
 
 		// Misc
 		deviceInfoData.put("test", SdkProperties.isTestMode());
-		deviceInfoData.put("callType", "token");
+		deviceInfoData.put("callType", InitRequestType.TOKEN.getCallType());
 		return deviceInfoData;
 	}
 

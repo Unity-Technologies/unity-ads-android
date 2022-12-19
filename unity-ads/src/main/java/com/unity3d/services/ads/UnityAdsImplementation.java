@@ -25,31 +25,16 @@ import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.WebViewBridgeInvoker;
 
-public final class UnityAdsImplementation {
+public final class UnityAdsImplementation implements IUnityAds {
 	private static Configuration configuration = null;
 	private static WebViewBridgeInvoker webViewBridgeInvoker = new WebViewBridgeInvoker();
+	private static IUnityAds instance;
 
-	/**
-	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
-	 *
-	 * @param context Current Android application context of calling app
-	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
-	 * @param initializationListener Listener for IUnityAdsInitializationListener callbacks
-	 */
-	public static void initialize(final Context context, final String gameId, final IUnityAdsInitializationListener initializationListener) {
-		boolean testMode = false;
-		initialize(context, gameId, testMode, initializationListener);
-	}
-
-	/**
-	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
-	 *
-	 * @param context Current Android application context of calling app
-	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
-	 * @param testMode If true, only test ads are shown
-	 */
-	public static void initialize(final Context context, final String gameId, final boolean testMode) {
-		initialize(context, gameId, testMode, null);
+	public static IUnityAds getInstance() {
+		if (instance == null) {
+			instance = new UnityAdsImplementation();
+		}
+		return instance;
 	}
 
 	/**
@@ -59,7 +44,8 @@ public final class UnityAdsImplementation {
 	 * @param testMode If true, only test ads are shown
 	 * @param initializationListener Listener for IUnityAdsInitializationListener callbacks
 	 */
-	public static void initialize(final Context context, final String gameId, final boolean testMode, final IUnityAdsInitializationListener initializationListener) {
+	@Override
+	public void initialize(final Context context, final String gameId, final boolean testMode, final IUnityAdsInitializationListener initializationListener) {
 		DeviceLog.entered();
 
 		UnityServices.initialize(context, gameId, testMode, initializationListener);
@@ -70,7 +56,8 @@ public final class UnityAdsImplementation {
 	 *
 	 * @return If true, Unity Ads has been successfully initialized
 	 */
-	public static boolean isInitialized() {
+	@Override
+	public boolean isInitialized() {
 		return UnityServices.isInitialized();
 	}
 
@@ -79,7 +66,8 @@ public final class UnityAdsImplementation {
 	 *
 	 * @return If true, device supports Unity Ads. If false, device can't initialize or show Unity Ads.
 	 */
-	public static boolean isSupported() {
+	@Override
+	public boolean isSupported() {
 		return UnityServices.isSupported();
 	}
 
@@ -88,7 +76,8 @@ public final class UnityAdsImplementation {
 	 *
 	 * @return Current SDK version name
 	 */
-	public static String getVersion() {
+	@Override
+	public String getVersion() {
 		return UnityServices.getVersion();
 	}
 
@@ -98,7 +87,7 @@ public final class UnityAdsImplementation {
 	 * @param activity Current Android activity of calling app
 	 * @param placementId Placement, as defined in Unity Ads admin tools
 	 */
-	public static void show(final Activity activity, final String placementId) {
+	public void show(final Activity activity, final String placementId) {
 		show(activity, placementId, new UnityAdsShowOptions(), null);
 	}
 
@@ -109,7 +98,7 @@ public final class UnityAdsImplementation {
 	 * @param placementId Placement, as defined in Unity Ads admin tools
 	 * @param showListener Listener for IUnityAdsShowListener callbacks
 	 */
-	public static void show(final Activity activity, final String placementId, final IUnityAdsShowListener showListener) {
+	public void show(final Activity activity, final String placementId, final IUnityAdsShowListener showListener) {
 		show(activity, placementId, new UnityAdsShowOptions(), showListener);
 	}
 
@@ -121,7 +110,8 @@ public final class UnityAdsImplementation {
 	 * @param showOptions Custom options
 	 * @param showListener Listener for IUnityAdsShowListener callbacks
 	 */
-	public static void show(final Activity activity, final String placementId, final UnityAdsShowOptions showOptions, final IUnityAdsShowListener showListener) {
+	@Override
+	public void show(final Activity activity, final String placementId, final UnityAdsShowOptions showOptions, final IUnityAdsShowListener showListener) {
 		if (!isSupported()) {
 			String showErrorMessage = "Unity Ads is not supported for this device";
 			handleShowError(showListener, placementId, UnityAds.UnityAdsShowError.NOT_INITIALIZED, showErrorMessage);
@@ -142,7 +132,7 @@ public final class UnityAdsImplementation {
 		ShowModule.getInstance().executeAdOperation(WebViewApp.getCurrentApp(), new ShowOperationState(placementId, showListener, activity, showOptions, config));
 	}
 
-	private static void handleShowError(IUnityAdsShowListener showListener, String placementId, UnityAds.UnityAdsShowError error, String message) {
+	private void handleShowError(IUnityAdsShowListener showListener, String placementId, UnityAds.UnityAdsShowError error, String message) {
 		SDKMetrics.getInstance().sendMetricWithInitState(AdOperationMetric.newAdShowFailure(error,0L));
 		if (showListener == null) return;
 		showListener.onUnityAdsShowFailure(placementId, error, message);
@@ -153,7 +143,8 @@ public final class UnityAdsImplementation {
 	 *
 	 * @param debugMode If true, debug mode is on and there will be lots of debug output from Unity Ads. If false, there will be only some short log messages from Unity Ads.
 	 */
-	public static void setDebugMode(boolean debugMode) {
+	@Override
+	public void setDebugMode(boolean debugMode) {
 		UnityServices.setDebugMode(debugMode);
 	}
 
@@ -162,20 +153,24 @@ public final class UnityAdsImplementation {
 	 *
 	 * @return If true, debug mode is on. If false, debug mode is off.
 	 */
-	public static boolean getDebugMode() {
+	@Override
+	public boolean getDebugMode() {
 		return UnityServices.getDebugMode();
 	}
 
-	public static void load(final String placementId, final UnityAdsLoadOptions loadOptions, final IUnityAdsLoadListener listener) {
+	@Override
+	public void load(final String placementId, final UnityAdsLoadOptions loadOptions, final IUnityAdsLoadListener listener) {
 		Configuration config = configuration == null ? new Configuration() : configuration;
 		LoadModule.getInstance().executeAdOperation(webViewBridgeInvoker, new LoadOperationState(placementId, listener, loadOptions, config));
 	}
 
-	public static String getToken() {
+	@Override
+	public String getToken() {
 		return TokenStorage.getToken();
 	}
 
-	public static void getToken(IUnityAdsTokenListener listener) {
+	@Override
+	public void getToken(IUnityAdsTokenListener listener) {
 		if (listener == null) {
 			DeviceLog.info("Please provide non-null listener to UnityAds.GetToken method");
 			return;

@@ -92,6 +92,14 @@ public class ScarRewardedAdHandlerTest {
 		Mockito.verify(mockWebViewApp, times(1)).sendEvent(WebViewEventCategory.GMA, GMAEvent.REWARDED_IMPRESSION_RECORDED);
 	}
 
+	@Test
+	public void testOnAdClicked() {
+		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject);
+		adHandler.onAdClicked();
+
+		Mockito.verify(mockWebViewApp, times(1)).sendEvent(WebViewEventCategory.GMA, GMAEvent.AD_CLICKED);
+	}
+
 	private ScarAdMetadata getDefaultScarMeta() {
 		return new ScarAdMetadata("test-placementId", "test-queryId", "test-adUnitId", "test-scarAdString", 30000);
 	}

@@ -10,6 +10,8 @@ public interface IInitializeEventsMetricSender {
 
 	void didConfigRequestStart();
 
+	void didConfigRequestEnd(boolean success);
+
 	void didPrivacyConfigRequestStart();
 
 	void didPrivacyConfigRequestEnd(boolean success);
@@ -32,7 +34,11 @@ public interface IInitializeEventsMetricSender {
 
 	Long privacyConfigDuration();
 
+	Long configRequestDuration();
+
 	Map<String, String> getRetryTags();
 
 	void sendMetric(Metric metric);
+
+	void setNewInitFlow(boolean isNewInitFlow);
 }

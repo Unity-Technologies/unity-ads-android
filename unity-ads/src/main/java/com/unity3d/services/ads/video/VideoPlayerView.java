@@ -58,9 +58,17 @@ public class VideoPlayerView extends VideoView {
 		_prepareTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				if(!isPlaying()) {
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PREPARE_TIMEOUT, _videoUrl);
-					DeviceLog.error("Video player prepare timeout: " + _videoUrl);
+				boolean isPlaying = false;
+				try {
+					isPlaying = isPlaying();
+					if(!isPlaying) {
+						WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PREPARE_TIMEOUT, _videoUrl);
+						DeviceLog.error("Video player prepare timeout: " + _videoUrl);
+					}
+				}
+				catch (IllegalStateException e) {
+					DeviceLog.exception("Exception while preparing timer", e);
+					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE, VideoPlayerEvent.PREPARE_TIMEOUT, _videoUrl, isPlaying);
 				}
 			}
 		}, delay);

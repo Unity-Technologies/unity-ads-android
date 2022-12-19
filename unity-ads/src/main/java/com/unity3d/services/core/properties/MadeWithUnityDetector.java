@@ -11,14 +11,11 @@ public class MadeWithUnityDetector {
 
 	public static boolean isMadeWithUnity() {
 		try {
-			Class cls = Class.forName(UNITY_PLAYER_CLASS_NAME);
-			if (cls != null) {
-				return true;
-			}
+			Class.forName(UNITY_PLAYER_CLASS_NAME);
+			return true;
 		} catch(ClassNotFoundException e) {
 			// Do nothing
-		} finally {
-			return false;
 		}
+		return false;
 	}
 }

@@ -108,7 +108,7 @@ public class InitializeThreadTest {
 		json.put("lto", 5);
 		json.put("wto", 6);
 		Configuration initConfig = new Configuration(json);
-		boolean fileWritten = Utilities.writeFile(new File(filePath), initConfig.getJSONString());
+		boolean fileWritten = Utilities.writeFile(new File(filePath), initConfig.getFilteredJsonString());
 		assertTrue("File was not written properly", fileWritten);
 
 		InitializeThread.InitializeStateLoadConfigFile state = new InitializeThread.InitializeStateLoadConfigFile(initConfig);

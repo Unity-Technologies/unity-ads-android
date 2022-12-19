@@ -5,7 +5,7 @@ import android.content.Context;
 
 import com.unity3d.scar.adapter.common.scarads.IScarAd;
 import com.unity3d.scar.adapter.common.signals.ISignalCollectionListener;
-import com.unity3d.scar.adapter.common.signals.ISignalsReader;
+import com.unity3d.scar.adapter.common.signals.ISignalsCollector;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.unity3d.scar.adapter.common.Utils.runOnUiThread;
 
 public abstract class ScarAdapterBase implements IScarAdapter {
-	protected ISignalsReader _scarSignalReader;
+	protected ISignalsCollector _signalCollector;
 	protected Map<String, IScarAd> _loadedAds = new ConcurrentHashMap<>();
 	protected IScarAd _currentAdReference;
 	protected IAdsErrorHandler _adsErrorHandler;
@@ -24,7 +24,7 @@ public abstract class ScarAdapterBase implements IScarAdapter {
 
 	@Override
 	public void getSCARSignals(Context context, String[] interstitialList, String[] rewardedList, ISignalCollectionListener signalCompletionListener) {
-		_scarSignalReader.getSCARSignals(context, interstitialList, rewardedList, signalCompletionListener);
+		_signalCollector.getSCARSignals(context, interstitialList, rewardedList, signalCompletionListener);
 	}
 
 	@Override

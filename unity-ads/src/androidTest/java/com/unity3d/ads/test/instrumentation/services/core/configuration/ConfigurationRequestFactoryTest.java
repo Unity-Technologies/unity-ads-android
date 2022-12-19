@@ -4,6 +4,7 @@ import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.ConfigurationRequestFactory;
 import com.unity3d.services.core.configuration.Experiments;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
+import com.unity3d.services.core.device.reader.IDeviceInfoDataContainer;
 import com.unity3d.services.core.device.reader.IDeviceInfoReader;
 import com.unity3d.services.core.request.WebRequest;
 
@@ -16,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -29,16 +31,15 @@ public class ConfigurationRequestFactoryTest {
 	Configuration _configurationMock;
 
 	@Mock
-	IDeviceInfoReader _deviceInfoReaderMock;
+	IDeviceInfoDataContainer _deviceInfoDataContainerMock;
 
-	@Mock
-	DeviceInfoReaderBuilder _deviceInfoReaderBuilderMock;
+	static final byte[] DUMMY_DEVICE_DATA = "{\"testKey\":\"testData\"}".getBytes();
 
 	static final String CONFIG_URL = "http://configurl/";
 
 	@Before
 	public void setup() {
-		Mockito.when(_deviceInfoReaderBuilderMock.build()).thenReturn(_deviceInfoReaderMock);
+		Mockito.when(_deviceInfoDataContainerMock.getDeviceData()).thenReturn(DUMMY_DEVICE_DATA);
 		Mockito.when(_configurationMock.getExperiments()).thenReturn(_experimentsMock);
 		Mockito.when(_configurationMock.getConfigUrl()).thenReturn(CONFIG_URL);
 	}
@@ -46,17 +47,18 @@ public class ConfigurationRequestFactoryTest {
 	@Test
 	public void testConfigurationRequestFactoryGetIfTsiEnabled() throws MalformedURLException {
 		Mockito.when(_experimentsMock.isTwoStageInitializationEnabled()).thenReturn(true);
-		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoReaderBuilderMock);
+		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoDataContainerMock);
 		WebRequest webRequest = configurationRequestFactory.getWebRequest();
 		Assert.assertEquals("POST", webRequest.getRequestType());
 		Map<String, List<String>> headers = webRequest.getHeaders();
 		Assert.assertEquals("gzip", headers.get("Content-Encoding").get(0));
+		Assert.assertEquals(DUMMY_DEVICE_DATA, webRequest.getBody());
 	}
 
 	@Test
 	public void testConfigurationRequestFactoryGetIfTsiDisabled() throws MalformedURLException {
 		Mockito.when(_experimentsMock.isTwoStageInitializationEnabled()).thenReturn(false);
-		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoReaderBuilderMock);
+		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoDataContainerMock);
 		WebRequest webRequest = configurationRequestFactory.getWebRequest();
 		validateGetRequest(webRequest);
 	}
@@ -64,7 +66,7 @@ public class ConfigurationRequestFactoryTest {
 	@Test
 	public void testConfigurationRequestFactoryGetNullExperiments() throws MalformedURLException {
 		Mockito.when(_configurationMock.getExperiments()).thenReturn(null);
-		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoReaderBuilderMock);
+		ConfigurationRequestFactory configurationRequestFactory = new ConfigurationRequestFactory(_configurationMock, _deviceInfoDataContainerMock);
 		WebRequest webRequest = configurationRequestFactory.getWebRequest();
 		validateGetRequest(webRequest);
 	}

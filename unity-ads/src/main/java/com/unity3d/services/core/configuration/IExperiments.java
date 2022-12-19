@@ -15,6 +15,8 @@ public interface IExperiments {
 	boolean isWebAssetAdCaching();
 	boolean isWebGestureNotRequired();
 	boolean isNewLifecycleTimer();
+	boolean isScarInitEnabled();
+	boolean isNewInitFlowEnabled();
 
 	JSONObject getCurrentSessionExperiments();
 	JSONObject getNextSessionExperiments();

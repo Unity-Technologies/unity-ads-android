@@ -2,6 +2,7 @@ package com.unity3d.services.core.timer;
 
 import com.unity3d.services.core.lifecycle.CachedLifecycle;
 import com.unity3d.services.core.lifecycle.IAppActiveListener;
+import com.unity3d.services.core.lifecycle.IAppEventListener;
 import com.unity3d.services.core.lifecycle.LifecycleCache;
 import com.unity3d.services.core.lifecycle.LifecycleEvent;
 import com.unity3d.services.core.log.DeviceLog;
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Simple class that represents a timer with a {@link ITimerListener} that notifies when finished
  */
-public class BaseTimer implements IBaseTimer, IAppActiveListener {
+public class BaseTimer implements IBaseTimer {
 
 	private final LifecycleCache _lifecycleCache;
 	final Integer _totalDurationMs;
@@ -23,23 +24,67 @@ public class BaseTimer implements IBaseTimer, IAppActiveListener {
 	Integer _remainingDurationMs;
 	private ITimerListener _timerListener;
 	private ScheduledFuture<?> _task;
+	private final boolean _useNewTimer;
 
 	private ScheduledExecutorService _timerService;
 	private final AtomicBoolean _isRunning = new AtomicBoolean(false);
 	private final AtomicBoolean _hasPaused = new AtomicBoolean(false);
 
-	public BaseTimer(final Integer totalDurationMs, ITimerListener timerListener, LifecycleCache lifecycleCache) {
+	public BaseTimer(final Integer totalDurationMs, boolean useNewTimer, ITimerListener timerListener, LifecycleCache lifecycleCache) {
 		_totalDurationMs = totalDurationMs;
+		_useNewTimer = useNewTimer;
 		_remainingDurationMs = totalDurationMs;
 		_timerListener = timerListener;
 		_lifecycleCache = lifecycleCache;
-		if (_lifecycleCache != null) {
-			_lifecycleCache.addListener(this);
+		addLifecycleListener();
+	}
+
+	private void addLifecycleListener() {
+		if (_lifecycleCache == null) return;
+		if (_useNewTimer) {
+			_lifecycleCache.addActiveListener(new IAppActiveListener() {
+				@Override
+				public void onAppStateChanged(boolean isAppActive) {
+					if (isAppActive) {
+						if (_hasPaused.get()) {
+							_hasPaused.getAndSet(false);
+							resume();
+						}
+					} else {
+						if (isRunning()) {
+							pause();
+							_hasPaused.getAndSet(true);
+						}
+					}
+				}
+			});
+		} else {
+			_lifecycleCache.addStateListener(new IAppEventListener() {
+				@Override
+				public void onLifecycleEvent(LifecycleEvent event) {
+					switch (event) {
+						case PAUSED:
+							if (isRunning()) {
+								pause();
+								_hasPaused.getAndSet(true);
+							}
+							break;
+						case RESUMED:
+							if (_hasPaused.get()) {
+								_hasPaused.getAndSet(false);
+								resume();
+							}
+							break;
+						default:
+							break;
+					}
+				}
+			});
 		}
 	}
 
-	public BaseTimer(final Integer totalDurationMs, ITimerListener timerListener) {
-		this(totalDurationMs, timerListener, CachedLifecycle.getLifecycleListener());
+	public BaseTimer(final Integer totalDurationMs, boolean useNewTimer, ITimerListener timerListener) {
+		this(totalDurationMs, useNewTimer, timerListener, CachedLifecycle.getLifecycleListener());
 	}
 
 	/**
@@ -116,9 +161,6 @@ public class BaseTimer implements IBaseTimer, IAppActiveListener {
 	 */
 	public void kill() {
 		stop();
-		if (_lifecycleCache != null) {
-			_lifecycleCache.removeListener(this);
-		}
 		_timerListener = null;
 	}
 
@@ -153,26 +195,6 @@ public class BaseTimer implements IBaseTimer, IAppActiveListener {
 	private void notifyListeners() {
 		if (_timerListener != null) {
 			_timerListener.onTimerFinished();
-		}
-	}
-
-	@Override
-	public void onAppStateChanged(LifecycleEvent event) {
-		switch (event) {
-			case PAUSED:
-				if (isRunning()) {
-					pause();
-					_hasPaused.getAndSet(true);
-				}
-				break;
-			case RESUMED:
-				if (_hasPaused.get()) {
-					_hasPaused.getAndSet(false);
-					resume();
-				}
-				break;
-			default:
-				break;
 		}
 	}
 }

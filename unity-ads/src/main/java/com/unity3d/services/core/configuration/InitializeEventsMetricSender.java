@@ -18,10 +18,12 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	private long _privacyConfigStartTime = 0L;
 	private long _privacyConfigEndTime = 0L;
 	private long _configStartTime = 0L;
+	private long _configEndTime = 0L;
 	private int _configRetryCount = 0;
 	private int _webviewRetryCount = 0;
 	private boolean _initMetricSent = false;
 	private boolean _tokenMetricSent = false;
+	private boolean _isNewInitFlow = false;
 
 	public static IInitializeEventsMetricSender getInstance() {
 		if (_instance == null) {
@@ -48,6 +50,13 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	}
 
 	@Override
+	public void didConfigRequestEnd(boolean success) {
+		_configEndTime = System.nanoTime();
+
+		sendConfigResolutionRequestIfNeeded(success);
+	}
+
+	@Override
 	public void didPrivacyConfigRequestStart() {
 		_privacyConfigStartTime = System.nanoTime();
 	}
@@ -66,7 +75,7 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 			return;
 		}
 
-		if (!_initMetricSent) {
+		if (!_initMetricSent && !_isNewInitFlow) {
 			sendMetric(TSIMetric.newInitTimeSuccess(duration(), getRetryTags()));
 			_initMetricSent = true;
 		}
@@ -84,7 +93,7 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 			return;
 		}
 
-		if (!_initMetricSent) {
+		if (!_initMetricSent && !_isNewInitFlow) {
 			sendMetric(TSIMetric.newInitTimeFailure(duration(), getErrorStateTags(errorState)));
 			_initMetricSent = true;
 		}
@@ -129,14 +138,37 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 
 	private void sendPrivacyResolutionRequestIfNeeded(boolean success) {
 		if (_privacyConfigStartTime == 0L || _privacyConfigEndTime == 0L) {
-			DeviceLog.debug("sendTokenResolutionRequestMetricIfNeeded called before didInitStart, skipping metric");
+			DeviceLog.debug("sendPrivacyResolutionRequestIfNeeded called with invalid timestamps, skipping metric");
 			return;
 		}
+		sendMetric(getPrivacyRequestMetric(success));
+	}
 
-		if (success) {
-			sendMetric(TSIMetric.newPrivacyResolutionRequestLatencySuccess(privacyConfigDuration()));
+	private Metric getPrivacyRequestMetric(boolean success) {
+		if (_isNewInitFlow) {
+			if (success) {
+				return TSIMetric.newPrivacyRequestLatencySuccess(privacyConfigDuration());
+			} else {
+				return TSIMetric.newPrivacyRequestLatencyFailure(privacyConfigDuration());
+			}
 		} else {
-			sendMetric(TSIMetric.newPrivacyResolutionRequestLatencyFailure(privacyConfigDuration()));
+			if (success) {
+				return TSIMetric.newPrivacyResolutionRequestLatencySuccess(privacyConfigDuration());
+			} else {
+				return TSIMetric.newPrivacyResolutionRequestLatencyFailure(privacyConfigDuration());
+			}
+		}
+	}
+
+	private void sendConfigResolutionRequestIfNeeded(boolean success) {
+		if (_configStartTime == 0L || _configEndTime == 0L) {
+			DeviceLog.debug("sendConfigResolutionRequestIfNeeded called with invalid timestamps, skipping metric");
+			return;
+		}
+		if (success) {
+			sendMetric(TSIMetric.newConfigRequestLatencySuccess(configRequestDuration()));
+		} else {
+			sendMetric(TSIMetric.newConfigRequestLatencyFailure(configRequestDuration()));
 		}
 	}
 
@@ -165,6 +197,11 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 		return TimeUnit.NANOSECONDS.toMillis(_privacyConfigEndTime - _privacyConfigStartTime);
 	}
 
+	@Override
+	public Long configRequestDuration() {
+		return TimeUnit.NANOSECONDS.toMillis(_configEndTime - _configStartTime);
+	}
+
 	public Map<String, String> getErrorStateTags(ErrorState errorState) {
 		Map<String, String> tags = getRetryTags();
 		tags.put("stt", errorState.getMetricName());
@@ -182,6 +219,11 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	@Override
 	public void sendMetric(Metric metric) {
 		SDKMetrics.getInstance().sendMetric(metric);
+	}
+
+	@Override
+	public void setNewInitFlow(boolean isNewInitFlow) {
+		_isNewInitFlow = isNewInitFlow;
 	}
 
 	@Override

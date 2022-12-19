@@ -1,6 +1,8 @@
 import com.android.ddmlib.DdmPreferences
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply from: '../dokka.gradle'
 
 Properties properties = new Properties()
 if (project.rootProject.file('local.properties').exists()) {
@@ -10,8 +12,8 @@ if (project.rootProject.file('local.properties').exists()) {
 ext {
   GROUP_ID = "com.unity3d.ads"
   ARTIFACT_ID = "unity-ads"
-  VERSION_ID = "4.4.1"
-  VERSION_CODE = 4410
+  VERSION_ID = "4.5.0"
+  VERSION_CODE = 4500
   SIGN_AAR = properties.getProperty("SIGN_AAR") ?: false
 }
 
@@ -49,6 +51,27 @@ android {
     targetCompatibility JavaVersion.VERSION_1_7
   }
 
+  tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+      if (it.name.contains("UnitTest")) {
+          sourceCompatibility = JavaVersion.VERSION_1_8
+          targetCompatibility = JavaVersion.VERSION_1_8
+          kotlinOptions {
+              jvmTarget = "1.8"
+          }
+      } else {
+          sourceCompatibility = JavaVersion.VERSION_1_6
+          targetCompatibility = JavaVersion.VERSION_1_6
+          kotlinOptions {
+              jvmTarget = "1.6"
+          }
+      }
+      kotlinOptions {
+          apiVersion = "1.4"
+          languageVersion = "1.4"
+          freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn" + "-Xallow-result-return-type"
+      }
+  }
+
   buildTypes {
     release {
       minifyEnabled false
@@ -65,6 +88,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+    androidTestCompileOnly project(':unity-scaradapter-2100')    
     androidTestCompileOnly project(':unity-scaradapter-2000')
     androidTestCompileOnly project(':unity-scaradapter-1950')
     androidTestCompileOnly project(':unity-scaradapter-1920')
@@ -80,37 +106,20 @@ dependencies {
     androidTestImplementation 'com.google.android.gms:play-services-ads:19.5.0'
     androidTestImplementation 'com.android.billingclient:billing:4.0.0'
     compileOnly 'com.google.ar:core:1.0.0'
+    compileOnly project(':unity-scaradapter-2100')
     compileOnly project(':unity-scaradapter-2000')
     compileOnly project(':unity-scaradapter-1950')
     compileOnly project(':unity-scaradapter-1920')
     compileOnly project(':unity-scaradapter-common')
     testImplementation 'junit:junit:4.13.2'
+    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
     testImplementation 'org.mockito:mockito-core:2.28.2'
     testImplementation 'com.android.billingclient:billing:4.0.0'
-}
-
-task javadoc(type: Javadoc) {
-    description "Generates Javadoc for Release"
-    source = android.sourceSets.main.java.srcDirs
-    ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
-    ext.generatedClass = "build/generated/source/buildConfig/release/"
-    doFirst {
-      classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-      classpath += files(ext.androidJar)
-      classpath += fileTree(dir: 'libs', include: ['*.jar'])
-      classpath += files(ext.generatedClass)
-    }
-    options {
-           links "http://docs.oracle.com/javase/7/docs/api/"
-    }
-    exclude '**/R.java'
-    destinationDir = file("../javadoc/")
-}
-
-task androidJavadocsJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier.set("javadoc")
-    archiveBaseName.set("${archivesBaseName}")
-    from javadoc.destinationDir
+    testImplementation "io.mockk:mockk:1.11.0"
+    testImplementation 'org.json:json:20180813'
 }
 
 task androidSourcesJar(type: Jar) {
@@ -119,9 +128,15 @@ task androidSourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
+task androidJavadocsJar(type: Jar, dependsOn: dokkaJavadoc) {
+    archiveClassifier.set("javadoc")
+    archiveBaseName.set("${archivesBaseName}")
+    from "$rootDir/../javadoc/"
+}
+
 artifacts {
-    archives androidJavadocsJar
     archives androidSourcesJar
+    archives androidJavadocsJar
 }
 
 def getPropertyStringWithDefaultValue(String key, String defaultValue) {

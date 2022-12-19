@@ -4,41 +4,34 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
-import com.unity3d.services.ads.gmascar.bridges.MobileAdsBridge;
+import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridge;
+import com.unity3d.services.ads.gmascar.finder.ScarAdapterVersion;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import static org.mockito.Mockito.timeout;
 
 public class MobileAdsBridgeTest {
 
 	@Test
-	@Ignore("Have to ignore for now cause the bridge is stateful (underlying call to GMA static init depends on other tests")
-	public void testMobileAdsBridgeGetVersionNotInitialized() {
+	public void testGetAdapterVersionWhen21() {
 		MobileAdsBridge mobileAdsBridge = new MobileAdsBridge();
-		String versionString = mobileAdsBridge.getVersionString();
-		Assert.assertEquals("0.0.0", versionString);
+		ScarAdapterVersion adapterVersion = mobileAdsBridge.getAdapterVersion(MobileAdsBridge.CODE_21);
+		Assert.assertEquals(ScarAdapterVersion.V21, adapterVersion);
 	}
 
 	@Test
-	public void testMobileAdsBridgeGetVersion() {
-		OnInitializationCompleteListener initializationCompleteListener = Mockito.mock(OnInitializationCompleteListener.class);
+	public void testGetAdapterVersionWhenAnything() {
 		MobileAdsBridge mobileAdsBridge = new MobileAdsBridge();
-		mobileAdsBridge.initialize(InstrumentationRegistry.getInstrumentation().getContext(), initializationCompleteListener);
-		Mockito.verify(initializationCompleteListener, timeout(5000).times(1)).onInitializationComplete(Mockito.any(InitializationStatus.class));
-		String versionString = mobileAdsBridge.getVersionString();
-		Assert.assertTrue(String.format("Minor version 203404000 is not found in %s", versionString), versionString.contains("203404000"));
+		ScarAdapterVersion adapterVersion = mobileAdsBridge.getAdapterVersion(999);
+		Assert.assertEquals(ScarAdapterVersion.V21, adapterVersion);
 	}
 
 	@Test
-	@Ignore("Cannot test this case since the underlying GMA call is static so test ordering impacts this result.")
-	public void testMobileAdsBridgeGetInitStatusNotInitialized() {
+	public void testGetAdapterVersionWhenError() {
 		MobileAdsBridge mobileAdsBridge = new MobileAdsBridge();
-		Object initializationStatus = mobileAdsBridge.getInitializationStatus();
-		Assert.assertNull(initializationStatus);
+		ScarAdapterVersion adapterVersion = mobileAdsBridge.getAdapterVersion(-1);
+		Assert.assertEquals(ScarAdapterVersion.NA, adapterVersion);
 	}
 
 	@Test

@@ -6,16 +6,24 @@ allprojects {
 }
 
 buildscript {
+    ext {
+        kotlin_version = '1.4.32' // 1.5 deprecated Java6
+        coroutines_version = '1.4.3' // 1.6.0 deprecated Java6
+        dokka_version = '1.6.10'
+    }
+
     repositories {
         gradlePluginPortal()
         google()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.1'
+        classpath 'com.android.tools.build:gradle:4.2.2'
         classpath 'org.jacoco:org.jacoco.core:0.8.5'
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.20.0'
         classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
     }
 }
 

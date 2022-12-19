@@ -1,6 +1,7 @@
 package com.unity3d.ads.test.instrumentation.services.ads.gmascar;
 
 import com.unity3d.ads.test.instrumentation.services.ads.gmascar.adapters.ScarAdapterFactoryTest;
+import com.unity3d.ads.test.instrumentation.services.ads.gmascar.bridges.MobileAdsBridgeLegacyTest;
 import com.unity3d.ads.test.instrumentation.services.ads.gmascar.finder.GMAInitializerTest;
 import com.unity3d.ads.test.instrumentation.services.ads.gmascar.finder.PresenceDetectorTest;
 import com.unity3d.ads.test.instrumentation.services.ads.gmascar.finder.ScarVersionFinderTest;
@@ -21,6 +22,7 @@ import org.junit.runners.Suite;
 	AdapterStatusBridgeTest.class,
 	InitializationStatusBridgeTest.class,
 	InitializeListenerBridgeTest.class,
+	MobileAdsBridgeLegacyTest.class,
 	MobileAdsBridgeTest.class
 })
 public class GmaScarTestSuite {

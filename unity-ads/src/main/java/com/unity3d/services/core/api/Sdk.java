@@ -61,6 +61,11 @@ public class Sdk {
 	}
 
 	@WebViewExposed
+	public static void getTrrData(WebViewCallback callback) {
+		callback.invoke(WebViewApp.getCurrentApp().getConfiguration().getRawConfigData().toString());
+	}
+
+	@WebViewExposed
 	public static void setDebugMode(Boolean debugMode, WebViewCallback callback) {
 		SdkProperties.setDebugMode(debugMode);
 		callback.invoke();

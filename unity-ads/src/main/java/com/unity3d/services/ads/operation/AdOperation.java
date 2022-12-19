@@ -10,7 +10,7 @@ public abstract class AdOperation implements IAdOperation {
 
 	protected AdOperation(IWebViewBridgeInvocation webViewBridgeInvocation, String invocationMethodName) throws NullPointerException {
 		_invocationMethodName = invocationMethodName;
-		if (_invocationMethodName == null || _invocationMethodName == "") {
+		if (_invocationMethodName == null || _invocationMethodName.isEmpty()) {
 			throw new IllegalArgumentException("invocationMethodName cannot be null");
 		}
 
