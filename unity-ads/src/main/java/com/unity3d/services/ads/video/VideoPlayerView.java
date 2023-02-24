@@ -6,8 +6,9 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.widget.VideoView;
 import com.unity3d.services.core.log.DeviceLog;
-import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.WebViewEventCategory;
+import com.unity3d.services.core.webview.bridge.IEventSender;
+import com.unity3d.services.core.webview.bridge.SharedInstances;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,9 +22,16 @@ public class VideoPlayerView extends VideoView {
 	private Float _volume = null;
 	private boolean _infoListenerEnabled = true;
 	private AudioManager _audioManager = null;
+	private final IEventSender _eventSender;
 
 	public VideoPlayerView(Context context) {
+		this(context, SharedInstances.INSTANCE.getWebViewEventSender());
+	}
+
+	public VideoPlayerView(Context context, IEventSender eventSender) {
 		super(context);
+
+		_eventSender = eventSender;
 	}
 
 	private void startVideoProgressTimer () {
@@ -34,11 +42,11 @@ public class VideoPlayerView extends VideoView {
 				boolean isPlaying = false;
 				try {
 					isPlaying = isPlaying();
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PROGRESS, getCurrentPosition());
+					_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PROGRESS, getCurrentPosition());
 				}
 				catch (IllegalStateException e) {
 					DeviceLog.exception("Exception while sending current position to webapp", e);
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE, VideoPlayerEvent.PROGRESS, _videoUrl, isPlaying);
+					_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE, VideoPlayerEvent.PROGRESS, _videoUrl, isPlaying);
 				}
 			}
 		}, _progressEventInterval, _progressEventInterval);
@@ -62,13 +70,13 @@ public class VideoPlayerView extends VideoView {
 				try {
 					isPlaying = isPlaying();
 					if(!isPlaying) {
-						WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PREPARE_TIMEOUT, _videoUrl);
+						_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PREPARE_TIMEOUT, _videoUrl);
 						DeviceLog.error("Video player prepare timeout: " + _videoUrl);
 					}
 				}
 				catch (IllegalStateException e) {
 					DeviceLog.exception("Exception while preparing timer", e);
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE, VideoPlayerEvent.PREPARE_TIMEOUT, _videoUrl, isPlaying);
+					_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE, VideoPlayerEvent.PREPARE_TIMEOUT, _videoUrl, isPlaying);
 				}
 			}
 		}, delay);
@@ -97,7 +105,7 @@ public class VideoPlayerView extends VideoView {
 				}
 
 				setVolume(initialVolume);
-				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PREPARED, _videoUrl, mp.getDuration(), mp.getVideoWidth(), mp.getVideoHeight());
+				_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PREPARED, _videoUrl, mp.getDuration(), mp.getVideoWidth(), mp.getVideoHeight());
 			}
 		});
 
@@ -110,7 +118,7 @@ public class VideoPlayerView extends VideoView {
 					_mediaPlayer = mp;
 				}
 
-				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.GENERIC_ERROR, _videoUrl, what, extra);
+				_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.GENERIC_ERROR, _videoUrl, what, extra);
 				stopVideoProgressTimer();
 				return true;
 			}
@@ -139,7 +147,7 @@ public class VideoPlayerView extends VideoView {
 			setVideoPath(_videoUrl);
 		}
 		catch (Exception e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PREPARE_ERROR, _videoUrl);
+			_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PREPARE_ERROR, _videoUrl);
 			DeviceLog.exception("Error preparing video: " + _videoUrl, e);
 			return false;
 		}
@@ -157,7 +165,7 @@ public class VideoPlayerView extends VideoView {
 					_mediaPlayer = mp;
 				}
 
-				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.COMPLETED, _videoUrl);
+				_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.COMPLETED, _videoUrl);
 				stopVideoProgressTimer();
 			}
 		});
@@ -167,9 +175,9 @@ public class VideoPlayerView extends VideoView {
 			stopVideoProgressTimer();
 			startVideoProgressTimer();
 
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PLAY, _videoUrl);
+			_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PLAY, _videoUrl);
 		} catch (IllegalStateException ex) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE,  _videoUrl, false);
+			_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.ILLEGAL_STATE,  _videoUrl, false);
 		}
 	}
 
@@ -180,7 +188,7 @@ public class VideoPlayerView extends VideoView {
 				setOnInfoListener(new MediaPlayer.OnInfoListener() {
 					@Override
 					public boolean onInfo(MediaPlayer mp, int what, int extra) {
-						WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.INFO, _videoUrl, what, extra);
+						_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.INFO, _videoUrl, what, extra);
 						return true;
 					}
 				});
@@ -205,13 +213,13 @@ public class VideoPlayerView extends VideoView {
 			}
 		}
 		catch (Exception e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PAUSE_ERROR, _videoUrl);
+			_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PAUSE_ERROR, _videoUrl);
 			DeviceLog.exception("Error pausing video", e);
 			return;
 		}
 
 		stopVideoProgressTimer();
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PAUSE, _videoUrl);
+		_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.PAUSE, _videoUrl);
 	}
 
 	@Override
@@ -220,12 +228,12 @@ public class VideoPlayerView extends VideoView {
 			super.seekTo(msec);
 		}
 		catch (Exception e) {
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.SEEKTO_ERROR, _videoUrl);
+			_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.SEEKTO_ERROR, _videoUrl);
 			DeviceLog.exception("Error seeking video", e);
 			return;
 		}
 
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.SEEKTO, _videoUrl);
+		_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.SEEKTO, _videoUrl);
 	}
 
 	public void stop () {
@@ -240,7 +248,7 @@ public class VideoPlayerView extends VideoView {
 			setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE);
 		}
 
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.STOP, _videoUrl);
+		_eventSender.sendEvent(WebViewEventCategory.VIDEOPLAYER, VideoPlayerEvent.STOP, _videoUrl);
 	}
 
 	public float getVolume () {

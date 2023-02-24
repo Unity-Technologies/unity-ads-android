@@ -11,6 +11,7 @@ import com.unity3d.services.ads.gmascar.bridges.InitializeListenerBridge;
 import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridgeBase;
 import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridgeLegacy;
 import com.unity3d.services.ads.gmascar.finder.GMAInitializer;
+import com.unity3d.services.ads.gmascar.utils.GMAEventSender;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.webview.WebViewApp;
 
@@ -36,7 +37,7 @@ public class GMAInitializerTest {
 
 	@Test
 	public void testGmaInitializer() {
-		GMAInitializer gmaInitializer = new GMAInitializer(mobileAdsBridge, initializeListenerBridge, initializationStatusBridge, adapterStatusBridge);
+		GMAInitializer gmaInitializer = new GMAInitializer(mobileAdsBridge, initializeListenerBridge, initializationStatusBridge, adapterStatusBridge, new GMAEventSender());
 		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getContext());
 		Mockito.when(mobileAdsBridge.shouldInitialize()).thenReturn(true);
 		gmaInitializer.initializeGMA();
@@ -51,7 +52,7 @@ public class GMAInitializerTest {
 		Object initializationStatus = realMobileAdsBridge.getInitializationStatus();
 
 		InitializationStatusBridge realStatusBridge = new InitializationStatusBridge();
-		GMAInitializer gmaInitializer = new GMAInitializer(realMobileAdsBridge, initializeListenerBridge, realStatusBridge, adapterStatusBridge);
+		GMAInitializer gmaInitializer = new GMAInitializer(realMobileAdsBridge, initializeListenerBridge, realStatusBridge, adapterStatusBridge, new GMAEventSender());
 
 		WebViewApp mockWebViewApp = Mockito.mock(WebViewApp.class);
 		Mockito.when(mockWebViewApp.sendEvent(Mockito.any(Enum.class), Mockito.any(Enum.class))).thenReturn(true);
@@ -63,7 +64,7 @@ public class GMAInitializerTest {
 
 	@Test
 	public void testGmaInitializerShouldNotInitialize() {
-		GMAInitializer gmaInitializer = new GMAInitializer(mobileAdsBridge, initializeListenerBridge, initializationStatusBridge, adapterStatusBridge);
+		GMAInitializer gmaInitializer = new GMAInitializer(mobileAdsBridge, initializeListenerBridge, initializationStatusBridge, adapterStatusBridge, new GMAEventSender());
 		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getContext());
 		Mockito.when(mobileAdsBridge.shouldInitialize()).thenReturn(false);
 		gmaInitializer.initializeGMA();

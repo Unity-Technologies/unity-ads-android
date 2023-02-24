@@ -2,6 +2,7 @@ package com.unity3d.services.core.lifecycle;
 
 import android.annotation.TargetApi;
 
+import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.properties.ClientProperties;
 
 public class CachedLifecycle {
@@ -11,7 +12,7 @@ public class CachedLifecycle {
 	public static void register() {
 		if (ClientProperties.getApplication() != null) {
 			if (getLifecycleListener() == null) {
-				setLifecycleListener(new LifecycleCache());
+				setLifecycleListener(new LifecycleCache(new ConfigurationReader()));
 				ClientProperties.getApplication().registerActivityLifecycleCallbacks(getLifecycleListener());
 			}
 		}

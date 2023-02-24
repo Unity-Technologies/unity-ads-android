@@ -1,7 +1,6 @@
 package com.unity3d.services.core.webview.bridge;
 
 import com.unity3d.services.core.log.DeviceLog;
-import com.unity3d.services.core.webview.WebViewApp;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,10 +13,17 @@ public class NativeCallback {
 	private static AtomicInteger _callbackCount = new AtomicInteger(0);
 	private Method _callback;
 	private String _id;
+	private final INativeCallbackSubject _nativeCallbackSubject;
 
 	public NativeCallback (Method callback) {
+		this(callback, SharedInstances.INSTANCE.getWebViewAppNativeCallbackSubject());
+	}
+
+	public NativeCallback(Method callback, INativeCallbackSubject nativeCallbackSubject) {
 		_callback = callback;
 		_id = _callback.getName().toUpperCase(Locale.US) + "_" + _callbackCount.getAndIncrement();
+
+		_nativeCallbackSubject = nativeCallbackSubject;
 	}
 
 	public String getId () {
@@ -32,7 +38,7 @@ public class NativeCallback {
 		}
 		catch (Exception e) {
 			DeviceLog.error("Illegal status");
-			WebViewApp.getCurrentApp().removeCallback(this);
+			_nativeCallbackSubject.remove(this);
 			throw e;
 		}
 
@@ -46,6 +52,6 @@ public class NativeCallback {
 		}
 
 		_callback.invoke(null, values);
-		WebViewApp.getCurrentApp().removeCallback(this);
+		_nativeCallbackSubject.remove(this);
 	}
 }

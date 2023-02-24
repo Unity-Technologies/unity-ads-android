@@ -26,4 +26,13 @@ public class SignalsCollector extends SignalsCollectorBase implements ISignalsCo
 		QueryInfoCallback queryInfoCallback = new QueryInfoCallback(placementId, new SignalCallbackListener(dispatchGroup, _signalsStorage, signalsResult));
 		QueryInfo.generate(context, adFormat, request, queryInfoCallback);
 	}
+
+	@Override
+	public void getSCARSignal(Context context,
+							  boolean isInterstitial,
+							  DispatchGroup dispatchGroup,
+							  SignalsResult signalsResult) {
+		onOperationNotSupported("GMA v2000 - SCAR signal retrieval without a placementId not relevant",
+			dispatchGroup, signalsResult);
+	}
 }

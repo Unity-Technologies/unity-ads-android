@@ -9,10 +9,15 @@ import java.util.Map;
 
 public abstract class MobileAdsBridgeBase extends GenericBridge implements IMobileAdsBridge {
 
-	public abstract String getVersionMethodName();
-	public abstract int getVersionCodeIndex();
-	public abstract ScarAdapterVersion getAdapterVersion(int versionCode);
-	public abstract boolean shouldInitialize();
+	/**
+	 * Determines whether implementation supports SCAR bidding or not.
+	 *
+	 * Bidding is only supported in the v21 adapter due to optimizations with initialization and
+	 * signal collection
+	 *
+	 * @return true if supported, false otherwise.
+	 */
+	public abstract boolean hasSCARBiddingSupport();
 
 	public static final String initializeMethodName = "initialize";
 	public static final String initializationStatusMethodName = "getInitializationStatus";

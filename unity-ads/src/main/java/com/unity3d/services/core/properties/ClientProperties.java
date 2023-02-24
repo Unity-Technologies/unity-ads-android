@@ -59,6 +59,7 @@ public class ClientProperties {
 	}
 
 	public static String getAppName() {
+		if (_applicationContext == null) return "";
 		return _applicationContext.getPackageName();
 	}
 

@@ -8,7 +8,6 @@ import android.app.Application;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.unity3d.services.core.lifecycle.CachedLifecycle;
-import com.unity3d.services.core.lifecycle.IAppActiveListener;
 import com.unity3d.services.core.lifecycle.LifecycleCache;
 import com.unity3d.services.core.lifecycle.LifecycleEvent;
 import com.unity3d.services.core.properties.ClientProperties;
@@ -41,15 +40,13 @@ public class BaseTimerTest {
 	private LifecycleCache _lifecycleCache = CachedLifecycle.getLifecycleListener();
 
 	BaseTimer timer;
-	BaseTimer timerLifecycle;
 
 	@Before
 	public void setup() {
 		ClientProperties.setApplication((Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext());
 		CachedLifecycle.register();
 		_lifecycleCache = CachedLifecycle.getLifecycleListener();
-		timer = new BaseTimer(TEST_DURATION_MS, false, mockTimerListener, CachedLifecycle.getLifecycleListener());
-		timerLifecycle = new BaseTimer(TEST_DURATION_MS, true, mockTimerListener, CachedLifecycle.getLifecycleListener());
+		timer = new BaseTimer(TEST_DURATION_MS, mockTimerListener, CachedLifecycle.getLifecycleListener());
 	}
 
 	@Test
@@ -89,36 +86,19 @@ public class BaseTimerTest {
 	}
 
 	@Test
-	public void testOnAppStateChangePauseResume() throws InterruptedException {
+	public void testLifecycleOnBackgroundForegroundPauseResume() throws InterruptedException {
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 		timer.start(executorService);
 
-		_lifecycleCache.notifyStateListeners(LifecycleEvent.PAUSED);
+		_lifecycleCache.onActivityStopped(null);
 		assertFalse(timer.isRunning());
 
-		_lifecycleCache.notifyStateListeners(LifecycleEvent.RESUMED);
+		_lifecycleCache.onActivityStarted(null);
 		assertTrue(timer.isRunning());
 
 		Thread.sleep(5000);
 		Mockito.verify(mockTimerListener, times(1)).onTimerFinished();
 		assertFalse(timer.isRunning());
-		assertTrue(executorService.isShutdown());
-	}
-
-	@Test
-	public void testLifecycleOnBackgroundForegroundPauseResume() throws InterruptedException {
-		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-		timerLifecycle.start(executorService);
-
-		_lifecycleCache.onActivityStopped(null);
-		assertFalse(timerLifecycle.isRunning());
-
-		_lifecycleCache.onActivityStarted(null);
-		assertTrue(timerLifecycle.isRunning());
-
-		Thread.sleep(5000);
-		Mockito.verify(mockTimerListener, times(1)).onTimerFinished();
-		assertFalse(timerLifecycle.isRunning());
 		assertTrue(executorService.isShutdown());
 	}
 

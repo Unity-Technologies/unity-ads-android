@@ -1,11 +1,8 @@
 package com.unity3d.services.core.configuration;
 
-import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.log.DeviceLog;
 
 import org.json.JSONObject;
-
-import java.util.Locale;
 
 public class ExperimentObject {
 	private static final String VALUE_KEY = "value";
@@ -17,6 +14,20 @@ public class ExperimentObject {
 		_experimentData = (experimentData != null) ? experimentData : new JSONObject();
 	}
 
+	/**
+	 * Retrieves String value from JSONObject.
+	 *
+	 * @return String value. If key not found, returns empty string ("").
+	 */
+	public String getStringValue() {
+		return _experimentData.optString(VALUE_KEY);
+	}
+
+	/**
+	 * Retrieves boolean value from JSONObject.
+	 *
+	 * @return boolean value. If key not found, returns default of false.
+	 */
 	public boolean getBooleanValue() {
 		return _experimentData.optBoolean(VALUE_KEY);
 	}

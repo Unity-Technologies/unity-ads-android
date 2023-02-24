@@ -49,14 +49,12 @@ public class ConfigurationLoader implements IConfigurationLoader {
 	}
 
 	private void sendConfigMetrics(String unifiedAuctionToken, String stateId) {
-		if (_localConfiguration.getExperiments() != null && _localConfiguration.getExperiments().isTwoStageInitializationEnabled()) {
-			if (unifiedAuctionToken == null || unifiedAuctionToken.isEmpty()) {
-				SDKMetrics.getInstance().sendMetric(TSIMetric.newMissingToken());
-			}
+		if (unifiedAuctionToken == null || unifiedAuctionToken.isEmpty()) {
+			SDKMetrics.getInstance().sendMetric(TSIMetric.newMissingToken());
+		}
 
-			if (stateId == null || stateId.isEmpty()) {
-				SDKMetrics.getInstance().sendMetric(TSIMetric.newMissingStateId());
-			}
+		if (stateId == null || stateId.isEmpty()) {
+			SDKMetrics.getInstance().sendMetric(TSIMetric.newMissingStateId());
 		}
 	}
 }

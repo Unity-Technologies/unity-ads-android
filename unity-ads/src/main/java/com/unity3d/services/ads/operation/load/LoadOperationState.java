@@ -27,4 +27,8 @@ public class LoadOperationState extends OperationState {
 			listener.onUnityAdsAdLoaded(this.placementId);
 		}
 	}
+
+	public boolean isBanner() {
+		return this instanceof LoadBannerOperationState;
+	}
 }

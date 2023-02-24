@@ -1,6 +1,7 @@
 package com.unity3d.services.ads.api;
 
 import com.unity3d.services.ads.gmascar.GMAScarAdapterBridge;
+import com.unity3d.services.ads.gmascar.GMA;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
 import com.unity3d.services.core.webview.bridge.WebViewExposed;
 
@@ -9,7 +10,7 @@ import org.json.JSONException;
 
 public class GMAScar {
 
-	private static final GMAScarAdapterBridge gmaScarAdapterBridge = new GMAScarAdapterBridge();
+	private static final GMAScarAdapterBridge gmaScarAdapterBridge = GMA.getInstance().getBridge();
 
 	@WebViewExposed
 	public static void initializeScar(final WebViewCallback callback) {

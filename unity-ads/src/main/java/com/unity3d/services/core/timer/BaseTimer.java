@@ -2,9 +2,7 @@ package com.unity3d.services.core.timer;
 
 import com.unity3d.services.core.lifecycle.CachedLifecycle;
 import com.unity3d.services.core.lifecycle.IAppActiveListener;
-import com.unity3d.services.core.lifecycle.IAppEventListener;
 import com.unity3d.services.core.lifecycle.LifecycleCache;
-import com.unity3d.services.core.lifecycle.LifecycleEvent;
 import com.unity3d.services.core.log.DeviceLog;
 
 import java.util.concurrent.RejectedExecutionException;
@@ -24,15 +22,12 @@ public class BaseTimer implements IBaseTimer {
 	Integer _remainingDurationMs;
 	private ITimerListener _timerListener;
 	private ScheduledFuture<?> _task;
-	private final boolean _useNewTimer;
-
 	private ScheduledExecutorService _timerService;
 	private final AtomicBoolean _isRunning = new AtomicBoolean(false);
 	private final AtomicBoolean _hasPaused = new AtomicBoolean(false);
 
-	public BaseTimer(final Integer totalDurationMs, boolean useNewTimer, ITimerListener timerListener, LifecycleCache lifecycleCache) {
+	public BaseTimer(final Integer totalDurationMs, ITimerListener timerListener, LifecycleCache lifecycleCache) {
 		_totalDurationMs = totalDurationMs;
-		_useNewTimer = useNewTimer;
 		_remainingDurationMs = totalDurationMs;
 		_timerListener = timerListener;
 		_lifecycleCache = lifecycleCache;
@@ -41,54 +36,32 @@ public class BaseTimer implements IBaseTimer {
 
 	private void addLifecycleListener() {
 		if (_lifecycleCache == null) return;
-		if (_useNewTimer) {
-			_lifecycleCache.addActiveListener(new IAppActiveListener() {
-				@Override
-				public void onAppStateChanged(boolean isAppActive) {
-					if (isAppActive) {
-						if (_hasPaused.get()) {
-							_hasPaused.getAndSet(false);
-							resume();
-						}
-					} else {
-						if (isRunning()) {
-							pause();
-							_hasPaused.getAndSet(true);
-						}
+
+		_lifecycleCache.addActiveListener(new IAppActiveListener() {
+			@Override
+			public void onAppStateChanged(boolean isAppActive) {
+				if (isAppActive) {
+					if (_hasPaused.get()) {
+						_hasPaused.getAndSet(false);
+						resume();
+					}
+				} else {
+					if (isRunning()) {
+						pause();
+						_hasPaused.getAndSet(true);
 					}
 				}
-			});
-		} else {
-			_lifecycleCache.addStateListener(new IAppEventListener() {
-				@Override
-				public void onLifecycleEvent(LifecycleEvent event) {
-					switch (event) {
-						case PAUSED:
-							if (isRunning()) {
-								pause();
-								_hasPaused.getAndSet(true);
-							}
-							break;
-						case RESUMED:
-							if (_hasPaused.get()) {
-								_hasPaused.getAndSet(false);
-								resume();
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			});
-		}
+			}
+		});
 	}
 
-	public BaseTimer(final Integer totalDurationMs, boolean useNewTimer, ITimerListener timerListener) {
-		this(totalDurationMs, useNewTimer, timerListener, CachedLifecycle.getLifecycleListener());
+	public BaseTimer(final Integer totalDurationMs, ITimerListener timerListener) {
+		this(totalDurationMs, timerListener, CachedLifecycle.getLifecycleListener());
 	}
 
 	/**
 	 * Starts the timer countdown
+	 *
 	 * @param timerService {@link ScheduledExecutorService} to run timer on, will be shutdown when timer is stopped via {@link #stop() Stop} or {@link #kill() Kill}
 	 */
 	public void start(ScheduledExecutorService timerService) {
@@ -113,6 +86,7 @@ public class BaseTimer implements IBaseTimer {
 	/**
 	 * Pauses the timer countdown
 	 * Countdown can be continued via {@link #resume() Resume} or {@link #restart(ScheduledExecutorService) Restart}
+	 *
 	 * @return if countdown could be paused
 	 */
 	public boolean pause() {
@@ -130,6 +104,7 @@ public class BaseTimer implements IBaseTimer {
 
 	/**
 	 * Resumes the timer countdown after a {@link #pause() Pause}
+	 *
 	 * @return if countdown resumed successfully
 	 */
 	public boolean resume() {
@@ -187,7 +162,8 @@ public class BaseTimer implements IBaseTimer {
 					onStep();
 				}
 			}, _delayMs, _delayMs, TimeUnit.MILLISECONDS);
-		} catch (IllegalStateException | IllegalArgumentException | NullPointerException | RejectedExecutionException e) {
+		} catch (IllegalStateException | IllegalArgumentException | NullPointerException |
+				 RejectedExecutionException e) {
 			DeviceLog.debug("ERROR: IntervalTimer failed to start due to exception " + e.getLocalizedMessage());
 		}
 	}

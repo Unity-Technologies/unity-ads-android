@@ -25,13 +25,13 @@ public class MobileAdsBridgeLegacyTest {
 	}
 
 	@Test
-	public void testMobileAdsBridgeV20GetVersion() {
+	public void testMobileAdsBridgeV21GetVersion() {
 		OnInitializationCompleteListener initializationCompleteListener = Mockito.mock(OnInitializationCompleteListener.class);
 		MobileAdsBridgeLegacy mobileAdsBridge = new MobileAdsBridgeLegacy();
 		mobileAdsBridge.initialize(InstrumentationRegistry.getInstrumentation().getContext(), initializationCompleteListener);
 		Mockito.verify(initializationCompleteListener, timeout(5000).times(1)).onInitializationComplete(Mockito.any(InitializationStatus.class));
 		String versionString = mobileAdsBridge.getVersionString();
-		Assert.assertTrue(String.format("Minor version 203404000 is not found in %s", versionString), versionString.contains("203404000"));
+		Assert.assertTrue(String.format("Minor version 223712000 is not found in %s", versionString), versionString.contains("223712000"));
 	}
 
 	@Test

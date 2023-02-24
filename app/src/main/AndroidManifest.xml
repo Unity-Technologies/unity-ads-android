@@ -10,7 +10,8 @@
         <activity
             android:name=".UnityAdsTestApp"
             android:label="@string/title_activity_unity_ads_test_app"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -2,6 +2,7 @@ import com.android.ddmlib.DdmPreferences
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply from: '../fatAar.gradle'
 apply from: '../dokka.gradle'
 
 Properties properties = new Properties()
@@ -12,28 +13,31 @@ if (project.rootProject.file('local.properties').exists()) {
 ext {
   GROUP_ID = "com.unity3d.ads"
   ARTIFACT_ID = "unity-ads"
-  VERSION_ID = "4.5.0"
-  VERSION_CODE = 4500
+  VERSION_ID = "4.6.0"
+  VERSION_CODE = 4600
   SIGN_AAR = properties.getProperty("SIGN_AAR") ?: false
 }
 
 android {
-  compileSdkVersion 30
+  namespace = GROUP_ID
+  compileSdkVersion 32
   DdmPreferences.setLogLevel("verbose")
   DdmPreferences.setTimeOut(10 * 60000)
-
-  defaultPublishConfig "release"
 
   lintOptions {
     abortOnError false
   }
 
   defaultConfig {
+    targetSdkVersion 32
     minSdkVersion 19
-    targetSdkVersion 30
     versionCode = VERSION_CODE
     versionName = VERSION_ID
-
+    gradle.startParameter.taskNames.each {
+      if (it.contains("AndroidTest")) {
+          minSdkVersion 26
+      }
+    }
     setProperty("archivesBaseName", "unity-ads")
 
     buildConfigField('String', 'WEBVIEW_BRANCH', getPropertyStringWithDefaultValue('WEBVIEW_BRANCH', '"' + versionName + '"'))
@@ -87,10 +91,14 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    debugImplementation fileTree(dir: 'libs/Debug', include: ['*.jar'])
+    releaseImplementation fileTree(dir: 'libs/Release', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
-    androidTestCompileOnly project(':unity-scaradapter-2100')    
+    implementation "androidx.startup:startup-runtime:$startup_runtime_version"
+    implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
+    implementation "com.unity3d.services.identifiers:unity-services-identifiers:$unity_identifiers_version"
+    androidTestCompileOnly project(':unity-scaradapter-2100')
     androidTestCompileOnly project(':unity-scaradapter-2000')
     androidTestCompileOnly project(':unity-scaradapter-1950')
     androidTestCompileOnly project(':unity-scaradapter-1920')
@@ -100,10 +108,10 @@ dependencies {
     androidTestImplementation 'org.mockito:mockito-android:2.25.0'
     // A bug in Mockito requires us to add this until an update in released
     androidTestImplementation 'org.opentest4j:opentest4j:1.2.0'
-    androidTestImplementation 'androidx.test:runner:1.3.0'
-    androidTestImplementation 'androidx.test:rules:1.3.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'com.google.android.gms:play-services-ads:19.5.0'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'com.google.android.gms:play-services-ads:21.4.0'
     androidTestImplementation 'com.android.billingclient:billing:4.0.0'
     compileOnly 'com.google.ar:core:1.0.0'
     compileOnly project(':unity-scaradapter-2100')
@@ -120,6 +128,8 @@ dependencies {
     testImplementation 'com.android.billingclient:billing:4.0.0'
     testImplementation "io.mockk:mockk:1.11.0"
     testImplementation 'org.json:json:20180813'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
 }
 
 task androidSourcesJar(type: Jar) {

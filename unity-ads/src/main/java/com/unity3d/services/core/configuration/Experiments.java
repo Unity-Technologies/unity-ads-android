@@ -1,8 +1,11 @@
 package com.unity3d.services.core.configuration;
 
+import com.unity3d.services.ads.gmascar.managers.SCARBiddingManagerType;
+
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,7 +14,7 @@ import java.util.Set;
 
 public class Experiments extends ExperimentsBase {
 
-	private static final Set<String> NEXT_SESSION_FLAGS = new HashSet<>(Arrays.asList("tsi", "tsi_upii", "tsi_p", "tsi_nt", "tsi_prr", "tsi_prw", "s_init"));
+	private static final Set<String> NEXT_SESSION_FLAGS = new HashSet<>(Arrays.asList("s_init", "tsi_prw"));
 
 	private final JSONObject _experimentData;
 
@@ -25,31 +28,6 @@ public class Experiments extends ExperimentsBase {
 		} else {
 			_experimentData = experimentData;
 		}
-	}
-
-	@Override
-	public boolean isTwoStageInitializationEnabled() {
-		return _experimentData.optBoolean(TSI_TAG_INIT_ENABLED, true);
-	}
-
-	@Override
-	public boolean isForwardExperimentsToWebViewEnabled() {
-		return _experimentData.optBoolean(TSI_TAG_FORWARD_FEATURE_FLAGS, false);
-	}
-
-	@Override
-	public boolean isNativeTokenEnabled() {
-		return _experimentData.optBoolean(TSI_TAG_NATIVE_TOKEN, true);
-	}
-
-	@Override
-	public boolean isUpdatePiiFields() {
-		return _experimentData.optBoolean(TSI_TAG_UPDATE_PII_FIELDS, false);
-	}
-
-	@Override
-	public boolean isPrivacyRequestEnabled() {
-		return _experimentData.optBoolean(TSI_TAG_PRIVACY_REQUEST, true);
 	}
 
 	@Override
@@ -73,11 +51,6 @@ public class Experiments extends ExperimentsBase {
 	}
 
 	@Override
-	public boolean isNewLifecycleTimer() {
-		return _experimentData.optBoolean(EXP_TAG_NEW_LIFECYCLE_TIMER, false);
-	}
-
-	@Override
 	public boolean isScarInitEnabled() {
 		return _experimentData.optBoolean(EXP_TAG_SCAR_INIT, false);
 	}
@@ -85,6 +58,16 @@ public class Experiments extends ExperimentsBase {
 	@Override
 	public boolean isNewInitFlowEnabled() {
 		return _experimentData.optBoolean(EXP_TAG_NEW_INIT_FLOW, false);
+	}
+
+	@Override
+	public String getScarBiddingManager() {
+		return _experimentData.optString(EXP_TAG_SCAR_BIDDING_MANAGER, SCARBiddingManagerType.DISABLED.getName());
+	}
+
+	@Override
+	public boolean isJetpackLifecycle() {
+		return _experimentData.optBoolean(EXP_TAG_JETPACK_LIFECYCLE, false);
 	}
 
 	public JSONObject getExperimentsAsJson() {

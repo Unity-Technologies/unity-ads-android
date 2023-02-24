@@ -1,6 +1,7 @@
 package com.unity3d.services.ads.api;
 
 import com.unity3d.services.ads.token.TokenError;
+import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
 import com.unity3d.services.core.webview.bridge.WebViewExposed;
 
@@ -11,7 +12,7 @@ public class Token {
 	@WebViewExposed
 	public static void createTokens(JSONArray tokens, WebViewCallback callback) {
 		try {
-			com.unity3d.services.ads.token.TokenStorage.createTokens(tokens);
+			TokenStorage.getInstance().createTokens(tokens);
 		} catch (JSONException e) {
 			callback.error(TokenError.JSON_EXCEPTION, e.getMessage());
 			return;
@@ -23,7 +24,7 @@ public class Token {
 	@WebViewExposed
 	public static void appendTokens(JSONArray tokens, WebViewCallback callback) {
 		try {
-			com.unity3d.services.ads.token.TokenStorage.appendTokens(tokens);
+			TokenStorage.getInstance().appendTokens(tokens);
 		} catch (JSONException e) {
 			callback.error(TokenError.JSON_EXCEPTION, e.getMessage());
 			return;
@@ -34,21 +35,21 @@ public class Token {
 
 	@WebViewExposed
 	public static void deleteTokens(WebViewCallback callback) {
-		com.unity3d.services.ads.token.TokenStorage.deleteTokens();
+		TokenStorage.getInstance().deleteTokens();
 
 		callback.invoke();
 	}
 
 	@WebViewExposed
 	public static void setPeekMode(Boolean mode, WebViewCallback callback) {
-		com.unity3d.services.ads.token.TokenStorage.setPeekMode(mode);
+		TokenStorage.getInstance().setPeekMode(mode);
 
 		callback.invoke();
 	}
 
 	@WebViewExposed
 	public static void getNativeGeneratedToken(WebViewCallback callback) {
-		com.unity3d.services.ads.token.TokenStorage.getNativeGeneratedToken();
+		TokenStorage.getInstance().getNativeGeneratedToken();
 
 		callback.invoke();
 	}

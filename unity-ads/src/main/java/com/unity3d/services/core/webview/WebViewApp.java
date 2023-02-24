@@ -4,7 +4,6 @@ import android.os.Build;
 import android.os.ConditionVariable;
 import android.os.Looper;
 import android.webkit.RenderProcessGoneDetail;
-import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebViewClient;
@@ -26,12 +25,8 @@ import com.unity3d.services.core.webview.bridge.NativeCallback;
 import com.unity3d.services.core.webview.bridge.WebViewBridge;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,17 +41,16 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 	private boolean _webAppLoaded = false;
 	private WebView _webView;
 	private Configuration _configuration;
-	private HashMap<String, NativeCallback> _nativeCallbacks;
-	private static AtomicReference<Boolean> _initialized = new AtomicReference<Boolean>(false);
-	private static AtomicReference<String> _webAppFailureMessage = new AtomicReference<>();
-	private static AtomicReference<Integer> _webAppFailureCode = new AtomicReference<>();
+	private final HashMap<String, NativeCallback> _nativeCallbacks = new HashMap<>();
+	private static final AtomicReference<Boolean> _initialized = new AtomicReference<>(false);
+	private static final AtomicReference<String> _webAppFailureMessage = new AtomicReference<>();
+	private static final AtomicReference<Integer> _webAppFailureCode = new AtomicReference<>();
 
-	private WebViewApp (Configuration configuration, boolean useWebViewWithCache, boolean shouldNotRequireGesturePlayback) {
+	public WebViewApp (Configuration configuration, boolean useWebViewWithCache, boolean shouldNotRequireGesturePlayback) {
 		setConfiguration(configuration);
 		WebViewBridge.setClassTable(getConfiguration().getWebAppApiClassList());
 		_webView = useWebViewWithCache ? new WebViewWithCache(ClientProperties.getApplicationContext(), shouldNotRequireGesturePlayback) : new WebView(ClientProperties.getApplicationContext(), shouldNotRequireGesturePlayback);
 		_webView.setWebViewClient(new WebAppClient());
-		_webView.setWebChromeClient(new WebAppChromeClient());
 	}
 
 	public WebViewApp() { }
@@ -117,13 +111,15 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 		_configuration = configuration;
 	}
 
-	private void invokeJavascriptMethod(String className, String methodName, JSONArray params) throws JSONException {
+	@SuppressWarnings("SameParameterValue")
+	private void invokeJavascriptMethod(String className, String methodName, JSONArray params) {
 		String javaScript = buildInvokeJavascript(className, methodName, params);
 		DeviceLog.debug("Invoking javascript: %s", javaScript);
 		getWebView().invokeJavascript(javaScript);
 	}
 
-	private String buildInvokeJavascript(String className, String methodName, JSONArray params) throws JSONException {
+	@SuppressWarnings("StringBufferReplaceableByString")
+	private String buildInvokeJavascript(String className, String methodName, JSONArray params) {
 		String paramsString = params.toString();
 		int stringLength = INVOKE_JS_CHARS_LENGTH + className.length() + methodName.length() + paramsString.length();
 		StringBuilder sb = new StringBuilder(stringLength);
@@ -137,6 +133,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 		return sb.toString();
 	}
 
+	@SuppressWarnings("rawtypes")
 	public boolean sendEvent (Enum eventCategory, Enum eventId, Object... params) {
 		if(!isWebAppLoaded()) {
 			DeviceLog.debug("sendEvent ignored because web app is not loaded");
@@ -199,6 +196,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 		return true;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public boolean invokeCallback(Invocation invocation) {
 		if(!isWebAppLoaded()) {
 			DeviceLog.debug("invokeBatchCallback ignored because web app is not loaded");
@@ -248,20 +246,12 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 	}
 
 	public void addCallback (NativeCallback callback) {
-		if (_nativeCallbacks == null) {
-			_nativeCallbacks = new HashMap<>();
-		}
-
 		synchronized (_nativeCallbacks) {
 			_nativeCallbacks.put(callback.getId(), callback);
 		}
 	}
 
 	public void removeCallback (NativeCallback callback) {
-		if (_nativeCallbacks == null) {
-			return;
-		}
-
 		synchronized (_nativeCallbacks) {
 			_nativeCallbacks.remove(callback.getId());
 		}
@@ -305,7 +295,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 					webViewApp = new WebViewApp(configuration, configuration.getExperiments().isWebAssetAdCaching(), configuration.getExperiments().isWebGestureNotRequired());
 				}
 				catch (Exception e) {
-					DeviceLog.error("Couldn't construct WebViewApp");
+					DeviceLog.error("Unity Ads SDK unable to create WebViewApp");
 					_conditionVariable.open();
 					return;
 				}
@@ -313,31 +303,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 				WebViewUrlBuilder webViewUrlBuilder =  new WebViewUrlBuilder("file://" + SdkProperties.getLocalWebViewFile(), configuration);
 				String baseUrl = webViewUrlBuilder.getUrlWithQueryString();
 
-				if (baseUrl == null) {
-					// Just in case of error, fallback to the old way.
-					String queryString = "?platform=android";
-
-					try {
-						if (configuration.getWebViewUrl() != null) {
-							queryString = queryString + "&origin=" + URLEncoder.encode(configuration.getWebViewUrl(), "UTF-8");
-						}
-					} catch (UnsupportedEncodingException e) {
-						DeviceLog.exception("Unsupported charset when encoding origin url", e);
-					}
-
-					try {
-						if (configuration.getWebViewVersion() != null) {
-							queryString = queryString + "&version=" + URLEncoder.encode(configuration.getWebViewVersion(), "UTF-8");
-						}
-					} catch (UnsupportedEncodingException e) {
-						DeviceLog.exception("Unsupported charset when encoding webview version", e);
-					}
-					webViewApp.getWebView().loadDataWithBaseURL("file://" + SdkProperties.getLocalWebViewFile() + queryString, configuration.getWebViewData(), "text/html", "UTF-8", null);
-
-				} else {
-					webViewApp.getWebView().loadDataWithBaseURL(baseUrl, configuration.getWebViewData(), "text/html", "UTF-8", null);
-				}
-
+				webViewApp.getWebView().loadDataWithBaseURL(baseUrl, configuration.getWebViewData(), "text/html", "UTF-8", null);
 
 				setCurrentApp(webViewApp);
 			}
@@ -354,6 +320,11 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 			if (!webViewCreateDidNotTimeout) {
 				return ErrorState.CreateWebviewTimeout;
 			}
+
+			if (WebViewApp.getCurrentApp() == null) {
+				return ErrorState.CreateWebview;
+			}
+
 			return WebViewApp.getCurrentApp().getErrorStateFromWebAppCode();
 		}
 		return null;
@@ -373,7 +344,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 					webViewApp = new WebViewApp(configuration, true, configuration.getExperiments().isWebGestureNotRequired());
 				}
 				catch (Exception e) {
-					DeviceLog.error("Couldn't construct WebViewApp");
+					DeviceLog.error("Unity Ads SDK unable to create WebViewApp");
 					_conditionVariable.open();
 					return;
 				}
@@ -398,6 +369,11 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 			if (!webViewCreateDidNotTimeout) {
 				return ErrorState.CreateWebviewTimeout;
 			}
+
+			if (WebViewApp.getCurrentApp() == null) {
+				return ErrorState.CreateWebview;
+			}
+
 			return WebViewApp.getCurrentApp().getErrorStateFromWebAppCode();
 		}
 		return null;
@@ -420,7 +396,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 
 	/* PRIVATE CLASSES */
 
-	private class WebAppClient extends WebViewClient {
+	private static class WebAppClient extends WebViewClient {
 
 		@Override
 		public boolean onRenderProcessGone(android.webkit.WebView view, final RenderProcessGoneDetail detail) {
@@ -443,7 +419,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 				}
 			});
 
-			DeviceLog.error("UnityAds Sdk WebView onRenderProcessGone : " + detail.toString());
+			DeviceLog.error("UnityAds SDK WebView render process gone with following reason : " + detail.toString());
 			SDKMetrics.getInstance().sendEvent("native_webview_render_process_gone", new HashMap<String, String>() {{
 				// Only apply tags if minimum API Level applies
 				if (Build.VERSION.SDK_INT >= 26) {
@@ -459,52 +435,25 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 		@Override
 		public void onPageFinished(android.webkit.WebView webview, String url) {
 			super.onPageFinished(webview, url);
-			DeviceLog.debug("onPageFinished url: " + url);
+			DeviceLog.debug("Unity Ads SDK finished loading URL inside WebView: " + url);
 		}
 
 		@Override
 		public boolean shouldOverrideUrlLoading(android.webkit.WebView view, String url) {
-			DeviceLog.debug("Trying to load url: " + url);
+			DeviceLog.debug("Unity Ads SDK attempts to load URL inside WebView: " + url);
 			return false;
 		}
 
 		@Override
 		public void onReceivedError(android.webkit.WebView view, WebResourceRequest request, WebResourceError error) {
 			super.onReceivedError(view, request, error);
-			if (view != null) {
-				DeviceLog.error("WEBVIEW_ERROR: " + view.toString());
-			}
-			if (request != null) {
-				DeviceLog.error("WEBVIEW_ERROR: " + request.toString());
-			}
-			if (error != null) {
-				DeviceLog.error("WEBVIEW_ERROR: " + error.toString());
-			}
-		}
-	}
 
-	private class WebAppChromeClient extends WebChromeClient {
-		@SuppressWarnings("deprecation")
-		@Override
-		public void onConsoleMessage(String message, int lineNumber, String sourceID) {
-			String sourceFile = sourceID;
-			File tmp = null;
-
-			try {
-				tmp = new File(sourceID);
-			}
-			catch (Exception e) {
-				DeviceLog.exception("Could not handle sourceId", e);
-			}
-
-			if (tmp != null)
-				sourceFile = tmp.getName();
-
-			// Only log JavaScript console if Android version < 4.4
-			// 4.4 introduced Chromium that logs JS console messages
-			// itself.
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-				DeviceLog.debug("JavaScript (sourceId=" + sourceFile + ", line=" + lineNumber + "): " + message);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && request != null && error != null) {
+				DeviceLog.error("Unity Ads SDK encountered an error (code: " +  error.getErrorCode() + ")  in WebView while loading a resource " + request.getUrl());
+			} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && request != null) {
+				DeviceLog.error("Unity Ads SDK encountered an error in WebView while loading a resource " + request.getUrl());
+			} else {
+				DeviceLog.error("Unity Ads SDK encountered an error in WebView while loading a resource");
 			}
 		}
 	}

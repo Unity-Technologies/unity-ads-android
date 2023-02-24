@@ -17,14 +17,25 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class TokenStorage {
-	private static final Object _lock = new Object();
-	private static ConcurrentLinkedQueue<String> _queue;
-	private static int _accessCounter = 0;
-	private static boolean _peekMode = false;
-	private static String _initToken = null;
-	private static ExecutorService _executorService = Executors.newSingleThreadExecutor();
+	private static TokenStorage _instance;
+	public static TokenStorage getInstance() {
+		if (_instance == null) {
+			_instance = new TokenStorage();
+		}
+		return _instance;
+	}
 
-	public static void createTokens(JSONArray tokens) throws JSONException {
+	private final Object _lock = new Object();
+	private ConcurrentLinkedQueue<String> _queue;
+	private int _accessCounter = 0;
+	private boolean _peekMode = false;
+	private String _initToken = null;
+	private final ExecutorService _executorService = Executors.newSingleThreadExecutor();
+
+	private TokenStorage() {
+	}
+
+	public void createTokens(JSONArray tokens) throws JSONException {
 		boolean shouldTriggerEvent;
 		synchronized (_lock) {
 			_queue = new ConcurrentLinkedQueue<>();
@@ -43,7 +54,7 @@ public class TokenStorage {
 		}
 	}
 
-	public static void appendTokens(JSONArray tokens) throws JSONException {
+	public void appendTokens(JSONArray tokens) throws JSONException {
 		boolean shouldTriggerEvent;
 		synchronized (_lock) {
 			if (_queue == null) {
@@ -64,14 +75,14 @@ public class TokenStorage {
 		}
 	}
 
-	public static void deleteTokens() {
+	public void deleteTokens() {
 		synchronized (_lock) {
 			_queue = null;
 			_accessCounter = 0;
 		}
 	}
 
-	public static String getToken() {
+	public String getToken() {
 		synchronized (_lock) {
 			if (_queue == null) {
 				return _initToken;
@@ -90,13 +101,13 @@ public class TokenStorage {
 		}
 	}
 
-	public static void setPeekMode(boolean mode) {
+	public void setPeekMode(boolean mode) {
 		synchronized (_lock) {
 			_peekMode = mode;
 		}
 	}
 
-	public static void getNativeGeneratedToken() {
+	public void getNativeGeneratedToken() {
 		NativeTokenGenerator nativeTokenGenerator = new NativeTokenGenerator(_executorService, new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance(), GameSessionIdReader.getInstance()), null);
 		nativeTokenGenerator.generateToken(new INativeTokenGeneratorListener() {
 			@Override
@@ -106,7 +117,7 @@ public class TokenStorage {
 		});
 	}
 
-	public static void setInitToken(String value) {
+	public void setInitToken(String value) {
 		boolean shouldTriggerEvent;
 		synchronized (_lock) {
 			_initToken = value;
@@ -119,7 +130,7 @@ public class TokenStorage {
 		}
 	}
 
-	private static void triggerTokenAvailable(Boolean withConfig) {
+	private void triggerTokenAvailable(Boolean withConfig) {
 		InitializeEventsMetricSender.getInstance().sdkTokenDidBecomeAvailableWithConfig(withConfig);
 	}
 

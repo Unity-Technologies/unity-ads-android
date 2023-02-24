@@ -6,12 +6,14 @@ import static com.unity3d.services.core.device.TokenType.TOKEN_REMOTE;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.unity3d.ads.IUnityAdsTokenListener;
+import com.unity3d.services.ads.gmascar.GMA;
+import com.unity3d.services.ads.gmascar.managers.IBiddingManager;
+import com.unity3d.services.ads.gmascar.utils.ScarConstants;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.configuration.PrivacyConfigStorage;
 import com.unity3d.services.core.device.TokenType;
-import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
+import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilderWithExtras;
 import com.unity3d.services.core.device.reader.GameSessionIdReader;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.InitializationStatusReader;
@@ -37,6 +39,8 @@ public class AsyncTokenStorage {
 	private INativeTokenGenerator _nativeTokenGenerator;
 	private final InitializationStatusReader  _initStatusReader = new InitializationStatusReader();
 	private final ISDKMetrics _sdkMetrics;
+	private DeviceInfoReaderBuilderWithExtras _deviceInfoReaderBuilderWithExtras;
+	private TokenStorage _tokenStorage;
 
 	private static AsyncTokenStorage _instance;
 
@@ -45,23 +49,25 @@ public class AsyncTokenStorage {
 			_instance = new AsyncTokenStorage(
 				null,
 				new Handler(Looper.getMainLooper()),
-				SDKMetrics.getInstance());
+				SDKMetrics.getInstance(),
+				TokenStorage.getInstance());
 		}
 		return _instance;
 	}
 
 	class TokenListenerState
 	{
-		public IUnityAdsTokenListener listener;
+		public IBiddingManager biddingManager;
 		public Runnable runnable;
 		public boolean invoked;
 		public TokenType tokenType;
 	}
 
-	public AsyncTokenStorage(INativeTokenGenerator nativeTokenGenerator, Handler handler, ISDKMetrics sdkMetrics) {
+	public AsyncTokenStorage(INativeTokenGenerator nativeTokenGenerator, Handler handler, ISDKMetrics sdkMetrics, TokenStorage tokenStorage) {
 		_handler = handler;
 		_nativeTokenGenerator = nativeTokenGenerator;
 		_sdkMetrics = sdkMetrics;
+		_tokenStorage = tokenStorage;
 	}
 
 	public synchronized void setConfiguration(Configuration configuration) {
@@ -73,9 +79,11 @@ public class AsyncTokenStorage {
 		}
 
 		if (_nativeTokenGenerator == null) {
-			DeviceInfoReaderBuilder deviceInfoReaderBuilder = new DeviceInfoReaderBuilder(new ConfigurationReader(), PrivacyConfigStorage.getInstance(), GameSessionIdReader.getInstance());
+			_deviceInfoReaderBuilderWithExtras = new DeviceInfoReaderBuilderWithExtras(new ConfigurationReader(), PrivacyConfigStorage.getInstance(), GameSessionIdReader.getInstance());
+
 			ExecutorService executorService = Executors.newSingleThreadExecutor();
-			_nativeTokenGenerator = new NativeTokenGenerator(executorService, deviceInfoReaderBuilder);
+			_nativeTokenGenerator = new NativeTokenGenerator(executorService, _deviceInfoReaderBuilderWithExtras);
+
 			if (configuration.getExperiments().shouldNativeTokenAwaitPrivacy()) {
 				_nativeTokenGenerator = new NativeTokenGeneratorWithPrivacyAwait(executorService, _nativeTokenGenerator, configuration.getPrivacyRequestWaitTimeout());
 			}
@@ -97,20 +105,20 @@ public class AsyncTokenStorage {
 		notifyListenersTokenReady();
 	}
 
-	public synchronized void getToken(IUnityAdsTokenListener listener) {
+	public synchronized void getToken(IBiddingManager biddingManager) {
 		if (SdkProperties.getCurrentInitializationState() == SdkProperties.InitializationState.INITIALIZED_FAILED) {
-			listener.onUnityAdsTokenReady(null);
+			biddingManager.onUnityAdsTokenReady(null);
 			sendTokenMetrics(null, TOKEN_REMOTE);
 			return;
 		}
 
 		if (SdkProperties.getCurrentInitializationState() == SdkProperties.InitializationState.NOT_INITIALIZED) {
-			listener.onUnityAdsTokenReady(null);
+			biddingManager.onUnityAdsTokenReady(null);
 			sendTokenMetrics(null, TOKEN_REMOTE);
 			return;
 		}
 
-		final AsyncTokenStorage.TokenListenerState state = addTimeoutHandler(listener);
+		final AsyncTokenStorage.TokenListenerState state = addTimeoutHandler(biddingManager);
 
 		if (!_configurationWasSet) {
 			return;
@@ -119,9 +127,9 @@ public class AsyncTokenStorage {
 		handleTokenInvocation(state);
 	}
 
-	private synchronized AsyncTokenStorage.TokenListenerState addTimeoutHandler(IUnityAdsTokenListener listener) {
+	private synchronized AsyncTokenStorage.TokenListenerState addTimeoutHandler(IBiddingManager biddingManager) {
 		final AsyncTokenStorage.TokenListenerState state = new AsyncTokenStorage.TokenListenerState();
-		state.listener = listener;
+		state.biddingManager = biddingManager;
 		state.tokenType = TOKEN_REMOTE;
 		state.runnable = new Runnable() {
 			@Override
@@ -129,7 +137,6 @@ public class AsyncTokenStorage {
 				notifyTokenReady(state, null);
 			}
 		};
-
 		_tokenListeners.add(state);
 		_handler.postDelayed(state.runnable, _configuration.getTokenTimeout());
 
@@ -138,7 +145,7 @@ public class AsyncTokenStorage {
 
 	private synchronized void notifyListenersTokenReady() {
 		while(!_tokenListeners.isEmpty()) {
-			String token = TokenStorage.getToken();
+			String token = _tokenStorage.getToken();
 
 			if (token == null) {
 				break;
@@ -154,8 +161,15 @@ public class AsyncTokenStorage {
 		}
 		state.invoked = true;
 
-		if (!_tokenAvailable && _configuration.getExperiments().isNativeTokenEnabled()) {
+		if (!_tokenAvailable) {
 			state.tokenType = TOKEN_NATIVE;
+
+			if (GMA.getInstance().hasSCARBiddingSupport() && _deviceInfoReaderBuilderWithExtras != null) {
+				Map<String, String> extras = new HashMap<>();
+				extras.put(ScarConstants.TOKEN_ID_KEY, state.biddingManager.getTokenIdentifier());
+				_deviceInfoReaderBuilderWithExtras.setExtras(extras);
+			}
+
 			_nativeTokenGenerator.generateToken(new INativeTokenGeneratorListener() {
 				@Override
 				public void onReady(final String token) {
@@ -169,7 +183,7 @@ public class AsyncTokenStorage {
 			});
 		} else {
 			state.tokenType = TOKEN_REMOTE;
-			String token = TokenStorage.getToken();
+			String token = _tokenStorage.getToken();
 
 			if (token == null || token.isEmpty()) {
 				return;
@@ -181,7 +195,16 @@ public class AsyncTokenStorage {
 
 	private synchronized void notifyTokenReady(AsyncTokenStorage.TokenListenerState state, String token) {
 		if (_tokenListeners.remove(state)) {
-			state.listener.onUnityAdsTokenReady(token);
+
+			// If SCAR token identifier exists and token is generated by the webView, then the
+			// scar identifier is to be prepended to the token <ScarID>:<unityToken>. Otherwise
+			// scarID will be included in the token map<String, String> payload.
+			String formattedToken = state.tokenType == TOKEN_REMOTE
+				? state.biddingManager.getFormattedToken(token)
+				: token;
+
+			state.biddingManager.onUnityAdsTokenReady(formattedToken);
+
 			try {
 				_handler.removeCallbacks(state.runnable);
 			} catch (Exception ex) {
@@ -229,6 +252,6 @@ public class AsyncTokenStorage {
 	}
 
 	private boolean isValidConfig(Configuration configuration) {
-		return configuration != null && configuration.getExperiments() != null;
+		return configuration != null;
 	}
 }

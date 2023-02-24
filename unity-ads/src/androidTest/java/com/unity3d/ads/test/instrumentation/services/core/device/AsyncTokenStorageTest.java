@@ -3,20 +3,23 @@ package com.unity3d.ads.test.instrumentation.services.core.device;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 import android.os.Handler;
 import android.os.Message;
 
 import com.unity3d.ads.IUnityAdsTokenListener;
+import com.unity3d.services.ads.gmascar.managers.IBiddingManager;
 import com.unity3d.services.ads.token.AsyncTokenStorage;
 import com.unity3d.services.ads.token.INativeTokenGenerator;
 import com.unity3d.services.ads.token.INativeTokenGeneratorListener;
 import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.configuration.Configuration;
-import com.unity3d.services.core.configuration.Experiments;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.metrics.ISDKMetrics;
@@ -24,9 +27,7 @@ import com.unity3d.services.core.request.metrics.Metric;
 import com.unity3d.services.core.request.metrics.TSIMetric;
 import com.unity3d.services.core.webview.WebViewApp;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,31 +47,35 @@ import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AsyncTokenStorageTest {
+
 	@Mock
 	INativeTokenGenerator _nativeTokenGenerator;
 	@Mock
 	Handler _handler;
 	@Mock
-	IUnityAdsTokenListener _listener;
+	IBiddingManager _biddingManager;
 	@Mock
 	ISDKMetrics _sdkMetrics;
+	@Mock
+	TokenStorage _tokenStorage;
 
 	AsyncTokenStorage _asyncTokenStorage;
 	Runnable timeoutRunnable;
 	List<Runnable> handlerRunnable = new ArrayList<>();
 	ArgumentCaptor<Metric> _metricsCaptor = ArgumentCaptor.forClass(Metric.class);
+	private static final String SCAR_TOKEN_IDENTIFIER_MOCK = "scarTokenIdentifier";
 
 	@Before
 	public void Before() {
 		ClientProperties.setApplicationContext(androidx.test.core.app.ApplicationProvider.getApplicationContext());
-		TokenStorage.deleteTokens();
-		TokenStorage.setInitToken(null);
 		MockWebViewApp webViewApp = new MockWebViewApp();
 		WebViewApp.setCurrentApp(webViewApp);
 		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZING);
 
-		_asyncTokenStorage = new AsyncTokenStorage(_nativeTokenGenerator, _handler, _sdkMetrics);
+		_asyncTokenStorage = new AsyncTokenStorage(_nativeTokenGenerator, _handler, _sdkMetrics, _tokenStorage);
 		_asyncTokenStorage.setConfiguration(new Configuration());
+
+		Mockito.when(_biddingManager.getTokenIdentifier()).thenReturn(SCAR_TOKEN_IDENTIFIER_MOCK);
 
 		doAnswer(new Answer() {
 			@Override
@@ -97,10 +102,10 @@ public class AsyncTokenStorageTest {
 			put ("state", "not_initialized");
 		}});
 
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(null);
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(null);
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		final Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
@@ -108,9 +113,9 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testGetTokenBeforeInit() {
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_handler, times(1)).sendMessageAtTime(any(Message.class), anyLong());
 	}
 
@@ -120,12 +125,12 @@ public class AsyncTokenStorageTest {
 			put ("state", "initializing");
 		}});
 
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		timeoutRunnable.run();
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(null);
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(null);
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		final Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
@@ -137,14 +142,14 @@ public class AsyncTokenStorageTest {
 			put ("state", "initializing");
 		}});
 
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		timeoutRunnable.run();
 		timeoutRunnable.run();
 		timeoutRunnable.run();
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(null);
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(null);
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(3)).sendMetric(_metricsCaptor.capture());
 		final Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
@@ -156,13 +161,17 @@ public class AsyncTokenStorageTest {
 			put ("state", "initializing");
 		}});
 
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
 
-		TokenStorage.setInitToken("init_time_token");
+		when(_tokenStorage.getToken())
+			.thenReturn("init_time_token")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("init_time_token");
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		// token will be generated by native flow, SCAR token identifier will be in the payload and
+		// not prepended.
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady("init_time_token");
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		final Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
@@ -170,182 +179,185 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testGetTokenBeforeInitAndCreateEmptyQueue() throws JSONException {
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
 
-		TokenStorage.createTokens(new JSONArray());
+		when(_tokenStorage.getToken()).thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(0)).sendMetric(any(Metric.class));
 	}
 
 	@Test
-	public void testGetTokenBeforeInitAndCreateQueueTokenReady() throws JSONException {
+	public void testGetTokenBeforeInitAndCreateQueueTokenReady() {
 		Metric _metric = TSIMetric.newNativeGeneratedTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
 
-		JSONArray array = new JSONArray();
-		array.put("queue_token_1");
-		TokenStorage.createTokens(array);
+		when(_tokenStorage.getToken()).thenReturn("queue_token_1")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("queue_token_1");
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		// token will be generated by native flow, SCAR token identifier will be in the payload and
+		// not prepended.
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady("queue_token_1");
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		final Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
 	}
 
 	@Test
-	public void testGetTokenAfterInitTokenReady() throws JSONException {
+	public void testGetTokenAfterInitTokenReady() {
 		Metric _metric = TSIMetric.newAsyncTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
-		TokenStorage.setInitToken("init_time_token");
+		when(_tokenStorage.getToken()).thenReturn("init_time_token")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		_asyncTokenStorage.getToken(_listener);
+		Mockito.when(_biddingManager.getFormattedToken(anyString())).thenReturn(SCAR_TOKEN_IDENTIFIER_MOCK + ":init_time_token");
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		Mockito.verify(_handler, times(1)).sendMessageAtTime(any(Message.class), anyLong());
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("init_time_token");
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		// token is remote, SCAR token identifier will prepended.
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(SCAR_TOKEN_IDENTIFIER_MOCK+":init_time_token");
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		final Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
 	}
 
 	@Test
-	public void testGetTokenAfterQueueTokenReady() throws JSONException {
+	public void testGetTokenAfterQueueTokenReady() {
 		Metric _metric = TSIMetric.newAsyncTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
-		JSONArray array = new JSONArray();
-		array.put("queue_token_1");
-		TokenStorage.createTokens(array);
+		when(_tokenStorage.getToken()).thenReturn("queue_token_1")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		_asyncTokenStorage.getToken(_listener);
+		Mockito.when(_biddingManager.getFormattedToken(anyString())).thenReturn(SCAR_TOKEN_IDENTIFIER_MOCK + ":queue_token_1");
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		Mockito.verify(_handler, times(1)).sendMessageAtTime(any(Message.class), anyLong());
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("queue_token_1");
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(SCAR_TOKEN_IDENTIFIER_MOCK+":queue_token_1");
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		final Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
 	}
 
 	@Test
-	public void testMultipleCallsBeforeInit() throws JSONException {
+	public void testMultipleCallsBeforeInit() {
 		Metric _metric = TSIMetric.newNativeGeneratedTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
-		_asyncTokenStorage.getToken(_listener);
-		_asyncTokenStorage.getToken(_listener);
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
+		_asyncTokenStorage.getToken(_biddingManager);
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		Mockito.verify(_handler, times(3)).sendMessageAtTime(any(Message.class), anyLong());
 
-		TokenStorage.setInitToken("init_time_token");
+		when(_tokenStorage.getToken()).thenReturn("init_time_token");
 		_asyncTokenStorage.onTokenAvailable();
 
-		Mockito.verify(_listener, Mockito.times(3)).onUnityAdsTokenReady("init_time_token");
-		Mockito.verify(_listener, Mockito.times(3)).onUnityAdsTokenReady(nullable(String.class));
+		// All tokens will be native. Scar will be in the payload
+		Mockito.verify(_nativeTokenGenerator, Mockito.times(3)).generateToken(any(INativeTokenGeneratorListener.class));
+		Mockito.verify(_biddingManager, Mockito.times(3)).onUnityAdsTokenReady("init_time_token");
+		Mockito.verify(_biddingManager, Mockito.times(3)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(3)).sendMetric(_metricsCaptor.capture());
 		final Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
 	}
 
 	@Test
-	public void testMultipleCallsBeforeInitAndQueue() throws JSONException {
+	public void testMultipleCallsBeforeInitAndQueue() {
 		Metric _metric = TSIMetric.newNativeGeneratedTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
-		_asyncTokenStorage.getToken(_listener);
-		_asyncTokenStorage.getToken(_listener);
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
+		_asyncTokenStorage.getToken(_biddingManager);
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		Mockito.verify(_handler, times(3)).sendMessageAtTime(any(Message.class), anyLong());
 
-		JSONArray array = new JSONArray();
-		array.put("queue_token_1");
-		array.put("queue_token_2");
-		array.put("queue_token_3");
-		TokenStorage.createTokens(array);
+		when(_tokenStorage.getToken())
+			.thenReturn("queue_token_1", "queue_token_2", "queue_token_3", null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		InOrder order = Mockito.inOrder(_listener);
-		order.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("queue_token_1");
-		order.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("queue_token_2");
-		order.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("queue_token_3");
-		Mockito.verify(_listener, Mockito.times(3)).onUnityAdsTokenReady(nullable(String.class));
+		InOrder order = Mockito.inOrder(_biddingManager);
+		Mockito.verify(_nativeTokenGenerator, Mockito.times(3)).generateToken(any(INativeTokenGeneratorListener.class));
+		order.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady("queue_token_1");
+		order.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady("queue_token_2");
+		order.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady("queue_token_3");
+		Mockito.verify(_biddingManager, Mockito.times(3)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(3)).sendMetric(_metricsCaptor.capture());
 		final Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
 	}
 
 	@Test
-	public void testMultipleCallsBeforeInitAndSingleAfterInit() throws JSONException {
+	public void testMultipleCallsBeforeInitAndSingleAfterInit() {
 		Metric _metric = TSIMetric.newNativeGeneratedTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
 
-		_asyncTokenStorage.getToken(_listener);
-		_asyncTokenStorage.getToken(_listener);
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
+		_asyncTokenStorage.getToken(_biddingManager);
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		Mockito.verify(_handler, times(3)).sendMessageAtTime(any(Message.class), anyLong());
 
-		JSONArray array = new JSONArray();
-		array.put("queue_token_1");
-		array.put("queue_token_2");
-		TokenStorage.createTokens(array);
+		when(_tokenStorage.getToken())
+			.thenReturn("queue_token_1", "queue_token_2", null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		Mockito.verify(_listener, Mockito.times(2)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_nativeTokenGenerator, Mockito.times(3)).generateToken(any(INativeTokenGeneratorListener.class));
+		Mockito.verify(_biddingManager, Mockito.times(2)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(2)).sendMetric(_metricsCaptor.capture());
 		Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
 
-		array = new JSONArray();
-		array.put("queue_token_3");
-		TokenStorage.appendTokens(array);
+		when(_tokenStorage.getToken())
+			.thenReturn("queue_token_3")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("queue_token_3");
-		Mockito.verify(_listener, Mockito.times(3)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady("queue_token_3");
+		Mockito.verify(_biddingManager, Mockito.times(3)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(3)).sendMetric(_metricsCaptor.capture());
 		capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
 	}
 
 	@Test
-	public void testGetTokenFailedInit() throws JSONException {
+	public void testGetTokenFailedInit() {
 		Metric _metric = TSIMetric.newAsyncTokenNull(new HashMap<String, String>(){{
 			put ("state", "initialized_failed");
 		}});
 
-		JSONArray array = new JSONArray();
-		array.put("queue_token_1");
-		TokenStorage.createTokens(array);
+		when(_tokenStorage.getToken())
+			.thenReturn("queue_token_1")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
 		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_FAILED);
 
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		Mockito.verify(_handler, times(0)).sendMessageAtTime(any(Message.class), anyLong());
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(null);
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(null);
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
@@ -353,12 +365,12 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testGetTokenFailedInitCancelAllRequests() {
-		_asyncTokenStorage.getToken(_listener);
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		SdkProperties.setInitializeState(SdkProperties.InitializationState.INITIALIZED_FAILED);
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(0)).sendMetric(any(Metric.class));
 	}
 
@@ -369,9 +381,6 @@ public class AsyncTokenStorageTest {
 		}});
 		Configuration configuration = Mockito.mock(Configuration.class);
 
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("tsi_nt", true);
-		Mockito.when(configuration.getExperiments()).thenReturn(new Experiments(jsonObject));
 		_asyncTokenStorage.setConfiguration(configuration);
 
 		doAnswer(new Answer() {
@@ -380,16 +389,16 @@ public class AsyncTokenStorageTest {
 				return null;
 			}}).when(_nativeTokenGenerator).generateToken(any(INativeTokenGeneratorListener.class));
 
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		Mockito.verify(_handler, times(2)).sendMessageAtTime(any(Message.class), anyLong());
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 
 		handlerRunnable.get(1).run();
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("native_token");
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady("native_token");
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
@@ -402,100 +411,100 @@ public class AsyncTokenStorageTest {
 		}});
 		Configuration configuration = Mockito.mock(Configuration.class);
 
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("tsi_nt", true);
-		Mockito.when(configuration.getExperiments()).thenReturn(new Experiments(jsonObject));
 		_asyncTokenStorage.setConfiguration(configuration);
 
-		JSONArray array = new JSONArray();
-		array.put("queue_token_1");
-		TokenStorage.createTokens(array);
+		when(_tokenStorage.getToken())
+			.thenReturn("queue_token_1")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		_asyncTokenStorage.getToken(_listener);
+		Mockito.when(_biddingManager.getFormattedToken(anyString())).thenReturn(SCAR_TOKEN_IDENTIFIER_MOCK + ":queue_token_1");
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		Mockito.verify(_nativeTokenGenerator, times(0)).generateToken(any(INativeTokenGeneratorListener.class));
 		Mockito.verify(_handler, times(1)).sendMessageAtTime(any(Message.class), anyLong());
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("queue_token_1");
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(SCAR_TOKEN_IDENTIFIER_MOCK+":queue_token_1");
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
 	}
 
 	@Test
-	public void testDelayedConfiguration() throws JSONException {
+	public void testDelayedConfiguration() {
 		Metric _metric = TSIMetric.newAsyncTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
-		_asyncTokenStorage = new AsyncTokenStorage(_nativeTokenGenerator, _handler, _sdkMetrics);
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage = new AsyncTokenStorage(_nativeTokenGenerator, _handler, _sdkMetrics, _tokenStorage);
+		_asyncTokenStorage.getToken(_biddingManager);
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_handler, times(1)).sendMessageAtTime(any(Message.class), anyLong());
 
-		JSONArray array = new JSONArray();
-		array.put("queue_token_1");
-		TokenStorage.createTokens(array);
+		when(_tokenStorage.getToken())
+			.thenReturn("queue_token_1")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 
 		_asyncTokenStorage.setConfiguration(new Configuration());
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
 	}
 
 	@Test
-	public void testDelayedConfigurationTwoConfigSets() throws JSONException {
+	public void testDelayedConfigurationTwoConfigSets() {
 		Metric _metric = TSIMetric.newAsyncTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
-		_asyncTokenStorage = new AsyncTokenStorage(_nativeTokenGenerator, _handler, _sdkMetrics);
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage = new AsyncTokenStorage(_nativeTokenGenerator, _handler, _sdkMetrics, _tokenStorage);
+		Mockito.when(_biddingManager.getFormattedToken(anyString())).thenReturn(SCAR_TOKEN_IDENTIFIER_MOCK + ":queue_token_1");
+		_asyncTokenStorage.getToken(_biddingManager);
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_handler, times(1)).sendMessageAtTime(any(Message.class), anyLong());
 
-		JSONArray array = new JSONArray();
-		array.put("queue_token_1");
-		TokenStorage.createTokens(array);
+		when(_tokenStorage.getToken())
+			.thenReturn("queue_token_1")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 
 		_asyncTokenStorage.setConfiguration(new Configuration());
 		_asyncTokenStorage.setConfiguration(new Configuration());
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("queue_token_1");
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(SCAR_TOKEN_IDENTIFIER_MOCK+":queue_token_1");
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
 	}
 
 	@Test
-	public void testDelayedConfigurationConfigurationArrivedFirst() throws JSONException {
+	public void testDelayedConfigurationConfigurationArrivedFirst() {
 		Metric _metric = TSIMetric.newNativeGeneratedTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
-		_asyncTokenStorage = new AsyncTokenStorage(_nativeTokenGenerator, _handler, _sdkMetrics);
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage.getToken(_biddingManager);
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_handler, times(1)).sendMessageAtTime(any(Message.class), anyLong());
 
 		_asyncTokenStorage.setConfiguration(new Configuration());
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 
-		TokenStorage.setInitToken("init_token");
+		when(_tokenStorage.getToken())
+			.thenReturn("init_token")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("init_token");
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady("init_token");
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);
@@ -503,51 +512,51 @@ public class AsyncTokenStorageTest {
 
 	@Test
 	public void testNullConfiguration() throws JSONException {
-		_asyncTokenStorage = new AsyncTokenStorage(_nativeTokenGenerator, _handler, _sdkMetrics);
-		_asyncTokenStorage.getToken(_listener);
+		_asyncTokenStorage = new AsyncTokenStorage(_nativeTokenGenerator, _handler, _sdkMetrics, _tokenStorage);
+		_asyncTokenStorage.getToken(_biddingManager);
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_handler, times(1)).sendMessageAtTime(any(Message.class), anyLong());
 
-		JSONArray array = new JSONArray();
-		array.put("queue_token_1");
-		TokenStorage.createTokens(array);
+		when(_tokenStorage.getToken())
+			.thenReturn("token_1")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(0)).sendMetric(any(Metric.class));
 
 		_asyncTokenStorage.setConfiguration(null);
 
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(0)).sendMetric(any(Metric.class));
 	}
 
 	@Test
-	public void testGetTokenWhenQueueEmptyWaitForNextToken() throws JSONException {
+	public void testGetTokenWhenQueueEmptyWaitForNextToken() {
 		Metric _metric = TSIMetric.newAsyncTokenAvailable(new HashMap<String, String>(){{
 			put ("state", "initializing");
 		}});
-		JSONArray array = new JSONArray();
-		array.put("create_token_1");
-		TokenStorage.createTokens(array);
+		when(_tokenStorage.getToken())
+			.thenReturn("create_token_1")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		assertEquals("create_token_1", TokenStorage.getToken());
-
-		_asyncTokenStorage.getToken(_listener);
+		assertEquals("create_token_1", _tokenStorage.getToken());
+		Mockito.when(_biddingManager.getFormattedToken(anyString())).thenReturn(SCAR_TOKEN_IDENTIFIER_MOCK + ":append_token_1");
+		_asyncTokenStorage.getToken(_biddingManager);
 
 		Mockito.verify(_handler, times(1)).sendMessageAtTime(any(Message.class), anyLong());
-		Mockito.verify(_listener, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(0)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(0)).sendMetric(any(Metric.class));
 
-		array = new JSONArray();
-		array.put("append_token_1");
-		TokenStorage.appendTokens(array);
+		when(_tokenStorage.getToken())
+			.thenReturn("append_token_1")
+			.thenReturn(null);
 		_asyncTokenStorage.onTokenAvailable();
 
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady("append_token_1");
-		Mockito.verify(_listener, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(SCAR_TOKEN_IDENTIFIER_MOCK+":append_token_1");
+		Mockito.verify(_biddingManager, Mockito.times(1)).onUnityAdsTokenReady(nullable(String.class));
 		Mockito.verify(_sdkMetrics, Mockito.times(1)).sendMetric(_metricsCaptor.capture());
 		Metric capturedMetric = _metricsCaptor.getValue();
 		Assert.assertEquals(_metric, capturedMetric);

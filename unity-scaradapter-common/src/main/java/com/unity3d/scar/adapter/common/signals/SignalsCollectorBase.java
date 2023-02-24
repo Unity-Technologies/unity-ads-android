@@ -10,6 +10,9 @@ import java.util.Map;
 
 public abstract class SignalsCollectorBase implements ISignalsCollector {
 
+	public static final String SCAR_RV_SIGNAL = "gmaScarBiddingRewardedSignal";
+	public static final String SCAR_INT_SIGNAL = "gmaScarBiddingInterstitialSignal";
+
 	public SignalsCollectorBase() {}
 
 	@Override
@@ -29,6 +32,25 @@ public abstract class SignalsCollectorBase implements ISignalsCollector {
 		}
 
 		dispatchGroup.notify(new GMAScarDispatchCompleted(signalCompletionListener, signalsResult));
+	}
+
+	@Override
+	public void getSCARBiddingSignals(Context context, ISignalCollectionListener signalCompletionListener) {
+		DispatchGroup dispatchGroup = new DispatchGroup();
+		SignalsResult signalsResult = new SignalsResult();
+
+		dispatchGroup.enter();
+		getSCARSignal(context, true, dispatchGroup, signalsResult);
+
+		dispatchGroup.enter();
+		getSCARSignal(context, false, dispatchGroup, signalsResult);
+
+		dispatchGroup.notify(new GMAScarDispatchCompleted(signalCompletionListener, signalsResult));
+	}
+
+	public void onOperationNotSupported(String msg, DispatchGroup dispatchGroup, SignalsResult signalsResult) {
+		signalsResult.setErrorMessage(String.format("Operation Not supported: %s.", msg));
+		dispatchGroup.leave();
 	}
 
 	private class GMAScarDispatchCompleted implements Runnable {

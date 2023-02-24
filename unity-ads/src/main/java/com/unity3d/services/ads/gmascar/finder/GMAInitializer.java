@@ -8,8 +8,6 @@ import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridgeBase;
 import com.unity3d.services.ads.gmascar.utils.GMAEventSender;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
-import com.unity3d.services.core.webview.WebViewApp;
-import com.unity3d.services.core.webview.WebViewEventCategory;
 
 import java.util.Map;
 
@@ -22,13 +20,13 @@ public class GMAInitializer {
 	private GMAEventSender _gmaEventSender;
 
 	public GMAInitializer(MobileAdsBridgeBase mobileAdsBridge, InitializeListenerBridge initializeListenerBridge,
-						  InitializationStatusBridge initializationStatusBridge, AdapterStatusBridge adapterStatusBridge) {
+						  InitializationStatusBridge initializationStatusBridge, AdapterStatusBridge adapterStatusBridge,
+						  GMAEventSender gmaEventSender) {
 		_mobileAdsBridge = mobileAdsBridge;
 		_initializationListenerBridge = initializeListenerBridge;
 		_initializationStatusBridge = initializationStatusBridge;
 		_adapterStatusBridge = adapterStatusBridge;
-
-		_gmaEventSender = new GMAEventSender();
+		_gmaEventSender = gmaEventSender;
 	}
 
 	// We need to initialize GMA SDK in order to get the version string in GMA SDK V20 and below or if part of the isScarInitEnabled experiment group
@@ -44,10 +42,10 @@ public class GMAInitializer {
 		Object adapterState = statusMap.get(_mobileAdsBridge.getClassName());
 		if (adapterState != null) {
 			if (_adapterStatusBridge.isGMAInitialized(adapterState)) {
-				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.GMA, GMAEvent.INIT_SUCCESS);
+				_gmaEventSender.send(GMAEvent.INIT_SUCCESS);
 				return true;
 			} else {
-				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.GMA, GMAEvent.INIT_ERROR);
+				_gmaEventSender.send(GMAEvent.INIT_ERROR);
 				return false;
 			}
 		}

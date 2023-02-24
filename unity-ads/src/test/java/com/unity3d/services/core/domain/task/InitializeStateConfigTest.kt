@@ -6,7 +6,7 @@ import com.unity3d.services.core.configuration.ExperimentsReader
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
-import junit.framework.Assert.assertTrue
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
@@ -41,17 +41,4 @@ class InitializeStateConfigTest {
         coEvery {initializeStateConfigWithLoaderMock(any())} returns Result.success(configMock)
     }
 
-    @Test
-    fun doWork_tsiEnabled_configLoaderCalled() = runBlockingTest {
-        // given
-        every {experimentsMock.isTwoStageInitializationEnabled} returns true
-        coEvery {initializeStateConfigWithLoaderMock(any())} returns Result.success(configMock)
-
-        // when
-        val result : Result<Configuration> = initializeStateConfig(InitializeStateConfig.Params(configMock))
-
-        // then
-        assertTrue(result.isSuccess)
-        coVerify(exactly=1){initializeStateConfigWithLoaderMock(any())}
-    }
 }

@@ -39,16 +39,14 @@ class InitializeStateConfigWithLoader(
                         deviceInfoDataFactory.getDeviceInfoData(InitRequestType.TOKEN)
                     )
                 )
-                if (params.config.experiments.isPrivacyRequestEnabled) {
-                    configurationLoader = PrivacyConfigurationLoader(
-                        configurationLoader,
-                        ConfigurationRequestFactory(
-                            params.config,
-                            deviceInfoDataFactory.getDeviceInfoData(InitRequestType.PRIVACY)
-                        ),
-                        privacyConfigStorage
-                    )
-                }
+                configurationLoader = PrivacyConfigurationLoader(
+                    configurationLoader,
+                    ConfigurationRequestFactory(
+                        params.config,
+                        deviceInfoDataFactory.getDeviceInfoData(InitRequestType.PRIVACY)
+                    ),
+                    privacyConfigStorage
+                )
                 var config = Configuration()
 
                 val configResult = runCatching {
@@ -65,7 +63,7 @@ class InitializeStateConfigWithLoader(
                                 override fun onSuccess(configuration: Configuration) {
                                     config = configuration
                                     config.saveToDisk()
-                                    TokenStorage.setInitToken(config.unifiedAuctionToken)
+                                    TokenStorage.getInstance().setInitToken(config.unifiedAuctionToken)
                                 }
 
                                 override fun onError(errorMsg: String) {
@@ -87,7 +85,7 @@ class InitializeStateConfigWithLoader(
                                 override fun onSuccess(configuration: Configuration) {
                                     config = configuration
                                     config.saveToDisk()
-                                    TokenStorage.setInitToken(config.unifiedAuctionToken)
+                                    TokenStorage.getInstance().setInitToken(config.unifiedAuctionToken)
                                 }
 
                                 override fun onError(errorMsg: String) {

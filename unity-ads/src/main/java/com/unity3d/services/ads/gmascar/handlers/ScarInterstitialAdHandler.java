@@ -3,12 +3,13 @@ package com.unity3d.services.ads.gmascar.handlers;
 import com.unity3d.scar.adapter.common.IScarInterstitialAdListenerWrapper;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
 import com.unity3d.scar.adapter.common.GMAEvent;
+import com.unity3d.services.ads.gmascar.utils.GMAEventSender;
 import com.unity3d.services.core.misc.EventSubject;
 
 public class ScarInterstitialAdHandler extends ScarAdHandlerBase implements IScarInterstitialAdListenerWrapper {
 
-	public ScarInterstitialAdHandler(ScarAdMetadata scarAdMetadata, EventSubject<GMAEvent> eventSubject) {
-		super(scarAdMetadata, eventSubject);
+	public ScarInterstitialAdHandler(ScarAdMetadata scarAdMetadata, EventSubject<GMAEvent> eventSubject, GMAEventSender gmaEventSender) {
+		super(scarAdMetadata, eventSubject, gmaEventSender);
 	}
 
 	@Override

@@ -12,10 +12,13 @@ public class AdOperationMetric {
 	private static final String AD_SHOW_SUCCESS = "native_show_time_success";
 	private static final String AD_LOAD_FAIL = "native_load_time_failure";
 	private static final String AD_SHOW_FAIL = "native_show_time_failure";
+	private static final String AD_LOAD_TYPE = "type";
 
 	private static final String UNKNOWN = "unknown";
 	private static final String REASON = "reason";
 	public static final String INIT_STATE = "state";
+	private static final String AD_TYPE_BANNER = "banner";
+	private static final String AD_TYPE_VIDEO = "video";
 
 	public static Metric newAdLoadStart() {
 		return new Metric(
@@ -31,11 +34,11 @@ public class AdOperationMetric {
 			null);
 	}
 
-	public static Metric newAdLoadSuccess(Long durationMs) {
+	public static Metric newAdLoadSuccess(Long durationMs, boolean isBanner) {
 		return new Metric(
 			AD_LOAD_SUCCESS,
 			durationMs,
-			null);
+			getTags(null, false, isBanner));
 	}
 
 	public static Metric newAdShowSuccess(Long durationMs) {
@@ -45,32 +48,36 @@ public class AdOperationMetric {
 			null);
 	}
 
-	public static Metric newAdLoadFailure(AdOperationError error, Long durationMs) {
+	public static Metric newAdLoadFailure(AdOperationError error, Long durationMs, boolean isBanner) {
 		return new Metric(
 			AD_LOAD_FAIL,
 			durationMs,
-			getTags(error));
+			getTags(error, true, isBanner));
 	}
 
-	public static Metric newAdLoadFailure(UnityAds.UnityAdsLoadError error, Long durationMs) {
-		return newAdLoadFailure(mapUnityAdsLoadError(error), durationMs);
+	public static Metric newAdLoadFailure(UnityAds.UnityAdsLoadError error, Long durationMs, boolean isBanner) {
+		return newAdLoadFailure(mapUnityAdsLoadError(error), durationMs, isBanner);
 	}
 
 	public static Metric newAdShowFailure(AdOperationError error, Long durationMs) {
 		return new Metric(
 			AD_SHOW_FAIL,
 			durationMs,
-			getTags(error));
+			getTags(error, true, false));
 	}
 
 	public static Metric newAdShowFailure(UnityAds.UnityAdsShowError error, Long durationMs) {
 		return newAdShowFailure(mapUnityAdsShowError(error), durationMs);
 	}
 
-	private static HashMap<String, String> getTags(AdOperationError error) {
+	private static HashMap<String, String> getTags(AdOperationError error, final boolean isFailure, boolean isBanner) {
 		final String errorMetric = error == null ? UNKNOWN : error.toString();
-		return new HashMap<String, String>(){{
-			put(REASON, errorMetric);
+		final String type = isBanner ? AD_TYPE_BANNER : AD_TYPE_VIDEO;
+		return new HashMap<String, String>() {{
+			if (isFailure) {
+				put(REASON, errorMetric);
+			}
+			put(AD_LOAD_TYPE, type);
 		}};
 	}
 

@@ -6,6 +6,7 @@ import android.view.Gravity;
 import android.view.ViewParent;
 import android.widget.RelativeLayout;
 
+import com.unity3d.ads.UnityAdsLoadOptions;
 import com.unity3d.services.ads.webplayer.WebPlayerSettingsCache;
 import com.unity3d.services.banners.bridge.BannerBridge;
 import com.unity3d.services.banners.view.BannerWebPlayerContainer;
@@ -16,7 +17,6 @@ import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.misc.ViewUtilities;
 import com.unity3d.services.core.properties.ClientProperties;
-import com.unity3d.services.core.properties.SdkProperties;
 
 import org.json.JSONObject;
 
@@ -61,11 +61,11 @@ public class BannerView extends RelativeLayout {
 	}
 
 	public void load() {
-		if (SdkProperties.isInitialized()) {
-			this.bridgeLoad();
-		} else {
-			this.registerInitializeListener();
-		}
+		this.bridgeLoad();
+	}
+
+	public void load(final UnityAdsLoadOptions loadOptions) {
+		this.bridgeLoad(loadOptions);
 	}
 
 	public void destroy() {
@@ -196,6 +196,10 @@ public class BannerView extends RelativeLayout {
 	}
 
 	private void bridgeLoad() {
-		BannerBridge.load(this.placementId, this.viewId, this.size);
+		BannerBridge.load(this.placementId, this.viewId, this.size, new UnityAdsLoadOptions());
+	}
+
+	private void bridgeLoad(UnityAdsLoadOptions loadOptions) {
+		BannerBridge.load(this.placementId, this.viewId, this.size, loadOptions);
 	}
 }

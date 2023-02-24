@@ -9,4 +9,7 @@ public interface ISignalsCollector {
 							   ISignalCollectionListener signalCompletionListener);
 	void getSCARSignal(Context context, String placementId, boolean isInterstitial,
 					   DispatchGroup dispatchGroup, SignalsResult signalsResult);
+	void getSCARSignal(Context context, boolean isInterstitial, final DispatchGroup dispatchGroup,
+					   final SignalsResult signalsResult) ;
+	void getSCARBiddingSignals(Context context, ISignalCollectionListener signalCompletionListener);
 }

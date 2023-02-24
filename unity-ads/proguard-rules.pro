@@ -18,3 +18,14 @@
 -keep class com.unity3d.services.** {
    *;
 }
+
+-keep class com.google.android.gms.ads.initialization.** {
+        *;
+}
+
+-keep class com.google.android.gms.ads.MobileAds {
+        *;
+}
+
+-dontwarn com.google.ads.mediation.admob.*
+-dontwarn com.google.android.gms.ads.**

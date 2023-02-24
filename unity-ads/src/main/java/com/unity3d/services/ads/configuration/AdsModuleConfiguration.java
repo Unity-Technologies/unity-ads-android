@@ -36,7 +36,7 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 	public boolean resetState(Configuration configuration) {
 		AdUnitOpen.setConfiguration(configuration);
 		UnityAdsImplementation.setConfiguration(configuration);
-		TokenStorage.deleteTokens();
+		TokenStorage.getInstance().deleteTokens();
 		AsyncTokenStorage.getInstance().setConfiguration(configuration);
 		return true;
 	}
@@ -80,8 +80,8 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 	}
 
 	public boolean initErrorState(Configuration configuration, ErrorState state, String errorMessage) {
-		TokenStorage.setInitToken(null);
-		TokenStorage.deleteTokens();
+		TokenStorage.getInstance().setInitToken(null);
+		TokenStorage.getInstance().deleteTokens();
 		return true;
 	}
 

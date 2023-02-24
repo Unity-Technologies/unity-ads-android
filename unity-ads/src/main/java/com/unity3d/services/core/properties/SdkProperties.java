@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Base64;
 
 import com.unity3d.ads.BuildConfig;
 import com.unity3d.ads.IUnityAdsInitializationListener;
@@ -29,6 +30,12 @@ public class SdkProperties {
 	private static final String CHINA_ISO_ALPHA_2_CODE = "CN";
 	private static final String CHINA_ISO_ALPHA_3_CODE = "CHN";
 	private static final String DEFAULT_CONFIG_VERSION = "configv2";
+	/**
+	 * CHINA_CONFIG_HOSTNAME is Base64 Encoded to remove
+	 * direct links to China country code endpoints within the code
+	 */
+	private static final String CHINA_CONFIG_HOSTNAME = "dW5pdHlhZHMudW5pdHljaGluYS5jbg==";
+	private static final String DEFAULT_CONFIG_HOSTNAME = "unityads.unity3d.com";
 	private static final String CONFIG_VERSION_METADATA_KEY = "com.unity3d.ads.configversion";
 	private static long _initializationTime = 0;
 	private static long _initializationTimeEpochMs = 0;
@@ -134,11 +141,8 @@ public class SdkProperties {
 
 	public static String getDefaultConfigUrl(String flavor) {
 		boolean isChinaLocale = isChinaLocale(Device.getNetworkCountryISO());
-		String baseURI = "https://" + getConfigVersion(ClientProperties.getApplicationContext()) + ".unityads.unity3d.com/webview/";
-		if (isChinaLocale) {
-			baseURI = "https://" + getConfigVersion(ClientProperties.getApplicationContext()) + ".unityads.unitychina.cn/webview/";
-		}
-		return baseURI + getWebViewBranch() + "/" + flavor + "/config.json";
+		String hostName = isChinaLocale ? new String(Base64.decode(CHINA_CONFIG_HOSTNAME, Base64.DEFAULT)) : DEFAULT_CONFIG_HOSTNAME;
+		return "https://" + getConfigVersion(ClientProperties.getApplicationContext()) + '.' + hostName + "/webview/" + getWebViewBranch() + "/" + flavor + "/config.json";
 	}
 
 	public static String getConfigVersion(Context context) {
@@ -167,11 +171,13 @@ public class SdkProperties {
 	}
 
 	public static String getLocalWebViewFile() {
-		return SdkProperties.getCacheDirectory().getAbsolutePath() + "/" + "UnityAdsWebApp.html";
+		if (getCacheDirectory() == null) return "";
+		return getCacheDirectory().getAbsolutePath() + "/" + "UnityAdsWebApp.html";
 	}
 
 	public static String getLocalConfigurationFilepath() {
-		return SdkProperties.getCacheDirectory().getAbsolutePath() + "/" + "UnityAdsWebViewConfiguration.json";
+		if (getCacheDirectory() == null) return "";
+		return getCacheDirectory().getAbsolutePath() + "/" + "UnityAdsWebViewConfiguration.json";
 	}
 
 	public static void setLatestConfiguration(Configuration configuration) {
@@ -180,10 +186,6 @@ public class SdkProperties {
 
 	public static Configuration getLatestConfiguration() {
 		return _latestConfiguration;
-	}
-
-	public static String getLocalWebViewFileUpdated() {
-		return getLocalWebViewFile() + ".new";
 	}
 
 	public static File getCacheDirectory() {

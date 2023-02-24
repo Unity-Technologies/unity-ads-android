@@ -1,7 +1,5 @@
 package com.unity3d.services.ads.operation.show;
 
-import android.os.ConditionVariable;
-
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.request.metrics.AdOperationError;
@@ -15,11 +13,8 @@ import java.util.concurrent.Executors;
 public class ShowModuleDecoratorTimeout extends ShowModuleDecorator {
 	private static final String errorMsgTimeout = "[UnityAds] Timeout while trying to show ";
 
-	private final boolean _useNewTimer;
-
 	public ShowModuleDecoratorTimeout(IShowModule showModule, ConfigurationReader configurationReader) {
 		super(showModule);
-		_useNewTimer = configurationReader.getCurrentConfiguration().getExperiments().isNewLifecycleTimer();
 	}
 
 	@Override
@@ -32,7 +27,7 @@ public class ShowModuleDecoratorTimeout extends ShowModuleDecorator {
 
 	private void startShowTimeout(final ShowOperationState showOperationState) {
 		if (showOperationState == null) return;
-		showOperationState.timeoutTimer = new BaseTimer(showOperationState.configuration.getShowTimeout(), _useNewTimer, new ITimerListener() {
+		showOperationState.timeoutTimer = new BaseTimer(showOperationState.configuration.getShowTimeout(), new ITimerListener() {
 			@Override
 			public void onTimerFinished() {
 				onOperationTimeout(showOperationState, UnityAds.UnityAdsShowError.TIMEOUT, errorMsgTimeout + showOperationState.placementId);

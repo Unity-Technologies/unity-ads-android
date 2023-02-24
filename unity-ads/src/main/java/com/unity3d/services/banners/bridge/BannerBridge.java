@@ -1,12 +1,19 @@
 package com.unity3d.services.banners.bridge;
 
+import com.unity3d.ads.IUnityAdsLoadListener;
+import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.UnityAdsLoadOptions;
+import com.unity3d.services.ads.operation.load.LoadBannerModule;
+import com.unity3d.services.ads.operation.load.LoadBannerOperationState;
 import com.unity3d.services.banners.BannerErrorCode;
 import com.unity3d.services.banners.BannerErrorInfo;
 import com.unity3d.services.banners.BannerView;
 import com.unity3d.services.banners.UnityBannerSize;
 import com.unity3d.services.banners.BannerViewCache;
+import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.WebViewEventCategory;
+import com.unity3d.services.core.webview.bridge.WebViewBridgeInvoker;
 
 public class BannerBridge {
 
@@ -20,6 +27,32 @@ public class BannerBridge {
 				bannerAdView.getListener().onBannerFailedToLoad(bannerAdView, new BannerErrorInfo("WebViewApp was not available, this is likely because UnityAds has not been initialized", BannerErrorCode.WEBVIEW_ERROR));
 			}
 		}
+	}
+
+	public static void load(String placementId, final String bannerAdId, UnityBannerSize bannerSize, UnityAdsLoadOptions loadOptions) {
+		final BannerView bannerAdView = BannerViewCache.getInstance().getBannerView(bannerAdId);
+		if (bannerAdView == null) return;
+		// success events are handled from webview callbacks, load module failures need to be mapped
+		IUnityAdsLoadListener listener = new IUnityAdsLoadListener() {
+			@Override
+			public void onUnityAdsAdLoaded(String placementId) {
+			}
+
+			@Override
+			public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message) {
+				BannerView bannerAdView = BannerViewCache.getInstance().getBannerView(bannerAdId);
+				if (bannerAdView == null || bannerAdView.getListener() == null) {
+					return;
+				}
+				BannerErrorInfo bannerErrorInfo = BannerErrorInfo.fromLoadError(error, message);
+				bannerAdView.getListener().onBannerFailedToLoad(bannerAdView, bannerErrorInfo);
+			}
+		};
+
+		LoadBannerModule.getInstance().executeAdOperation(
+			new WebViewBridgeInvoker(),
+			new LoadBannerOperationState(placementId, bannerAdId, bannerSize, listener, loadOptions, new ConfigurationReader().getCurrentConfiguration())
+		);
 	}
 
 	public static void destroy(String bannerAdId) {

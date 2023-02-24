@@ -11,13 +11,17 @@ import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.UnityAdsLoadOptions;
 import com.unity3d.ads.UnityAdsShowOptions;
 import com.unity3d.services.UnityServices;
-import com.unity3d.services.ads.operation.load.LoadOperationState;
+import com.unity3d.services.ads.gmascar.managers.BiddingBaseManager;
+import com.unity3d.services.ads.gmascar.managers.BiddingManagerFactory;
 import com.unity3d.services.ads.operation.load.LoadModule;
-import com.unity3d.services.ads.operation.show.ShowOperationState;
+import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.ads.operation.show.ShowModule;
+import com.unity3d.services.ads.operation.show.ShowOperationState;
 import com.unity3d.services.ads.token.AsyncTokenStorage;
 import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.ConfigurationReader;
+import com.unity3d.services.core.configuration.IExperiments;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
@@ -39,6 +43,7 @@ public final class UnityAdsImplementation implements IUnityAds {
 
 	/**
 	 * Initializes Unity Ads. Unity Ads should be initialized when app starts.
+	 *
 	 *  @param context Current Android application context of calling app
 	 * @param gameId Unique identifier for a game, given by Unity Ads admin tools or Unity editor
 	 * @param testMode If true, only test ads are shown
@@ -84,7 +89,7 @@ public final class UnityAdsImplementation implements IUnityAds {
 	/**
 	 * Show one advertisement with custom placement.
 	 *
-	 * @param activity Current Android activity of calling app
+	 * @param activity    Current Android activity of calling app
 	 * @param placementId Placement, as defined in Unity Ads admin tools
 	 */
 	public void show(final Activity activity, final String placementId) {
@@ -94,8 +99,8 @@ public final class UnityAdsImplementation implements IUnityAds {
 	/**
 	 * Show one advertisement with custom placement.
 	 *
-	 * @param activity Current Android activity of calling app
-	 * @param placementId Placement, as defined in Unity Ads admin tools
+	 * @param activity     Current Android activity of calling app
+	 * @param placementId  Placement, as defined in Unity Ads admin tools
 	 * @param showListener Listener for IUnityAdsShowListener callbacks
 	 */
 	public void show(final Activity activity, final String placementId, final IUnityAdsShowListener showListener) {
@@ -105,9 +110,9 @@ public final class UnityAdsImplementation implements IUnityAds {
 	/**
 	 * Show one advertisement with custom placement and custom options.
 	 *
-	 * @param activity Current Android activity of calling app
-	 * @param placementId Placement, as defined in Unity Ads admin tools
-	 * @param showOptions Custom options
+	 * @param activity     Current Android activity of calling app
+	 * @param placementId  Placement, as defined in Unity Ads admin tools
+	 * @param showOptions  Custom options
 	 * @param showListener Listener for IUnityAdsShowListener callbacks
 	 */
 	@Override
@@ -117,12 +122,12 @@ public final class UnityAdsImplementation implements IUnityAds {
 			handleShowError(showListener, placementId, UnityAds.UnityAdsShowError.NOT_INITIALIZED, showErrorMessage);
 			return;
 		}
-		if(!isInitialized()) {
+		if (!isInitialized()) {
 			String showErrorMessage = "Unity Ads is not initialized";
 			handleShowError(showListener, placementId, UnityAds.UnityAdsShowError.NOT_INITIALIZED, showErrorMessage);
 			return;
 		}
-		if(activity == null) {
+		if (activity == null) {
 			String showErrorMessage = "Activity must not be null";
 			handleShowError(showListener, placementId, UnityAds.UnityAdsShowError.INVALID_ARGUMENT, showErrorMessage);
 			return;
@@ -133,7 +138,7 @@ public final class UnityAdsImplementation implements IUnityAds {
 	}
 
 	private void handleShowError(IUnityAdsShowListener showListener, String placementId, UnityAds.UnityAdsShowError error, String message) {
-		SDKMetrics.getInstance().sendMetricWithInitState(AdOperationMetric.newAdShowFailure(error,0L));
+		SDKMetrics.getInstance().sendMetricWithInitState(AdOperationMetric.newAdShowFailure(error, 0L));
 		if (showListener == null) return;
 		showListener.onUnityAdsShowFailure(placementId, error, message);
 	}
@@ -166,20 +171,34 @@ public final class UnityAdsImplementation implements IUnityAds {
 
 	@Override
 	public String getToken() {
-		return TokenStorage.getToken();
+		// Getting the available token from storage
+		final String token =  TokenStorage.getInstance().getToken();
+		if (token == null || token.isEmpty()) {
+			return null;
+		}
+
+		Configuration config = configuration == null ? new ConfigurationReader().getCurrentConfiguration() : configuration;
+		BiddingBaseManager manager = BiddingManagerFactory.getInstance().createManager(null, config.getExperiments());
+		manager.start();
+		return manager.getFormattedToken(token);
 	}
 
 	@Override
-	public void getToken(IUnityAdsTokenListener listener) {
+	public void getToken(final IUnityAdsTokenListener listener) {
 		if (listener == null) {
+			// Invalidating listener
 			DeviceLog.info("Please provide non-null listener to UnityAds.GetToken method");
 			return;
-		}
-		if (ClientProperties.getApplicationContext() == null) {
+		} else if (ClientProperties.getApplicationContext() == null) {
+			// Invalidating app Context.
 			listener.onUnityAdsTokenReady(null);
 			return;
 		}
-		AsyncTokenStorage.getInstance().getToken(listener);
+
+		Configuration config = configuration == null ? new ConfigurationReader().getCurrentConfiguration() : configuration;
+		BiddingBaseManager manager = BiddingManagerFactory.getInstance().createManager(listener, config.getExperiments());
+		manager.start();
+		AsyncTokenStorage.getInstance().getToken(manager);
 	}
 
 	public static void setConfiguration(Configuration configuration) {

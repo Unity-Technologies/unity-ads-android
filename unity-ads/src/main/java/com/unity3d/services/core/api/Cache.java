@@ -391,6 +391,7 @@ public class Cache {
 	}
 
 	private static String fileIdToFilename(String fileId) {
+		if (SdkProperties.getCacheDirectory() == null) return "";
 		return SdkProperties.getCacheDirectory() + "/" + SdkProperties.getCacheFilePrefix() + fileId;
 	}
 

@@ -1,7 +1,5 @@
 package com.unity3d.ads.test.instrumentation.services.core.webview;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.Experiments;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
@@ -42,11 +40,10 @@ public class WebViewUrlBuilderTest {
 	}
 
 	@Test
-	public void testWebViewUrlBuilder() throws JSONException {
-		Mockito.when(_configMock.getExperiments()).thenReturn(new Experiments(new JSONObject("{\"fff\":true}")));
+	public void testWebViewUrlBuilder() {
 		WebViewUrlBuilder webViewUrlBuilder = new WebViewUrlBuilder(TEST_BASE_URL, _configMock);
 		String result = webViewUrlBuilder.getUrlWithQueryString();
-		Assert.assertEquals(TEST_BASE_URL + "?platform=android&experiments=%7B%22fff%22%3Atrue%7D&isNativeCollectingMetrics=false", result);
+		Assert.assertEquals(TEST_BASE_URL + "?platform=android&isNativeCollectingMetrics=false", result);
 	}
 
 	@Test
@@ -66,14 +63,6 @@ public class WebViewUrlBuilderTest {
 		WebViewUrlBuilder webViewUrlBuilder = new WebViewUrlBuilder(TEST_BASE_URL, _configMock);
 		String result = webViewUrlBuilder.getUrlWithQueryString();
 		Assert.assertEquals(TEST_BASE_URL + "?platform=android&isNativeCollectingMetrics=true", result);
-	}
-
-	@Test
-	public void testWebViewUrlBuilderWithExperimentsButFeatureDisabled() throws JSONException {
-		Mockito.when(_configMock.getExperiments()).thenReturn(new Experiments(new JSONObject("{\"fff\":false, \"tsi\":true}")));
-		WebViewUrlBuilder webViewUrlBuilder = new WebViewUrlBuilder(TEST_BASE_URL, _configMock);
-		String result = webViewUrlBuilder.getUrlWithQueryString();
-		Assert.assertEquals(TEST_BASE_URL + "?platform=android&isNativeCollectingMetrics=false", result);
 	}
 
 	@Test

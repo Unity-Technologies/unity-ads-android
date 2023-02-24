@@ -17,6 +17,7 @@ import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
+import com.unity3d.services.core.properties.Session;
 
 public class UnityServices {
 
@@ -115,9 +116,9 @@ public class UnityServices {
 		}
 
 		if(testMode) {
-			DeviceLog.info("Initializing Unity Services " + SdkProperties.getVersionName() + " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in test mode");
+			DeviceLog.info("Initializing Unity Services " + SdkProperties.getVersionName() + " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in test mode, session " + Session.Default.getId());
 		} else {
-			DeviceLog.info("Initializing Unity Services " + SdkProperties.getVersionName() + " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in production mode");
+			DeviceLog.info("Initializing Unity Services " + SdkProperties.getVersionName() + " (" + SdkProperties.getVersionCode() + ") with game id " + gameId + " in production mode, session " + Session.Default.getId());
 		}
 
 		SdkProperties.setDebugMode(SdkProperties.getDebugMode());

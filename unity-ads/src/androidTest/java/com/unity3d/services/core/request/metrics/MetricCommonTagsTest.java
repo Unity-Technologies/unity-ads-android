@@ -12,6 +12,7 @@ import com.unity3d.services.core.configuration.Experiments;
 import com.unity3d.services.core.configuration.PrivacyConfig;
 import com.unity3d.services.core.configuration.PrivacyConfigStatus;
 import com.unity3d.services.core.configuration.PrivacyConfigStorage;
+import com.unity3d.services.core.device.Storage;
 import com.unity3d.services.core.device.StorageManager;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.webview.WebViewApp;
@@ -40,9 +41,10 @@ public class MetricCommonTagsTest {
 
 	@After
 	public void after () {
-		if (StorageManager.getStorage(StorageManager.StorageType.PUBLIC) != null) {
-			StorageManager.getStorage(StorageManager.StorageType.PUBLIC).clearStorage();
-			StorageManager.getStorage(StorageManager.StorageType.PUBLIC).initStorage();
+		Storage publicStorage = StorageManager.getStorage(StorageManager.StorageType.PUBLIC);
+		if (publicStorage != null) {
+			publicStorage.clearStorage();
+			publicStorage.initStorage();
 		}
 	}
 
@@ -130,19 +132,15 @@ public class MetricCommonTagsTest {
 
 		currentTags = commonTags.asMap();
 
-		assertNull("Incorrect experiment tag tsi value", currentTags.get("tsi"));
-		assertNull("Incorrect experiment tag fff value", currentTags.get("fff"));
-		assertNull("Incorrect experiment tag tsi_upii value", currentTags.get("tsi_upii"));
-		assertNull("Incorrect experiment tag tsi_nt value", currentTags.get("tsi_nt"));
-		assertNull("Incorrect experiment tag tsi_prr value", currentTags.get("tsi_prr"));
 		assertNull("Incorrect experiment tag tsi_prw value", currentTags.get("tsi_prw"));
+		assertNull("Incorrect experiment tag wac value", currentTags.get("wac"));
 		assertNull("Incorrect experiment tag nwc value", currentTags.get("nwc"));
 	}
 
 	@Test
 	public void testNonEmptyConfigurationMetaDataCommonTags() throws JSONException {
 		Configuration configMock = Mockito.mock(Configuration.class);
-		Mockito.when(configMock.getExperiments()).thenReturn(new Experiments(new JSONObject("{\"fff\":true}")));
+		Mockito.when(configMock.getExperiments()).thenReturn(new Experiments(new JSONObject("{\"wac\":true}")));
 
 		WebViewApp.setCurrentApp(_webviewapp);
 		Map<String, String> currentTags;
@@ -152,12 +150,8 @@ public class MetricCommonTagsTest {
 
 		currentTags = commonTags.asMap();
 
-		assertNull("Incorrect experiment tag tsi value",currentTags.get("tsi"));
-		assertEquals("Incorrect experiment tag fff value","true", currentTags.get("fff"));
-		assertNull("Incorrect experiment tag tsi_upii value", currentTags.get("tsi_upii"));
-		assertNull("Incorrect experiment tag tsi_nt value", currentTags.get("tsi_nt"));
-		assertNull("Incorrect experiment tag tsi_prr value", currentTags.get("tsi_prr"));
 		assertNull("Incorrect experiment tag tsi_prw value", currentTags.get("tsi_prw"));
+		assertEquals("Incorrect experiment tag wac value","true", currentTags.get("wac"));
 		assertNull("Incorrect experiment tag nwc value", currentTags.get("nwc"));
 	}
 }

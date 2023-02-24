@@ -97,20 +97,8 @@ public class IntervalTimerTest {
 	}
 
 	@Test
-	public void testOnAppStateChange() {
-		IntervalTimer intervalTimer = getIntervalTimer();
-		intervalTimer.start(mockTimer);
-
-		_lifecycleCache.notifyStateListeners(LifecycleEvent.PAUSED);
-		assertFalse(intervalTimer.isRunning());
-
-		_lifecycleCache.notifyStateListeners(LifecycleEvent.RESUMED);
-		assertTrue(intervalTimer.isRunning());
-	}
-
-	@Test
 	public void testOnAppActiveChange() {
-		IntervalTimer intervalTimer = getNewIntervalTimer();
+		IntervalTimer intervalTimer = getIntervalTimer();
 		intervalTimer.start(mockTimer);
 
 		_lifecycleCache.onActivityStopped(null);
@@ -129,11 +117,7 @@ public class IntervalTimerTest {
 	}
 
 	private IntervalTimer getIntervalTimer() {
-		return new IntervalTimer(TEST_DURATION_MS, TEST_INTERVAL_SIZE, false, mockTimerListener, _lifecycleCache);
-	}
-
-	private IntervalTimer getNewIntervalTimer() {
-		return new IntervalTimer(TEST_DURATION_MS, TEST_INTERVAL_SIZE, true, mockTimerListener, _lifecycleCache);
+		return new IntervalTimer(TEST_DURATION_MS, TEST_INTERVAL_SIZE, mockTimerListener, _lifecycleCache);
 	}
 }
 

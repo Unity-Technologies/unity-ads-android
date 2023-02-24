@@ -14,10 +14,7 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.unity3d.services.ads.api.AdUnit;
-import com.unity3d.services.ads.configuration.IAdsModuleConfiguration;
 import com.unity3d.services.core.api.Intent;
-import com.unity3d.services.core.configuration.Configuration;
-import com.unity3d.services.core.configuration.IModuleConfiguration;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.ViewUtilities;
 import com.unity3d.services.core.webview.WebViewApp;
@@ -50,6 +47,8 @@ public class AdUnitActivity extends Activity {
 	boolean _keepScreenOn;
 	private Map<String, IAdUnitViewHandler> _viewHandlers;
 	private int _displayCutoutMode;
+
+	private final IAdUnitViewHandlerFactory _adUnitViewHandlerFactory = new AdUnitViewHandlerFactory();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -473,7 +472,7 @@ public class AdUnitActivity extends Activity {
 			viewHandler = _viewHandlers.get(name);
 		}
 		else {
-			viewHandler = createViewHandler(name);
+			viewHandler = _adUnitViewHandlerFactory.createViewHandler(name);
 
 			if (viewHandler != null) {
 				if (_viewHandlers == null) {
@@ -514,32 +513,5 @@ public class AdUnitActivity extends Activity {
 		_layout = new AdUnitRelativeLayout(this);
 		_layout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		ViewUtilities.setBackground(_layout, new ColorDrawable(Color.BLACK));
-	}
-
-	private IAdUnitViewHandler createViewHandler(String name) {
-		if (WebViewApp.getCurrentApp() != null) {
-			Configuration configuration = WebViewApp.getCurrentApp().getConfiguration();
-			String[] list = configuration.getModuleConfigurationList();
-
-			for (String moduleName : list) {
-				IModuleConfiguration moduleConfig = configuration.getModuleConfiguration(moduleName);
-				if (moduleConfig instanceof IAdsModuleConfiguration) {
-					Map<String, Class> adUnitViewHandlers = ((IAdsModuleConfiguration) moduleConfig).getAdUnitViewHandlers();
-					if (adUnitViewHandlers != null && adUnitViewHandlers.containsKey(name)) {
-						IAdUnitViewHandler viewHandler = null;
-						try {
-							viewHandler = (IAdUnitViewHandler)adUnitViewHandlers.get(name).newInstance();
-						}
-						catch (Exception e) {
-							DeviceLog.error("Error creating view: " + name);
-						}
-
-						return viewHandler;
-					}
-				}
-			}
-		}
-
-		return null;
 	}
 }

@@ -1,9 +1,9 @@
 package com.unity3d.services.core.configuration;
 
+import static com.unity3d.services.ads.gmascar.utils.ScarConstants.SCAR_PRD_BIDDING_ENDPOINT;
+
 import android.text.TextUtils;
 
-import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
-import com.unity3d.services.core.device.reader.GameSessionIdReader;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.WebRequest;
@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class Configuration {
@@ -41,6 +40,7 @@ public class Configuration {
 	private String _metricsUrl;
 	private double _metricSampleRate;
 	private long _webViewAppCreateTimeout;
+	private String _scarBiddingUrl;
 
 	private String _filteredJsonString;
 	private JSONObject _rawJsonData;
@@ -143,6 +143,8 @@ public class Configuration {
 	public int getWebViewBridgeTimeout() { return _webViewBridgeTimeout; }
 
 	public String getMetricsUrl() { return _metricsUrl; }
+
+	public String getScarBiddingUrl() { return _scarBiddingUrl; }
 
 	public double getMetricSampleRate() { return _metricSampleRate; }
 
@@ -263,6 +265,8 @@ public class Configuration {
 		_tokenTimeout = configData.optInt("tto", 5000);
 		_privacyRequestWaitTimeout = configData.optInt("prwto", 3000);
 		_src = configData.optString("src", null);
+		_scarBiddingUrl = configData.optString("scurl", SCAR_PRD_BIDDING_ENDPOINT);
+
 		IExperiments experiments;
 		if (configData.has("expo")) {
 			experiments = new ExperimentObjects(configData.optJSONObject("expo"));

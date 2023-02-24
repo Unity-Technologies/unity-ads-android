@@ -3,6 +3,7 @@ package com.unity3d.ads.test.instrumentation.services.ads.gmascar.handlers;
 import com.unity3d.scar.adapter.common.GMAEvent;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
 import com.unity3d.services.ads.gmascar.handlers.ScarRewardedAdHandler;
+import com.unity3d.services.ads.gmascar.utils.GMAEventSender;
 import com.unity3d.services.core.misc.EventSubject;
 import com.unity3d.services.core.misc.IEventListener;
 import com.unity3d.services.core.webview.WebViewApp;
@@ -34,7 +35,7 @@ public class ScarRewardedAdHandlerTest {
 
 	@Test
 	public void testOnAdLoaded() {
-		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject);
+		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject, new GMAEventSender());
 		adHandler.onAdLoaded();
 
 		Mockito.verify(mockWebViewApp, times(1)).sendEvent(eq(WebViewEventCategory.GMA), eq(GMAEvent.AD_LOADED), eq("test-placementId"), eq("test-queryId"));
@@ -42,7 +43,7 @@ public class ScarRewardedAdHandlerTest {
 
 	@Test
 	public void testOnAdFailedToLoad() {
-		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject);
+		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject, new GMAEventSender());
 		adHandler.onAdFailedToLoad(0, "Ad failed to load");
 
 		Mockito.verify(mockWebViewApp, times(1)).sendEvent(eq(WebViewEventCategory.GMA), eq(GMAEvent.LOAD_ERROR), eq("test-placementId"), eq("test-queryId"), eq("Ad failed to load"), eq(0));
@@ -50,7 +51,7 @@ public class ScarRewardedAdHandlerTest {
 
 	@Test
 	public void testOnAdOpened() {
-		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject);
+		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject, new GMAEventSender());
 		adHandler.onAdOpened();
 
 		Mockito.verify(mockWebViewApp, times(1)).sendEvent(WebViewEventCategory.GMA, GMAEvent.AD_STARTED);
@@ -59,7 +60,7 @@ public class ScarRewardedAdHandlerTest {
 
 	@Test
 	public void testOnAdFailedToShow() {
-		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject);
+		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject, new GMAEventSender());
 		adHandler.onAdFailedToShow(0, "Ad failed to show");
 
 		Mockito.verify(mockWebViewApp, times(1)).sendEvent(eq(WebViewEventCategory.GMA), eq(GMAEvent.REWARDED_SHOW_ERROR), eq("test-placementId"), eq("test-queryId"), eq("Ad failed to show"), eq(0));
@@ -67,7 +68,7 @@ public class ScarRewardedAdHandlerTest {
 
 	@Test
 	public void testOnAdSkipped() {
-		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject);
+		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject, new GMAEventSender());
 		adHandler.onAdClosed();
 
 		Mockito.verify(mockWebViewApp, times(1)).sendEvent(WebViewEventCategory.GMA, GMAEvent.AD_SKIPPED);
@@ -75,7 +76,7 @@ public class ScarRewardedAdHandlerTest {
 
 	@Test
 	public void testOnAdClosedAndRewardGranted() {
-		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject);
+		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject, new GMAEventSender());
 		adHandler.onUserEarnedReward();
 		adHandler.onAdClosed();
 
@@ -86,7 +87,7 @@ public class ScarRewardedAdHandlerTest {
 
 	@Test
 	public void testOnAdImpression() {
-		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject);
+		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject, new GMAEventSender());
 		adHandler.onAdImpression();
 
 		Mockito.verify(mockWebViewApp, times(1)).sendEvent(WebViewEventCategory.GMA, GMAEvent.REWARDED_IMPRESSION_RECORDED);
@@ -94,7 +95,7 @@ public class ScarRewardedAdHandlerTest {
 
 	@Test
 	public void testOnAdClicked() {
-		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject);
+		ScarRewardedAdHandler adHandler = new ScarRewardedAdHandler(getDefaultScarMeta(), mockEventSubject, new GMAEventSender());
 		adHandler.onAdClicked();
 
 		Mockito.verify(mockWebViewApp, times(1)).sendEvent(WebViewEventCategory.GMA, GMAEvent.AD_CLICKED);

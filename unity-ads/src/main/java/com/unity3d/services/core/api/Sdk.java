@@ -1,11 +1,13 @@
 package com.unity3d.services.core.api;
 
+import com.unity3d.services.UnityServices;
 import com.unity3d.services.core.configuration.InitializeThread;
 import com.unity3d.services.core.configuration.PrivacyConfigStorage;
 import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
+import com.unity3d.services.core.properties.Session;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
@@ -63,6 +65,11 @@ public class Sdk {
 	@WebViewExposed
 	public static void getTrrData(WebViewCallback callback) {
 		callback.invoke(WebViewApp.getCurrentApp().getConfiguration().getRawConfigData().toString());
+	}
+
+	@WebViewExposed
+	public static void getSharedSessionID(WebViewCallback callback) {
+		callback.invoke(Session.Default.getId());
 	}
 
 	@WebViewExposed

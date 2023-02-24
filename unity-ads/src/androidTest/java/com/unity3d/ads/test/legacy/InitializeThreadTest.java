@@ -79,7 +79,6 @@ public class InitializeThreadTest {
 
 	private void DeleteAllTempFiles() {
 		new File(SdkProperties.getLocalWebViewFile()).delete();
-		new File(SdkProperties.getLocalWebViewFileUpdated()).delete();
 		new File(SdkProperties.getLocalConfigurationFilepath()).delete();
 	}
 

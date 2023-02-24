@@ -9,11 +9,11 @@ import com.unity3d.services.ads.gmascar.bridges.AdapterStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializationStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializeListenerBridge;
 import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridgeBase;
-import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridgeFactory;
 import com.unity3d.services.ads.gmascar.finder.GMAInitializer;
 import com.unity3d.services.ads.gmascar.finder.PresenceDetector;
 import com.unity3d.services.ads.gmascar.finder.ScarAdapterVersion;
 import com.unity3d.services.ads.gmascar.finder.ScarVersionFinder;
+import com.unity3d.services.ads.gmascar.handlers.BiddingSignalsHandler;
 import com.unity3d.services.ads.gmascar.handlers.ScarInterstitialAdHandler;
 import com.unity3d.services.ads.gmascar.handlers.ScarRewardedAdHandler;
 import com.unity3d.services.ads.gmascar.handlers.SignalsHandler;
@@ -23,6 +23,8 @@ import com.unity3d.services.core.misc.EventSubject;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.timer.DefaultIntervalTimerFactory;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayDeque;
 import java.util.Arrays;
 
@@ -31,9 +33,7 @@ import java.util.Arrays;
  */
 public class GMAScarAdapterBridge {
 
-	private IScarAdapter _scarAdapter;
 	private final ScarVersionFinder _scarVersionFinder;
-
 	private final MobileAdsBridgeBase _mobileAdsBridge;
 	private final InitializeListenerBridge _initializationListenerBridge;
 	private final InitializationStatusBridge _initializationStatusBridge;
@@ -43,18 +43,25 @@ public class GMAScarAdapterBridge {
 	private final WebViewErrorHandler _webViewErrorHandler;
 	private final ScarAdapterFactory _scarAdapterFactory;
 	private final GMAEventSender _gmaEventSender;
+	private IScarAdapter _scarAdapter;
 
-	public GMAScarAdapterBridge() {
-		_initializationStatusBridge = new InitializationStatusBridge();
-		_initializationListenerBridge = new InitializeListenerBridge();
-		_adapterStatusBridge = new AdapterStatusBridge();
-		_webViewErrorHandler = new WebViewErrorHandler();
-		_scarAdapterFactory = new ScarAdapterFactory();
-		_mobileAdsBridge = new MobileAdsBridgeFactory().createMobileAdsBridge();
+	public GMAScarAdapterBridge(@Nullable MobileAdsBridgeBase mobileAdsBridge,
+								InitializeListenerBridge initializeListenerBridge,
+								InitializationStatusBridge initializationStatusBridge,
+								AdapterStatusBridge adapterStatusBridge,
+								WebViewErrorHandler webViewErrorHandler,
+								ScarAdapterFactory adapterFactory,
+								GMAEventSender eventSender) {
+		_initializationStatusBridge = initializationStatusBridge;
+		_initializationListenerBridge = initializeListenerBridge;
+		_adapterStatusBridge = adapterStatusBridge;
+		_webViewErrorHandler = webViewErrorHandler;
+		_scarAdapterFactory = adapterFactory;
+		_mobileAdsBridge = mobileAdsBridge;
+		_gmaEventSender = eventSender;
 		_presenceDetector = new PresenceDetector(_mobileAdsBridge, _initializationListenerBridge, _initializationStatusBridge, _adapterStatusBridge);
-		_gmaInitializer = new GMAInitializer(_mobileAdsBridge, _initializationListenerBridge, _initializationStatusBridge, _adapterStatusBridge);
-		_scarVersionFinder = new ScarVersionFinder(_mobileAdsBridge, _presenceDetector, _gmaInitializer);
-		_gmaEventSender = new GMAEventSender();
+		_gmaInitializer = new GMAInitializer(_mobileAdsBridge, _initializationListenerBridge, _initializationStatusBridge, _adapterStatusBridge, _gmaEventSender);
+		_scarVersionFinder = new ScarVersionFinder(_mobileAdsBridge, _presenceDetector, _gmaInitializer, _gmaEventSender);
 	}
 
 	public void initializeScar() {
@@ -76,12 +83,44 @@ public class GMAScarAdapterBridge {
 
 	public void getSCARSignals(String[] interstitialList, String[] rewardedList) {
 		_scarAdapter = getScarAdapterObject();
-		SignalsHandler signalListener = new SignalsHandler();
+		SignalsHandler signalListener = new SignalsHandler(_gmaEventSender);
 
 		if (_scarAdapter != null) {
 			_scarAdapter.getSCARSignals(ClientProperties.getApplicationContext(), interstitialList, rewardedList, signalListener);
 		} else {
 			_webViewErrorHandler.handleError(GMAAdsError.InternalSignalsError("Could not create SCAR adapter object"));
+		}
+	}
+
+	/**
+	 * Helper function to check if GMA SCAR bidding signals collection is supported.
+	 *
+	 * @return true if supported, false otherwise
+	 */
+	public boolean hasSCARBiddingSupport() {
+		if (_mobileAdsBridge != null && _mobileAdsBridge.hasSCARBiddingSupport()) {
+			_scarAdapter = getScarAdapterObject();
+			return _scarAdapter != null;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Helper function to fetch GMA SCAR bidding signals.
+	 *
+	 * @param handler {@link BiddingSignalsHandler} to be notified when signals are ready.
+	 */
+	public void getSCARBiddingSignals(BiddingSignalsHandler handler) {
+		if (_mobileAdsBridge != null && _mobileAdsBridge.hasSCARBiddingSupport()) {
+			_scarAdapter = getScarAdapterObject();
+			if (_scarAdapter != null) {
+				_scarAdapter.getSCARBiddingSignals(ClientProperties.getApplicationContext(), handler);
+			} else {
+				handler.onSignalsCollectionFailed("Could not create SCAR adapter object.");
+			}
+		} else {
+			handler.onSignalsCollectionFailed("SCAR bidding unsupported.");
 		}
 	}
 
@@ -100,12 +139,12 @@ public class GMAScarAdapterBridge {
 	}
 
 	private void loadInterstitialAd(final ScarAdMetadata scarAdMetadata) {
-		ScarInterstitialAdHandler adListener = new ScarInterstitialAdHandler(scarAdMetadata, getScarEventSubject(scarAdMetadata.getVideoLengthMs()));
+		ScarInterstitialAdHandler adListener = new ScarInterstitialAdHandler(scarAdMetadata, getScarEventSubject(scarAdMetadata.getVideoLengthMs()), _gmaEventSender);
 		_scarAdapter.loadInterstitialAd(ClientProperties.getApplicationContext(), scarAdMetadata, adListener);
 	}
 
 	private void loadRewardedAd(final ScarAdMetadata scarAdMetadata) {
-		ScarRewardedAdHandler adListener = new ScarRewardedAdHandler(scarAdMetadata, getScarEventSubject(scarAdMetadata.getVideoLengthMs()));
+		ScarRewardedAdHandler adListener = new ScarRewardedAdHandler(scarAdMetadata, getScarEventSubject(scarAdMetadata.getVideoLengthMs()), _gmaEventSender);
 		_scarAdapter.loadRewardedAd(ClientProperties.getApplicationContext(), scarAdMetadata, adListener);
 	}
 
@@ -124,7 +163,7 @@ public class GMAScarAdapterBridge {
 	}
 
 	private IScarAdapter getScarAdapterObject() {
-		if (_scarAdapter == null) {
+		if (_scarAdapter == null && _mobileAdsBridge != null) {
 			ScarAdapterVersion adapterVersion = _mobileAdsBridge.getAdapterVersion(_scarVersionFinder.getVersionCode());
 			_scarAdapter = _scarAdapterFactory.createScarAdapter(adapterVersion, _webViewErrorHandler);
 		}

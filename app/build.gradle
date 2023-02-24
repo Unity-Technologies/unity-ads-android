@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 32
 
     defaultConfig {
         applicationId "com.unity3d.ads.example"
         minSdkVersion 19
-        targetSdkVersion 30
-        versionCode = 4500
-        versionName = "4.5.0"
+        targetSdkVersion 32
+        versionCode = 4600
+        versionName = "4.6.0"
     }
 
     buildTypes {

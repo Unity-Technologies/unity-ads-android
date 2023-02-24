@@ -1,7 +1,6 @@
 package com.unity3d.services.core.webview.bridge;
 
 import com.unity3d.services.core.log.DeviceLog;
-import com.unity3d.services.core.webview.WebViewApp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,8 +14,14 @@ public class Invocation {
 	private ArrayList<ArrayList<Object>> _invocations;
 	private ArrayList<ArrayList<Object>> _responses;
 	private int _invocationId;
+	private IInvocationCallbackInvoker _invocationCallbackInvoker;
 
 	public Invocation() {
+		this(SharedInstances.INSTANCE.getWebViewAppInvocationCallbackInvoker());
+	}
+
+	public Invocation(IInvocationCallbackInvoker invocationHandler) {
+		_invocationCallbackInvoker = invocationHandler;
 		_invocationId = _idCount.getAndIncrement();
 
 		if (_invocationSets == null) {
@@ -72,7 +77,7 @@ public class Invocation {
 
 	public void sendInvocationCallback() {
 		_invocationSets.remove(getId());
-		WebViewApp.getCurrentApp().invokeCallback(this);
+		_invocationCallbackInvoker.invokeCallback(this);
 	}
 
 	public int getId () {

@@ -1,21 +1,40 @@
-task deleteOldJar(type: Delete) {
-    delete("../unity-ads/libs/${project.name}.jar")
-}
-
-def copyJarTask(buildType) {
+def copyJarTask(String buildType) {
     return tasks.create("copyJars${buildType}", Copy.class) {
-        from("build/intermediates/compile_library_classes_jar/${buildType}/")
-        into('../unity-ads/libs/')
+        from(tasks.getByName("bundleLibCompileToJar${buildType}"))
+        into("../unity-ads/libs/${buildType}/")
         include('classes.jar')
         rename('classes.jar', "${project.name}.jar")
-    }.dependsOn(deleteOldJar)
+    }
+}
+
+static def tasksDependentOnScar(String buildType) {
+    return [
+        "copy${buildType}JniLibsProjectAndLocalJars",
+        "compile${buildType}Kotlin",
+        "merge${buildType}JavaResource",
+        "sync${buildType}LibJars",
+        "extract${buildType}Annotations",
+        "dokkaJavadoc"
+    ]
 }
 
 project.tasks.whenTaskAdded { Task theTask ->
-    if (theTask.name == 'bundleLibCompileToJarRelease') {
-        theTask.finalizedBy(copyJarTask("release"))
-    }
-    if (theTask.name == 'bundleLibCompileToJarDebug') {
-        theTask.finalizedBy(copyJarTask("debug"))
+    {
+        ["Release", "Debug"].each { buildType ->
+            {
+                if (theTask.name == "bundleLibCompileToJar${buildType}") {
+                    if (project.name != "unity-ads") {
+                        theTask.finalizedBy(copyJarTask("${buildType}"))
+                    }
+                }
+                if (tasksDependentOnScar("${buildType}").any { theTask.name == it }) {
+                    theTask.dependsOn(":unity-scaradapter-common:copyJars${buildType}")
+                    theTask.dependsOn(":unity-scaradapter-1920:copyJars${buildType}")
+                    theTask.dependsOn(":unity-scaradapter-1950:copyJars${buildType}")
+                    theTask.dependsOn(":unity-scaradapter-2000:copyJars${buildType}")
+                    theTask.dependsOn(":unity-scaradapter-2100:copyJars${buildType}")
+                }
+            }
+        }
     }
 }

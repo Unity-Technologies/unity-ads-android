@@ -42,7 +42,7 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 	}
 
 	public boolean resetState(Configuration configuration) {
-		BroadcastMonitor.removeAllBroadcastListeners();
+		BroadcastMonitor.getInstance().removeAllBroadcastListeners();
 		CacheThread.cancel();
 		WebRequestThread.cancel();
 		ConnectivityMonitor.stopAll();

@@ -35,7 +35,7 @@ public class BroadcastTest {
 
 	@After
 	public void cleanup() {
-		BroadcastMonitor.removeAllBroadcastListeners();
+		BroadcastMonitor.getInstance().removeAllBroadcastListeners();
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class BroadcastTest {
 		};
 		WebViewApp.setCurrentApp(webapp);
 
-		BroadcastMonitor.addBroadcastListener(testReceiverName, null, new String[]{testAction});
+		BroadcastMonitor.getInstance().addBroadcastListener(testReceiverName, null, new String[]{testAction});
 
 		Intent earlyIntent = new Intent();
 		earlyIntent.setAction(testAction);
@@ -105,7 +105,7 @@ public class BroadcastTest {
 		};
 		WebViewApp.setCurrentApp(webapp2);
 
-		BroadcastMonitor.removeAllBroadcastListeners();
+		BroadcastMonitor.getInstance().removeAllBroadcastListeners();
 
 		Intent lateIntent = new Intent();
 		lateIntent.setAction(testAction);
@@ -172,8 +172,8 @@ public class BroadcastTest {
 		WebViewApp.getCurrentApp().setWebAppLoaded(true);
 		SdkProperties.setInitialized(true);
 
-		BroadcastMonitor.addBroadcastListener(jsonReceiverName, null, new String[]{jsonAction});
-		BroadcastMonitor.addBroadcastListener(dataSchemeReceiverName, testDataScheme, new String[]{dataSchemeAction});
+		BroadcastMonitor.getInstance().addBroadcastListener(jsonReceiverName, null, new String[]{jsonAction});
+		BroadcastMonitor.getInstance().addBroadcastListener(dataSchemeReceiverName, testDataScheme, new String[]{dataSchemeAction});
 
 		Intent jsonIntent = new Intent();
 		jsonIntent.setAction(jsonAction);

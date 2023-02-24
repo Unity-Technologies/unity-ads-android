@@ -12,7 +12,6 @@ import com.unity3d.ads.test.legacy.EventIdTest;
 import com.unity3d.ads.test.legacy.InitializeThreadTest;
 import com.unity3d.ads.test.legacy.InvocationTest;
 import com.unity3d.ads.test.legacy.LifecycleListenerTest;
-import com.unity3d.ads.test.legacy.LoadOptionsTest;
 import com.unity3d.ads.test.legacy.MetaDataTest;
 import com.unity3d.ads.test.legacy.NativeCallbackTest;
 import com.unity3d.ads.test.legacy.OpenAdvertisingIdentifierTest;
@@ -20,7 +19,6 @@ import com.unity3d.ads.test.legacy.PreferencesTest;
 import com.unity3d.ads.test.legacy.PublicApiTest;
 import com.unity3d.ads.test.legacy.RequestTest;
 import com.unity3d.ads.test.legacy.SdkPropertiesTest;
-import com.unity3d.ads.test.legacy.ShowOptionsTest;
 import com.unity3d.ads.test.legacy.StorageDiskTest;
 import com.unity3d.ads.test.legacy.StorageGeneralTest;
 import com.unity3d.ads.test.legacy.StorageMemoryTest;
@@ -72,9 +70,7 @@ import org.junit.runners.Suite;
 	WebPlayerViewTest.class,
 	PreferencesTest.class,
 	WebRequestThreadPoolTest.class,
-	TokenStorageTest.class,
-	LoadOptionsTest.class,
-	ShowOptionsTest.class
+	TokenStorageTest.class
 })
 
 public class LegacyTestSuite {}

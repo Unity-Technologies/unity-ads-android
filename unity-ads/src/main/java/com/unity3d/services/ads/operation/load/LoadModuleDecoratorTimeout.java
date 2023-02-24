@@ -13,11 +13,8 @@ import java.util.concurrent.Executors;
 public class LoadModuleDecoratorTimeout extends LoadModuleDecorator {
 	private static final String errorMsgTimeoutLoading = "[UnityAds] Timeout while loading ";
 
-	private final boolean _useNewTimer;
-
 	public LoadModuleDecoratorTimeout(ILoadModule loadModule, ConfigurationReader configurationReader) {
 		super(loadModule);
-		_useNewTimer = configurationReader.getCurrentConfiguration().getExperiments().isNewLifecycleTimer();
 	}
 
 	@Override
@@ -30,7 +27,7 @@ public class LoadModuleDecoratorTimeout extends LoadModuleDecorator {
 
 	private void startLoadTimeout(final LoadOperationState loadOperationState) {
 		if (loadOperationState == null) return;
-		loadOperationState.timeoutTimer = new BaseTimer(loadOperationState.configuration.getLoadTimeout(), _useNewTimer, new ITimerListener() {
+		loadOperationState.timeoutTimer = new BaseTimer(loadOperationState.configuration.getLoadTimeout(), new ITimerListener() {
 			@Override
 			public void onTimerFinished() {
 				onOperationTimeout(loadOperationState);
@@ -63,7 +60,7 @@ public class LoadModuleDecoratorTimeout extends LoadModuleDecorator {
 
 	private void onOperationTimeout(final LoadOperationState state) {
 		if (state != null) {
-			getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdLoadFailure(AdOperationError.timeout, state.duration()));
+			getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdLoadFailure(AdOperationError.timeout, state.duration(), state.isBanner()));
 			remove(state.id);
 			state.onUnityAdsFailedToLoad(UnityAds.UnityAdsLoadError.TIMEOUT, errorMsgTimeoutLoading + state.placementId);
 		}

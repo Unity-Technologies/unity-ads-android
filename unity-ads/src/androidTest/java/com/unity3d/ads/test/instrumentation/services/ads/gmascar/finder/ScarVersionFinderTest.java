@@ -7,6 +7,7 @@ import com.unity3d.services.ads.gmascar.bridges.mobileads.MobileAdsBridgeLegacy;
 import com.unity3d.services.ads.gmascar.finder.GMAInitializer;
 import com.unity3d.services.ads.gmascar.finder.PresenceDetector;
 import com.unity3d.services.ads.gmascar.finder.ScarVersionFinder;
+import com.unity3d.services.ads.gmascar.utils.GMAEventSender;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,7 +39,7 @@ public class ScarVersionFinderTest {
 		doCallRealMethod().when(mobileAdsBridgeMock).getVersionCodeIndex();
 
 		Mockito.when(mobileAdsBridgeMock.getVersionString()).thenReturn("afma-sdk-a-v204890999.203404000.1");
-		ScarVersionFinder scarVersionFinder = new ScarVersionFinder(mobileAdsBridgeMock, presenceDetector, gmaInitializer);
+		ScarVersionFinder scarVersionFinder = new ScarVersionFinder(mobileAdsBridgeMock, presenceDetector, gmaInitializer, new GMAEventSender());
 		long versionCode = scarVersionFinder.getVersionCode();
 		Assert.assertEquals(MobileAdsBridgeLegacy.CODE_19_5, versionCode);
 	}
@@ -47,7 +48,7 @@ public class ScarVersionFinderTest {
 	public void testScarVersionFinderWithMobileAdsBridge() {
 		MobileAdsBridge mobileAdsBridgeMock = Mockito.mock(MobileAdsBridge.class);
 		Mockito.when(mobileAdsBridgeMock.getVersionString()).thenReturn("21.0.0");
-		ScarVersionFinder scarVersionFinder = new ScarVersionFinder(mobileAdsBridgeMock, presenceDetector, gmaInitializer);
+		ScarVersionFinder scarVersionFinder = new ScarVersionFinder(mobileAdsBridgeMock, presenceDetector, gmaInitializer, new GMAEventSender());
 		long versionCode = scarVersionFinder.getVersionCode();
 		Assert.assertEquals(MobileAdsBridge.CODE_21, versionCode);
 	}
@@ -55,7 +56,7 @@ public class ScarVersionFinderTest {
 	@Test
 	public void testScarVersionFinderNullVersion() {
 		Mockito.when(mobileAdsBridgeMock.getVersionString()).thenReturn(null);
-		ScarVersionFinder scarVersionFinder = new ScarVersionFinder(mobileAdsBridgeMock, presenceDetector, gmaInitializer);
+		ScarVersionFinder scarVersionFinder = new ScarVersionFinder(mobileAdsBridgeMock, presenceDetector, gmaInitializer, new GMAEventSender());
 		long versionCode = scarVersionFinder.getVersionCode();
 		Assert.assertEquals(-1, versionCode);
 	}
@@ -63,7 +64,7 @@ public class ScarVersionFinderTest {
 	@Test
 	public void testScarVersionFinderMissingVersion() {
 		Mockito.when(mobileAdsBridgeMock.getVersionString()).thenReturn("");
-		ScarVersionFinder scarVersionFinder = new ScarVersionFinder(mobileAdsBridgeMock, presenceDetector, gmaInitializer);
+		ScarVersionFinder scarVersionFinder = new ScarVersionFinder(mobileAdsBridgeMock, presenceDetector, gmaInitializer, new GMAEventSender());
 		long versionCode = scarVersionFinder.getVersionCode();
 		Assert.assertEquals(-1, versionCode);
 	}
@@ -71,7 +72,7 @@ public class ScarVersionFinderTest {
 	@Test
 	public void testScarVersionFinderInvalidVersion() {
 		Mockito.when(mobileAdsBridgeMock.getVersionString()).thenReturn("invalid");
-		ScarVersionFinder scarVersionFinder = new ScarVersionFinder(mobileAdsBridgeMock, presenceDetector, gmaInitializer);
+		ScarVersionFinder scarVersionFinder = new ScarVersionFinder(mobileAdsBridgeMock, presenceDetector, gmaInitializer, new GMAEventSender());
 		long versionCode = scarVersionFinder.getVersionCode();
 		Assert.assertEquals(-1, versionCode);
 	}

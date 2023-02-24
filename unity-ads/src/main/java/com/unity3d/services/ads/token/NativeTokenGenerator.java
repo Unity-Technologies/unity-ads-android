@@ -32,6 +32,7 @@ public class NativeTokenGenerator implements INativeTokenGenerator {
 			public void run() {
 				try {
 					IDeviceInfoReader deviceInfoReader = _deviceInfoReaderBuilder.build();
+
 					String queryData = Base64.encodeToString(new DeviceInfoReaderCompressor(deviceInfoReader).getDeviceData(), Base64.NO_WRAP);
 					if (_prependStr != null && !_prependStr.isEmpty()) {
 						StringBuilder stringBuilder = new StringBuilder(_prependStr.length() + queryData.length());

@@ -1,5 +1,7 @@
 package com.unity3d.ads.test.legacy;
 
+import static com.unity3d.services.ads.gmascar.utils.ScarConstants.SCAR_PRD_BIDDING_ENDPOINT;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.unity3d.services.core.configuration.Configuration;
@@ -96,6 +98,21 @@ public class ConfigurationTest {
 		Assert.assertEquals(config.getRawConfigData().get("srr"), srrData);
 		Assert.assertTrue(config.getFilteredJsonString().contains("murl"));
 		Assert.assertFalse(config.getFilteredJsonString().contains("srr"));
+	}
+
+	@Test
+	public void testConfigWithScurlNotPresentShouldUseDefaultUrl() throws JSONException, MalformedURLException {
+		Configuration config = new Configuration(getDefaultData());
+		Assert.assertEquals(config.getScarBiddingUrl(), SCAR_PRD_BIDDING_ENDPOINT);
+	}
+
+	@Test
+	public void testConfigWithScurlPresentShouldUseScurlValue() throws JSONException, MalformedURLException {
+		JSONObject configData = getDefaultData();
+		String notDefaultUrl = "https://scar.not.default.com";
+		configData.put("scurl", notDefaultUrl);
+		Configuration config = new Configuration(configData);
+		Assert.assertEquals(config.getScarBiddingUrl(), notDefaultUrl);
 	}
 
 	@Test

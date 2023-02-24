@@ -59,4 +59,9 @@ public class MobileAdsBridgeLegacy extends MobileAdsBridgeBase {
 	public boolean shouldInitialize() {
 		return true;
 	}
+
+	@Override
+	public boolean hasSCARBiddingSupport() {
+		return false;
+	}
 }

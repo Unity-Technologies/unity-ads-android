@@ -3,14 +3,15 @@ package com.unity3d.services.ads.gmascar.handlers;
 import com.unity3d.scar.adapter.common.IScarRewardedAdListenerWrapper;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
 import com.unity3d.scar.adapter.common.GMAEvent;
+import com.unity3d.services.ads.gmascar.utils.GMAEventSender;
 import com.unity3d.services.core.misc.EventSubject;
 
 public class ScarRewardedAdHandler extends ScarAdHandlerBase implements IScarRewardedAdListenerWrapper {
 
 	private boolean _hasEarnedReward = false;
 
-	public ScarRewardedAdHandler(ScarAdMetadata scarAdMetadata, EventSubject<GMAEvent> eventSubject) {
-		super(scarAdMetadata, eventSubject);
+	public ScarRewardedAdHandler(ScarAdMetadata scarAdMetadata, EventSubject<GMAEvent> eventSubject, GMAEventSender gmaEventSender) {
+		super(scarAdMetadata, eventSubject, gmaEventSender);
 	}
 
 	@Override

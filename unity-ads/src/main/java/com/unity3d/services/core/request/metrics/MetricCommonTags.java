@@ -19,13 +19,9 @@ public class MetricCommonTags {
 	private static final String METRIC_COMMON_TAG_PLATFORM = "plt";
 	private static final String METRIC_COMMON_TAG_SDK_VERSION = "sdk";
 	private static final String METRIC_COMMON_TAG_SYSTEM_VERSION = "system";
-	private static final String METRIC_COMMON_TAG_API_LEVEL = "apil";
 	private static final String METRIC_COMMON_TAG_PRIVACY_MODE = "prvc";
 	private static final String METRIC_COMMON_TAG_TEST_MODE = "tm";
 	private static final String METRIC_COMMON_TAG_CONFIG_SOURCE = "src";
-	private static final String METRIC_COMMON_TAG_DEVICE_MAKE = "dma";
-	private static final String METRIC_COMMON_TAG_DEVICE_NAME = "dna";
-	private static final String METRIC_COMMON_TAG_DEVICE_MODEL = "dmo";
 
 	private static final String METRIC_COMMON_TAG_MEDIATION_NAME = "m_name";
 	private static final String METRIC_COMMON_TAG_MEDIATION_VERSION = "m_ver";
@@ -37,10 +33,6 @@ public class MetricCommonTags {
 	private final String _platform;
 	private final String _sdkVersion;
 	private final String _systemVersion;
-	private final String _apiLevel;
-	private final String _deviceModel;
-	private final String _deviceName;
-	private final String _deviceManufacturer;
 	private final boolean _testMode;
 	private String _mediationName;
 	private String _mediationVersion;
@@ -61,12 +53,8 @@ public class MetricCommonTags {
 		this._platform = METRIC_COMMON_TAG_PLATFORM_ANDROID;
 		this._sdkVersion = SdkProperties.getVersionName();
 		this._systemVersion = Device.getOsVersion();
-		this._apiLevel = String.valueOf(Device.getApiLevel());
-		this._deviceModel = Device.getModel();
-		this._deviceName = Device.getDevice();
-		this._deviceManufacturer = Device.getManufacturer();
 		this._privacyMode = PrivacyConfigStorage.getInstance().getPrivacyConfig().getPrivacyStatus().toLowerCase();
-    	this._testMode = SdkProperties.isTestMode();
+		this._testMode = SdkProperties.isTestMode();
 
 		PrivacyConfigStorage.getInstance().registerObserver(_privacyObserver);
 	}
@@ -88,12 +76,8 @@ public class MetricCommonTags {
 		if (_countryISO != null) result.put(METRIC_COMMON_TAG_COUNTRY_ISO, _countryISO);
 		if (_platform != null) result.put(METRIC_COMMON_TAG_PLATFORM, _platform);
 		if (_sdkVersion != null) result.put(METRIC_COMMON_TAG_SDK_VERSION, _sdkVersion);
-		if (_apiLevel != null) result.put(METRIC_COMMON_TAG_API_LEVEL, _apiLevel);
-		if (_deviceModel != null) result.put(METRIC_COMMON_TAG_DEVICE_MODEL, _deviceModel);
-		if (_deviceName != null) result.put(METRIC_COMMON_TAG_DEVICE_NAME, _deviceName);
-		if (_deviceManufacturer != null) result.put(METRIC_COMMON_TAG_DEVICE_MAKE, _deviceManufacturer);
 		if (_systemVersion != null) result.put(METRIC_COMMON_TAG_SYSTEM_VERSION, _systemVersion);
-    	if (_privacyMode != null) result.put(METRIC_COMMON_TAG_PRIVACY_MODE, _privacyMode);
+		if (_privacyMode != null) result.put(METRIC_COMMON_TAG_PRIVACY_MODE, _privacyMode);
 		if (_configSrc != null) result.put(METRIC_COMMON_TAG_CONFIG_SOURCE, _configSrc);
 		if (_mediationName != null) result.put(METRIC_COMMON_TAG_MEDIATION_NAME, _mediationName);
 		if (_mediationVersion != null) result.put(METRIC_COMMON_TAG_MEDIATION_VERSION, _mediationVersion);
@@ -101,14 +85,13 @@ public class MetricCommonTags {
 		if (_experiments != null) result.putAll(_experiments);
 		result.put(METRIC_COMMON_TAG_TEST_MODE, String.valueOf(_testMode));
 
-
 		return result;
 	}
 
 	public void shutdown() {
 		PrivacyConfigStorage.getInstance().unregisterObserver(_privacyObserver);
-  }
-  
+	}
+
 	private void refreshMediationData() {
 		try {
 			Storage storage = StorageManager.getStorage(StorageManager.StorageType.PUBLIC);

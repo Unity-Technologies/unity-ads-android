@@ -22,7 +22,7 @@ public class Broadcast {
 				for (int i = 0; i < actions.length(); i++) {
 					parsedActions[i] = actions.getString(i);
 				}
-				BroadcastMonitor.addBroadcastListener(name, dataScheme, parsedActions);
+				BroadcastMonitor.getInstance().addBroadcastListener(name, dataScheme, parsedActions);
 			}
 		} catch(JSONException e) {
 			callback.error(BroadcastError.JSON_ERROR);
@@ -34,13 +34,13 @@ public class Broadcast {
 
 	@WebViewExposed
 	public static void removeBroadcastListener(String name, WebViewCallback callback) {
-		BroadcastMonitor.removeBroadcastListener(name);
+		BroadcastMonitor.getInstance().removeBroadcastListener(name);
 		callback.invoke();
 	}
 
 	@WebViewExposed
 	public static void removeAllBroadcastListeners(WebViewCallback callback) {
-		BroadcastMonitor.removeAllBroadcastListeners();
+		BroadcastMonitor.getInstance().removeAllBroadcastListeners();
 		callback.invoke();
 	}
 }

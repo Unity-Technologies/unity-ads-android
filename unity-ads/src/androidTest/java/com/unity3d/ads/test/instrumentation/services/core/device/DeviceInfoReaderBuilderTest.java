@@ -56,7 +56,6 @@ public class DeviceInfoReaderBuilderTest {
 		ClientProperties.setGameId(TEST_GAME_ID);
 		CachedLifecycle.register();
 		Mockito.when(_privacyConfigStorageMock.getPrivacyConfig()).thenReturn(_privacyConfigMock);
-		Mockito.when(_experimentsMock.isPrivacyRequestEnabled()).thenReturn(true);
 		Mockito.when(_configurationMock.getExperiments()).thenReturn(_experimentsMock);
 		Mockito.when(_configReaderMock.getCurrentConfiguration()).thenReturn(_configurationMock);
 	}

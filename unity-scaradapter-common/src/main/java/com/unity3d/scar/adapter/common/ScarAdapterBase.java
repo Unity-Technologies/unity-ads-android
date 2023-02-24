@@ -23,6 +23,11 @@ public abstract class ScarAdapterBase implements IScarAdapter {
 	}
 
 	@Override
+	public void getSCARBiddingSignals(Context context, ISignalCollectionListener signalCompletionListener) {
+		_signalCollector.getSCARBiddingSignals(context, signalCompletionListener);
+	}
+
+	@Override
 	public void getSCARSignals(Context context, String[] interstitialList, String[] rewardedList, ISignalCollectionListener signalCompletionListener) {
 		_signalCollector.getSCARSignals(context, interstitialList, rewardedList, signalCompletionListener);
 	}

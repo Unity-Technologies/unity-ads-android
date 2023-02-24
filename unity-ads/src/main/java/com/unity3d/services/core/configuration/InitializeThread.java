@@ -12,11 +12,6 @@ import com.unity3d.services.core.api.Lifecycle;
 import com.unity3d.services.core.connectivity.ConnectivityMonitor;
 import com.unity3d.services.core.connectivity.IConnectivityListener;
 import com.unity3d.services.core.device.reader.DeviceInfoDataFactory;
-import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
-import com.unity3d.services.core.device.reader.DeviceInfoReaderCompressor;
-import com.unity3d.services.core.device.reader.DeviceInfoReaderCompressorWithMetrics;
-import com.unity3d.services.core.device.reader.DeviceInfoReaderPrivacyBuilder;
-import com.unity3d.services.core.device.reader.GameSessionIdReader;
 import com.unity3d.services.core.device.reader.IDeviceInfoDataContainer;
 import com.unity3d.services.core.lifecycle.CachedLifecycle;
 import com.unity3d.services.core.log.DeviceLog;
@@ -342,13 +337,7 @@ public class InitializeThread extends Thread  {
 		@Override
 		public InitializeState execute() {
 			DeviceLog.info("Unity Ads init: load configuration from " + SdkProperties.getConfigUrl());
-			InitializeState nextState;
-			if (_configuration.getExperiments() != null && _configuration.getExperiments().isTwoStageInitializationEnabled()) {
-				nextState = executeWithLoader();
-			} else {
-				nextState = executeLegacy(_configuration);
-			}
-			return nextState;
+			return executeWithLoader();
 		}
 
 		public InitializeState executeLegacy(Configuration configuration) {
@@ -378,10 +367,8 @@ public class InitializeThread extends Thread  {
 			DeviceInfoDataFactory deviceInfoDataFactory = new DeviceInfoDataFactory();
 			IDeviceInfoDataContainer infoReaderCompressor = deviceInfoDataFactory.getDeviceInfoData(InitRequestType.TOKEN);
 			IConfigurationLoader configurationLoader = new ConfigurationLoader(new ConfigurationRequestFactory(_configuration, infoReaderCompressor));
-			if (_configuration.getExperiments().isPrivacyRequestEnabled()) {
-				IDeviceInfoDataContainer privacyInfoReaderCompressor = deviceInfoDataFactory.getDeviceInfoData(InitRequestType.PRIVACY);
-				configurationLoader = new PrivacyConfigurationLoader(configurationLoader, new ConfigurationRequestFactory(_configuration, privacyInfoReaderCompressor), privacyConfigStorage);
-			}
+			IDeviceInfoDataContainer privacyInfoReaderCompressor = deviceInfoDataFactory.getDeviceInfoData(InitRequestType.PRIVACY);
+			configurationLoader = new PrivacyConfigurationLoader(configurationLoader, new ConfigurationRequestFactory(_configuration, privacyInfoReaderCompressor), privacyConfigStorage);
 			final Configuration legacyConfiguration = new Configuration(SdkProperties.getConfigUrl());
 			try {
 				configurationLoader.loadConfiguration(new IConfigurationLoaderListener() {
@@ -392,7 +379,7 @@ public class InitializeThread extends Thread  {
 						if (_configuration.getDelayWebViewUpdate()) {
 							_nextState = new InitializeStateLoadCacheConfigAndWebView(_configuration, _localConfig);
 						}
-						TokenStorage.setInitToken(_configuration.getUnifiedAuctionToken());
+						TokenStorage.getInstance().setInitToken(_configuration.getUnifiedAuctionToken());
 						boolean isNativeWebViewCache = _configuration.getExperiments().isNativeWebViewCacheEnabled();
 						_nextState = isNativeWebViewCache ? new InitializeStateCreateWithRemote(_configuration) : new InitializeStateLoadCache(_configuration);
 					}

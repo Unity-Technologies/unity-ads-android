@@ -6,8 +6,6 @@ import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
 import com.unity3d.services.ads.gmascar.utils.GMAEventSender;
 import com.unity3d.services.core.misc.EventSubject;
 import com.unity3d.services.core.misc.IEventListener;
-import com.unity3d.services.core.webview.WebViewApp;
-import com.unity3d.services.core.webview.WebViewEventCategory;
 
 public abstract class ScarAdHandlerBase implements IScarAdListenerWrapper {
 
@@ -15,10 +13,10 @@ public abstract class ScarAdHandlerBase implements IScarAdListenerWrapper {
 	final protected EventSubject<GMAEvent> _eventSubject;
 	final protected GMAEventSender _gmaEventSender;
 
-	public ScarAdHandlerBase(ScarAdMetadata scarAdMetadata, EventSubject<GMAEvent> eventSubject) {
+	public ScarAdHandlerBase(ScarAdMetadata scarAdMetadata, EventSubject<GMAEvent> eventSubject, GMAEventSender gmaEventSender) {
 		_scarAdMetadata = scarAdMetadata;
 		_eventSubject = eventSubject;
-		_gmaEventSender = new GMAEventSender();
+		_gmaEventSender = gmaEventSender;
 	}
 
 	@Override
@@ -33,7 +31,7 @@ public abstract class ScarAdHandlerBase implements IScarAdListenerWrapper {
 
 	@Override
 	public void onAdOpened() {
-		WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.GMA, GMAEvent.AD_STARTED);
+		_gmaEventSender.send(GMAEvent.AD_STARTED);
 
 		_eventSubject.subscribe(new IEventListener<GMAEvent>() {
 			@Override

@@ -1,22 +1,56 @@
 package com.unity3d.services.core.lifecycle;
 
+import static androidx.lifecycle.Lifecycle.*;
+
+import static com.unity3d.scar.adapter.common.Utils.runOnUiThread;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ProcessLifecycleOwner;
+
+import com.unity3d.services.core.configuration.ConfigurationReader;
+
 import java.util.HashSet;
 import java.util.Set;
 
 @TargetApi(14)
-public class LifecycleCache implements Application.ActivityLifecycleCallbacks {
+public class LifecycleCache implements Application.ActivityLifecycleCallbacks, LifecycleEventObserver {
 
 	private LifecycleEvent _currentState = LifecycleEvent.RESUMED;
 	private boolean _appActive = true;
+	private boolean _lifecycleAppActive = true;
 	private int _numStarted = 0;
+	private boolean _newLifecycle = false;
 
 	private final Set<IAppActiveListener> _appActiveListeners = new HashSet<>();
 	private final Set<IAppEventListener> _appStateListeners = new HashSet<>();
+
+	LifecycleCache(ConfigurationReader configurationReader) {
+		_newLifecycle = configurationReader.getCurrentConfiguration().getExperiments().isJetpackLifecycle();
+		startProcessLifecycleObserving();
+	}
+
+	private void startProcessLifecycleObserving(){
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				registerLifecycleObserver();
+			}
+		});
+	}
+
+	private void registerLifecycleObserver() {
+		ProcessLifecycleOwner
+			.get()
+			.getLifecycle()
+			.addObserver(this);
+	}
 
 	@Override
 	public void onActivityCreated(Activity activity, Bundle bundle) {
@@ -29,7 +63,10 @@ public class LifecycleCache implements Application.ActivityLifecycleCallbacks {
 		if (_numStarted == 0) {
 			// app went to foreground
 			_appActive = true;
-			notifyActiveListeners();
+			if (!_newLifecycle) {
+				notifyActiveListeners();
+			}
+
 		}
 		_numStarted++;
 	}
@@ -54,7 +91,9 @@ public class LifecycleCache implements Application.ActivityLifecycleCallbacks {
 			_numStarted = 0;
 			// app went to background
 			_appActive = false;
-			notifyActiveListeners();
+			if (!_newLifecycle) {
+				notifyActiveListeners();
+			}
 		}
 	}
 
@@ -73,7 +112,7 @@ public class LifecycleCache implements Application.ActivityLifecycleCallbacks {
 	}
 
 	public boolean isAppActive() {
-		return _appActive;
+		return _newLifecycle ? _lifecycleAppActive : _appActive;
 	}
 
 	public synchronized void notifyStateListeners(LifecycleEvent event) {
@@ -101,5 +140,22 @@ public class LifecycleCache implements Application.ActivityLifecycleCallbacks {
 
 	public synchronized void removeStateListener(IAppEventListener listener) {
 		_appStateListeners.remove(listener);
+	}
+
+	@Override
+	public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Event event) {
+		switch (event) {
+			case ON_STOP:
+				_lifecycleAppActive = false;
+				if (_newLifecycle) {
+					notifyActiveListeners();
+				}
+				break;
+			case ON_START:
+				_lifecycleAppActive = true;
+				if (_newLifecycle) {
+					notifyActiveListeners();
+				}
+		}
 	}
 }

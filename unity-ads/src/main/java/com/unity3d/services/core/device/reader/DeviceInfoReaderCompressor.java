@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 public class DeviceInfoReaderCompressor implements IDeviceInfoDataCompressor {
-	private final IDeviceInfoReader _deviceInfoReader;
+	public final IDeviceInfoReader _deviceInfoReader;
 
 	public DeviceInfoReaderCompressor(IDeviceInfoReader deviceInfoReader) {
 		_deviceInfoReader = deviceInfoReader;

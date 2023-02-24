@@ -51,4 +51,9 @@ public class MobileAdsBridge extends MobileAdsBridgeBase {
 	public boolean shouldInitialize() {
 		return _configurationReader.getCurrentConfiguration().getExperiments().isScarInitEnabled();
 	}
+
+	@Override
+	public boolean hasSCARBiddingSupport() {
+		return true;
+	}
 }

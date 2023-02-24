@@ -1,5 +1,7 @@
 package com.unity3d.services.core.configuration;
 
+import com.unity3d.services.ads.gmascar.managers.SCARBiddingManagerType;
+
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -27,31 +29,6 @@ public class ExperimentObjects extends ExperimentsBase {
 	}
 
 	@Override
-	public boolean isTwoStageInitializationEnabled() {
-		return getExperimentValue(TSI_TAG_INIT_ENABLED, true);
-	}
-
-	@Override
-	public boolean isForwardExperimentsToWebViewEnabled() {
-		return getExperimentValueOrDefault(TSI_TAG_FORWARD_FEATURE_FLAGS);
-	}
-
-	@Override
-	public boolean isNativeTokenEnabled() {
-		return getExperimentValue(TSI_TAG_NATIVE_TOKEN, true);
-	}
-
-	@Override
-	public boolean isUpdatePiiFields() {
-		return getExperimentValueOrDefault(TSI_TAG_UPDATE_PII_FIELDS);
-	}
-
-	@Override
-	public boolean isPrivacyRequestEnabled() {
-		return getExperimentValue(TSI_TAG_PRIVACY_REQUEST, true);
-	}
-
-	@Override
 	public boolean shouldNativeTokenAwaitPrivacy() {
 		return getExperimentValueOrDefault(TSI_TAG_NATIVE_TOKEN_AWAIT_PRIVACY);
 	}
@@ -72,11 +49,6 @@ public class ExperimentObjects extends ExperimentsBase {
 	}
 
 	@Override
-	public boolean isNewLifecycleTimer() {
-		return getExperimentValueOrDefault(EXP_TAG_NEW_LIFECYCLE_TIMER);
-	}
-
-	@Override
 	public boolean isScarInitEnabled() {
 		return getExperimentValueOrDefault(EXP_TAG_SCAR_INIT);
 	}
@@ -84,6 +56,21 @@ public class ExperimentObjects extends ExperimentsBase {
 	@Override
 	public boolean isNewInitFlowEnabled() {
 		return getExperimentValueOrDefault(EXP_TAG_NEW_INIT_FLOW);
+	}
+
+	@Override
+	public String getScarBiddingManager() {
+		return getExperimentValue(EXP_TAG_SCAR_BIDDING_MANAGER, SCARBiddingManagerType.DISABLED.getName());
+	}
+
+	@Override
+	public boolean isJetpackLifecycle() {
+		return getExperimentValueOrDefault(EXP_TAG_JETPACK_LIFECYCLE);
+	}
+
+	private String getExperimentValue(String experimentName, String defaultValue) {
+		ExperimentObject expo = getExperimentObject(experimentName);
+		return (expo != null) ? expo.getStringValue() : defaultValue;
 	}
 
 	private boolean getExperimentValue(String experimentName, boolean defaultValue) {
@@ -105,7 +92,7 @@ public class ExperimentObjects extends ExperimentsBase {
 	public Map<String, String> getExperimentTags() {
 		Map<String, String> map = new HashMap<>();
 		for (Map.Entry<String, ExperimentObject> entry : _experimentObjects.entrySet()) {
-			map.put(entry.getKey(), String.valueOf(entry.getValue().getBooleanValue()));
+			map.put(entry.getKey(), entry.getValue().getStringValue());
 		}
 		return map;
 	}
@@ -118,14 +105,13 @@ public class ExperimentObjects extends ExperimentsBase {
 	@Override
 	public JSONObject getNextSessionExperiments() {
 		return getExperimentWithAppliedRule(ExperimentAppliedRule.NEXT);
-
 	}
 
 	private JSONObject getExperimentWithAppliedRule(ExperimentAppliedRule experimentAppliedRule) {
 		Map<String, String> map = new HashMap<>();
 		for (Map.Entry<String, ExperimentObject> entry : _experimentObjects.entrySet()) {
 			if (entry.getValue().getAppliedRule() == experimentAppliedRule) {
-				map.put(entry.getKey(), String.valueOf(entry.getValue().getBooleanValue()));
+				map.put(entry.getKey(), entry.getValue().getStringValue());
 			}
 		}
 		return new JSONObject(map);

@@ -29,7 +29,7 @@ public class InitializeEventsMetricSenderTest {
 	}};
 
 	private final HashMap<String, String> TEST_OTHER_TAGS = new HashMap<String, String> (){{
-		put("tsi_prr", "false");
+		put("s_init", "false");
 	}};
 
 	private final HashMap<String, String> TEST_MERGED_TAGS = new HashMap<String, String> (){{

@@ -60,7 +60,7 @@ public class LoadModuleDecoratorInitializationBuffer extends LoadModuleDecorator
 
 	private void sendOnUnityAdsFailedToLoad(final LoadOperationState state, final UnityAds.UnityAdsLoadError error, final String message) {
 		if (state == null || state.listener == null) return;
-		getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdLoadFailure(error, state.duration()));
+		getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdLoadFailure(error, state.duration(), state.isBanner()));
 		Utilities.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {

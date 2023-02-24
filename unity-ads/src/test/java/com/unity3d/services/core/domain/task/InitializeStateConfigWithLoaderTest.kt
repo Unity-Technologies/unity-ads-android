@@ -38,7 +38,6 @@ class InitializeStateConfigWithLoaderTest {
         every { configMock.retryScalingFactor } returns 1.0
         every { configMock.retryDelay } returns 1
         every { configMock.unifiedAuctionToken } returns ""
-        every { configMock.experiments.isPrivacyRequestEnabled } returns false
     }
 
     @Test
@@ -50,7 +49,7 @@ class InitializeStateConfigWithLoaderTest {
                     firstArg<IConfigurationLoaderListener>().onSuccess(configMock)
                 }
                 every { anyConstructed<ConfigurationReader>().currentConfiguration } returns configMock
-                every { TokenStorage.setInitToken(any()) } returns Unit
+                every { TokenStorage.getInstance().setInitToken(any()) } returns Unit
 
                 // when
                 val configWithLoaderResult = initializeStateConfigWithLoader(
@@ -60,7 +59,7 @@ class InitializeStateConfigWithLoaderTest {
                 // then
                 Assert.assertTrue(configWithLoaderResult.isSuccess)
                 Assert.assertEquals(configMock, configWithLoaderResult.getOrNull())
-                verify(exactly = 1) { TokenStorage.setInitToken(configMock.unifiedAuctionToken) }
+                verify(exactly = 1) { TokenStorage.getInstance().setInitToken(configMock.unifiedAuctionToken) }
                 coVerify(exactly = 0) { initializeStateNetworkError(InitializeStateNetworkError.Params(configMock))}
             }
         }
@@ -85,7 +84,7 @@ class InitializeStateConfigWithLoaderTest {
                 Assert.assertTrue(configWithLoaderResult.isFailure)
                 coVerify(exactly = 1) { initializeStateNetworkError(InitializeStateNetworkError.Params(configMock))}
                 verify(exactly = 5) { anyConstructed<ConfigurationLoader>().loadConfiguration(any()) }
-                verify(exactly = 0) { TokenStorage.setInitToken(configMock.unifiedAuctionToken) }
+                verify(exactly = 0) { TokenStorage.getInstance().setInitToken(configMock.unifiedAuctionToken) }
             }
         }
     }
@@ -110,7 +109,7 @@ class InitializeStateConfigWithLoaderTest {
                 Assert.assertTrue(configWithLoaderResult.isFailure)
                 coVerify(exactly = 1) { initializeStateNetworkError(InitializeStateNetworkError.Params(configMock))}
                 verify(exactly = 1) { anyConstructed<ConfigurationLoader>().loadConfiguration(any()) }
-                verify(exactly = 0) { TokenStorage.setInitToken(configMock.unifiedAuctionToken) }
+                verify(exactly = 0) { TokenStorage.getInstance().setInitToken(configMock.unifiedAuctionToken) }
             }
         }
     }

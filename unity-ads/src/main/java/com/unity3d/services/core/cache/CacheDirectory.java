@@ -23,6 +23,7 @@ public class CacheDirectory {
 	}
 
 	public synchronized File getCacheDirectory(Context context) {
+		if (context == null) return null;
 		if(_initialized) {
 			return _cacheDirectory;
 		} else {
@@ -50,7 +51,6 @@ public class CacheDirectory {
 					DeviceLog.debug("External media not mounted");
 				}
 			}
-
 			File internalCache = context.getFilesDir();
 			if(testCacheDirectory(internalCache)) {
 				_cacheDirectory = internalCache;

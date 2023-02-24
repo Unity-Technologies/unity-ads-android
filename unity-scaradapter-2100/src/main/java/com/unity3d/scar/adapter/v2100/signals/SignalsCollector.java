@@ -26,4 +26,13 @@ public class SignalsCollector extends SignalsCollectorBase implements ISignalsCo
 		QueryInfoCallback queryInfoCallback = new QueryInfoCallback(placementId, new SignalCallbackListener(dispatchGroup, signalsResult));
 		QueryInfo.generate(context, adFormat, request, queryInfoCallback);
 	}
+
+	@Override
+	public void getSCARSignal(Context context, boolean isInterstitial, DispatchGroup dispatchGroup, SignalsResult signalsResult) {
+		getSCARSignal(context,
+			// this will act as the tag
+			isInterstitial ? SignalsCollectorBase.SCAR_INT_SIGNAL : SignalsCollectorBase.SCAR_RV_SIGNAL,
+			isInterstitial, dispatchGroup, signalsResult
+		);
+	}
 }
