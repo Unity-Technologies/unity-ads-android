@@ -22,6 +22,8 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 	private final String tokenIdentifier;
 	private final IUnityAdsTokenListener unityAdsTokenListener;
 	private final ScarRequestHandler _scarRequestHandler;
+	private final boolean _isAsyncTokenCall;
+
 
 	private final AtomicReference<BiddingSignals> signals = new AtomicReference<>();
 
@@ -32,6 +34,7 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 	public BiddingBaseManager(IUnityAdsTokenListener unityAdsTokenListener, ScarRequestHandler requestSender) {
 		this.tokenIdentifier = UUID.randomUUID().toString();
 		this.unityAdsTokenListener = unityAdsTokenListener;
+		this._isAsyncTokenCall = unityAdsTokenListener != null;
 		this._scarRequestHandler = requestSender;
 	}
 
@@ -73,7 +76,7 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 	}
 
 	public void fetchSignals() {
-		getMetricSender().sendMetric(ScarMetric.hbSignalsFetchStart());
+		getMetricSender().sendMetric(ScarMetric.hbSignalsFetchStart(_isAsyncTokenCall));
 
 		new Thread(new Runnable() {
 			@Override
@@ -96,9 +99,9 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 
 	public void sendFetchResult(String errorMsg) {
 		if (errorMsg != "") {
-			getMetricSender().sendMetric(ScarMetric.hbSignalsFetchFailure(errorMsg));
+			getMetricSender().sendMetric(ScarMetric.hbSignalsFetchFailure(_isAsyncTokenCall, errorMsg));
 		} else {
-			getMetricSender().sendMetric(ScarMetric.hbSignalsFetchSuccess());
+			getMetricSender().sendMetric(ScarMetric.hbSignalsFetchSuccess(_isAsyncTokenCall));
 		}
 	}
 
@@ -116,11 +119,11 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 	}
 
 	public void uploadSignals() {
-		getMetricSender().sendMetric(ScarMetric.hbSignalsUploadStart());
+		getMetricSender().sendMetric(ScarMetric.hbSignalsUploadStart(_isAsyncTokenCall));
 
 		final BiddingSignals signals = this.signals.get();
 		if (signals == null || signals.isEmpty()) {
-			getMetricSender().sendMetric(ScarMetric.hbSignalsUploadFailure("null or empty signals"));
+			getMetricSender().sendMetric(ScarMetric.hbSignalsUploadFailure(_isAsyncTokenCall, "null or empty signals"));
 			return;
 		}
 
@@ -131,9 +134,9 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 					// Since there are potential side effects of file read in the
 					// getCurrentConfiguration call, we don't want this to be called in the constructor.
 					_scarRequestHandler.makeUploadRequest(tokenIdentifier, signals, new ConfigurationReader().getCurrentConfiguration().getScarBiddingUrl());
-					getMetricSender().sendMetric(ScarMetric.hbSignalsUploadSuccess());
+					getMetricSender().sendMetric(ScarMetric.hbSignalsUploadSuccess(_isAsyncTokenCall));
 				} catch (Exception e) {
-					getMetricSender().sendMetric(ScarMetric.hbSignalsUploadFailure(e.getLocalizedMessage()));
+					getMetricSender().sendMetric(ScarMetric.hbSignalsUploadFailure(_isAsyncTokenCall, e.getLocalizedMessage()));
 				}
 			}
 		}).start();

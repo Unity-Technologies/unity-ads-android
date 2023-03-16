@@ -39,11 +39,45 @@ public class BiddingManagerFactoryTest {
 
 			}
 		}, null);
+		assertThat(manager, instanceOf(BiddingDisabledManager.class));
+	}
+
+	@Test
+	public void createManagerNoListenerNullExperiments() {
+		BiddingBaseManager manager = biddingManagerFactory
+			.createManager(null, null);
+		assertThat(manager, instanceOf(BiddingDisabledManager.class));
+	}
+
+	@Test
+	public void createManagerNoListenerNullGetScarBmExperiment() {
+		BiddingBaseManager manager = biddingManagerFactory
+			.createManager(null, experiments);
+		assertThat(manager, instanceOf(BiddingDisabledManager.class));
+	}
+
+	@Test
+	public void createManagerNoListenerDisabledExperiment() {
+		when(experiments.getScarBiddingManager()).thenReturn("dis");
+
+		BiddingBaseManager manager = biddingManagerFactory
+			.createManager(null, experiments);
+		assertThat(manager, instanceOf(BiddingDisabledManager.class));
+	}
+
+	@Test
+	public void createManagerNoListenerExperimentEager() {
+		when(experiments.getScarBiddingManager()).thenReturn("eag");
+
+		BiddingBaseManager manager = biddingManagerFactory
+			.createManager(null, experiments);
 		assertThat(manager, instanceOf(BiddingEagerManager.class));
 	}
 
 	@Test
-	public void createManagerNoListener() {
+	public void createManagerNoListenerAnyExperiment() {
+		when(experiments.getScarBiddingManager()).thenReturn("laz");
+
 		BiddingBaseManager manager = biddingManagerFactory
 			.createManager(null, experiments);
 		assertThat(manager, instanceOf(BiddingEagerManager.class));

@@ -7,8 +7,8 @@ android {
         applicationId "com.unity3d.ads.example"
         minSdkVersion 19
         targetSdkVersion 32
-        versionCode = 4600
-        versionName = "4.6.0"
+        versionCode = 4610
+        versionName = "4.6.1"
     }
 
     buildTypes {
