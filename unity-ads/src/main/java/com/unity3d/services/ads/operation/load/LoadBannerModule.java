@@ -5,7 +5,8 @@ import com.unity3d.services.banners.UnityBannerSize;
 import com.unity3d.services.banners.bridge.BannerBridge;
 import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.configuration.InitializationNotificationCenter;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
 
 import org.json.JSONException;
@@ -17,7 +18,7 @@ public class LoadBannerModule extends BaseLoadModule {
 
 	public static ILoadModule getInstance() {
 		if (_instance == null) {
-			LoadBannerModule loadModule = new LoadBannerModule(SDKMetrics.getInstance());
+			LoadBannerModule loadModule = new LoadBannerModule(Utilities.getService(SDKMetricsSender.class));
 			LoadModuleDecoratorInitializationBuffer bufferedLoadModule = new LoadModuleDecoratorInitializationBuffer(loadModule, InitializationNotificationCenter.getInstance());
 			LoadModuleDecoratorTimeout timedLoadModule = new LoadModuleDecoratorTimeout(bufferedLoadModule, new ConfigurationReader());
 			_instance = timedLoadModule;
@@ -25,7 +26,7 @@ public class LoadBannerModule extends BaseLoadModule {
 		return _instance;
 	}
 
-	public LoadBannerModule(ISDKMetrics sdkMetrics) {
+	public LoadBannerModule(SDKMetricsSender sdkMetrics) {
 		super(sdkMetrics);
 	}
 

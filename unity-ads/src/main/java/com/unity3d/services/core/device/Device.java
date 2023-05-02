@@ -27,7 +27,7 @@ import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.preferences.AndroidPreferences;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.request.metrics.Metric;
-import com.unity3d.services.core.request.metrics.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,6 +52,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Device {
+
+	private static SDKMetricsSender sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
 
 	public enum MemoryInfoType { TOTAL_MEMORY, FREE_MEMORY }
 
@@ -124,11 +126,21 @@ public class Device {
 		String idfi = AndroidPreferences.getString("unityads-installinfo", "unityads-idfi");
 
 		if (idfi == null) {
+			// We use the auid in case there is no idfi yet.
+			idfi = getAuid();
+		}
+
+		if (idfi == null) {
+			// If we don't have either auid nor existing idfi, we generate an idfi ourselves.
 			idfi = Device.getUniqueEventId();
 			AndroidPreferences.setString("unityads-installinfo", "unityads-idfi", idfi);
 		}
 
 		return idfi;
+	}
+
+	public static String getAuid() {
+		return AndroidPreferences.getString("supersonic_shared_preferen", "auid");
 	}
 
 	public static String getConnectionType() {
@@ -533,9 +545,9 @@ public class Device {
 		}
 		long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
 		if (duration > timeout) {
-			SDKMetrics.getInstance().sendMetric(new Metric("native_device_info_apk_digest_timeout", apkSize, null));
+			sdkMetricsSender.sendMetric(new Metric("native_device_info_apk_digest_timeout", apkSize));
 		}
-		SDKMetrics.getInstance().sendMetric(new Metric("native_device_info_apk_size", apkSize, null));
+		sdkMetricsSender.sendMetric(new Metric("native_device_info_apk_size", apkSize));
 		return apkDigest;
 	}
 

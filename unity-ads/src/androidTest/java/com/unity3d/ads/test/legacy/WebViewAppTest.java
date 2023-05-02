@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
+import android.webkit.ValueCallback;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -64,6 +65,7 @@ public class WebViewAppTest {
 			public void run() {
 				WebViewApp.getCurrentApp().setWebAppLoaded(true);
 				WebViewApp.getCurrentApp().setWebAppInitialized(false);
+				WebViewApp.getCurrentApp().setWebAppFailureCode(1);
 			}
 		}, 100);
 		ErrorState webViewErrorState = WebViewApp.create(conf);
@@ -542,7 +544,7 @@ public class WebViewAppTest {
 		}
 
 		@Override
-		public void invokeJavascript(String data) {
+		public void evaluateJavascript(String data, ValueCallback<String> callback) {
 			JS_INVOKED = true;
 			JS_CALL = data;
 		}

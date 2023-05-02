@@ -16,8 +16,8 @@ public class MetricsContainerTest {
 		MetricCommonTags commonTags = Mockito.mock(MetricCommonTags.class);
 		Map<String, Object> currentTags;
 
-		MetricsContainer container = new MetricsContainer("50", commonTags, new ArrayList<Metric>(), "token");
-		currentTags = container.asMap();
+		MetricsContainer container = new MetricsContainer("50", commonTags, new ArrayList<>(), "token");
+		currentTags = container.toMap();
 
 		assertEquals("Incorrect metricSampleRate value", "50", currentTags.get("msr"));
 	}
@@ -27,8 +27,8 @@ public class MetricsContainerTest {
 		MetricCommonTags commonTags = Mockito.mock(MetricCommonTags.class);
 		Map<String, Object> currentTags;
 
-		MetricsContainer container = new MetricsContainer("50", commonTags, new ArrayList<Metric>(), "token");
-		currentTags = container.asMap();
+		MetricsContainer container = new MetricsContainer("50", commonTags, new ArrayList<>(), "token");
+		currentTags = container.toMap();
 
 		assertEquals("Incorrect session token value", "token", currentTags.get("sTkn"));
 	}
@@ -38,8 +38,8 @@ public class MetricsContainerTest {
 		MetricCommonTags commonTags = Mockito.mock(MetricCommonTags.class);
 		Map<String, Object> currentTags;
 
-		MetricsContainer container = new MetricsContainer("50", commonTags, new ArrayList<Metric>(), "token");
-		currentTags = container.asMap();
+		MetricsContainer container = new MetricsContainer("50", commonTags, new ArrayList<>(), "token");
+		currentTags = container.toMap();
 
 		assertNotNull("Shared session id missing value", currentTags.get("shSid"));
 	}

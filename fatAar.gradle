@@ -14,6 +14,7 @@ static def tasksDependentOnScar(String buildType) {
         "merge${buildType}JavaResource",
         "sync${buildType}LibJars",
         "extract${buildType}Annotations",
+        "desugar${buildType}FileDependencies",
         "dokkaJavadoc"
     ]
 }

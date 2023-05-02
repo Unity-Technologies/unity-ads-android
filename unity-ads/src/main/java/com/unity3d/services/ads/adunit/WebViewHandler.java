@@ -7,7 +7,7 @@ import com.unity3d.services.core.misc.ViewUtilities;
 import com.unity3d.services.core.webview.WebViewApp;
 
 public class WebViewHandler implements IAdUnitViewHandler {
-	public boolean create(AdUnitActivity activity) {
+	public boolean create(IAdUnitActivity activity) {
 		return true;
 	}
 
@@ -26,22 +26,22 @@ public class WebViewHandler implements IAdUnitViewHandler {
 		return null;
 	}
 
-	public void onCreate(AdUnitActivity activity, Bundle savedInstanceState) {
+	public void onCreate(IAdUnitActivity activity, Bundle savedInstanceState) {
 	}
 
-	public void onStart(AdUnitActivity activity) {
+	public void onStart(IAdUnitActivity activity) {
 	}
 
-	public void onStop(AdUnitActivity activity) {
+	public void onStop(IAdUnitActivity activity) {
 	}
 
-	public void onResume(AdUnitActivity activity) {
+	public void onResume(IAdUnitActivity activity) {
 	}
 
-	public void onPause(AdUnitActivity activity) {
+	public void onPause(IAdUnitActivity activity) {
 	}
 
-	public void onDestroy(AdUnitActivity activity) {
+	public void onDestroy(IAdUnitActivity activity) {
 		destroy();
 	}
 }

@@ -70,7 +70,7 @@ publishing {
                 }
 
                 // List all dependencies and write to POM
-                configurations.api.getAllDependencies().each cl
+                configurations.implementation.getAllDependencies().each cl
                 configurations.releaseImplementation.getAllDependencies().each cl
             }
         }

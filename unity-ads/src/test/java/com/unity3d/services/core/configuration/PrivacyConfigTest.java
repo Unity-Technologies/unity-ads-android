@@ -14,6 +14,7 @@ public class PrivacyConfigTest {
 		PrivacyConfig privacyConfig = new PrivacyConfig();
 		Assert.assertEquals(PrivacyConfigStatus.UNKNOWN, privacyConfig.getPrivacyStatus());
 		Assert.assertFalse(privacyConfig.allowedToSendPii());
+		Assert.assertFalse(privacyConfig.shouldSendNonBehavioral());
 	}
 
 	@Test
@@ -21,6 +22,7 @@ public class PrivacyConfigTest {
 		PrivacyConfig privacyConfig = new PrivacyConfig(new JSONObject("{\"pas\":true}"));
 		Assert.assertEquals(PrivacyConfigStatus.ALLOWED, privacyConfig.getPrivacyStatus());
 		Assert.assertTrue(privacyConfig.allowedToSendPii());
+		Assert.assertFalse(privacyConfig.shouldSendNonBehavioral());
 	}
 
 	@Test
@@ -28,6 +30,23 @@ public class PrivacyConfigTest {
 		PrivacyConfig privacyConfig = new PrivacyConfig(new JSONObject("{\"pas\":false}"));
 		Assert.assertEquals(PrivacyConfigStatus.DENIED, privacyConfig.getPrivacyStatus());
 		Assert.assertFalse(privacyConfig.allowedToSendPii());
+		Assert.assertFalse(privacyConfig.shouldSendNonBehavioral());
+	}
+
+	@Test
+	public void testPrivacyConfigWithPasTrueSnbTrue() throws JSONException {
+		PrivacyConfig privacyConfig = new PrivacyConfig(new JSONObject("{\"pas\":true, \"snb\": true}"));
+		Assert.assertEquals(PrivacyConfigStatus.ALLOWED, privacyConfig.getPrivacyStatus());
+		Assert.assertTrue(privacyConfig.allowedToSendPii());
+		Assert.assertTrue(privacyConfig.shouldSendNonBehavioral());
+	}
+
+	@Test
+	public void testPrivacyConfigWithPasTrueSnbFalse() throws JSONException {
+		PrivacyConfig privacyConfig = new PrivacyConfig(new JSONObject("{\"pas\":true, \"snb\": false}"));
+		Assert.assertEquals(PrivacyConfigStatus.ALLOWED, privacyConfig.getPrivacyStatus());
+		Assert.assertTrue(privacyConfig.allowedToSendPii());
+		Assert.assertFalse(privacyConfig.shouldSendNonBehavioral());
 	}
 
 	@Test

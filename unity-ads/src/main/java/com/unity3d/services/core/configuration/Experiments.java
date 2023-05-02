@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class Experiments extends ExperimentsBase {
 
-	private static final Set<String> NEXT_SESSION_FLAGS = new HashSet<>(Arrays.asList("s_init", "tsi_prw"));
+	private static final Set<String> NEXT_SESSION_FLAGS = new HashSet<>(Collections.singletonList("tsi_prw"));
 
 	private final JSONObject _experimentData;
 
@@ -56,11 +56,6 @@ public class Experiments extends ExperimentsBase {
 	}
 
 	@Override
-	public boolean isNewInitFlowEnabled() {
-		return _experimentData.optBoolean(EXP_TAG_NEW_INIT_FLOW, false);
-	}
-
-	@Override
 	public String getScarBiddingManager() {
 		return _experimentData.optString(EXP_TAG_SCAR_BIDDING_MANAGER, SCARBiddingManagerType.DISABLED.getName());
 	}
@@ -68,6 +63,21 @@ public class Experiments extends ExperimentsBase {
 	@Override
 	public boolean isJetpackLifecycle() {
 		return _experimentData.optBoolean(EXP_TAG_JETPACK_LIFECYCLE, false);
+	}
+
+	@Override
+	public boolean isOkHttpEnabled() {
+		return _experimentData.optBoolean(EXP_TAG_OK_HTTP, false);
+  }
+  
+    @Override
+	public boolean isWebMessageEnabled() {
+		return _experimentData.optBoolean(EXP_TAG_WEB_MESSAGE, false);
+	}
+
+	@Override
+	public boolean isWebViewAsyncDownloadEnabled() {
+		return _experimentData.optBoolean(EXP_TAG_WEBVIEW_ASYNC_DOWNLOAD, false);
 	}
 
 	public JSONObject getExperimentsAsJson() {

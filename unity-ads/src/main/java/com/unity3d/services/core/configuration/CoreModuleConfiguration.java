@@ -9,12 +9,14 @@ import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.device.OpenAdvertisingId;
 import com.unity3d.services.core.device.StorageManager;
 import com.unity3d.services.core.device.VolumeChange;
+import com.unity3d.services.core.device.VolumeChangeContentObserver;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.WebRequestThread;
 import com.unity3d.services.core.request.metrics.Metric;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,12 +52,8 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 		StorageManager.init(ClientProperties.getApplicationContext());
 		AdvertisingId.init(ClientProperties.getApplicationContext());
 		OpenAdvertisingId.init(ClientProperties.getApplicationContext());
-		VolumeChange.clearAllListeners();
+		((VolumeChange)Utilities.getService(VolumeChange.class)).clearAllListeners();
 
-		return true;
-	}
-
-	public boolean initModuleState(Configuration configuration) {
 		return true;
 	}
 
@@ -76,7 +74,7 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 				message = "Unity Ads failed to initialize due to internal error";
 				error = UnityAds.UnityAdsInitializationError.INTERNAL_ERROR;
 		}
-    
+
 		InitializationNotificationCenter.getInstance().triggerOnSdkInitializationFailed(message, state, 0);
 
 		Utilities.runOnUiThread(new Runnable() {
@@ -106,8 +104,9 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 		List<Metric> metrics = new ArrayList<>();
 		int hasX264 = Device.hasX264Decoder() ? 1 : 0;
 		int hasX265 = Device.hasX265Decoder() ? 1 : 0;
-		metrics.add(new Metric("native_device_decoder_x264", hasX264, null));
-		metrics.add(new Metric("native_device_decoder_x265", hasX265, null));
-		SDKMetrics.getInstance().sendMetrics(metrics);
+		metrics.add(new Metric("native_device_decoder_x264", hasX264));
+		metrics.add(new Metric("native_device_decoder_x265", hasX265));
+		SDKMetricsSender sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
+		sdkMetricsSender.sendMetrics(metrics);
 	}
 }

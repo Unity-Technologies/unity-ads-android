@@ -1,18 +1,16 @@
 package com.unity3d.services.core.api;
 
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
-import android.util.SparseArray;
+import android.media.AudioRouting;
 
 import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.device.DeviceError;
-import com.unity3d.services.core.device.IVolumeChangeListener;
 import com.unity3d.services.core.device.VolumeChange;
+import com.unity3d.services.core.device.VolumeChangeMonitor;
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
-import com.unity3d.services.core.webview.WebViewApp;
-import com.unity3d.services.core.webview.WebViewEventCategory;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
 import com.unity3d.services.core.webview.bridge.WebViewExposed;
 
@@ -27,12 +25,8 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public class DeviceInfo {
+	private static final VolumeChangeMonitor volumeChangeMonitor = Utilities.getService(VolumeChangeMonitor.class);
 	public enum StorageType { EXTERNAL, INTERNAL }
-	public enum DeviceInfoEvent {
-		VOLUME_CHANGED
-	}
-
-	private static SparseArray<IVolumeChangeListener> _volumeChangeListeners;
 
 	@WebViewExposed
 	public static void getAdvertisingTrackingId(WebViewCallback callback) {
@@ -257,39 +251,13 @@ public class DeviceInfo {
 
 	@WebViewExposed
 	public static void registerVolumeChangeListener(final Integer streamType, WebViewCallback callback) {
-		if (_volumeChangeListeners == null) {
-			_volumeChangeListeners = new SparseArray<>();
-		}
-
-		if (_volumeChangeListeners.get(streamType) == null) {
-			IVolumeChangeListener listener = new IVolumeChangeListener() {
-				private int _streamType = streamType;
-				@Override
-				public void onVolumeChanged(int volume) {
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.DEVICEINFO, DeviceInfoEvent.VOLUME_CHANGED, getStreamType(), volume, Device.getStreamMaxVolume(_streamType));
-				}
-
-				@Override
-				public int getStreamType() {
-					return _streamType;
-				}
-			};
-
-			_volumeChangeListeners.append(streamType, listener);
-			VolumeChange.registerListener(listener);
-		}
-
+		volumeChangeMonitor.registerVolumeChangeListener(streamType);
 		callback.invoke();
 	}
 
 	@WebViewExposed
 	public static void unregisterVolumeChangeListener(final Integer streamType, WebViewCallback callback) {
-		if (_volumeChangeListeners != null && _volumeChangeListeners.get(streamType) != null) {
-			IVolumeChangeListener listener = _volumeChangeListeners.get(streamType);
-			VolumeChange.unregisterListener(listener);
-			_volumeChangeListeners.remove(streamType);
-		}
-
+		volumeChangeMonitor.unregisterVolumeChangeListener(streamType);
 		callback.invoke();
 	}
 

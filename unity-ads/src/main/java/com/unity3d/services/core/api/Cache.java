@@ -15,6 +15,7 @@ import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.WebRequestError;
+import com.unity3d.services.core.webview.bridge.SharedInstances;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
 import com.unity3d.services.core.webview.bridge.WebViewExposed;
 
@@ -58,7 +59,7 @@ public class Cache {
 			return;
 		}
 
-		CacheThread.download(url, fileIdToFilename(fileId), mappedHeaders, append);
+		CacheThread.download(url, fileIdToFilename(fileId), mappedHeaders, append, SharedInstances.INSTANCE.getWebViewEventSender());
 		callback.invoke();
 	}
 

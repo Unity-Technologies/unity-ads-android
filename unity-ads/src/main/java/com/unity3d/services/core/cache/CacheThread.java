@@ -1,6 +1,7 @@
 package com.unity3d.services.core.cache;
 
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.webview.bridge.IEventSender;
 
 import android.os.Bundle;
 import android.os.Looper;
@@ -48,7 +49,7 @@ public class CacheThread extends Thread {
 		Looper.loop();
 	}
 
-	public static synchronized void download(String source, String target, HashMap<String, List<String>> headers, boolean append) {
+	public static synchronized void download(String source, String target, HashMap<String, List<String>> headers, boolean append, IEventSender eventSender) {
 		if(!_ready) {
 			init();
 		}
@@ -60,6 +61,7 @@ public class CacheThread extends Thread {
 		params.putInt("readTimeout", _readTimeout);
 		params.putInt("progressInterval", _progressInterval);
 		params.putBoolean("append", append);
+		params.putSerializable("cacheEventSender", new CacheEventSender(eventSender));
 
 		if (headers != null) {
 			for (String s : headers.keySet()) {

@@ -7,7 +7,7 @@ suspend fun <T> withRetry(
     retryDelay: Long = 5000,
     retries: Int = 6,
     scalingFactor: Double = 2.0,
-    fallbackException: Throwable,
+    fallbackException: Exception,
     block: suspend (attempt: Int) -> T
 ): T {
     var nextDelay: Long = retryDelay
@@ -19,8 +19,9 @@ suspend fun <T> withRetry(
         when {
             result.isSuccess -> return result.getOrThrow()
             result.isFailure -> {
-                // If we fail and want to abort retry, exit with fallbackException
-                if (result.exceptionOrNull() is AbortRetryException) { throw fallbackException }
+                // If we fail and want to abort retry, exit with the failureException itself (AbortRetryException)
+                val failureException = result.exceptionOrNull()
+                if (failureException is AbortRetryException) { throw failureException }
 
                 // Check if we should retry again
                 if (attempt+1 == retries) { throw fallbackException }

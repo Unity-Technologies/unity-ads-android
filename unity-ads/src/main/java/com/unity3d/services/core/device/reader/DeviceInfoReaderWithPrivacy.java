@@ -30,6 +30,9 @@ public class DeviceInfoReaderWithPrivacy implements IDeviceInfoReader {
 			if (_privacyConfigStorage.getPrivacyConfig().allowedToSendPii()) {
 				originalData.putAll(getPiiAttributesFromDevice());
 			}
+			if (_privacyConfigStorage.getPrivacyConfig().shouldSendNonBehavioral()) {
+				originalData.put(USER_NON_BEHAVIORAL_KEY, _piiTrackingStatusReader.getUserNonBehavioralFlag());
+			}
 		}
 		return originalData;
 	}
@@ -40,8 +43,6 @@ public class DeviceInfoReaderWithPrivacy implements IDeviceInfoReader {
 		if (advertisingId != null) {
 			piiData.put(ADVERTISING_TRACKING_ID_NORMALIZED_KEY, advertisingId);
 		}
-		piiData.put(USER_NON_BEHAVIORAL_KEY, _piiTrackingStatusReader.getUserNonBehavioralFlag());
-
 		return piiData;
 	}
 

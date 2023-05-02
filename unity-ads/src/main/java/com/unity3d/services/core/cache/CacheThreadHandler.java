@@ -11,8 +11,6 @@ import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.request.IWebRequestProgressListener;
 import com.unity3d.services.core.request.NetworkIOException;
 import com.unity3d.services.core.request.WebRequest;
-import com.unity3d.services.core.webview.WebViewApp;
-import com.unity3d.services.core.webview.WebViewEventCategory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,6 +42,8 @@ class 	CacheThreadHandler extends Handler {
 		data.remove("progressInterval");
 		boolean append = data.getBoolean("append", false);
 		data.remove("append");
+		CacheEventSender cacheEventSender = (CacheEventSender) data.getSerializable("cacheEventSender");
+		data.remove("cacheEventSender");
 
 		HashMap<String, List<String>> headers = null;
 		if (data.size() > 0) {
@@ -61,13 +61,13 @@ class 	CacheThreadHandler extends Handler {
 
 		if ((append && !targetFile.exists()) || (!append && targetFile.exists())) {
 			_active = false;
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_STATE_WRONG, source, target, append, targetFile.exists());
+			cacheEventSender.sendEvent(CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_STATE_WRONG, source, target, append, targetFile.exists());
 			return;
 		}
 
 		switch (msg.what) {
 			case CacheThread.MSG_DOWNLOAD:
-				downloadFile(source, target, connectTimeout, readTimeout, progressInterval, headers, append);
+				downloadFile(source, target, connectTimeout, readTimeout, progressInterval, headers, append, cacheEventSender);
 				break;
 
 			default:
@@ -88,7 +88,7 @@ class 	CacheThreadHandler extends Handler {
 		return _active;
 	}
 
-	private void downloadFile(String source, String target, int connectTimeout, int readTimeout, final int progressInterval, HashMap<String, List<String>> headers, boolean append) {
+	private void downloadFile(String source, String target, int connectTimeout, int readTimeout, final int progressInterval, HashMap<String, List<String>> headers, boolean append, final CacheEventSender cacheThreadBinder) {
 		if (_canceled || source == null || target == null) {
 			return;
 		}
@@ -104,7 +104,7 @@ class 	CacheThreadHandler extends Handler {
 
 		if (!Device.isActiveNetworkConnected()) {
 			DeviceLog.debug("Unity Ads cache: download cancelled, no internet connection available");
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.NO_INTERNET, source);
+			cacheThreadBinder.sendEvent(CacheEvent.DOWNLOAD_ERROR, CacheError.NO_INTERNET, source);
 			return;
 		}
 
@@ -121,14 +121,14 @@ class 	CacheThreadHandler extends Handler {
 
 				@Override
 				public void onRequestStart(String url, long total, int responseCode, Map<String, List<String>> headers) {
-					WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_STARTED, url, targetFile.length(), (total + targetFile.length()), responseCode, Request.getResponseHeadersMap(headers));
+					cacheThreadBinder.sendEvent(CacheEvent.DOWNLOAD_STARTED, url, targetFile.length(), (total + targetFile.length()), responseCode, Request.getResponseHeadersMap(headers));
 				}
 
 				@Override
 				public void onRequestProgress(String url, long bytes, long total) {
 					if(progressInterval > 0 && System.currentTimeMillis() - lastProgressEventTime > progressInterval) {
 						lastProgressEventTime = System.currentTimeMillis();
-						WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_PROGRESS, url, bytes, total);
+						cacheThreadBinder.sendEvent(CacheEvent.DOWNLOAD_PROGRESS, url, bytes, total);
 					}
 				}
 			});
@@ -137,37 +137,37 @@ class 	CacheThreadHandler extends Handler {
 
 			// Note: active must be set to false before sending end/error event back to webview to allow webview to start next download or other operation immediately after receiving the event
 			_active = false;
-			postProcessDownload(startTime, source, targetFile, total, _currentRequest.getContentLength(), _currentRequest.isCanceled(), _currentRequest.getResponseCode(), _currentRequest.getResponseHeaders());
+			postProcessDownload(startTime, source, targetFile, total, _currentRequest.getContentLength(), _currentRequest.isCanceled(), _currentRequest.getResponseCode(), _currentRequest.getResponseHeaders(), cacheThreadBinder);
 		}
 		catch (FileNotFoundException e) {
 			DeviceLog.exception("Couldn't create target file", e);
 			_active = false;
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_IO_ERROR, source, e.getMessage());
+			cacheThreadBinder.sendEvent(CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_IO_ERROR, source, e.getMessage());
 		}
 		catch (MalformedURLException e) {
 			DeviceLog.exception("Malformed URL", e);
 			_active = false;
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.MALFORMED_URL, source, e.getMessage());
+			cacheThreadBinder.sendEvent(CacheEvent.DOWNLOAD_ERROR, CacheError.MALFORMED_URL, source, e.getMessage());
 		}
 		catch (IOException e) {
 			DeviceLog.exception("Couldn't request stream", e);
 			_active = false;
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_IO_ERROR, source, e.getMessage());
+			cacheThreadBinder.sendEvent(CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_IO_ERROR, source, e.getMessage());
 		}
 		catch (IllegalStateException e) {
 			DeviceLog.exception("Illegal state", e);
 			_active = false;
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.ILLEGAL_STATE, source, e.getMessage());
+			cacheThreadBinder.sendEvent(CacheEvent.DOWNLOAD_ERROR, CacheError.ILLEGAL_STATE, source, e.getMessage());
 		}
 		catch (NetworkIOException e) {
 			DeviceLog.exception("Network error", e);
 			_active = false;
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.NETWORK_ERROR, source, e.getMessage());
+			cacheThreadBinder.sendEvent(CacheEvent.DOWNLOAD_ERROR, CacheError.NETWORK_ERROR, source, e.getMessage());
 		}
 		catch (Exception e) {
 			DeviceLog.exception("Unknown error", e);
 			_active = false;
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.UNKNOWN_ERROR, source, e.getMessage());
+			cacheThreadBinder.sendEvent(CacheEvent.DOWNLOAD_ERROR, CacheError.UNKNOWN_ERROR, source, e.getMessage());
 		}
 		finally {
 			_currentRequest = null;
@@ -177,12 +177,12 @@ class 	CacheThreadHandler extends Handler {
 				}
 			} catch (Exception e) {
 				DeviceLog.exception("Error closing stream", e);
-				WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_IO_ERROR, source, e.getMessage());
+				cacheThreadBinder.sendEvent(CacheEvent.DOWNLOAD_ERROR, CacheError.FILE_IO_ERROR, source, e.getMessage());
 			}
 		}
 	}
 
-	private void postProcessDownload(long startTime, String source, File targetFile, long byteCount, long totalBytes, boolean canceled, int responseCode, Map<String, List<String>> responseHeaders) {
+	private void postProcessDownload(long startTime, String source, File targetFile, long byteCount, long totalBytes, boolean canceled, int responseCode, Map<String, List<String>> responseHeaders, final CacheEventSender cacheEventSender) {
 		long duration = SystemClock.elapsedRealtime() - startTime;
 
 		// With some old Androids the MediaPlayer cannot play the file unless it's set to readable for all
@@ -193,10 +193,10 @@ class 	CacheThreadHandler extends Handler {
 
 		if (!canceled) {
 			DeviceLog.debug("Unity Ads cache: File " + targetFile.getName() + " of " + byteCount + " bytes downloaded in " + duration + "ms");
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_END, source, byteCount, totalBytes, duration, responseCode, Request.getResponseHeadersMap(responseHeaders));
+			cacheEventSender.sendEvent(CacheEvent.DOWNLOAD_END, source, byteCount, totalBytes, duration, responseCode, Request.getResponseHeadersMap(responseHeaders));
 		} else {
 			DeviceLog.debug("Unity Ads cache: downloading of " + source + " stopped");
-			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.CACHE, CacheEvent.DOWNLOAD_STOPPED, source, byteCount, totalBytes, duration, responseCode, Request.getResponseHeadersMap(responseHeaders));
+			cacheEventSender.sendEvent(CacheEvent.DOWNLOAD_STOPPED, source, byteCount, totalBytes, duration, responseCode, Request.getResponseHeadersMap(responseHeaders));
 		}
 	}
 

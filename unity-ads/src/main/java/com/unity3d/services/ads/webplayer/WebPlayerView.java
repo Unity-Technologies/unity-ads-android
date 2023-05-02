@@ -479,7 +479,11 @@ public class WebPlayerView extends WebView {
 			// possible Google might reject the app as an unsafe implementation.
 			// https://support.google.com/faqs/answer/7071387?hl=en
 			super.onReceivedSslError(view, handler, error);
-			DeviceLog.error("Received SSL error for '%s': %s", error.getUrl(), error.toString());
+			if (error != null) {
+				DeviceLog.error("Received SSL error for '%s': %s", error.getUrl(), error.toString());
+			} else {
+				DeviceLog.error("Received unknown SSL error: SslError was null");
+			}
 
 			if (shouldSendEvent("onReceivedSslError")) {
 				String url = "";

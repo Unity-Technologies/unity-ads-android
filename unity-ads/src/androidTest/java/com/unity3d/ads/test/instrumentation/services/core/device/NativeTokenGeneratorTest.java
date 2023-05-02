@@ -9,9 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.unity3d.services.ads.token.INativeTokenGeneratorListener;
 import com.unity3d.services.ads.token.NativeTokenGenerator;
-import com.unity3d.services.core.configuration.PrivacyConfig;
-import com.unity3d.services.core.configuration.PrivacyConfigStorage;
-import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
+import com.unity3d.services.core.device.reader.builder.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.device.reader.IDeviceInfoReader;
 
 import org.junit.Before;

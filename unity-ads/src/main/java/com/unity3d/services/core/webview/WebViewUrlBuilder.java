@@ -2,20 +2,23 @@ package com.unity3d.services.core.webview;
 
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 public class WebViewUrlBuilder {
 	private final String _urlWithQueryString;
+	private final SDKMetricsSender _sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
 
 	public WebViewUrlBuilder(String baseUrl, Configuration configuration) {
 		String queryString = "?platform=android";
 
 		queryString += buildQueryParam("origin", configuration.getWebViewUrl());
 		queryString += buildQueryParam("version", configuration.getWebViewVersion());
-		queryString += buildQueryParam("isNativeCollectingMetrics", String.valueOf(SDKMetrics.getInstance().areMetricsEnabledForCurrentSession()));
+		queryString += buildQueryParam("isNativeCollectingMetrics", String.valueOf(_sdkMetricsSender.areMetricsEnabledForCurrentSession()));
 
 		_urlWithQueryString = baseUrl + queryString;
 	}

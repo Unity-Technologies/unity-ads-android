@@ -16,9 +16,9 @@ public abstract class ScarAdapterBase implements IScarAdapter {
 	protected ISignalsCollector _signalCollector;
 	protected Map<String, IScarAd> _loadedAds = new ConcurrentHashMap<>();
 	protected IScarAd _currentAdReference;
-	protected IAdsErrorHandler _adsErrorHandler;
+	protected IAdsErrorHandler<WebViewAdsError> _adsErrorHandler;
 
-	public ScarAdapterBase(IAdsErrorHandler adsErrorHandler) {
+	public ScarAdapterBase(IAdsErrorHandler<WebViewAdsError> adsErrorHandler) {
 		_adsErrorHandler = adsErrorHandler;
 	}
 

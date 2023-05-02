@@ -12,7 +12,7 @@ import com.unity3d.services.ads.operation.load.LoadBannerOperationState;
 import com.unity3d.services.banners.UnityBannerSize;
 import com.unity3d.services.core.request.metrics.AdOperationError;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.request.metrics.Metric;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
@@ -39,7 +39,7 @@ public class LoadBannerModuleTests {
 	private IWebViewBridgeInvoker webViewBridgeInvokerMock;
 	private IUnityAdsLoadListener loadListenerMock;
 	private LoadBannerModule loadBannerModule;
-	private ISDKMetrics sdkMetrics;
+	private SDKMetricsSender sdkMetrics;
 
 	final ArgumentCaptor<JSONObject> parametersCaptor = ArgumentCaptor.forClass(JSONObject.class);
 
@@ -48,7 +48,7 @@ public class LoadBannerModuleTests {
 	public void beforeEachTest() {
 		webViewBridgeInvokerMock = mock(IWebViewBridgeInvoker.class);
 		loadListenerMock = mock(IUnityAdsLoadListener.class);
-		sdkMetrics = mock(ISDKMetrics.class);
+		sdkMetrics = mock(SDKMetricsSender.class);
 		loadBannerModule = new LoadBannerModule(sdkMetrics);
 	}
 

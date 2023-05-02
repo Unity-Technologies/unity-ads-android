@@ -23,11 +23,6 @@ public class BannersModuleConfiguration implements IModuleConfiguration {
     }
 
     @Override
-    public boolean initModuleState(Configuration configuration) {
-        return true;
-    }
-
-    @Override
     public boolean initErrorState(Configuration configuration, ErrorState state, String message) {
         return true;
     }

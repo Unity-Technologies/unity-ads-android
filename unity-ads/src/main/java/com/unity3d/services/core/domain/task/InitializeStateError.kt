@@ -3,7 +3,6 @@ package com.unity3d.services.core.domain.task
 import com.unity3d.services.core.configuration.Configuration
 import com.unity3d.services.core.configuration.ErrorState
 import com.unity3d.services.core.domain.ISDKDispatchers
-import com.unity3d.services.core.extensions.runReturnSuspendCatching
 import com.unity3d.services.core.log.DeviceLog
 import kotlinx.coroutines.withContext
 
@@ -15,24 +14,22 @@ import kotlinx.coroutines.withContext
  */
 class InitializeStateError(
     private val dispatchers: ISDKDispatchers
-): MetricTask<InitializeStateError.Params, Result<Unit>>() {
+) : MetricTask<InitializeStateError.Params, Unit>() {
 
     override fun getMetricName(): String {
         return getMetricNameForInitializeTask("error")
     }
 
-    override suspend fun doWork(params: Params): Result<Unit> =
+    override suspend fun doWork(params: Params) =
         withContext(dispatchers.default) {
-            runReturnSuspendCatching {
-                DeviceLog.error("Unity Ads init: halting init in " + params.errorState.metricName + ": " + params.exception.message)
+            DeviceLog.error("Unity Ads init: halting init in " + params.errorState.metricName + ": " + params.exception.message)
 
-                for (moduleName in params.config.moduleConfigurationList ?: emptyArray()) {
-                    params.config.getModuleConfiguration(moduleName)?.initErrorState(
-                        params.config,
-                        params.errorState,
-                        params.exception.message
-                    )
-                }
+            for (moduleName in params.config.moduleConfigurationList ?: emptyArray()) {
+                params.config.getModuleConfiguration(moduleName)?.initErrorState(
+                    params.config,
+                    params.errorState,
+                    params.exception.message
+                )
             }
         }
 

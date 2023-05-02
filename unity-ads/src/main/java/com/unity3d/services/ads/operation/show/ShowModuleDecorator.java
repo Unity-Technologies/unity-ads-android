@@ -1,7 +1,7 @@
 package com.unity3d.services.ads.operation.show;
 
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
 public class ShowModuleDecorator implements IShowModule {
@@ -17,7 +17,7 @@ public class ShowModuleDecorator implements IShowModule {
 	}
 
 	@Override
-	public ISDKMetrics getMetricSender() {
+	public SDKMetricsSender getMetricSender() {
 		return _showModule.getMetricSender();
 	}
 

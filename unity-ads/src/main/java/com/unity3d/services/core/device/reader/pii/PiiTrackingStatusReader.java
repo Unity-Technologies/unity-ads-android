@@ -2,17 +2,17 @@ package com.unity3d.services.core.device.reader.pii;
 
 import static com.unity3d.services.core.device.reader.JsonStorageKeyNames.PRIVACY_MODE_KEY;
 import static com.unity3d.services.core.device.reader.JsonStorageKeyNames.PRIVACY_SPM_KEY;
-import static com.unity3d.services.core.device.reader.JsonStorageKeyNames.USER_NON_BEHAVIORAL_VALUE_ALT_KEY;
-import static com.unity3d.services.core.device.reader.JsonStorageKeyNames.USER_NON_BEHAVIORAL_VALUE_KEY;
 
 import com.unity3d.services.core.misc.IJsonStorageReader;
 
 public class PiiTrackingStatusReader {
 
 	private final IJsonStorageReader _jsonStorageReader;
+	private final NonBehavioralFlagReader _nonBehavioralFlagReader;
 
 	public PiiTrackingStatusReader(IJsonStorageReader jsonStorageReader) {
 		_jsonStorageReader = jsonStorageReader;
+		_nonBehavioralFlagReader = new NonBehavioralFlagReader(jsonStorageReader);
 	}
 
 	public PiiPrivacyMode getPrivacyMode() {
@@ -36,19 +36,8 @@ public class PiiTrackingStatusReader {
 	}
 
 	public boolean getUserNonBehavioralFlag() {
-		boolean userNonBehavioralFlag = false;
-		if (_jsonStorageReader != null) {
-			Object privacyModeObj = _jsonStorageReader.get(USER_NON_BEHAVIORAL_VALUE_KEY);
-			if (privacyModeObj == null) {
-				privacyModeObj = _jsonStorageReader.get(USER_NON_BEHAVIORAL_VALUE_ALT_KEY);
-			}
-			if (privacyModeObj instanceof String) {
-				userNonBehavioralFlag = Boolean.parseBoolean((String)privacyModeObj);
-			} else if (privacyModeObj instanceof Boolean) {
-				userNonBehavioralFlag = (boolean) privacyModeObj;
-			}
-		}
-		return userNonBehavioralFlag;
+		// This is to keep the previous behavior of this method. (where unknown and false both returned false)
+		return _nonBehavioralFlagReader.getUserNonBehavioralFlag() == NonBehavioralFlag.TRUE;
 	}
 
 	private PiiPrivacyMode getUserPrivacyMode() {

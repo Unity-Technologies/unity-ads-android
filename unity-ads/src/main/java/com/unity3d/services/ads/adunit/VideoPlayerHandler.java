@@ -13,14 +13,14 @@ public class VideoPlayerHandler implements IAdUnitViewHandler {
 	private RelativeLayout _videoContainer;
 	private VideoPlayerView _videoView;
 
-	public boolean create(AdUnitActivity activity) {
+	public boolean create(IAdUnitActivity activity) {
 		DeviceLog.entered();
 		if (_videoContainer == null) {
-			_videoContainer = new RelativeLayout(activity);
+			_videoContainer = new RelativeLayout(activity.getContext());
 		}
 
 		if (_videoView == null) {
-			_videoView = new VideoPlayerView(activity);
+			_videoView = new VideoPlayerView(activity.getContext());
 			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
 			params.addRule(RelativeLayout.CENTER_IN_PARENT);
 			_videoView.setLayoutParams(params);
@@ -57,23 +57,23 @@ public class VideoPlayerHandler implements IAdUnitViewHandler {
 		return _videoContainer;
 	}
 
-	public void onCreate(AdUnitActivity activity, Bundle savedInstanceState) {
+	public void onCreate(IAdUnitActivity activity, Bundle savedInstanceState) {
 		create(activity);
 	}
 
-	public void onStart(AdUnitActivity activity) {
+	public void onStart(IAdUnitActivity activity) {
 	}
 
-	public void onStop(AdUnitActivity activity) {
+	public void onStop(IAdUnitActivity activity) {
 	}
 
-	public void onResume(AdUnitActivity activity) {
+	public void onResume(IAdUnitActivity activity) {
 	}
 
-	public void onPause(AdUnitActivity activity) {
+	public void onPause(IAdUnitActivity activity) {
 		destroy();
 	}
 
-	public void onDestroy(AdUnitActivity activity) {
+	public void onDestroy(IAdUnitActivity activity) {
 	}
 }

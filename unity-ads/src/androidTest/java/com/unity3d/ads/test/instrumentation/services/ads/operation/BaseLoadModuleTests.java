@@ -15,7 +15,7 @@ import com.unity3d.services.ads.operation.load.LoadOperation;
 import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.core.request.metrics.AdOperationError;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.request.metrics.Metric;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocation;
@@ -42,13 +42,13 @@ public class BaseLoadModuleTests {
 	private IWebViewBridgeInvoker webViewBridgeInvokerMock;
 	private IUnityAdsLoadListener loadListenerMock;
 	private BaseLoadModule baseLoadModule;
-	private ISDKMetrics sdkMetrics;
+	private SDKMetricsSender sdkMetrics;
 
 	@Before
 	public void beforeEachTest() {
 		webViewBridgeInvokerMock = mock(IWebViewBridgeInvoker.class);
 		loadListenerMock = mock(IUnityAdsLoadListener.class);
-		sdkMetrics = mock(ISDKMetrics.class);
+		sdkMetrics = mock(SDKMetricsSender.class);
 		baseLoadModule = new LoadModule(sdkMetrics);
 	}
 

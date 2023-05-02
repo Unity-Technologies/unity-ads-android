@@ -1,8 +1,7 @@
 package com.unity3d.services.core.extensions
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
 
@@ -10,9 +9,9 @@ import org.junit.Test
 class TaskExtensionsTest {
 
     @Test
-    fun withRetry_retriesAlwaysThrows_failsWithFallback() = runBlockingTest {
+    fun withRetry_retriesAlwaysThrows_failsWithFallback() = runTest {
         // given
-        var counter: Int = 0
+        var counter = 0
         val functionBlock = {
             counter++
             throw Exception()
@@ -37,9 +36,9 @@ class TaskExtensionsTest {
     }
 
     @Test
-    fun withRetry_retriesSucceedsAfter5Attempts_succeedAfterRetries() = runBlockingTest {
+    fun withRetry_retriesSucceedsAfter5Attempts_succeedAfterRetries() = runTest {
         // given
-        var counter: Int = 0
+        var counter = 0
         val functionBlock = {
             counter++
             if (counter < 5) {
@@ -62,9 +61,9 @@ class TaskExtensionsTest {
     }
 
     @Test
-    fun withRetry_succeedsOnFirstAttempts_succeedWithoutRetries() = runBlockingTest {
+    fun withRetry_succeedsOnFirstAttempts_succeedWithoutRetries() = runTest {
         // given
-        var counter: Int = 0
+        var counter = 0
         val functionBlock = { counter++ }
 
         // when
@@ -82,7 +81,7 @@ class TaskExtensionsTest {
     }
 
     @Test
-    fun withRetry_throwsAbortRetry_failsWithoutRetries() = runBlockingTest {
+    fun withRetry_throwsAbortRetry_failsWithoutRetries() = runTest {
         // given
         val functionBlock = { throw AbortRetryException("") }
 
@@ -97,6 +96,6 @@ class TaskExtensionsTest {
 
         // then
         Assert.assertTrue(result.isFailure)
-        Assert.assertEquals("fallback", result.exceptionOrNull()?.message)
+        Assert.assertTrue(result.exceptionOrNull() is AbortRetryException)
     }
 }

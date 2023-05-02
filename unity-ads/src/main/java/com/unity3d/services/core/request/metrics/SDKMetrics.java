@@ -3,6 +3,9 @@ package com.unity3d.services.core.request.metrics;
 
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.properties.InitializationStatusReader;
@@ -16,7 +19,7 @@ public final class SDKMetrics {
 
 	private static final String NULL_INSTANCE_METRICS_URL = "nullInstanceMetricsUrl";
 
-	private static ISDKMetrics _instance;
+	private static SDKMetricsSender _instance;
 	private static MetricSenderWithBatch _batchedSender;
 	private static final AtomicBoolean _configurationIsSet = new AtomicBoolean(false);
 
@@ -50,7 +53,7 @@ public final class SDKMetrics {
 		_batchedSender.sendQueueIfNeeded();
 	}
 
-	public static synchronized ISDKMetrics getInstance() {
+	public static synchronized SDKMetricsSender getInstance() {
 
 		if (_instance == null) {
 			_instance = new NullInstance(null);
@@ -68,7 +71,7 @@ public final class SDKMetrics {
 			_configurationIsSet.compareAndSet(false, true);
 	}
 
-	private final static class NullInstance implements ISDKMetrics {
+	private final static class NullInstance implements SDKMetricsSender {
 
 		private final String _metricEndpoint;
 
@@ -81,23 +84,23 @@ public final class SDKMetrics {
 			return false;
 		}
 
-		public void sendEvent(final String event) {
+		public void sendEvent(@NonNull final String event) {
 			DeviceLog.debug("Metric " + event + " was skipped from being sent");
 		}
 
-		public void sendEvent(String event, String value, Map<String, String> tags) {
+		public void sendEvent(@NonNull String event, String value, Map<String, String> tags) {
 			sendEvent(event);
 		}
 
-		public void sendEvent(final String event, final Map<String, String> tags) {
+		public void sendEvent(@NonNull final String event, final Map<String, String> tags) {
 			sendEvent(event);
 		}
 
-		public void sendMetric(Metric metric) {
+		public void sendMetric(@NonNull Metric metric) {
 			DeviceLog.debug("Metric " + metric + " was skipped from being sent");
 		}
 
-		public void sendMetrics(List<Metric> metrics) {
+		public void sendMetrics(@NonNull List<Metric> metrics) {
 			DeviceLog.debug("Metrics: " + metrics + " was skipped from being sent");
 		}
 

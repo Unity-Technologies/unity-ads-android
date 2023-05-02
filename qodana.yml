@@ -1,0 +1,13 @@
+version: 1.0
+linter: jetbrains/qodana-jvm-android:2023.1-eap
+exclude:
+  - name: All
+    paths:
+      - app
+      - unity-scaradapter-1920
+      - unity-scaradapter-1950
+      - unity-scaradapter-2000
+      - unity-scaradapter-2100
+      - unity-scaradapter-common
+include:
+  - name: SizeReplaceableByIsEmpty

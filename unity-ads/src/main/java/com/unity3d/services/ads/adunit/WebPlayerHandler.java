@@ -13,10 +13,10 @@ public class WebPlayerHandler implements IAdUnitViewHandler {
 
 	private static String webPlayerViewId = "webplayer";
 
-	public boolean create(AdUnitActivity activity) {
+	public boolean create(IAdUnitActivity activity) {
 		if (_webPlayerView == null) {
 			WebPlayerSettingsCache webPlayerSettingsCache = WebPlayerSettingsCache.getInstance();
-			_webPlayerView = new WebPlayerView(activity, webPlayerViewId, webPlayerSettingsCache.getWebSettings(webPlayerViewId), webPlayerSettingsCache.getWebPlayerSettings(webPlayerViewId));
+			_webPlayerView = new WebPlayerView(activity.getContext(), webPlayerViewId, webPlayerSettingsCache.getWebSettings(webPlayerViewId), webPlayerSettingsCache.getWebPlayerSettings(webPlayerViewId));
 			_webPlayerView.setEventSettings(webPlayerSettingsCache.getWebPlayerEventSettings(webPlayerViewId));
 			WebPlayerViewCache.getInstance().addWebPlayer(webPlayerViewId, _webPlayerView);
 		}
@@ -40,23 +40,23 @@ public class WebPlayerHandler implements IAdUnitViewHandler {
 		return _webPlayerView;
 	}
 
-	public void onCreate(AdUnitActivity activity, Bundle savedInstanceState) {
+	public void onCreate(IAdUnitActivity activity, Bundle savedInstanceState) {
 		this.create(activity);
 	}
 
-	public void onStart(AdUnitActivity activity) {
+	public void onStart(IAdUnitActivity activity) {
 	}
 
-	public void onStop(AdUnitActivity activity) {
+	public void onStop(IAdUnitActivity activity) {
 	}
 
-	public void onResume(AdUnitActivity activity) {
+	public void onResume(IAdUnitActivity activity) {
 	}
 
-	public void onPause(AdUnitActivity activity) {
+	public void onPause(IAdUnitActivity activity) {
 	}
 
-	public void onDestroy(AdUnitActivity activity) {
+	public void onDestroy(IAdUnitActivity activity) {
 		if (activity.isFinishing()) {
 			destroy();
 		}

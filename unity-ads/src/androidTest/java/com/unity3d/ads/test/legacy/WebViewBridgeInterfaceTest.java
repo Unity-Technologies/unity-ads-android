@@ -1,12 +1,18 @@
 package com.unity3d.ads.test.legacy;
 
+import android.net.Uri;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
+import android.webkit.ValueCallback;
+import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import androidx.webkit.JavaScriptReplyProxy;
+import androidx.webkit.WebMessageCompat;
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.configuration.IExperiments;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.ads.test.TestUtilities;
 import com.unity3d.services.core.webview.WebView;
@@ -17,20 +23,28 @@ import com.unity3d.services.core.webview.bridge.WebViewBridgeInterface;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
 import com.unity3d.services.core.webview.bridge.WebViewExposed;
 
+import kotlinx.coroutines.Dispatchers;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class WebViewBridgeInterfaceTest {
+
+	@Mock
+	private JavaScriptReplyProxy javaScriptProxy;
 
 	private static boolean nativeCallbackInvoked = false;
 	private static CallbackStatus nativeCallbackStatus = null;
@@ -98,7 +112,7 @@ public class WebViewBridgeInterfaceTest {
 				WebViewApp.getCurrentApp().setWebAppInitialized(true);
 				WebViewApp.getCurrentApp().setWebView(new WebView(ClientProperties.getApplicationContext(), false) {
 					@Override
-					public void invokeJavascript(String data) {
+					public void evaluateJavascript(String data, ValueCallback<String> callback) {
 					}
 				});
 
@@ -129,10 +143,34 @@ public class WebViewBridgeInterfaceTest {
 		webInterface.handleInvocation("[[\"com.unity3d.ads.test.legacy.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", null, \"CALLBACK_01\"]]");
 	}
 
+	@Test(expected = ClassCastException.class)
+	public void testOnHandleInvocationShouldFailParametersNull() {
+		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+		webInterface.onHandleInvocation(
+				WebViewApp.getCurrentApp().getWebView(),
+				new WebMessageCompat("[[\"com.unity3d.ads.test.legacy.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", null, \"CALLBACK_01\"]]"),
+				Uri.EMPTY,
+				true,
+				javaScriptProxy
+		);
+	}
+
 	@Test (expected = NullPointerException.class)
 	public void testHandleCallbackShouldFailParametersNull () throws Exception {
 		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
 		webInterface.handleCallback("CALLBACK_01", "OK", null);
+	}
+
+	@Test(expected = JSONException.class)
+	public void testOnHandleCallbackShouldFailParametersNull() {
+		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+		webInterface.onHandleCallback(
+				WebViewApp.getCurrentApp().getWebView(),
+				new WebMessageCompat("{\"id\":\"CALLBACK_01\",\"status\":\"OK\"}"),
+				Uri.EMPTY,
+				true,
+				javaScriptProxy
+		);
 	}
 
 	@Test (expected = ClassCastException.class)
@@ -141,16 +179,54 @@ public class WebViewBridgeInterfaceTest {
 		webInterface.handleInvocation("[[\"com.unity3d.ads.test.legacy.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", \"\", \"CALLBACK_01\"]]");
 	}
 
+	@Test(expected = ClassCastException.class)
+	public void testOnHandleInvocationShouldFailParametersEmpty() {
+		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+		webInterface.onHandleInvocation(
+				WebViewApp.getCurrentApp().getWebView(),
+				new WebMessageCompat("[[\"com.unity3d.ads.test.legacy.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", \"\", \"CALLBACK_01\"]]"),
+				Uri.EMPTY,
+				true,
+				javaScriptProxy
+		);
+	}
+
 	@Test (expected = JSONException.class)
 	public void testHandleCallbackShouldFailParametersEmpty () throws Exception {
 		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
 		webInterface.handleCallback("CALLBACK_01", "OK", "");
 	}
 
+	@Test(expected = JSONException.class)
+	public void testOnHandleCallbackShouldFailParametersEmpty() {
+		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+		webInterface.onHandleCallback(
+				WebViewApp.getCurrentApp().getWebView(),
+				new WebMessageCompat("{\"id\":\"CALLBACK_01\",\"status\":\"OK\",\"parameters\":\"\"}"),
+				Uri.EMPTY,
+				true,
+				javaScriptProxy
+		);
+	}
+
 	@Test
 	public void testHandleInvocationShouldSucceed () throws JSONException {
 		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
 		webInterface.handleInvocation("[[\"com.unity3d.ads.test.legacy.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", [], \"CALLBACK_01\"]]");
+		assertTrue("ApiMethod should have been invoked but wasn't", WebViewBridgeTestApi.invoked);
+		assertEquals("CallbackID's didn't match", "CALLBACK_01", WebViewBridgeTestApi.callback.getCallbackId());
+	}
+
+	@Test
+	public void testOnHandleInvocationShouldSucceed() {
+		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+		webInterface.onHandleInvocation(
+				WebViewApp.getCurrentApp().getWebView(),
+				new WebMessageCompat("[[\"com.unity3d.ads.test.legacy.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethodNoParams\", [], \"CALLBACK_01\"]]"),
+				Uri.EMPTY,
+				true,
+				javaScriptProxy
+		);
 		assertTrue("ApiMethod should have been invoked but wasn't", WebViewBridgeTestApi.invoked);
 		assertEquals("CallbackID's didn't match", "CALLBACK_01", WebViewBridgeTestApi.callback.getCallbackId());
 	}
@@ -164,12 +240,41 @@ public class WebViewBridgeInterfaceTest {
 		assertEquals("Callback value wasn't same as was originally given", "test", WebViewBridgeTestApi.value);
 	}
 
+	@Test
+	public void testOnHandleInvocationWithParamsShouldSucceed() {
+		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+		webInterface.onHandleInvocation(
+				WebViewApp.getCurrentApp().getWebView(),
+				new WebMessageCompat("[[\"com.unity3d.ads.test.legacy.WebViewBridgeInterfaceTest$WebViewBridgeTestApi\", \"apiTestMethod\", [\"test\"], \"CALLBACK_01\"]]"),
+				Uri.EMPTY,
+				true,
+				javaScriptProxy
+		);
+		assertTrue("ApiMethod should have been invoked but wasn't", WebViewBridgeTestApi.invoked);
+		assertEquals("CallbackID's didn't match", "CALLBACK_01", WebViewBridgeTestApi.callback.getCallbackId());
+		assertEquals("Callback value wasn't same as was originally given", "test", WebViewBridgeTestApi.value);
+	}
+
 	@Test (expected = NullPointerException.class)
 	public void testHandleCallbackShouldFailCallbackNotAdded () throws Exception {
 		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
 		Method m = getClass().getMethod("staticTestHandleCallback", CallbackStatus.class);
 		NativeCallback callback = new NativeCallback(m);
 		webInterface.handleCallback(callback.getId(), "OK", "[]");
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void testOnHandleCallbackShouldFailCallbackNotAdded() throws Exception {
+		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+		Method m = getClass().getMethod("staticTestHandleCallback", CallbackStatus.class);
+		NativeCallback callback = new NativeCallback(m);
+		webInterface.onHandleCallback(
+				WebViewApp.getCurrentApp().getWebView(),
+				new WebMessageCompat("{\"id\":\"" + callback.getId() + "\",\"status\":\"OK\",\"parameters\":\"[]\"}"),
+				Uri.EMPTY,
+				true,
+				javaScriptProxy
+		);
 	}
 
 	@Test (expected = NullPointerException.class)
@@ -179,6 +284,21 @@ public class WebViewBridgeInterfaceTest {
 		NativeCallback callback = new NativeCallback(m);
 		WebViewApp.getCurrentApp().addCallback(callback);
 		webInterface.handleCallback(callback.getId(), "OK", "[]");
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void testOnHandleCallbackShouldFailMethodNotStatic() throws Exception {
+		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+		Method m = getClass().getMethod("instanceTestHandleCallback", CallbackStatus.class);
+		NativeCallback callback = new NativeCallback(m);
+		WebViewApp.getCurrentApp().addCallback(callback);
+		webInterface.onHandleCallback(
+				WebViewApp.getCurrentApp().getWebView(),
+				new WebMessageCompat("{\"id\":\"" + callback.getId() + "\",\"status\":\"OK\",\"parameters\":\"[]\"}"),
+				Uri.EMPTY,
+				true,
+				javaScriptProxy
+		);
 	}
 
 	@Test
@@ -193,12 +313,49 @@ public class WebViewBridgeInterfaceTest {
 	}
 
 	@Test
+	public void testOnHandleCallbackShouldSucceed() throws Exception {
+		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+		Method m = getClass().getMethod("staticTestHandleCallback", CallbackStatus.class);
+		NativeCallback callback = new NativeCallback(m);
+		WebViewApp.getCurrentApp().addCallback(callback);
+		webInterface.onHandleCallback(
+				WebViewApp.getCurrentApp().getWebView(),
+				new WebMessageCompat("{\"id\":\"" + callback.getId() + "\",\"status\":\"OK\",\"parameters\":\"[]\"}"),
+				Uri.EMPTY,
+				true,
+				javaScriptProxy
+		);
+		assertTrue("NativeCallback -method should have been invoked but wasn't", nativeCallbackInvoked);
+		assertEquals("NativeCallback status wasn't OK", CallbackStatus.OK, nativeCallbackStatus);
+	}
+
+	@Test
 	public void testHandleCallbackWithParamsShouldSucceed () throws Exception {
 		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
 		Method m = getClass().getMethod("staticTestHandleCallbackStringParam", CallbackStatus.class, String.class);
 		NativeCallback callback = new NativeCallback(m);
 		WebViewApp.getCurrentApp().addCallback(callback);
 		webInterface.handleCallback(callback.getId(), "OK", "[\"test\"]");
+
+		assertTrue("NativeCallback -method should have been invoked but wasn't", nativeCallbackInvoked);
+		assertEquals("NativeCallback status wasn't OK", CallbackStatus.OK, nativeCallbackStatus);
+		assertNotNull("Received value should not be null", nativeCallbackValue);
+		assertEquals("The value received wasn't the same than was originally given", "test", nativeCallbackValue);
+	}
+
+	@Test
+	public void testOnHandleCallbackWithParamsShouldSucceed() throws Exception {
+		WebViewBridgeInterface webInterface = new WebViewBridgeInterface();
+		Method m = getClass().getMethod("staticTestHandleCallbackStringParam", CallbackStatus.class, String.class);
+		NativeCallback callback = new NativeCallback(m);
+		WebViewApp.getCurrentApp().addCallback(callback);
+		webInterface.onHandleCallback(
+				WebViewApp.getCurrentApp().getWebView(),
+				new WebMessageCompat("{\"id\":\"" + callback.getId() + "\",\"status\":\"OK\",\"parameters\":[\"test\"]}"),
+				Uri.EMPTY,
+				true,
+				javaScriptProxy
+		);
 
 		assertTrue("NativeCallback -method should have been invoked but wasn't", nativeCallbackInvoked);
 		assertEquals("NativeCallback status wasn't OK", CallbackStatus.OK, nativeCallbackStatus);

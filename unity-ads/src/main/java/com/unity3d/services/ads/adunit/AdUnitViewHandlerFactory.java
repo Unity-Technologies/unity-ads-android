@@ -13,10 +13,10 @@ public class AdUnitViewHandlerFactory implements IAdUnitViewHandlerFactory {
 	public IAdUnitViewHandler createViewHandler(String name) {
 		if (WebViewApp.getCurrentApp() != null) {
 			Configuration configuration = WebViewApp.getCurrentApp().getConfiguration();
-			String[] list = configuration.getModuleConfigurationList();
+			Class[] list = configuration.getModuleConfigurationList();
 
-			for (String moduleName : list) {
-				IModuleConfiguration moduleConfig = configuration.getModuleConfiguration(moduleName);
+			for (Class moduleClass : list) {
+				IModuleConfiguration moduleConfig = configuration.getModuleConfiguration(moduleClass);
 				if (moduleConfig instanceof IAdsModuleConfiguration) {
 					Map<String, Class> adUnitViewHandlers = ((IAdsModuleConfiguration) moduleConfig).getAdUnitViewHandlers();
 					if (adUnitViewHandlers != null && adUnitViewHandlers.containsKey(name)) {

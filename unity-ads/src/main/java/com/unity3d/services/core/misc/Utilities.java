@@ -4,6 +4,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.unity3d.services.core.di.ServiceProvider;
 import com.unity3d.services.core.log.DeviceLog;
 
 import org.json.JSONException;
@@ -205,5 +206,21 @@ public class Utilities {
 
 	public static Map<String, Object> convertJsonToMap(JSONObject jsonObject) {
 		return combineJsonIntoMap(new HashMap<String, Object>(), jsonObject);
+	}
+
+	public static <T> T getService(String name, Class clazz) {
+		return ServiceProvider.INSTANCE.getRegistry().getService(name, kotlin.jvm.JvmClassMappingKt.getKotlinClass(clazz));
+	}
+
+	public static <T> T getService(Class clazz) {
+		return getService("", clazz);
+	}
+
+	public static void wrapCustomerListener(Runnable listener) {
+		try {
+			listener.run();
+		} catch (Exception exception) {
+			DeviceLog.error("An uncaught exception has occurred in the client application.  Exception: %s", exception.getMessage());
+		}
 	}
 }

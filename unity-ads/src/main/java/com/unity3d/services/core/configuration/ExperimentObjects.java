@@ -54,11 +54,6 @@ public class ExperimentObjects extends ExperimentsBase {
 	}
 
 	@Override
-	public boolean isNewInitFlowEnabled() {
-		return getExperimentValueOrDefault(EXP_TAG_NEW_INIT_FLOW);
-	}
-
-	@Override
 	public String getScarBiddingManager() {
 		return getExperimentValue(EXP_TAG_SCAR_BIDDING_MANAGER, SCARBiddingManagerType.DISABLED.getName());
 	}
@@ -66,6 +61,21 @@ public class ExperimentObjects extends ExperimentsBase {
 	@Override
 	public boolean isJetpackLifecycle() {
 		return getExperimentValueOrDefault(EXP_TAG_JETPACK_LIFECYCLE);
+	}
+
+	@Override
+	public boolean isOkHttpEnabled() {
+		return getExperimentValueOrDefault(EXP_TAG_OK_HTTP);
+  }
+
+    @Override
+	public boolean isWebMessageEnabled() {
+		return getExperimentValueOrDefault(EXP_TAG_WEB_MESSAGE);
+	}
+
+	@Override
+	public boolean isWebViewAsyncDownloadEnabled() {
+		return getExperimentValueOrDefault(EXP_TAG_WEBVIEW_ASYNC_DOWNLOAD);
 	}
 
 	private String getExperimentValue(String experimentName, String defaultValue) {

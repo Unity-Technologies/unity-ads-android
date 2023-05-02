@@ -9,8 +9,12 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockkStatic
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -39,10 +43,16 @@ class InitializeStateCreateTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
+        Dispatchers.setMain(dispatchers.main)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun doWork_webViewAppWebviewDataPassed_configUpdatedWithWebviewData() = runBlockingTest {
+    fun doWork_webViewAppWebviewDataPassed_configUpdatedWithWebviewData() = runTest {
 
         val config = Configuration()
 
@@ -51,8 +61,7 @@ class InitializeStateCreateTest {
             every { WebViewApp.create(config, false) } returns null
 
             // when
-            val result: Result<Configuration> =
-                initializeSateCreate(InitializeStateCreate.Params(config, webViewData))
+            val result = runCatching { initializeSateCreate(InitializeStateCreate.Params(config, webViewData)) }
 
             // then
             assertTrue(result.isSuccess)
@@ -62,15 +71,14 @@ class InitializeStateCreateTest {
     }
 
     @Test
-    fun doWork_webViewAppCreateSuccess_successWithConfig() = runBlockingTest {
+    fun doWork_webViewAppCreateSuccess_successWithConfig() = runTest {
 
         mockkStatic(WebViewApp::class) {
             // given
             every { WebViewApp.create(configMock, false) } returns null
 
             // when
-            val result: Result<Configuration> =
-                initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData))
+            val result = runCatching { initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData)) }
 
             // then
             assertTrue(result.isSuccess)
@@ -80,7 +88,7 @@ class InitializeStateCreateTest {
     }
 
     @Test
-    fun doWork_webViewAppCreateFails_failsWithCustomExceptionMessage() = runBlockingTest {
+    fun doWork_webViewAppCreateFails_failsWithCustomExceptionMessage() = runTest {
         mockkStatic(WebViewApp::class) {
             // given
             every {
@@ -90,8 +98,7 @@ class InitializeStateCreateTest {
             every { WebViewApp.create(any(), false) } returns ErrorState.CreateWebview
 
             // when
-            val result: Result<Configuration> =
-                initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData))
+            val result = runCatching { initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData)) }
 
             // then
             assertTrue(result.isFailure)
@@ -107,7 +114,7 @@ class InitializeStateCreateTest {
     }
 
     @Test
-    fun doWork_webViewAppCreateFails_failsWithDefaultExceptionMessage() = runBlockingTest {
+    fun doWork_webViewAppCreateFails_failsWithDefaultExceptionMessage() = runTest {
         mockkStatic(WebViewApp::class) {
             // given
             every {
@@ -117,8 +124,7 @@ class InitializeStateCreateTest {
             every { WebViewApp.create(any(), false) } returns ErrorState.CreateWebview
 
             // when
-            val result: Result<Configuration> =
-                initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData))
+            val result = runCatching { initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData)) }
 
             // then
             assertTrue(result.isFailure)

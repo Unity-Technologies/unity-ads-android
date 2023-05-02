@@ -14,7 +14,7 @@ import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.configuration.IInitializationNotificationCenter;
 import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
 import org.junit.Before;
@@ -29,7 +29,7 @@ public class LoadModuleDecoratorInitializationBufferTests {
 	private IInitializationNotificationCenter initializationNotificationCenterMock;
 	private IWebViewBridgeInvoker webViewBridgeInvokerMock;
 	private LoadOperationState loadOperationStateMock;
-	private ISDKMetrics sdkMetrics;
+	private SDKMetricsSender sdkMetrics;
 
 	@Before
 	public void beforeEachTest() {
@@ -37,7 +37,7 @@ public class LoadModuleDecoratorInitializationBufferTests {
 		initializationNotificationCenterMock = mock(IInitializationNotificationCenter.class);
 		webViewBridgeInvokerMock = mock(IWebViewBridgeInvoker.class);
 		loadOperationStateMock = mock(LoadOperationState.class);
-		sdkMetrics = mock(ISDKMetrics.class);
+		sdkMetrics = mock(SDKMetricsSender.class);
 	}
 
 	@Test

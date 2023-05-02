@@ -9,7 +9,7 @@ import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.request.metrics.AdOperationError;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocationCallback;
@@ -25,7 +25,7 @@ public abstract class BaseLoadModule extends AdModule<ILoadOperation, LoadOperat
 	static final String errorMsgPlacementIdNull = "[UnityAds] Placement ID cannot be null";
 	static final String errorMsgFailedToCreateLoadRequest = "[UnityAds] Failed to create load request";
 
-	public BaseLoadModule(ISDKMetrics sdkMetrics) {
+	public BaseLoadModule(SDKMetricsSender sdkMetrics) {
 		super(sdkMetrics);
 	}
 

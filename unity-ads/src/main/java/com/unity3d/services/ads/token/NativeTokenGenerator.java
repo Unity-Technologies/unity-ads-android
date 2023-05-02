@@ -2,7 +2,7 @@ package com.unity3d.services.ads.token;
 
 import android.util.Base64;
 
-import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder;
+import com.unity3d.services.core.device.reader.builder.DeviceInfoReaderBuilder;
 import com.unity3d.services.core.device.reader.DeviceInfoReaderCompressor;
 import com.unity3d.services.core.device.reader.IDeviceInfoReader;
 import com.unity3d.services.core.log.DeviceLog;

@@ -1,5 +1,8 @@
 package com.unity3d.services.banners;
 
+import com.unity3d.ads.UnityAds;
+import com.unity3d.services.ads.operation.load.ILoadModule;
+import com.unity3d.services.ads.operation.load.LoadBannerModule;
 import com.unity3d.services.core.misc.Utilities;
 
 import java.lang.ref.WeakReference;
@@ -82,18 +85,7 @@ public class BannerViewCache {
 	}
 
 	public synchronized void triggerBannerErrorEvent(String bannerAdId, final BannerErrorInfo bannerErrorInfo) {
-		final BannerView bannerView = this.getBannerView(bannerAdId);
-		if (bannerView != null && bannerView.getListener() != null) {
-			final BannerView.IListener listener = bannerView.getListener();
-			Utilities.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					if (listener != null) {
-						listener.onBannerFailedToLoad(bannerView, bannerErrorInfo);
-					}
-				}
-			});
-		}
+		LoadBannerModule.getInstance().onUnityAdsFailedToLoad(bannerAdId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, bannerErrorInfo.errorMessage);
 	}
 
 	public synchronized void triggerBannerLeftApplicationEvent(String bannerAdId) {

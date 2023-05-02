@@ -10,9 +10,11 @@ public interface IExperiments {
 	boolean isWebAssetAdCaching();
 	boolean isWebGestureNotRequired();
 	boolean isScarInitEnabled();
-	boolean isNewInitFlowEnabled();
 	String getScarBiddingManager();
 	boolean isJetpackLifecycle();
+	boolean isOkHttpEnabled();
+	boolean isWebMessageEnabled();
+	boolean isWebViewAsyncDownloadEnabled();
 
 	JSONObject getCurrentSessionExperiments();
 	JSONObject getNextSessionExperiments();

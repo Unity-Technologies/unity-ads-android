@@ -40,7 +40,6 @@ public class ScarMetric {
 
 		return new Metric(
 			String.format(HB_SIGNALS_FETCH_START, isAsyncTokenCall ? ASYNC_PREFIX : SYNC_PREFIX),
-			null,
 			null
 		);
 	}
@@ -48,8 +47,7 @@ public class ScarMetric {
 	public static Metric hbSignalsFetchSuccess(boolean isAsyncTokenCall) {
 		return new Metric(
 			String.format(HB_SIGNALS_FETCH_SUCCESS, isAsyncTokenCall ? ASYNC_PREFIX : SYNC_PREFIX),
-			getTotalFetchTime(),
-			null
+			getTotalFetchTime()
 		);
 	}
 
@@ -68,7 +66,6 @@ public class ScarMetric {
 		_uploadStartTime = System.nanoTime();
 		return new Metric(
 			String.format(HB_SIGNALS_UPLOAD_START, isAsyncTokenCall ? ASYNC_PREFIX : SYNC_PREFIX),
-			null,
 			null
 		);
 	}
@@ -76,8 +73,7 @@ public class ScarMetric {
 	public static Metric hbSignalsUploadSuccess(boolean isAsyncTokenCall) {
 		return new Metric(
 			String.format(HB_SIGNALS_UPLOAD_SUCCESS, isAsyncTokenCall ? ASYNC_PREFIX : SYNC_PREFIX),
-			getTotalUploadTime(),
-			null
+			getTotalUploadTime()
 		);
 	}
 

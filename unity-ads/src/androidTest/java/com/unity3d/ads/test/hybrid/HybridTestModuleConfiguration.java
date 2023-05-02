@@ -14,9 +14,6 @@ public class HybridTestModuleConfiguration implements IModuleConfiguration {
   public boolean resetState(Configuration configuration) {
     return true;
   }
-  public boolean initModuleState(Configuration configuration) {
-    return true;
-  }
   public boolean initErrorState(Configuration configuration, ErrorState state, String message) {
     return true;
   }

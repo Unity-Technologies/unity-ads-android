@@ -62,7 +62,7 @@ public class MetricCommonTagsTest {
 		mediationMetaData.set("adapter_version", "456");
 		mediationMetaData.commit();
 
-		currentTags = commonTags.asMap();
+		currentTags = commonTags.toMap();
 
 		assertNull("Incorrect metricSampleRate value", currentTags.get("msr"));
 		assertEquals("Incorrect mediation name value", "MediationNetwork", currentTags.get("m_name"));
@@ -78,7 +78,7 @@ public class MetricCommonTagsTest {
 
 		MetricCommonTags commonTags = new MetricCommonTags();
 
-		currentTags = commonTags.asMap();
+		currentTags = commonTags.toMap();
 
 		assertNull("Incorrect mediation name value", currentTags.get("m_name"));
 		assertNull("Incorrect mediation version value", currentTags.get("m_ver"));
@@ -90,7 +90,7 @@ public class MetricCommonTagsTest {
 		mediationMetaData.set("adapter_version", "456");
 		mediationMetaData.commit();
 
-		currentTags = commonTags.asMap();
+		currentTags = commonTags.toMap();
 
 		assertEquals("Incorrect mediation name value", "MediationNetwork", currentTags.get("m_name"));
 		assertEquals("Incorrect mediation version value", "123", currentTags.get("m_ver"));
@@ -104,7 +104,7 @@ public class MetricCommonTagsTest {
 
 		MetricCommonTags commonTags = new MetricCommonTags();
 
-		currentTags = commonTags.asMap();
+		currentTags = commonTags.toMap();
 
 		assertNull("Incorrect mediation name value", currentTags.get("m_name"));
 		assertNull("Incorrect mediation version value", currentTags.get("m_ver"));
@@ -116,7 +116,7 @@ public class MetricCommonTagsTest {
 		mediationMetaData.set("adapter_version", "456");
 		mediationMetaData.commit();
 
-		currentTags = commonTags.asMap();
+		currentTags = commonTags.toMap();
 
 		assertNull("Incorrect mediation name value", currentTags.get("m_name"));
 		assertEquals("Incorrect mediation version value", "123", currentTags.get("m_ver"));
@@ -130,7 +130,7 @@ public class MetricCommonTagsTest {
 
 		MetricCommonTags commonTags = new MetricCommonTags();
 
-		currentTags = commonTags.asMap();
+		currentTags = commonTags.toMap();
 
 		assertNull("Incorrect experiment tag tsi_prw value", currentTags.get("tsi_prw"));
 		assertNull("Incorrect experiment tag wac value", currentTags.get("wac"));
@@ -148,7 +148,7 @@ public class MetricCommonTagsTest {
 		MetricCommonTags commonTags = new MetricCommonTags();
 		commonTags.updateWithConfig(configMock);
 
-		currentTags = commonTags.asMap();
+		currentTags = commonTags.toMap();
 
 		assertNull("Incorrect experiment tag tsi_prw value", currentTags.get("tsi_prw"));
 		assertEquals("Incorrect experiment tag wac value","true", currentTags.get("wac"));

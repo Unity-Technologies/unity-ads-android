@@ -66,7 +66,7 @@ public class MetricCommonTags {
 		}
 	}
 
-	public Map<String, String> asMap() {
+	public Map<String, String> toMap() {
 		if (mediationIsEmpty()) {
 			refreshMediationData();
 		}

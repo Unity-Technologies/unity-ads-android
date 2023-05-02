@@ -2,25 +2,16 @@ package com.unity3d.ads.test.instrumentation.services.ads.operation;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 
 import com.unity3d.ads.IUnityAdsLoadListener;
-import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.UnityAdsLoadOptions;
-import com.unity3d.services.ads.operation.load.LoadBannerModule;
 import com.unity3d.services.ads.operation.load.LoadBannerOperationState;
 import com.unity3d.services.ads.operation.load.LoadModule;
-import com.unity3d.services.ads.operation.load.LoadOperation;
-import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.banners.UnityBannerSize;
-import com.unity3d.services.core.request.metrics.AdOperationError;
-import com.unity3d.services.core.request.metrics.AdOperationMetric;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
-import com.unity3d.services.core.request.metrics.Metric;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
-import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocation;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,7 +36,7 @@ public class LoadModuleTests {
 	private IWebViewBridgeInvoker webViewBridgeInvokerMock;
 	private IUnityAdsLoadListener loadListenerMock;
 	private LoadModule loadModule;
-	private ISDKMetrics sdkMetrics;
+	private SDKMetricsSender sdkMetrics;
 
 	final ArgumentCaptor<JSONObject> parametersCaptor = ArgumentCaptor.forClass(JSONObject.class);
 
@@ -54,7 +45,7 @@ public class LoadModuleTests {
 	public void beforeEachTest() {
 		webViewBridgeInvokerMock = mock(IWebViewBridgeInvoker.class);
 		loadListenerMock = mock(IUnityAdsLoadListener.class);
-		sdkMetrics = mock(ISDKMetrics.class);
+		sdkMetrics = mock(SDKMetricsSender.class);
 		loadModule = new LoadModule(sdkMetrics);
 	}
 

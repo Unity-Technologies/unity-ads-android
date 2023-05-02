@@ -3,12 +3,13 @@ package com.unity3d.services
 import com.unity3d.services.core.domain.ISDKDispatchers
 import com.unity3d.services.core.request.metrics.Metric
 import com.unity3d.services.core.request.metrics.SDKMetrics
+import com.unity3d.services.core.request.metrics.SDKMetricsSender
 import kotlinx.coroutines.CoroutineExceptionHandler
 import java.lang.IllegalStateException
 import java.lang.RuntimeException
 import kotlin.coroutines.CoroutineContext
 
-class SDKErrorHandler(private val dispatchers: ISDKDispatchers) : CoroutineExceptionHandler {
+class SDKErrorHandler(private val dispatchers: ISDKDispatchers, private val sdkMetricsSender: SDKMetricsSender) : CoroutineExceptionHandler {
 
     override val key = CoroutineExceptionHandler.Key
 
@@ -25,9 +26,9 @@ class SDKErrorHandler(private val dispatchers: ISDKDispatchers) : CoroutineExcep
             else -> "native_exception"
         }
 
-        sendMetric(Metric(name, "{$className}_$line", null))
+        sendMetric(Metric(name, "{$className}_$line"))
     }
 
 
-    private fun sendMetric(metric: Metric) = SDKMetrics.getInstance().sendMetric(metric);
+    private fun sendMetric(metric: Metric) = sdkMetricsSender.sendMetric(metric);
 }

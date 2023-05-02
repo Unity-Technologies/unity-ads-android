@@ -39,6 +39,4 @@ public interface IInitializeEventsMetricSender {
 	Map<String, String> getRetryTags();
 
 	void sendMetric(Metric metric);
-
-	void setNewInitFlow(boolean isNewInitFlow);
 }

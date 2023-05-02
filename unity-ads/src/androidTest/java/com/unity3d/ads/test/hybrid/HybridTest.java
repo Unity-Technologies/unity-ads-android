@@ -78,10 +78,10 @@ public class HybridTest {
 
   private class HybridTestConfiguration extends Configuration {
     @Override
-    public String[] getModuleConfigurationList () {
-      ArrayList<String> moduleConfigurationList = new ArrayList<>(Arrays.asList(super.getModuleConfigurationList()));
-      moduleConfigurationList.add("com.unity3d.ads.test.hybrid.HybridTestModuleConfiguration");
-      return moduleConfigurationList.toArray(new String[moduleConfigurationList.size()]);
+    public Class<?>[] getModuleConfigurationList () {
+      ArrayList<Class> moduleConfigurationList = new ArrayList<>(Arrays.asList(super.getModuleConfigurationList()));
+      moduleConfigurationList.add(HybridTestModuleConfiguration.class);
+      return moduleConfigurationList.toArray(new Class[moduleConfigurationList.size()]);
     }
   }
 

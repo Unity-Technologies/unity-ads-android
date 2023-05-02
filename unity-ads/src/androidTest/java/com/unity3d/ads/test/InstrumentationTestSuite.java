@@ -12,7 +12,7 @@ import com.unity3d.ads.test.instrumentation.services.ads.webplayer.WebPlayerView
 import com.unity3d.ads.test.instrumentation.services.ads.webplayer.WebPlayerViewSettingsCacheTest;
 import com.unity3d.ads.test.instrumentation.services.banners.BannerViewCacheTests;
 import com.unity3d.ads.test.instrumentation.services.core.configuration.InitializationNotificationCenterTest;
-import com.unity3d.ads.test.instrumentation.services.core.device.AsyncTokenStorageTest;
+import com.unity3d.ads.test.instrumentation.services.core.device.InMemoryAsyncTokenStorageTest;
 import com.unity3d.ads.test.instrumentation.services.core.device.DeviceInfoReaderCompressorTest;
 import com.unity3d.ads.test.instrumentation.services.core.device.DeviceInfoReaderFilterProviderTest;
 import com.unity3d.ads.test.instrumentation.services.core.device.DeviceInfoReaderWithFilterTest;
@@ -52,7 +52,7 @@ import org.junit.runners.Suite;
 	ShowModuleTests.class,
 	ConfigurationTest.class,
 	GmaScarTestSuite.class,
-	AsyncTokenStorageTest.class,
+	InMemoryAsyncTokenStorageTest.class,
 	NativeTokenGeneratorTest.class,
 	DeviceInfoReaderCompressorTest.class,
 	DeviceInfoReaderFilterProviderTest.class,

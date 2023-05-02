@@ -3,19 +3,23 @@ package com.unity3d.services.core.domain.task
 import com.unity3d.services.core.configuration.Configuration
 import com.unity3d.services.core.configuration.Experiments
 import com.unity3d.services.core.configuration.ExperimentsReader
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
-import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.resetMain
+
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
-import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class InitializeStateConfigTest {
     // Injected into InitializeStateConfig constructor
-    var dispatchers : TestSDKDispatchers = TestSDKDispatchers()
+    var dispatchers: TestSDKDispatchers = TestSDKDispatchers()
 
     @MockK
     lateinit var initializeStateConfigWithLoaderMock: InitializeStateConfigWithLoader
@@ -38,7 +42,13 @@ class InitializeStateConfigTest {
         every { configMock.experiments } returns experimentsMock
         every { configMock.experimentsReader } returns experimentsReaderMock
         every { experimentsReaderMock.currentlyActiveExperiments } returns experimentsMock
-        coEvery {initializeStateConfigWithLoaderMock(any())} returns Result.success(configMock)
+        coEvery { initializeStateConfigWithLoaderMock(any()) } returns configMock
+        Dispatchers.setMain(dispatchers.main)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
 }

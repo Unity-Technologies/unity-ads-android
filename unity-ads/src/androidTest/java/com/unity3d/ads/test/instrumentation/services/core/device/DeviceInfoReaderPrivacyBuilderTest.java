@@ -4,18 +4,21 @@ import android.app.Application;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.unity3d.ads.metadata.MetaData;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.configuration.Experiments;
 import com.unity3d.services.core.configuration.PrivacyConfig;
 import com.unity3d.services.core.configuration.PrivacyConfigStorage;
-import com.unity3d.services.core.device.reader.DeviceInfoReaderPrivacyBuilder;
+import com.unity3d.services.core.device.Storage;
+import com.unity3d.services.core.device.StorageManager;
 import com.unity3d.services.core.device.reader.IDeviceInfoReader;
 import com.unity3d.services.core.device.reader.IGameSessionIdReader;
-import com.unity3d.services.core.lifecycle.CachedLifecycle;
+import com.unity3d.services.core.device.reader.builder.DeviceInfoReaderPrivacyBuilder;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,12 +61,57 @@ public class DeviceInfoReaderPrivacyBuilderTest {
 		Mockito.when(_configReaderMock.getCurrentConfiguration()).thenReturn(_configurationMock);
 	}
 
+	@After
+	public void tearDown() {
+		StorageManager.getStorage(StorageManager.StorageType.PUBLIC).clearStorage();
+		StorageManager.getStorage(StorageManager.StorageType.PUBLIC).initStorage();
+	}
+
 	@Test
 	public void testDeviceInfoReaderPrivacyBuilder() {
 		DeviceInfoReaderPrivacyBuilder deviceInfoReaderPrivacyBuilder = new DeviceInfoReaderPrivacyBuilder(_configReaderMock, _privacyConfigStorageMock, _gameSessionIdReaderMock);
 		IDeviceInfoReader deviceInfoReader = deviceInfoReaderPrivacyBuilder.build();
 		Map<String, Object> deviceInfoData = deviceInfoReader.getDeviceInfoData();
+		validatePrivacyGenerics(deviceInfoData);
+	}
+
+	@Test
+	public void testDeviceInfoReaderPrivacyBuilderSettingNonBehavioralTrue() {
+		setUserNonBehavioralFlag(true);
+		DeviceInfoReaderPrivacyBuilder deviceInfoReaderPrivacyBuilder = new DeviceInfoReaderPrivacyBuilder(_configReaderMock, _privacyConfigStorageMock, _gameSessionIdReaderMock);
+		IDeviceInfoReader deviceInfoReader = deviceInfoReaderPrivacyBuilder.build();
+		Map<String, Object> deviceInfoData = deviceInfoReader.getDeviceInfoData();
+		validatePrivacyGenerics(deviceInfoData);
+		Assert.assertTrue((Boolean) deviceInfoData.get("user.nonBehavioral"));
+	}
+
+	@Test
+	public void testDeviceInfoReaderPrivacyBuilderSettingNonBehavioralFalse() {
+		setUserNonBehavioralFlag(false);
+		DeviceInfoReaderPrivacyBuilder deviceInfoReaderPrivacyBuilder = new DeviceInfoReaderPrivacyBuilder(_configReaderMock, _privacyConfigStorageMock, _gameSessionIdReaderMock);
+		IDeviceInfoReader deviceInfoReader = deviceInfoReaderPrivacyBuilder.build();
+		Map<String, Object> deviceInfoData = deviceInfoReader.getDeviceInfoData();
+		validatePrivacyGenerics(deviceInfoData);
+		Assert.assertFalse((Boolean) deviceInfoData.get("user.nonBehavioral"));
+	}
+
+	@Test
+	public void testDeviceInfoReaderPrivacyBuilderSettingNonBehavioralMissing() {
+		DeviceInfoReaderPrivacyBuilder deviceInfoReaderPrivacyBuilder = new DeviceInfoReaderPrivacyBuilder(_configReaderMock, _privacyConfigStorageMock, _gameSessionIdReaderMock);
+		IDeviceInfoReader deviceInfoReader = deviceInfoReaderPrivacyBuilder.build();
+		Map<String, Object> deviceInfoData = deviceInfoReader.getDeviceInfoData();
+		validatePrivacyGenerics(deviceInfoData);
+		Assert.assertNull(deviceInfoData.get("user.nonBehavioral"));
+	}
+
+	private void validatePrivacyGenerics(Map<String, Object> deviceInfoData) {
 		Assert.assertEquals("privacy", deviceInfoData.get("callType"));
 		Assert.assertEquals(SdkProperties.getVersionName(), deviceInfoData.get("sdkVersionName"));
+	}
+
+	private void setUserNonBehavioralFlag(boolean flagValue) {
+		MetaData userMetaData = new MetaData(InstrumentationRegistry.getInstrumentation().getContext());
+		userMetaData.set("user.nonbehavioral", flagValue);
+		userMetaData.commit();
 	}
 }

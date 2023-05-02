@@ -15,7 +15,7 @@ import com.unity3d.services.ads.operation.load.LoadModuleDecoratorTimeout;
 import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.ConfigurationReader;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
 import org.junit.Before;
@@ -34,14 +34,14 @@ public class LoadModuleDecoratorTimeoutTests {
 
 	private IUnityAdsLoadListener loadListenerMock;
 	private ILoadModule loadModuleMock;
-	private ISDKMetrics sdkMetricsMock;
+	private SDKMetricsSender sdkMetricsMock;
 	private ConfigurationReader configurationReaderMock;
 
 	@Before
 	public void beforeEachTest() {
 		loadListenerMock = mock(IUnityAdsLoadListener.class);
 		loadModuleMock = mock(ILoadModule.class);
-		sdkMetricsMock = mock(ISDKMetrics.class);
+		sdkMetricsMock = mock(SDKMetricsSender.class);
 		configurationReaderMock = mock(ConfigurationReader.class);
 
 		Mockito.when(configurationReaderMock.getCurrentConfiguration()).thenReturn(new Configuration());

@@ -4,6 +4,7 @@ import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
+import android.webkit.ValueCallback;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -104,7 +105,7 @@ public class InvocationTest {
 			public void run() {
 				WebViewApp.getCurrentApp().setWebView(new WebView(ClientProperties.getApplicationContext(), false) {
 					@Override
-					public void invokeJavascript(String data) {
+					public void evaluateJavascript(String data, ValueCallback<String> callback) {
 						BatchInvocationTestApi.JAVASCRIPT_INVOKED = true;
 					}
 				});
@@ -142,7 +143,7 @@ public class InvocationTest {
 			public void run() {
 				WebViewApp.getCurrentApp().setWebView(new WebView(ClientProperties.getApplicationContext(), false) {
 					@Override
-					public void invokeJavascript(String data) {
+					public void evaluateJavascript(String data, ValueCallback<String> callback) {
 						BatchInvocationTestApi.JAVASCRIPT_INVOKED = true;
 					}
 				});

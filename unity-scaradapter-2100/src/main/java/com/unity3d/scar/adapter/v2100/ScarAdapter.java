@@ -7,6 +7,7 @@ import com.unity3d.scar.adapter.common.IScarAdapter;
 import com.unity3d.scar.adapter.common.IScarInterstitialAdListenerWrapper;
 import com.unity3d.scar.adapter.common.IScarRewardedAdListenerWrapper;
 import com.unity3d.scar.adapter.common.ScarAdapterBase;
+import com.unity3d.scar.adapter.common.WebViewAdsError;
 import com.unity3d.scar.adapter.common.requests.RequestExtras;
 import com.unity3d.scar.adapter.common.scarads.IScarLoadListener;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
@@ -20,7 +21,7 @@ import static com.unity3d.scar.adapter.common.Utils.runOnUiThread;
 public class ScarAdapter extends ScarAdapterBase implements IScarAdapter {
 	private AdRequestFactory _adRequestFactory;
 
-	public ScarAdapter(IAdsErrorHandler adsErrorHandler, String unityVersionName) {
+	public ScarAdapter(IAdsErrorHandler<WebViewAdsError> adsErrorHandler, String unityVersionName) {
 		super(adsErrorHandler);
 		_adRequestFactory = new AdRequestFactory(new RequestExtras(unityVersionName));
 		_signalCollector = new SignalsCollector(_adRequestFactory);

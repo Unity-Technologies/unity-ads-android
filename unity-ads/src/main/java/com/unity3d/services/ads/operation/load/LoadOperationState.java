@@ -1,5 +1,7 @@
 package com.unity3d.services.ads.operation.load;
 
+import static com.unity3d.services.core.misc.Utilities.wrapCustomerListener;
+
 import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.UnityAdsLoadOptions;
@@ -18,13 +20,15 @@ public class LoadOperationState extends OperationState {
 
 	public void onUnityAdsFailedToLoad(UnityAds.UnityAdsLoadError error, String message) {
 		if (listener != null) {
-			listener.onUnityAdsFailedToLoad(this.placementId, error, message);
+			wrapCustomerListener(() ->
+				listener.onUnityAdsFailedToLoad(this.placementId, error, message));
 		}
 	}
 
 	public void onUnityAdsAdLoaded() {
 		if (listener != null) {
-			listener.onUnityAdsAdLoaded(this.placementId);
+			wrapCustomerListener(() ->
+				listener.onUnityAdsAdLoaded(this.placementId));
 		}
 	}
 

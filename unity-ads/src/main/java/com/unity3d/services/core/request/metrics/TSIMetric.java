@@ -7,8 +7,6 @@ public class TSIMetric {
 	private static final String TSI_METRIC_MISSING_TOKEN = "native_missing_token";
 	private static final String TSI_METRIC_MISSING_STATE_ID = "native_missing_state_id";
 	private static final String TSI_METRIC_MISSING_GAME_SESSION_ID = "native_missing_game_session_id";
-	private static final String TSI_METRIC_INIT_TIME_SUCCESS = "native_initialization_time_success";
-	private static final String TSI_METRIC_INIT_TIME_FAILURE = "native_initialization_time_failure";
 	private static final String TSI_METRIC_INIT_STARTED	= "native_initialization_started";
 	private static final String TSI_METRIC_TOKEN_CONFIG	= "native_token_availability_latency_config";
 	private static final String TSI_METRIC_TOKEN_WEBVIEW = "native_token_availability_latency_webview";
@@ -30,42 +28,24 @@ public class TSIMetric {
 	public static Metric newMissingToken() {
 		return new Metric(
 			TSI_METRIC_MISSING_TOKEN,
-			null,
 			null);
 	}
 
 	public static Metric newMissingStateId() {
 		return new Metric(
 			TSI_METRIC_MISSING_STATE_ID,
-			null,
 			null);
 	}
 
 	public static Metric newMissingGameSessionId() {
 		return new Metric(
 			TSI_METRIC_MISSING_GAME_SESSION_ID,
-			null,
 			null);
-	}
-
-	public static Metric newInitTimeSuccess(Long value, Map<String, String> tags) {
-		return new Metric(
-			TSI_METRIC_INIT_TIME_SUCCESS,
-			value,
-			tags);
-	}
-
-	public static Metric newInitTimeFailure(Long value, Map<String, String> tags) {
-		return new Metric(
-			TSI_METRIC_INIT_TIME_FAILURE,
-			value,
-			tags);
 	}
 
 	public static Metric newInitStarted() {
 		return new Metric(
 			TSI_METRIC_INIT_STARTED,
-			null,
 			null);
 	}
 
@@ -93,64 +73,55 @@ public class TSIMetric {
 	public static Metric newPrivacyResolutionRequestLatencySuccess(Long value) {
 		return new Metric(
 			TSI_METRIC_PRIVACY_RESOLUTION_SUCCESS,
-			value,
-			null);
+			value);
 	}
 
 	public static Metric newPrivacyResolutionRequestLatencyFailure(Long value) {
 		return new Metric(
 			TSI_METRIC_PRIVACY_RESOLUTION_FAILURE,
-			value,
-			null);
+			value);
 	}
 
 	public static Metric newPrivacyRequestLatencySuccess(Long value) {
 		return new Metric(
 			TSI_METRIC_PRIVACY_REQUEST_SUCCESS,
-			value,
-			null);
+			value);
 	}
 
 	public static Metric newPrivacyRequestLatencyFailure(Long value) {
 		return new Metric(
 			TSI_METRIC_PRIVACY_REQUEST_FAILURE,
-			value,
-			null);
+			value);
 	}
 
 	public static Metric newConfigRequestLatencySuccess(Long value) {
 		return new Metric(
 			TSI_METRIC_CONFIG_REQUEST_SUCCESS,
-			value,
-			null);
+			value);
 	}
 
 	public static Metric newConfigRequestLatencyFailure(Long value) {
 		return new Metric(
 			TSI_METRIC_CONFIG_REQUEST_FAILURE,
-			value,
-			null);
+			value);
 	}
 
 	public static Metric newEmergencySwitchOff() {
 		return new Metric(
 			TSI_METRIC_EMERGENCY_OFF,
-			null,
 			null);
 	}
 
 	public static Metric newDeviceInfoCollectionLatency(Long value) {
 		return new Metric(
 			TSI_METRIC_COLLECTION_LATENCY,
-			value,
-			null);
+			value);
 	}
 
 	public static Metric newDeviceInfoCompressionLatency(Long value) {
 		return new Metric(
 			TSI_METRIC_COMPRESSION_LATENCY,
-			value,
-			null);
+			value);
 	}
 
 	public static Metric newNativeGeneratedTokenAvailable(Map<String, String> tags) {

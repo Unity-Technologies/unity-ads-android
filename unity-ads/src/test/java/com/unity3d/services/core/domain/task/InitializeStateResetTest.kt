@@ -6,11 +6,15 @@ import com.unity3d.services.core.properties.SdkProperties
 import com.unity3d.services.core.webview.WebView
 import com.unity3d.services.core.webview.WebViewApp
 import io.mockk.*
+import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -20,83 +24,84 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class InitializeStateResetTest {
-    var dispatcher = TestCoroutineDispatcher()
-
-    var dispatchers = TestSDKDispatchers(dispatcher, dispatcher, dispatcher)
-
-    private val testScope = TestCoroutineScope(dispatcher)
+    var dispatchers = TestSDKDispatchers()
 
     @MockK
-    lateinit var moduleConfigurationMock : IModuleConfiguration
+    lateinit var moduleConfigurationMock: IModuleConfiguration
 
     @MockK
-    lateinit var webViewAppMock : WebViewApp
+    lateinit var webViewAppMock: WebViewApp
 
     @MockK
-    lateinit var webViewMock : WebView
+    lateinit var webViewMock: WebView
 
     @MockK
-    lateinit var configMock : Configuration
+    lateinit var configMock: Configuration
 
-    var initializeStateReset: InitializeStateReset = InitializeStateReset(dispatchers)
+    @InjectMockKs
+    lateinit var initializeStateReset: InitializeStateReset
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
-        every { configMock.moduleConfigurationList } returns arrayOf("mockModule")
+        every { configMock.moduleConfigurationList } returns arrayOf(String::class.java)
         every { configMock.webViewAppCreateTimeout } returns 200
         every { moduleConfigurationMock.initCompleteState(any()) } returns true
         every { moduleConfigurationMock.resetState(any()) } returns true
+        Dispatchers.setMain(dispatchers.main)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun doWork_webViewAppReset_success() = runBlockingTest {
+    fun doWork_webViewAppReset_success() = runTest {
         mockkStatic(WebViewApp::class) {
             mockkStatic(SdkProperties::class) {
                 // given
-                every {WebViewApp.getCurrentApp()} returns webViewAppMock
-                every {webViewAppMock.webView} returns webViewMock
-                every {configMock.getModuleConfiguration(any()) } returns null
-                every {SdkProperties.getCacheDirectory(any())} returns mockkClass(File::class)
+                every { WebViewApp.getCurrentApp() } returns webViewAppMock
+                every { webViewAppMock.webView } returns webViewMock
+                every { configMock.getModuleConfiguration(any()) } returns null
+                every { SdkProperties.getCacheDirectory(any()) } returns mockkClass(File::class)
 
                 // when
-                val result = initializeStateReset(InitializeStateReset.Params(configMock))
+                val result = runCatching { initializeStateReset(InitializeStateReset.Params(configMock)) }
 
                 // then
-                verify (exactly = 1) { webViewAppMock.resetWebViewAppInitialization() }
-                verify (exactly = 1) { SdkProperties.setInitialized(false) }
+                verify(exactly = 1) { webViewAppMock.resetWebViewAppInitialization() }
+                verify(exactly = 1) { SdkProperties.setInitialized(false) }
                 assertTrue(result.isSuccess)
             }
         }
     }
 
     @Test
-    fun doWork_webViewAppTimesOut_failureWithException()  {
-        testScope.runBlockingTest {
-            mockkStatic(WebViewApp::class) {
-                mockkStatic(SdkProperties::class) {
-                    // given
-                    every { WebViewApp.getCurrentApp() } returns webViewAppMock
-                    every { webViewAppMock.webView } returns webViewMock
-                    every { webViewMock.destroy() } answers {
-                        advanceTimeBy(300)
-                    }
-                    // when
-                    val result = initializeStateReset(InitializeStateReset.Params(configMock))
-
-                    // then
-                    verify(exactly = 1) { webViewAppMock.resetWebViewAppInitialization() }
-                    verify(exactly = 0) { SdkProperties.setInitialized(false) }
-                    assertTrue(result.isFailure)
-                    assertNotNull(result.exceptionOrNull())
-                    assertEquals("Reset failed on opening ConditionVariable", result.exceptionOrNull()?.message)
+    fun doWork_webViewAppTimesOut_failureWithException() = runTest {
+        mockkStatic(WebViewApp::class) {
+            mockkStatic(SdkProperties::class) {
+                // given
+                every { WebViewApp.getCurrentApp() } returns webViewAppMock
+                every { webViewAppMock.webView } returns webViewMock
+                every { webViewMock.destroy() } answers {
+                    advanceTimeBy(300)
                 }
+                // when
+                val result = runCatching { initializeStateReset(InitializeStateReset.Params(configMock)) }
+
+                // then
+                verify(exactly = 1) { webViewAppMock.resetWebViewAppInitialization() }
+                verify(exactly = 0) { SdkProperties.setInitialized(false) }
+                assertTrue(result.isFailure)
+                assertNotNull(result.exceptionOrNull())
+                assertEquals("Reset failed on opening ConditionVariable", result.exceptionOrNull()?.message)
             }
         }
     }
 
     @Test
-    fun doWork_webViewAppNull_success() = runBlockingTest {
+    fun doWork_webViewAppNull_success() = runTest {
         mockkStatic(SdkProperties::class) {
             mockkStatic(WebViewApp::class) {
                 // given
@@ -105,7 +110,7 @@ class InitializeStateResetTest {
                 every { SdkProperties.getCacheDirectory(any()) } returns mockkClass(File::class)
 
                 // when
-                val result = initializeStateReset(InitializeStateReset.Params(configMock))
+                val result = runCatching { initializeStateReset(InitializeStateReset.Params(configMock)) }
 
                 // then
                 assertTrue(result.isSuccess)
@@ -114,14 +119,14 @@ class InitializeStateResetTest {
     }
 
     @Test
-    fun doWork_moduleConfiguration_calledModuleConfigSuccess() = runBlockingTest {
+    fun doWork_moduleConfiguration_calledModuleConfigSuccess() = runTest {
         mockkStatic(SdkProperties::class) {
             // given
             every { configMock.getModuleConfiguration(any()) } returns moduleConfigurationMock
             every { SdkProperties.getCacheDirectory(any()) } returns mockkClass(File::class)
 
             // when
-            val result = initializeStateReset(InitializeStateReset.Params(configMock))
+            val result = runCatching { initializeStateReset(InitializeStateReset.Params(configMock)) }
 
             // then
             assertTrue(result.isSuccess)

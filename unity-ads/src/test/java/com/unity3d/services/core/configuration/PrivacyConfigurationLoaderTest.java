@@ -3,6 +3,10 @@ package com.unity3d.services.core.configuration;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 
+import com.unity3d.services.core.extensions.AbortRetryException;
+import com.unity3d.services.core.network.core.HttpClient;
+import com.unity3d.services.core.network.model.HttpRequest;
+import com.unity3d.services.core.network.model.HttpResponse;
 import com.unity3d.services.core.request.WebRequest;
 
 import org.junit.Assert;
@@ -11,11 +15,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PrivacyConfigurationLoaderTest {
@@ -39,16 +44,14 @@ public class PrivacyConfigurationLoaderTest {
 
 	@Before
 	public void setup() throws Exception {
-		Mockito.when(_webRequestMock.getResponseCode()).thenReturn(200);
 		Mockito.when(_privacyConfigMock.getPrivacyStatus()).thenReturn(PrivacyConfigStatus.UNKNOWN);
 		Mockito.when(_privacyConfigStorageMock.getPrivacyConfig()).thenReturn(_privacyConfigMock);
+		Mockito.when(_webRequestMock.getUrl()).thenReturn(new URL("https://www.unity3d.com"));
+		Mockito.when(_webRequestMock.getRequestType()).thenReturn("GET");
 		Mockito.when(_configRequestFactoryMock.getWebRequest()).thenReturn(_webRequestMock);
-		doAnswer(new Answer<Object>() {
-			@Override
-			public Object answer(InvocationOnMock invocation) {
-				_configLoaderListener.onSuccess(new Configuration());
-				return null;
-			}
+		doAnswer((Answer<Object>) invocation -> {
+			_configLoaderListener.onSuccess(new Configuration());
+			return null;
 		}).when(_configLoaderMock).loadConfiguration(_configLoaderListener);
 	}
 
@@ -73,6 +76,7 @@ public class PrivacyConfigurationLoaderTest {
 		Mockito.verify(_configLoaderListener, times(0)).onError(Mockito.anyString());
 		Mockito.verify(_configLoaderMock, times(1)).loadConfiguration(_configLoaderListener);
 	}
+
 	@Test
 	public void testPrivacyConfigLoaderSkippedIfPrivacyAlreadySet() throws Exception {
 		Mockito.when(_privacyConfigMock.getPrivacyStatus()).thenReturn(PrivacyConfigStatus.ALLOWED);
@@ -89,8 +93,6 @@ public class PrivacyConfigurationLoaderTest {
 
 	@Test
 	public void testPrivacyConfigLoaderWhenConfigRequestInvalidJson() throws Exception {
-		Mockito.when(_webRequestMock.makeRequest()).thenReturn("{invalid}");
-
 		PrivacyConfigurationLoader privacyConfigurationLoader = new PrivacyConfigurationLoader(_configLoaderMock, _configRequestFactoryMock, _privacyConfigStorageMock);
 		privacyConfigurationLoader.loadConfiguration(_configLoaderListener);
 
@@ -99,25 +101,39 @@ public class PrivacyConfigurationLoaderTest {
 		Mockito.verify(_configLoaderMock, times(1)).loadConfiguration(_configLoaderListener);
 	}
 
-	@Test
-	public void testPrivacyConfigLoaderWhenConfigRequestReturnNotOk() throws Exception {
-		Mockito.when(_webRequestMock.getResponseCode()).thenReturn(400);
-		privacyConfigLoaderValidation(true, false);
+	@Test(expected = AbortRetryException.class)
+	public void testPrivacyConfigLoaderWhenConfigRequestReturnsLocked() throws Exception {
+		PrivacyConfigurationLoader privacyConfigurationLoader = new PrivacyConfigurationLoader(_configLoaderMock, _configRequestFactoryMock, _privacyConfigStorageMock);
+		HttpClient httpClient = Mockito.mock(HttpClient.class);
+		Mockito.when(httpClient.executeBlocking(Mockito.any(HttpRequest.class))).thenReturn(new HttpResponse("{}", 423));
+
+		Field field = PrivacyConfigurationLoader.class.getDeclaredField("_httpClient");
+		field.setAccessible(true);
+		field.set(privacyConfigurationLoader, httpClient);
+
+		privacyConfigurationLoader.loadConfiguration(_configLoaderListener);
 	}
 
-	private void privacyConfigLoaderValidation(final boolean pasReponse, final boolean expectedIsAllowed) throws Exception {
-		Mockito.when(_webRequestMock.makeRequest()).thenReturn("{\"pas\":" + pasReponse + "}");
+	@Test
+	public void testPrivacyConfigLoaderWhenConfigRequestReturnNotOk() throws Exception {
+		privacyConfigLoaderValidation(true, false, 400);
+	}
 
-		doAnswer(new Answer<Object>() {
-			@Override
-			public Object answer(InvocationOnMock invocation) {
-				PrivacyConfig privacyConfig = invocation.getArgument(0);
-				Assert.assertEquals(expectedIsAllowed, privacyConfig.allowedToSendPii());
-				return null;
-			}
-		}).when(_privacyConfigStorageMock).setPrivacyConfig(Mockito.<PrivacyConfig>any());
+	private void privacyConfigLoaderValidation(final boolean pasResponse, final boolean expectedIsAllowed, final int statusCode) throws Exception {
+		HttpClient httpClient = Mockito.mock(HttpClient.class);
+		Mockito.when(httpClient.executeBlocking(Mockito.any(HttpRequest.class))).thenReturn(new HttpResponse("{\"pas\":" + pasResponse + "}", statusCode));
+
+		doAnswer((Answer<Object>) invocation -> {
+			PrivacyConfig privacyConfig = invocation.getArgument(0);
+			Assert.assertEquals(expectedIsAllowed, privacyConfig.allowedToSendPii());
+			return null;
+		}).when(_privacyConfigStorageMock).setPrivacyConfig(Mockito.any());
 
 		PrivacyConfigurationLoader privacyConfigurationLoader = new PrivacyConfigurationLoader(_configLoaderMock, _configRequestFactoryMock, _privacyConfigStorageMock);
+		Field field = PrivacyConfigurationLoader.class.getDeclaredField("_httpClient");
+		field.setAccessible(true);
+		field.set(privacyConfigurationLoader, httpClient);
+
 		privacyConfigurationLoader.loadConfiguration(_configLoaderListener);
 
 		Mockito.verify(_configLoaderMock, times(1)).loadConfiguration(_configLoaderListener);
@@ -126,6 +142,6 @@ public class PrivacyConfigurationLoaderTest {
 	}
 
 	private void privacyConfigLoaderValidation(final boolean isAllowed) throws Exception {
-		privacyConfigLoaderValidation(isAllowed, isAllowed);
+		privacyConfigLoaderValidation(isAllowed, isAllowed, 200);
 	}
 }

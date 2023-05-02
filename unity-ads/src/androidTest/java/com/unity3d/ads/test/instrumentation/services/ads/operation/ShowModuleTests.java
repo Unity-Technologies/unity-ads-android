@@ -18,7 +18,7 @@ import com.unity3d.services.ads.operation.show.ShowOperation;
 import com.unity3d.services.ads.operation.show.ShowOperationState;
 import com.unity3d.services.core.request.metrics.AdOperationError;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.request.metrics.Metric;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocation;
@@ -43,7 +43,7 @@ public class ShowModuleTests {
 
 	private IUnityAdsShowListener _showListenerMock;
 	private IShowModule _showModule;
-	private ISDKMetrics _sdkMetrics;
+	private SDKMetricsSender _sdkMetrics;
 	private IWebViewBridgeInvoker _webViewBridgeInvokerMock;
 
 	@Rule
@@ -53,7 +53,7 @@ public class ShowModuleTests {
 	public void beforeEachTest() {
 		_showListenerMock = mock(IUnityAdsShowListener.class);
 		_webViewBridgeInvokerMock = mock(IWebViewBridgeInvoker.class);
-		_sdkMetrics = mock(ISDKMetrics.class);
+		_sdkMetrics = mock(SDKMetricsSender.class);
 		_showModule = new ShowModule(_sdkMetrics);
 	}
 

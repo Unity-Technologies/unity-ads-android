@@ -3,9 +3,11 @@ package com.unity3d.services.ads.adunit;
 import android.os.ConditionVariable;
 
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.request.metrics.AdOperationError;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 
@@ -16,6 +18,7 @@ import java.lang.reflect.Method;
 public class AdUnitOpen {
 	private static ConditionVariable _waitShowStatus;
 	private static Configuration _configuration;
+	private static final SDKMetricsSender _sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
 
 	public static synchronized boolean open(String placementId, JSONObject options) throws NoSuchMethodException {
 		Method showCallback = AdUnitOpen.class.getMethod("showCallback", CallbackStatus.class);
@@ -27,7 +30,7 @@ public class AdUnitOpen {
 		boolean success = _waitShowStatus.block(_configuration.getShowTimeout());
 		_waitShowStatus = null;
 		if (!success) {
-			SDKMetrics.getInstance().sendMetric(AdOperationMetric.newAdShowFailure(AdOperationError.timeout, Long.valueOf(_configuration.getShowTimeout())));
+			_sdkMetricsSender.sendMetric(AdOperationMetric.newAdShowFailure(AdOperationError.timeout, Long.valueOf(_configuration.getShowTimeout())));
 		}
 		return success;
 	}

@@ -11,9 +11,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.unity3d.ads.test.TestUtilities;
 import com.unity3d.services.core.configuration.Configuration;
+import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.NativeCallback;
@@ -121,22 +123,23 @@ public class WebViewBridgeTest {
 
 	@Test (expected = NullPointerException.class)
 	public void testAllNull () throws Exception {
-		WebViewBridge.handleInvocation(null, null, null, null);
+		WebViewBridge.getInstance().handleInvocation(null, null, null, null);
+
 	}
 
 	@Test (expected = NullPointerException.class)
 	public void testClassNameSetOthersNull () throws Exception {
-		WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", null, null, null);
+		WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", null, null, null);
 	}
 
 	@Test (expected = NullPointerException.class)
 	public void testClassNameMethodSetOthersNull () throws Exception {
-		WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", null, null);
+		WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", null, null);
 	}
 
 	@Test (expected = NullPointerException.class)
 	public void testOthersSetParametersNull () throws Exception {
-		WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", null, new MockWebViewCallback("APICALLBACK_01", 1));
+		WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", null, new MockWebViewCallback("APICALLBACK_01", 1));
 	}
 
 	@Test
@@ -144,7 +147,7 @@ public class WebViewBridgeTest {
 		boolean gotException = false;
 
 		try {
-			WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", null, new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+			WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", null, new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
 		}
 		catch (NoSuchMethodException e) {
 			assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
@@ -162,7 +165,7 @@ public class WebViewBridgeTest {
 		boolean gotException = false;
 
 		try {
-			WebViewBridge.handleInvocation(null, "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+			WebViewBridge.getInstance().handleInvocation(null, "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
 		}
 		catch (NoSuchMethodException e) {
 			assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
@@ -180,7 +183,7 @@ public class WebViewBridgeTest {
 		boolean gotException = false;
 
 		try {
-			WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApina", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+			WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApina", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
 		}
 		catch (NoSuchMethodException e) {
 			assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
@@ -198,7 +201,7 @@ public class WebViewBridgeTest {
 		boolean gotException = false;
 
 		try {
-			WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apinaTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+			WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apinaTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
 		}
 		catch (NoSuchMethodException e) {
 			assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
@@ -213,7 +216,7 @@ public class WebViewBridgeTest {
 
 	@Test (expected = NullPointerException.class)
 	public void testAllSetParametersWrong () throws Exception {
-		WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{1, "test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+		WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{1, "test"}, new MockWebViewCallback("APICALLBACK_01", 1));
 	}
 
 	@Test
@@ -221,7 +224,7 @@ public class WebViewBridgeTest {
 		boolean gotException = false;
 
 		try {
-			WebViewBridge.handleInvocation("", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+			WebViewBridge.getInstance().handleInvocation("", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
 		}
 		catch (NoSuchMethodException e) {
 			assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
@@ -239,7 +242,7 @@ public class WebViewBridgeTest {
 		boolean gotException = false;
 
 		try {
-			WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+			WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
 		}
 		catch (NoSuchMethodException e) {
 			assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
@@ -254,7 +257,7 @@ public class WebViewBridgeTest {
 
 	@Test (expected = IllegalArgumentException.class)
 	public void testOthersSetCallbackNull () throws Exception {
-		WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, null);
+		WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, null);
 	}
 
 	public class MockWebViewCallback extends WebViewCallback {
@@ -296,7 +299,7 @@ public class WebViewBridgeTest {
 		boolean gotException = false;
 
 		try {
-			WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "wrongMethodName", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+			WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "wrongMethodName", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
 		}
 		catch (Exception e) {
 			assertEquals("Should have received exception of type NoSuchMethodException", NoSuchMethodException.class, e.getClass());
@@ -314,7 +317,7 @@ public class WebViewBridgeTest {
 
 	@Test
 	public void testAllSetMethodNoParams () throws Exception {
-		WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethodNoParams", new Object[]{}, new MockWebViewCallback("APICALLBACK_01", 1));
+		WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethodNoParams", new Object[]{}, new MockWebViewCallback("APICALLBACK_01", 1));
 		assertEquals(true, WebViewBridgeTestApi.invoked);
 		assertNull(WebViewBridgeTestApi.value);
 		assertNotNull(WebViewBridgeTestApi.callback);
@@ -323,7 +326,7 @@ public class WebViewBridgeTest {
 
 	@Test
 	public void testOthersSetParametersNullMethodNoParams () throws Exception {
-		WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethodNoParams", null, new MockWebViewCallback("APICALLBACK_01", 1));
+		WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethodNoParams", null, new MockWebViewCallback("APICALLBACK_01", 1));
 		assertEquals(true, WebViewBridgeTestApi.invoked);
 		assertNull(WebViewBridgeTestApi.value);
 		assertNotNull(WebViewBridgeTestApi.callback);
@@ -332,7 +335,7 @@ public class WebViewBridgeTest {
 
 	@Test
 	public void testAllSetCorrectly () throws Exception {
-		WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
+		WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("APICALLBACK_01", 1));
 		assertEquals(true, WebViewBridgeTestApi.invoked);
 		assertEquals("test", WebViewBridgeTestApi.value);
 		assertNotNull(WebViewBridgeTestApi.callback);
@@ -341,7 +344,7 @@ public class WebViewBridgeTest {
 
 	@Test
 	public void testAllSetCallbackEmpty () throws Exception {
-		WebViewBridge.handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("", 1));
+		WebViewBridge.getInstance().handleInvocation("com.unity3d.ads.test.legacy.WebViewBridgeTest$WebViewBridgeTestApi", "apiTestMethod", new Object[]{"test"}, new MockWebViewCallback("", 1));
 		assertEquals(true, WebViewBridgeTestApi.invoked);
 		assertEquals("test", WebViewBridgeTestApi.value);
 		assertNotNull(WebViewBridgeTestApi.callback);
@@ -365,7 +368,7 @@ public class WebViewBridgeTest {
 		NativeCallback ncb = new NativeCallback(ncbm);
 		WebViewApp.getCurrentApp().addCallback(ncb);
 		Object[] params = new Object[]{"Test"};
-		WebViewBridge.handleCallback(ncb.getId(), CallbackStatus.OK.toString(), params);
+		WebViewBridge.getInstance().handleCallback(ncb.getId(), CallbackStatus.OK.toString(), params);
 		assertEquals("Native Callback status was expected to be OK", CallbackStatus.OK, nativeCallbackStatus);
 		assertTrue("Native Callback should have finished", nativeCallbackFinished);
 		assertEquals("Native callback should have received a string as a parameter with value \"Test\"", "Test", nativeCallbackValue);
@@ -377,7 +380,7 @@ public class WebViewBridgeTest {
 		NativeCallback ncb = new NativeCallback(ncbm);
 		WebViewApp.getCurrentApp().addCallback(ncb);
 		Object[] params = null;
-		WebViewBridge.handleCallback(ncb.getId(), CallbackStatus.OK.toString(), params);
+		WebViewBridge.getInstance().handleCallback(ncb.getId(), CallbackStatus.OK.toString(), params);
 		assertEquals("Native Callback status was expected to be OK", CallbackStatus.OK, nativeCallbackStatus);
 		assertTrue("Native Callback should have finished", nativeCallbackFinished);
 		assertNull("Native callback should have not received a value \"Test\"", nativeCallbackValue);
@@ -389,7 +392,7 @@ public class WebViewBridgeTest {
 		NativeCallback ncb = new NativeCallback(ncbm);
 		WebViewApp.getCurrentApp().addCallback(ncb);
 		Object[] params = new Object[]{"Test"};
-		WebViewBridge.handleCallback(ncb.getId(), "INVALID_STATUS", params);
+		WebViewBridge.getInstance().handleCallback(ncb.getId(), "INVALID_STATUS", params);
 	}
 
 	@Test (expected = NullPointerException.class)

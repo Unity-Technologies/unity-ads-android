@@ -1,5 +1,7 @@
 package com.unity3d.services.ads;
 
+import static com.unity3d.services.core.misc.Utilities.wrapCustomerListener;
+
 import android.app.Activity;
 import android.content.Context;
 
@@ -21,11 +23,12 @@ import com.unity3d.services.ads.token.AsyncTokenStorage;
 import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.ConfigurationReader;
-import com.unity3d.services.core.configuration.IExperiments;
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.WebViewBridgeInvoker;
 
@@ -33,6 +36,9 @@ public final class UnityAdsImplementation implements IUnityAds {
 	private static Configuration configuration = null;
 	private static WebViewBridgeInvoker webViewBridgeInvoker = new WebViewBridgeInvoker();
 	private static IUnityAds instance;
+	private final TokenStorage tokenStorage = Utilities.getService(TokenStorage.class);
+	private final AsyncTokenStorage asyncTokenStorage = Utilities.getService(AsyncTokenStorage.class);
+	private final SDKMetricsSender sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
 
 	public static IUnityAds getInstance() {
 		if (instance == null) {
@@ -138,7 +144,7 @@ public final class UnityAdsImplementation implements IUnityAds {
 	}
 
 	private void handleShowError(IUnityAdsShowListener showListener, String placementId, UnityAds.UnityAdsShowError error, String message) {
-		SDKMetrics.getInstance().sendMetricWithInitState(AdOperationMetric.newAdShowFailure(error, 0L));
+		sdkMetricsSender.sendMetricWithInitState(AdOperationMetric.newAdShowFailure(error, 0L));
 		if (showListener == null) return;
 		showListener.onUnityAdsShowFailure(placementId, error, message);
 	}
@@ -172,7 +178,7 @@ public final class UnityAdsImplementation implements IUnityAds {
 	@Override
 	public String getToken() {
 		// Getting the available token from storage
-		final String token =  TokenStorage.getInstance().getToken();
+		final String token = tokenStorage.getToken();
 		if (token == null || token.isEmpty()) {
 			return null;
 		}
@@ -191,14 +197,16 @@ public final class UnityAdsImplementation implements IUnityAds {
 			return;
 		} else if (ClientProperties.getApplicationContext() == null) {
 			// Invalidating app Context.
-			listener.onUnityAdsTokenReady(null);
+			wrapCustomerListener(() ->
+				listener.onUnityAdsTokenReady(null));
 			return;
 		}
 
 		Configuration config = configuration == null ? new ConfigurationReader().getCurrentConfiguration() : configuration;
 		BiddingBaseManager manager = BiddingManagerFactory.getInstance().createManager(listener, config.getExperiments());
 		manager.start();
-		AsyncTokenStorage.getInstance().getToken(manager);
+
+		asyncTokenStorage.getToken(manager);
 	}
 
 	public static void setConfiguration(Configuration configuration) {

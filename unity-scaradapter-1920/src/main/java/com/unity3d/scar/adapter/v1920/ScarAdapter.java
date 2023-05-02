@@ -8,6 +8,7 @@ import com.unity3d.scar.adapter.common.IScarAdapter;
 import com.unity3d.scar.adapter.common.IScarInterstitialAdListenerWrapper;
 import com.unity3d.scar.adapter.common.IScarRewardedAdListenerWrapper;
 import com.unity3d.scar.adapter.common.ScarAdapterBase;
+import com.unity3d.scar.adapter.common.WebViewAdsError;
 import com.unity3d.scar.adapter.common.scarads.IScarLoadListener;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
 import com.unity3d.scar.adapter.common.signals.SignalsStorage;
@@ -21,9 +22,9 @@ public class ScarAdapter extends ScarAdapterBase implements IScarAdapter {
 
 	private SignalsStorage<QueryInfo> _signalsStorage;
 
-	public ScarAdapter(IAdsErrorHandler adsErrorHandler) {
+	public ScarAdapter(IAdsErrorHandler<WebViewAdsError> adsErrorHandler) {
 		super(adsErrorHandler);
-		_signalsStorage = new SignalsStorage();
+		_signalsStorage = new SignalsStorage<>();
 		_signalCollector = new SignalsCollector(_signalsStorage);
 	}
 

@@ -1,6 +1,7 @@
 package com.unity3d.services.ads.gmascar.managers;
 
 import static com.unity3d.services.ads.gmascar.utils.ScarConstants.TOKEN_WITH_SCAR_FORMAT;
+import static com.unity3d.services.core.misc.Utilities.wrapCustomerListener;
 
 import com.unity3d.ads.IUnityAdsTokenListener;
 import com.unity3d.services.ads.gmascar.GMA;
@@ -8,7 +9,8 @@ import com.unity3d.services.ads.gmascar.listeners.IBiddingSignalsListener;
 import com.unity3d.services.ads.gmascar.models.BiddingSignals;
 import com.unity3d.services.ads.gmascar.utils.ScarRequestHandler;
 import com.unity3d.services.core.configuration.ConfigurationReader;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.metrics.ScarMetric;
 
@@ -58,7 +60,7 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 	@Override
 	public final void onUnityAdsTokenReady(String token) {
 		if (unityAdsTokenListener != null) {
-			unityAdsTokenListener.onUnityAdsTokenReady(token);
+			wrapCustomerListener(() -> unityAdsTokenListener.onUnityAdsTokenReady(token));
 		}
 
 		if (token != null && !token.isEmpty()) {
@@ -142,7 +144,7 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 		}).start();
 	}
 
-	public ISDKMetrics getMetricSender() {
-		return SDKMetrics.getInstance();
+	public SDKMetricsSender getMetricSender() {
+		return Utilities.getService(SDKMetricsSender.class);
 	}
 }

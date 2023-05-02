@@ -1,5 +1,7 @@
 package com.unity3d.services.ads.operation.show;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
 import android.text.TextUtils;
@@ -14,7 +16,7 @@ import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.request.metrics.AdOperationError;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
@@ -32,12 +34,12 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 
 	public static IShowModule getInstance() {
 		if (instance == null) {
-			instance = new ShowModuleDecoratorTimeout(new ShowModule(SDKMetrics.getInstance()), new ConfigurationReader());
+			instance = new ShowModuleDecoratorTimeout(new ShowModule(Utilities.getService(SDKMetricsSender.class)), new ConfigurationReader());
 		}
 		return instance;
 	}
 
-	public ShowModule(ISDKMetrics sdkMetrics) {
+	public ShowModule(SDKMetricsSender sdkMetrics) {
 		super(sdkMetrics);
 	}
 
@@ -67,16 +69,17 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 				remove(state.id);
 			}
 		}));
+		Activity activity = state.activity.get();
 
-		ClientProperties.setActivity(state.activity);
+		ClientProperties.setActivity(activity);
 
-		Display defaultDisplay = ((WindowManager)state.activity.getSystemService(state.activity.WINDOW_SERVICE)).getDefaultDisplay();
+		Display defaultDisplay = ((WindowManager)activity.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 		JSONObject parameters = new JSONObject();
 		JSONObject options = new JSONObject();
 		JSONObject display = new JSONObject();
 
 		try {
-			display.put("requestedOrientation", state.activity.getRequestedOrientation());
+			display.put("requestedOrientation", activity.getRequestedOrientation());
 			display.put("rotation", defaultDisplay.getRotation());
 			if (Build.VERSION.SDK_INT >= 13) {
 				Point displaySize = new Point();

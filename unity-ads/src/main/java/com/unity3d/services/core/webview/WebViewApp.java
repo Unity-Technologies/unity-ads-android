@@ -8,9 +8,13 @@ import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebViewClient;
 
+import androidx.webkit.WebViewCompat;
+import androidx.webkit.WebViewFeature;
 import com.unity3d.services.ads.api.AdUnit;
 import com.unity3d.services.core.configuration.ErrorState;
-import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
+import com.unity3d.services.core.configuration.IExperiments;
+import com.unity3d.services.core.webview.bridge.*;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.InitializeThread;
 import com.unity3d.services.core.log.DeviceLog;
@@ -19,17 +23,11 @@ import com.unity3d.services.core.misc.ViewUtilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
-import com.unity3d.services.core.webview.bridge.CallbackStatus;
-import com.unity3d.services.core.webview.bridge.Invocation;
-import com.unity3d.services.core.webview.bridge.NativeCallback;
-import com.unity3d.services.core.webview.bridge.WebViewBridge;
 
 import org.json.JSONArray;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class WebViewApp implements IWebViewBridgeInvoker {
@@ -40,20 +38,39 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 
 	private boolean _webAppLoaded = false;
 	private WebView _webView;
+	protected final IWebViewBridge _webViewBridge;
 	private Configuration _configuration;
 	private final HashMap<String, NativeCallback> _nativeCallbacks = new HashMap<>();
 	private static final AtomicReference<Boolean> _initialized = new AtomicReference<>(false);
 	private static final AtomicReference<String> _webAppFailureMessage = new AtomicReference<>();
 	private static final AtomicReference<Integer> _webAppFailureCode = new AtomicReference<>();
 
-	public WebViewApp (Configuration configuration, boolean useWebViewWithCache, boolean shouldNotRequireGesturePlayback) {
+	private WebViewApp (Configuration configuration, boolean useWebViewWithCache, boolean shouldNotRequireGesturePlayback) {
+		this(configuration, useWebViewWithCache, shouldNotRequireGesturePlayback, SharedInstances.INSTANCE.getWebViewBridge());
+	}
+
+	private WebViewApp (Configuration configuration, boolean useWebViewWithCache, boolean shouldNotRequireGesturePlayback, IWebViewBridge webViewBridge) {
 		setConfiguration(configuration);
 		WebViewBridge.setClassTable(getConfiguration().getWebAppApiClassList());
-		_webView = useWebViewWithCache ? new WebViewWithCache(ClientProperties.getApplicationContext(), shouldNotRequireGesturePlayback) : new WebView(ClientProperties.getApplicationContext(), shouldNotRequireGesturePlayback);
+		IExperiments experiments = configuration.getExperiments();
+		_webViewBridge = webViewBridge;
+		_webView = useWebViewWithCache
+				? new WebViewWithCache(ClientProperties.getApplicationContext(), shouldNotRequireGesturePlayback, experiments)
+				: new WebView(
+					ClientProperties.getApplicationContext(),
+					shouldNotRequireGesturePlayback,
+					SharedInstances.INSTANCE.getWebViewBridge(),
+					SharedInstances.INSTANCE.getWebViewAppInvocationCallbackInvoker(),
+					experiments
+				);
 		_webView.setWebViewClient(new WebAppClient());
 	}
 
-	public WebViewApp() { }
+	public WebViewApp() {
+		WebViewBridge.setClassTable(new Class[0]);
+		_webViewBridge = SharedInstances.INSTANCE.getWebViewBridge();
+		_conditionVariable = new ConditionVariable();
+	}
 
 	public void setWebAppLoaded(boolean loaded) {
 		_webAppLoaded = loaded;
@@ -115,7 +132,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 	private void invokeJavascriptMethod(String className, String methodName, JSONArray params) {
 		String javaScript = buildInvokeJavascript(className, methodName, params);
 		DeviceLog.debug("Invoking javascript: %s", javaScript);
-		getWebView().invokeJavascript(javaScript);
+		getWebView().evaluateJavascript(javaScript, null);
 	}
 
 	@SuppressWarnings("StringBufferReplaceableByString")
@@ -295,7 +312,7 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 					webViewApp = new WebViewApp(configuration, configuration.getExperiments().isWebAssetAdCaching(), configuration.getExperiments().isWebGestureNotRequired());
 				}
 				catch (Exception e) {
-					DeviceLog.error("Unity Ads SDK unable to create WebViewApp");
+					DeviceLog.error("Unity Ads SDK unable to create WebViewApp " + e.getMessage());
 					_conditionVariable.open();
 					return;
 				}
@@ -420,7 +437,8 @@ public class WebViewApp implements IWebViewBridgeInvoker {
 			});
 
 			DeviceLog.error("UnityAds SDK WebView render process gone with following reason : " + detail.toString());
-			SDKMetrics.getInstance().sendEvent("native_webview_render_process_gone", new HashMap<String, String>() {{
+			SDKMetricsSender sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
+			sdkMetricsSender.sendEvent("native_webview_render_process_gone", null, new HashMap<String, String>() {{
 				// Only apply tags if minimum API Level applies
 				if (Build.VERSION.SDK_INT >= 26) {
 					put("dc", "" + detail.didCrash());

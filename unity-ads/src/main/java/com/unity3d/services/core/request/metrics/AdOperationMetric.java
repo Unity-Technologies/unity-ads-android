@@ -23,14 +23,12 @@ public class AdOperationMetric {
 	public static Metric newAdLoadStart() {
 		return new Metric(
 			AD_LOAD_START,
-			null,
 			null);
 	}
 
 	public static Metric newAdShowStart() {
 		return new Metric(
 			AD_SHOW_START,
-			null,
 			null);
 	}
 
@@ -44,8 +42,7 @@ public class AdOperationMetric {
 	public static Metric newAdShowSuccess(Long durationMs) {
 		return new Metric(
 			AD_SHOW_SUCCESS,
-			durationMs,
-			null);
+			durationMs);
 	}
 
 	public static Metric newAdLoadFailure(AdOperationError error, Long durationMs, boolean isBanner) {

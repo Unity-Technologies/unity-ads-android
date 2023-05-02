@@ -16,12 +16,16 @@ import com.unity3d.services.core.device.reader.IDeviceInfoDataContainer;
 import com.unity3d.services.core.lifecycle.CachedLifecycle;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.network.core.HttpClient;
+import com.unity3d.services.core.network.model.HttpRequest;
+import com.unity3d.services.core.network.model.HttpResponse;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.services.core.request.WebRequest;
 import com.unity3d.services.core.request.metrics.Metric;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.request.metrics.TSIMetric;
+import com.unity3d.services.core.webview.WebView;
 import com.unity3d.services.core.webview.WebViewApp;
 
 import org.json.JSONObject;
@@ -39,6 +43,7 @@ public class InitializeThread extends Thread  {
 	private boolean _stopThread = false;
 	private boolean _didRetry = false;
 	private long _stateStartTimestamp;
+	private final SDKMetricsSender _sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
 
 	private InitializeThread(InitializeState state) {
 		super();
@@ -134,7 +139,7 @@ public class InitializeThread extends Thread  {
 	private void handleStateEndMetrics(InitializeState nextState) {
 		if (_stateName == null || isRetryState(nextState) || _stateName.equals("native_retry_state")) return;
 		long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - _stateStartTimestamp);
-		SDKMetrics.getInstance().sendMetric(new Metric(_stateName, duration, getMetricTagsForState()));
+		_sdkMetricsSender.sendMetric(new Metric(_stateName, duration, getMetricTagsForState()));
 	}
 
 	private Map<String, String> getMetricTagsForState() {
@@ -223,8 +228,11 @@ public class InitializeThread extends Thread  {
 					Utilities.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							currentApp.getWebView().destroy();
-							currentApp.setWebView(null);
+							WebView currentWebView = currentApp.getWebView();
+							if (currentWebView != null) {
+								currentWebView.destroy();
+								currentApp.setWebView(null);
+							}
 							cv.open();
 						}
 					});
@@ -249,8 +257,8 @@ public class InitializeThread extends Thread  {
 
 			SdkProperties.setInitialized(false);
 
-			for (String moduleName : _configuration.getModuleConfigurationList()) {
-				IModuleConfiguration moduleConfiguration = _configuration.getModuleConfiguration(moduleName);
+			for (Class moduleClass : _configuration.getModuleConfigurationList()) {
+				IModuleConfiguration moduleConfiguration = _configuration.getModuleConfiguration(moduleClass);
 				if (moduleConfiguration != null) {
 					moduleConfiguration.resetState(_configuration);
 				}
@@ -298,15 +306,6 @@ public class InitializeThread extends Thread  {
 
 		@Override
 		public InitializeState execute() {
-			for (String moduleName : _configuration.getModuleConfigurationList()) {
-				IModuleConfiguration moduleConfiguration = _configuration.getModuleConfiguration(moduleName);
-				if (moduleConfiguration != null) {
-					if(!moduleConfiguration.initModuleState(_configuration)) {
-						return new InitializeStateError(ErrorState.InitModules, new Exception("Unity Ads config server resolves to loopback address (due to ad blocker?)"), _configuration);
-					}
-				}
-			}
-
 			return new InitializeStateConfig(_configuration);
 		}
 	}
@@ -366,7 +365,8 @@ public class InitializeThread extends Thread  {
 			PrivacyConfigStorage privacyConfigStorage = PrivacyConfigStorage.getInstance();
 			DeviceInfoDataFactory deviceInfoDataFactory = new DeviceInfoDataFactory();
 			IDeviceInfoDataContainer infoReaderCompressor = deviceInfoDataFactory.getDeviceInfoData(InitRequestType.TOKEN);
-			IConfigurationLoader configurationLoader = new ConfigurationLoader(new ConfigurationRequestFactory(_configuration, infoReaderCompressor));
+			SDKMetricsSender sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
+			IConfigurationLoader configurationLoader = new ConfigurationLoader(new ConfigurationRequestFactory(_configuration, infoReaderCompressor), sdkMetricsSender);
 			IDeviceInfoDataContainer privacyInfoReaderCompressor = deviceInfoDataFactory.getDeviceInfoData(InitRequestType.PRIVACY);
 			configurationLoader = new PrivacyConfigurationLoader(configurationLoader, new ConfigurationRequestFactory(_configuration, privacyInfoReaderCompressor), privacyConfigStorage);
 			final Configuration legacyConfiguration = new Configuration(SdkProperties.getConfigUrl());
@@ -379,14 +379,14 @@ public class InitializeThread extends Thread  {
 						if (_configuration.getDelayWebViewUpdate()) {
 							_nextState = new InitializeStateLoadCacheConfigAndWebView(_configuration, _localConfig);
 						}
-						TokenStorage.getInstance().setInitToken(_configuration.getUnifiedAuctionToken());
+						((TokenStorage)Utilities.getService(TokenStorage.class)).setInitToken(_configuration.getUnifiedAuctionToken());
 						boolean isNativeWebViewCache = _configuration.getExperiments().isNativeWebViewCacheEnabled();
 						_nextState = isNativeWebViewCache ? new InitializeStateCreateWithRemote(_configuration) : new InitializeStateLoadCache(_configuration);
 					}
 
 					@Override
 					public void onError(String errorMsg) {
-						SDKMetrics.getInstance().sendMetric(TSIMetric.newEmergencySwitchOff());
+						sdkMetricsSender.sendMetric(TSIMetric.newEmergencySwitchOff());
 						_nextState = executeLegacy(legacyConfiguration);
 					}
 				});
@@ -453,6 +453,7 @@ public class InitializeThread extends Thread  {
 		private long _retryDelay;
 		private int _maxRetries;
 		private double _scalingFactor;
+		private HttpClient _httpClient = Utilities.getService(HttpClient.class);
 
 		public InitializeStateLoadWeb(Configuration configuration) {
 			_configuration = configuration;
@@ -470,12 +471,12 @@ public class InitializeThread extends Thread  {
 		public InitializeState execute() {
 			DeviceLog.info("Unity Ads init: loading webapp from " + _configuration.getWebViewUrl());
 
-			WebRequest request;
+			HttpRequest request;
 
 			try {
-				request = new WebRequest(_configuration.getWebViewUrl(), "GET", null);
+				request = new HttpRequest(_configuration.getWebViewUrl());
 			}
-			catch (MalformedURLException e) {
+			catch (Exception e) {
 				DeviceLog.exception("Malformed URL", e);
 				return new InitializeStateError(ErrorState.MalformedWebviewRequest, e, _configuration);
 			}
@@ -483,7 +484,8 @@ public class InitializeThread extends Thread  {
 			String webViewData;
 
 			try {
-				webViewData = request.makeRequest();
+				HttpResponse response = _httpClient.executeBlocking(request);
+				webViewData = response.getBody().toString();
 			} catch (Exception e) {
 				if (_retries < _maxRetries) {
 					_retryDelay *= _scalingFactor;
@@ -603,8 +605,8 @@ public class InitializeThread extends Thread  {
 
 		@Override
 		public InitializeState execute() {
-			for (String moduleName : _configuration.getModuleConfigurationList()) {
-				IModuleConfiguration moduleConfiguration = _configuration.getModuleConfiguration(moduleName);
+			for (Class moduleClass : _configuration.getModuleConfigurationList()) {
+				IModuleConfiguration moduleConfiguration = _configuration.getModuleConfiguration(moduleClass);
 				if (moduleConfiguration != null) {
 					moduleConfiguration.initCompleteState(_configuration);
 				}
@@ -629,8 +631,8 @@ public class InitializeThread extends Thread  {
 		public InitializeState execute() {
 			DeviceLog.error("Unity Ads init: halting init in " + _errorState.getMetricName() + ": " + _exception.getMessage());
 
-			for (String moduleName : _configuration.getModuleConfigurationList()) {
-				IModuleConfiguration moduleConfiguration = _configuration.getModuleConfiguration(moduleName);
+			for (Class moduleClass : _configuration.getModuleConfigurationList()) {
+				IModuleConfiguration moduleConfiguration = _configuration.getModuleConfiguration(moduleClass);
 				if (moduleConfiguration != null) {
 					moduleConfiguration.initErrorState(_configuration, _errorState, _exception.getMessage());
 				}
@@ -863,6 +865,7 @@ public class InitializeThread extends Thread  {
 		private Configuration _configuration;
 		private int _retries;
 		private long _retryDelay;
+		private HttpClient _httpClient = Utilities.getService(HttpClient.class);
 
 		public InitializeStateDownloadWebView(Configuration configuration) {
 			_configuration = configuration;
@@ -874,10 +877,10 @@ public class InitializeThread extends Thread  {
 		public InitializeState execute() {
 			DeviceLog.info("Unity Ads init: downloading webapp from " + _configuration.getWebViewUrl());
 
-			WebRequest request;
+			HttpRequest request;
 
 			try {
-				request = new WebRequest(_configuration.getWebViewUrl(), "GET", null);
+				request = new HttpRequest(_configuration.getWebViewUrl());
 			}
 			catch (Exception e) {
 				DeviceLog.exception("Malformed URL", e);
@@ -887,7 +890,8 @@ public class InitializeThread extends Thread  {
 			String webViewData;
 
 			try {
-				webViewData = request.makeRequest();
+				HttpResponse response = _httpClient.executeBlocking(request);
+				webViewData = response.getBody().toString();
 			} catch (Exception e) {
 				if (_retries < _configuration.getMaxRetries()) {
 					_retryDelay *= _configuration.getRetryScalingFactor();

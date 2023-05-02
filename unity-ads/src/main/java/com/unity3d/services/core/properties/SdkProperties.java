@@ -1,5 +1,7 @@
 package com.unity3d.services.core.properties;
 
+import static com.unity3d.services.core.misc.Utilities.wrapCustomerListener;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -60,7 +62,7 @@ public class SdkProperties {
 		setInitializeState(InitializationState.INITIALIZED_FAILED);
 
 		for(IUnityAdsInitializationListener initializationListener: getInitializationListeners()) {
-			initializationListener.onInitializationFailed(error, message);
+			wrapCustomerListener(() -> initializationListener.onInitializationFailed(error, message));
 		}
 		resetInitializationListeners();
 	}
@@ -69,7 +71,7 @@ public class SdkProperties {
 		setInitializeState(InitializationState.INITIALIZED_SUCCESSFULLY);
 
 		for(IUnityAdsInitializationListener initializationListener: getInitializationListeners()) {
-			initializationListener.onInitializationComplete();
+			wrapCustomerListener(initializationListener::onInitializationComplete);
 		}
 		resetInitializationListeners();
 	}

@@ -2,8 +2,10 @@ package com.unity3d.services.core.configuration;
 
 
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.request.metrics.Metric;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.request.metrics.TSIMetric;
 
 import java.util.HashMap;
@@ -23,7 +25,7 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	private int _webviewRetryCount = 0;
 	private boolean _initMetricSent = false;
 	private boolean _tokenMetricSent = false;
-	private boolean _isNewInitFlow = false;
+	private final SDKMetricsSender _sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
 
 	public static IInitializeEventsMetricSender getInstance() {
 		if (_instance == null) {
@@ -72,12 +74,6 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	public synchronized void sdkDidInitialize() {
 		if (initializationStartTimeStamp() == 0L) {
 			DeviceLog.debug("sdkDidInitialize called before didInitStart, skipping metric");
-			return;
-		}
-
-		if (!_initMetricSent && !_isNewInitFlow) {
-			sendMetric(TSIMetric.newInitTimeSuccess(duration(), getRetryTags()));
-			_initMetricSent = true;
 		}
 	}
 
@@ -90,12 +86,6 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	public synchronized void sdkInitializeFailed(String message, ErrorState errorState) {
 		if (_startTime == 0L) {
 			DeviceLog.debug("sdkInitializeFailed called before didInitStart, skipping metric");
-			return;
-		}
-
-		if (!_initMetricSent && !_isNewInitFlow) {
-			sendMetric(TSIMetric.newInitTimeFailure(duration(), getErrorStateTags(errorState)));
-			_initMetricSent = true;
 		}
 	}
 
@@ -145,18 +135,10 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 	}
 
 	private Metric getPrivacyRequestMetric(boolean success) {
-		if (_isNewInitFlow) {
-			if (success) {
-				return TSIMetric.newPrivacyRequestLatencySuccess(privacyConfigDuration());
-			} else {
-				return TSIMetric.newPrivacyRequestLatencyFailure(privacyConfigDuration());
-			}
+		if (success) {
+			return TSIMetric.newPrivacyRequestLatencySuccess(privacyConfigDuration());
 		} else {
-			if (success) {
-				return TSIMetric.newPrivacyResolutionRequestLatencySuccess(privacyConfigDuration());
-			} else {
-				return TSIMetric.newPrivacyResolutionRequestLatencyFailure(privacyConfigDuration());
-			}
+			return TSIMetric.newPrivacyRequestLatencyFailure(privacyConfigDuration());
 		}
 	}
 
@@ -218,12 +200,7 @@ public class InitializeEventsMetricSender implements IInitializeEventsMetricSend
 
 	@Override
 	public void sendMetric(Metric metric) {
-		SDKMetrics.getInstance().sendMetric(metric);
-	}
-
-	@Override
-	public void setNewInitFlow(boolean isNewInitFlow) {
-		_isNewInitFlow = isNewInitFlow;
+		_sdkMetricsSender.sendMetric(metric);
 	}
 
 	@Override

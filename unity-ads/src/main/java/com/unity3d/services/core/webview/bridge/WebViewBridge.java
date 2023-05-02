@@ -1,7 +1,6 @@
 package com.unity3d.services.core.webview.bridge;
 
 import com.unity3d.services.core.log.DeviceLog;
-import com.unity3d.services.core.webview.WebViewApp;
 
 import org.json.JSONException;
 
@@ -10,9 +9,22 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class WebViewBridge {
-	private static HashMap<String, HashMap<String, HashMap<Integer, Method>>> _classTable;
+public class WebViewBridge implements IWebViewBridge {
+	private static IWebViewBridge _instance;
+	private final INativeCallbackSubject nativeCallbackSubject;
+
 	public static void setClassTable(Class[] apiClassList) {
+		_instance = new WebViewBridge(apiClassList, SharedInstances.INSTANCE.getWebViewAppNativeCallbackSubject());
+	}
+	public static IWebViewBridge getInstance() {
+		return _instance;
+	}
+
+	private HashMap<String, HashMap<String, HashMap<Integer, Method>>> _classTable;
+
+	private WebViewBridge(Class[] apiClassList, INativeCallbackSubject nativeCallbackSubject) {
+		this.nativeCallbackSubject = nativeCallbackSubject;
+
 		if (apiClassList == null)
 			return;
 
@@ -43,7 +55,7 @@ public class WebViewBridge {
 		}
 	}
 
-	private static Method findMethod(String className, String methodName, Object[] parameters) throws JSONException, NoSuchMethodException {
+	private Method findMethod(String className, String methodName, Object[] parameters) throws JSONException, NoSuchMethodException {
 		HashMap<String, HashMap<Integer, Method>> methodTable;
 
 		if (!_classTable.containsKey(className)) {
@@ -65,7 +77,7 @@ public class WebViewBridge {
 		return overrideTable.get(Arrays.deepHashCode(types));
 	}
 
-	private static Class<?>[] getTypes(Object[] parameters) throws JSONException {
+	private Class<?>[] getTypes(Object[] parameters) throws JSONException {
 		Class<?>[] types;
 		if(parameters == null) {
 			types = new Class[1];
@@ -84,7 +96,7 @@ public class WebViewBridge {
 		return types;
 	}
 
-	private static Object[] getValues(Object[] parameters, WebViewCallback callback) throws JSONException {
+	private Object[] getValues(Object[] parameters, WebViewCallback callback) throws JSONException {
 		Object[] values;
 		if(parameters == null) {
 			if(callback == null) {
@@ -106,7 +118,8 @@ public class WebViewBridge {
 		return values;
 	}
 
-	public static void handleInvocation(String className, String methodName, Object[] parameters, WebViewCallback callback)
+	@Override
+	public void handleInvocation(String className, String methodName, Object[] parameters, WebViewCallback callback)
 			throws Exception {
 		Method method;
 		try {
@@ -127,10 +140,11 @@ public class WebViewBridge {
 		}
 	}
 
-	public static void handleCallback(String callbackId, String callbackStatus, Object[] parameters)
+	@Override
+	public void handleCallback(String callbackId, String callbackStatus, Object[] parameters)
 			throws Exception {
 
-		NativeCallback callback = WebViewApp.getCurrentApp().getCallback(callbackId);
+		NativeCallback callback = nativeCallbackSubject.getCallback(callbackId);
 		try {
 			callback.invoke(callbackStatus, getValues(parameters, null));
 		} catch (InvocationTargetException | IllegalAccessException | JSONException | IllegalArgumentException e) {

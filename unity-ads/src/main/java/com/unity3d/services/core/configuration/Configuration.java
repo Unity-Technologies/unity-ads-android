@@ -4,9 +4,17 @@ import static com.unity3d.services.ads.gmascar.utils.ScarConstants.SCAR_PRD_BIDD
 
 import android.text.TextUtils;
 
+import com.unity3d.services.ads.configuration.AdsModuleConfiguration;
+import com.unity3d.services.analytics.core.configuration.AnalyticsModuleConfiguration;
+import com.unity3d.services.banners.configuration.BannersModuleConfiguration;
 import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.network.core.HttpClient;
+import com.unity3d.services.core.network.mapper.WebRequestToHttpRequestKt;
+import com.unity3d.services.core.network.model.HttpRequest;
+import com.unity3d.services.core.network.model.HttpResponse;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.WebRequest;
+import com.unity3d.services.store.core.configuration.StoreModuleConfiguration;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,12 +64,12 @@ public class Configuration {
 
 	private Map<String, IModuleConfiguration> _moduleConfigurations;
 
-	private String[] _moduleConfigurationList = {
-			"com.unity3d.services.core.configuration.CoreModuleConfiguration",
-			"com.unity3d.services.ads.configuration.AdsModuleConfiguration",
-			"com.unity3d.services.analytics.core.configuration.AnalyticsModuleConfiguration",
-			"com.unity3d.services.banners.configuration.BannersModuleConfiguration",
-			"com.unity3d.services.store.core.configuration.StoreModuleConfiguration"
+	private final Class<?>[] _moduleConfigurationList = {
+		CoreModuleConfiguration.class,
+		AdsModuleConfiguration.class,
+		AnalyticsModuleConfiguration.class,
+		BannersModuleConfiguration.class,
+		StoreModuleConfiguration.class,
 	};
 
 	private Class[] _webAppApiClassList;
@@ -102,7 +110,7 @@ public class Configuration {
 		return _webAppApiClassList;
 	}
 
-	public String[] getModuleConfigurationList () { return _moduleConfigurationList; }
+	public Class[] getModuleConfigurationList () { return _moduleConfigurationList; }
 
 	public String getWebViewUrl() { return _webViewUrl; }
 
@@ -170,17 +178,17 @@ public class Configuration {
 
 	public String getSrc() {return (_src != null) ? _src : ""; }
 
-	public IModuleConfiguration getModuleConfiguration(String moduleName) {
-		if (_moduleConfigurations != null && _moduleConfigurations.containsKey(moduleName)) {
-			return _moduleConfigurations.get(moduleName);
+	public IModuleConfiguration getModuleConfiguration(Class moduleClass) {
+		if (_moduleConfigurations != null && _moduleConfigurations.containsKey(moduleClass)) {
+			return _moduleConfigurations.get(moduleClass);
 		}
 
 		try {
-			IModuleConfiguration module = (IModuleConfiguration)Class.forName(moduleName).newInstance();
+			IModuleConfiguration module = (IModuleConfiguration)moduleClass.newInstance();
 			if (module != null) {
 				if (_moduleConfigurations == null) {
 					_moduleConfigurations = new HashMap<>();
-					_moduleConfigurations.put(moduleName, module);
+					_moduleConfigurations.put(moduleClass.getName(), module);
 				}
 
 				return module;
@@ -200,10 +208,12 @@ public class Configuration {
 		if (_configUrl == null) {
 			throw new MalformedURLException("Base URL is null");
 		}
-
 		WebRequest request = _configurationRequestFactory.getWebRequest();
+		HttpRequest httpRequest = WebRequestToHttpRequestKt.toHttpRequest(request);
 		InitializeEventsMetricSender.getInstance().didConfigRequestStart();
-		String data = request.makeRequest();
+		HttpClient httpClient = Utilities.getService(HttpClient.class);
+		HttpResponse response = httpClient.executeBlocking(httpRequest);
+		String data = response.getBody().toString();
 
 		try {
 			handleConfigurationData(new JSONObject(data), true);
@@ -283,7 +293,7 @@ public class Configuration {
 	private void createWebAppApiClassList() {
 		List<Class> apiList = new ArrayList<>();
 
-		for (String moduleConfigClass : getModuleConfigurationList()) {
+		for (Class moduleConfigClass : getModuleConfigurationList()) {
 			IModuleConfiguration moduleConfiguration = getModuleConfiguration(moduleConfigClass);
 			if (moduleConfiguration != null) {
 				if (moduleConfiguration.getWebAppApiClassList() != null) {

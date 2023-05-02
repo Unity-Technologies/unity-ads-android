@@ -9,6 +9,7 @@ import com.unity3d.services.ads.token.TokenStorage;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.log.DeviceLog;
+import com.unity3d.services.core.misc.Utilities;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -18,6 +19,8 @@ import java.util.Map;
 
 public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 	private InetAddress _address;
+	private final TokenStorage tokenStorage = Utilities.getService(TokenStorage.class);
+	private final AsyncTokenStorage asyncTokenStorage = Utilities.getService(AsyncTokenStorage.class);
 
 	public Class[] getWebAppApiClassList() {
 		Class[] list = {
@@ -27,7 +30,9 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 			com.unity3d.services.ads.api.Load.class,
 			com.unity3d.services.ads.api.Show.class,
 			com.unity3d.services.ads.api.Token.class,
-			com.unity3d.services.ads.api.GMAScar.class
+			com.unity3d.services.ads.api.GMAScar.class,
+			com.unity3d.services.ads.api.Measurements.class,
+			com.unity3d.services.ads.api.Topics.class,
 		};
 
 		return list;
@@ -36,59 +41,21 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 	public boolean resetState(Configuration configuration) {
 		AdUnitOpen.setConfiguration(configuration);
 		UnityAdsImplementation.setConfiguration(configuration);
-		TokenStorage.getInstance().deleteTokens();
-		AsyncTokenStorage.getInstance().setConfiguration(configuration);
-		return true;
-	}
-
-	public boolean initModuleState(Configuration configuration) {
-		DeviceLog.debug("Unity Ads init: checking for ad blockers");
-
-		final String configHost;
-		try {
-			configHost = new URL(configuration.getConfigUrl()).getHost();
-		} catch(MalformedURLException e) {
-			return true;
-		}
-
-		final ConditionVariable cv = new ConditionVariable();
-
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					_address = InetAddress.getByName(configHost);
-					cv.open();
-				} catch(Exception e) {
-					DeviceLog.exception("Couldn't get address. Host: " + configHost, e);
-					cv.open();
-				}
-			}
-		}.start();
-
-		// This is checking if config url is in /etc/hosts or equivalent. No need for long wait.
-		boolean success = cv.block(2000);
-		if(success && _address != null && _address.isLoopbackAddress()) {
-			DeviceLog.error("Unity Ads init: halting init because Unity Ads config resolves to loopback address (due to ad blocker?)");
-			return false;
-		}
-		AdUnitOpen.setConfiguration(configuration);
-		UnityAdsImplementation.setConfiguration(configuration);
-		AsyncTokenStorage.getInstance().setConfiguration(configuration);
-
+		tokenStorage.deleteTokens();
+		asyncTokenStorage.setConfiguration(configuration);
 		return true;
 	}
 
 	public boolean initErrorState(Configuration configuration, ErrorState state, String errorMessage) {
-		TokenStorage.getInstance().setInitToken(null);
-		TokenStorage.getInstance().deleteTokens();
+		tokenStorage.setInitToken(null);
+		tokenStorage.deleteTokens();
 		return true;
 	}
 
 	public boolean initCompleteState(Configuration configuration) {
 		AdUnitOpen.setConfiguration(configuration);
 		UnityAdsImplementation.setConfiguration(configuration);
-		AsyncTokenStorage.getInstance().setConfiguration(configuration);
+		asyncTokenStorage.setConfiguration(configuration);
 		return true;
 	}
 

@@ -4,7 +4,6 @@ import com.unity3d.services.core.configuration.Configuration
 import com.unity3d.services.core.connectivity.ConnectivityMonitor
 import com.unity3d.services.core.connectivity.IConnectivityListener
 import com.unity3d.services.core.domain.ISDKDispatchers
-import com.unity3d.services.core.extensions.runReturnSuspendCatching
 import com.unity3d.services.core.log.DeviceLog
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -19,7 +18,7 @@ import kotlin.coroutines.resume
  */
 class InitializeStateNetworkError(
     private val dispatchers: ISDKDispatchers,
-) : MetricTask<InitializeStateNetworkError.Params, Result<Unit>>(), IConnectivityListener {
+) : MetricTask<InitializeStateNetworkError.Params, Unit>(), IConnectivityListener {
     private var maximumConnectedEvents: Int = 500
     private var receivedConnectedEvents: Int = 0
     private var lastConnectedEventTimeMs: Long = 0
@@ -30,23 +29,21 @@ class InitializeStateNetworkError(
         return getMetricNameForInitializeTask("error_network")
     }
 
-    override suspend fun doWork(params: Params): Result<Unit> = withContext(dispatchers.default) {
-        runReturnSuspendCatching {
-            DeviceLog.error("Unity Ads init: network error, waiting for connection events")
-            maximumConnectedEvents = params.config.maximumConnectedEvents
-            connectedEventThreshold = params.config.connectedEventThreshold
+    override suspend fun doWork(params: Params) = withContext(dispatchers.default) {
+        DeviceLog.error("Unity Ads init: network error, waiting for connection events")
+        maximumConnectedEvents = params.config.maximumConnectedEvents
+        connectedEventThreshold = params.config.connectedEventThreshold
 
-            val success = withTimeoutOrNull(params.config.networkErrorTimeout) {
-                suspendCancellableCoroutine<Unit> { cont ->
-                    startListening(cont)
-                }
+        val success = withTimeoutOrNull(params.config.networkErrorTimeout) {
+            suspendCancellableCoroutine<Unit> { cont ->
+                startListening(cont)
             }
+        }
 
-            // We timed out
-            if (success == null) {
-                ConnectivityMonitor.removeListener(this@InitializeStateNetworkError)
-                throw Exception("No connected events within the timeout!")
-            }
+        // We timed out
+        if (success == null) {
+            ConnectivityMonitor.removeListener(this@InitializeStateNetworkError)
+            throw Exception("No connected events within the timeout!")
         }
     }
 

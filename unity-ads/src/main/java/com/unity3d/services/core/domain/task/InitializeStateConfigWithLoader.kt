@@ -3,14 +3,12 @@ package com.unity3d.services.core.domain.task
 import com.unity3d.services.ads.token.TokenStorage
 import com.unity3d.services.core.configuration.*
 import com.unity3d.services.core.device.reader.DeviceInfoDataFactory
-import com.unity3d.services.core.device.reader.DeviceInfoReaderBuilder
-import com.unity3d.services.core.device.reader.DeviceInfoReaderPrivacyBuilder
-import com.unity3d.services.core.device.reader.GameSessionIdReader
+import com.unity3d.services.core.di.get
 import com.unity3d.services.core.domain.ISDKDispatchers
 import com.unity3d.services.core.extensions.AbortRetryException
-import com.unity3d.services.core.extensions.runReturnSuspendCatching
 import com.unity3d.services.core.extensions.withRetry
 import com.unity3d.services.core.request.metrics.SDKMetrics
+import com.unity3d.services.core.request.metrics.SDKMetricsSender
 import com.unity3d.services.core.request.metrics.TSIMetric
 import kotlinx.coroutines.withContext
 
@@ -24,93 +22,110 @@ import kotlinx.coroutines.withContext
  */
 class InitializeStateConfigWithLoader(
     private val dispatchers: ISDKDispatchers,
-    private val initializeStateNetworkError: InitializeStateNetworkError
-): BaseTask<InitializeStateConfigWithLoader.Params, Result<Configuration>> {
+    private val initializeStateNetworkError: InitializeStateNetworkError,
+    private val tokenStorage: TokenStorage,
+    private val sdkMetricsSender: SDKMetricsSender
+) : BaseTask<InitializeStateConfigWithLoader.Params, Configuration> {
 
-    override suspend fun doWork(params: Params): Result<Configuration> =
+    override suspend fun doWork(params: Params) =
         withContext(dispatchers.default) {
-            runReturnSuspendCatching {
-                val privacyConfigStorage = PrivacyConfigStorage.getInstance()
-                val deviceInfoDataFactory = DeviceInfoDataFactory()
+            val privacyConfigStorage = PrivacyConfigStorage.getInstance()
+            val deviceInfoDataFactory = DeviceInfoDataFactory()
 
-                var configurationLoader: IConfigurationLoader = ConfigurationLoader(
-                    ConfigurationRequestFactory(
-                        params.config,
-                        deviceInfoDataFactory.getDeviceInfoData(InitRequestType.TOKEN)
-                    )
-                )
-                configurationLoader = PrivacyConfigurationLoader(
-                    configurationLoader,
-                    ConfigurationRequestFactory(
-                        params.config,
-                        deviceInfoDataFactory.getDeviceInfoData(InitRequestType.PRIVACY)
+            var configurationLoader: IConfigurationLoader = ConfigurationLoader(
+                ConfigurationRequestFactory(
+                    params.config,
+                    deviceInfoDataFactory.getDeviceInfoData(InitRequestType.TOKEN)
+                ), get()
+            )
+            configurationLoader = PrivacyConfigurationLoader(
+                configurationLoader,
+                ConfigurationRequestFactory(
+                    params.config,
+                    deviceInfoDataFactory.getDeviceInfoData(InitRequestType.PRIVACY)
+                ),
+                privacyConfigStorage
+            )
+            var config = Configuration()
+
+            val configResult = runCatching {
+                withRetry(
+                    retries = params.config.maxRetries,
+                    scalingFactor = params.config.retryScalingFactor,
+                    retryDelay = params.config.retryDelay,
+                    fallbackException = InitializationException(
+                        ErrorState.NetworkConfigRequest,
+                        Exception(),
+                        params.config
                     ),
-                    privacyConfigStorage
-                )
-                var config = Configuration()
+                ) {
+                    if (it > 0) InitializeEventsMetricSender.getInstance().onRetryConfig()
+                    withContext(dispatchers.io) {
+                        configurationLoader.loadConfiguration(object :
+                            IConfigurationLoaderListener {
+                            override fun onSuccess(configuration: Configuration) {
+                                config = configuration
+                                config.saveToDisk()
+                                tokenStorage.setInitToken(config.unifiedAuctionToken)
+                            }
 
-                val configResult = runCatching {
-                    withRetry(
-                        retries = params.config.maxRetries,
-                        scalingFactor = params.config.retryScalingFactor,
-                        retryDelay = params.config.retryDelay,
-                        fallbackException = InitializationException(ErrorState.NetworkConfigRequest, Exception(), params.config),
-                    ) {
-                        if (it > 0) InitializeEventsMetricSender.getInstance().onRetryConfig()
-                        withContext(dispatchers.io) {
-                            configurationLoader.loadConfiguration(object :
-                                IConfigurationLoaderListener {
-                                override fun onSuccess(configuration: Configuration) {
-                                    config = configuration
-                                    config.saveToDisk()
-                                    TokenStorage.getInstance().setInitToken(config.unifiedAuctionToken)
-                                }
-
-                                override fun onError(errorMsg: String) {
-                                    SDKMetrics.getInstance().sendMetric(TSIMetric.newEmergencySwitchOff())
-                                    // Shall return with error and stop retries
-                                    throw AbortRetryException(errorMsg)
-                                }
-                            })
-                        }
+                            override fun onError(errorMsg: String) {
+                                sdkMetricsSender.sendMetric(TSIMetric.newEmergencySwitchOff())
+                                // Shall return with error and stop retries
+                                throw AbortRetryException(errorMsg)
+                            }
+                        })
                     }
                 }
+            }
 
-                config = if (configResult.isFailure) {
-                    val haveNetwork: Result<Unit> = initializeStateNetworkError(InitializeStateNetworkError.Params(params.config))
-                    if (haveNetwork.isSuccess) {
-                        InitializeEventsMetricSender.getInstance().onRetryConfig()
-                        withContext(dispatchers.io) {
-                            configurationLoader.loadConfiguration(object : IConfigurationLoaderListener {
-                                override fun onSuccess(configuration: Configuration) {
-                                    config = configuration
-                                    config.saveToDisk()
-                                    TokenStorage.getInstance().setInitToken(config.unifiedAuctionToken)
-                                }
+            config = if (configResult.isFailure) {
+                // Check if it as an aborted exception
+                val configResultException = configResult.exceptionOrNull()
+                if (configResultException is AbortRetryException) {
+                    // Abort init!
+                    throw InitializationException(
+                        ErrorState.NetworkConfigRequest,
+                        configResultException,
+                        params.config
+                    )
+                }
+                val haveNetwork =
+                    runCatching { initializeStateNetworkError(InitializeStateNetworkError.Params(params.config)) }
+                if (haveNetwork.isSuccess) {
+                    InitializeEventsMetricSender.getInstance().onRetryConfig()
+                    withContext(dispatchers.io) {
+                        configurationLoader.loadConfiguration(object : IConfigurationLoaderListener {
+                            override fun onSuccess(configuration: Configuration) {
+                                config = configuration
+                                config.saveToDisk()
+                                tokenStorage.setInitToken(config.unifiedAuctionToken)
+                            }
 
-                                override fun onError(errorMsg: String) {
-                                    SDKMetrics.getInstance().sendMetric(TSIMetric.newEmergencySwitchOff())
-                                    // Shall return with an error
-                                    throw InitializationException(ErrorState.NetworkConfigRequest,
-                                        Exception(errorMsg),
-                                        params.config)
-                                }
-                            })
-                        }
-                        config
-                    } else {
-                        throw InitializationException(
-                            ErrorState.NetworkConfigRequest,
-                            Exception("No connected events within the timeout!"),
-                            params.config
-                        )
+                            override fun onError(errorMsg: String) {
+                                sdkMetricsSender.sendMetric(TSIMetric.newEmergencySwitchOff())
+                                // Shall return with an error
+                                throw InitializationException(
+                                    ErrorState.NetworkConfigRequest,
+                                    Exception(errorMsg),
+                                    params.config
+                                )
+                            }
+                        })
                     }
-                } else {
                     config
+                } else {
+                    throw InitializationException(
+                        ErrorState.NetworkConfigRequest,
+                        Exception("No connected events within the timeout!"),
+                        params.config
+                    )
                 }
-
+            } else {
                 config
             }
+
+            config
         }
 
     /**

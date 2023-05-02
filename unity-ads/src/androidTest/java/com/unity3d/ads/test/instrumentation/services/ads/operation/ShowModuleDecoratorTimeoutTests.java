@@ -19,7 +19,7 @@ import com.unity3d.services.ads.operation.show.ShowModuleDecoratorTimeout;
 import com.unity3d.services.ads.operation.show.ShowOperationState;
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.configuration.ConfigurationReader;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.WebViewBridgeInvocationRunnable;
@@ -40,7 +40,7 @@ public class ShowModuleDecoratorTimeoutTests {
 
 	private IUnityAdsShowListener showListenerMock;
 	private IShowModule showModule;
-	private ISDKMetrics sdkMetricsMock;
+	private SDKMetricsSender sdkMetricsMock;
 	private ConfigurationReader configurationReaderMock;
 
 	@Rule
@@ -49,7 +49,7 @@ public class ShowModuleDecoratorTimeoutTests {
 	@Before
 	public void beforeEachTest() {
 		showListenerMock = mock(IUnityAdsShowListener.class);
-		sdkMetricsMock = mock(ISDKMetrics.class);
+		sdkMetricsMock = mock(SDKMetricsSender.class);
 		configurationReaderMock = mock(ConfigurationReader.class);
 		// We need a real instance since ShowModule will create the Operation object (which holds the State with Listener ID)
 		showModule = new ShowModule(sdkMetricsMock);

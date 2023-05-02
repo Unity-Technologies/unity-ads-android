@@ -1,14 +1,23 @@
 package com.unity3d.services.core.domain.task
 
+import com.unity3d.services.ads.configuration.AdsModuleConfiguration
+import com.unity3d.services.analytics.core.configuration.AnalyticsModuleConfiguration
+import com.unity3d.services.banners.configuration.BannersModuleConfiguration
 import com.unity3d.services.core.configuration.Configuration
+import com.unity3d.services.core.configuration.CoreModuleConfiguration
 import com.unity3d.services.core.configuration.ErrorState
 import com.unity3d.services.core.configuration.IModuleConfiguration
 import com.unity3d.services.core.log.DeviceLog
+import com.unity3d.services.store.core.configuration.StoreModuleConfiguration
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertTrue
@@ -24,7 +33,7 @@ class InitializeStateErrorTest {
 
     private val defaultDeviceLog: String = "Unity Ads init: halting init in init_modules: Error occurred"
 
-    private val dispatchers: TestSDKDispatchers = TestSDKDispatchers()
+    var dispatchers = TestSDKDispatchers()
 
     @MockK
     lateinit var moduleMock: IModuleConfiguration
@@ -40,19 +49,32 @@ class InitializeStateErrorTest {
         MockKAnnotations.init(this, relaxUnitFun = true)
         every { configMock.getModuleConfiguration(any()) } returns moduleMock
         every { moduleMock.initErrorState(any(), any(), any()) } returns true
+        Dispatchers.setMain(dispatchers.main)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun doWork_emptyModuleConfigurationList_returnSuccess() = runBlockingTest {
+    fun doWork_emptyModuleConfigurationList_returnSuccess() = runTest {
         mockkStatic(DeviceLog::class) {
             // given
-            val emptyModuleList: Array<String?> = emptyArray()
+            val emptyModuleList: Array<Class<Any>?> = emptyArray()
             every { configMock.moduleConfigurationList } returns emptyModuleList
             every { DeviceLog.error(any()) } returns Unit
 
             // when
-            val result: Result<Unit> =
-                initializeStateError(InitializeStateError.Params(errorState, defaultException, configMock))
+            val result = runCatching {
+                initializeStateError(
+                    InitializeStateError.Params(
+                        errorState,
+                        defaultException,
+                        configMock
+                    )
+                )
+            }
 
             // then
             assertTrue(result.isSuccess)
@@ -62,14 +84,21 @@ class InitializeStateErrorTest {
     }
 
     @Test
-    fun doWork_nullModuleConfigurationList_returnSuccess() = runBlockingTest {
+    fun doWork_nullModuleConfigurationList_returnSuccess() = runTest {
         mockkStatic(DeviceLog::class) {
             // given
             every { configMock.moduleConfigurationList } returns null
 
             // when
-            val result: Result<Unit> =
-                initializeStateError(InitializeStateError.Params(errorState, defaultException, configMock))
+            val result = runCatching {
+                initializeStateError(
+                    InitializeStateError.Params(
+                        errorState,
+                        defaultException,
+                        configMock
+                    )
+                )
+            }
 
             // then
             assertTrue(result.isSuccess)
@@ -79,22 +108,29 @@ class InitializeStateErrorTest {
     }
 
     @Test
-    fun doWork_validModuleConfigurationList_returnSuccess() = runBlockingTest {
+    fun doWork_validModuleConfigurationList_returnSuccess() = runTest {
         mockkStatic(DeviceLog::class) {
             // given
             val moduleList = arrayOf(
-                "com.unity3d.services.core.configuration.CoreModuleConfiguration",
-                "com.unity3d.services.ads.configuration.AdsModuleConfiguration",
-                "com.unity3d.services.analytics.core.configuration.AnalyticsModuleConfiguration",
-                "com.unity3d.services.banners.configuration.BannersModuleConfiguration",
-                "com.unity3d.services.store.core.configuration.StoreModuleConfiguration"
+                CoreModuleConfiguration::class.java,
+                AdsModuleConfiguration::class.java,
+                AnalyticsModuleConfiguration::class.java,
+                BannersModuleConfiguration::class.java,
+                StoreModuleConfiguration::class.java
             )
 
             every { configMock.moduleConfigurationList } returns moduleList
 
             // when
-            val result: Result<Unit> =
-                initializeStateError(InitializeStateError.Params(errorState, defaultException, configMock))
+            val result = runCatching {
+                initializeStateError(
+                    InitializeStateError.Params(
+                        errorState,
+                        defaultException,
+                        configMock
+                    )
+                )
+            }
 
             // then
             assertTrue(result.isSuccess)
@@ -106,18 +142,25 @@ class InitializeStateErrorTest {
 
     @Test
     fun doWork_validModuleConfigurationListWithNullModuleConfiguration_returnSuccess() =
-        runBlockingTest {
+        runTest {
             mockkStatic(DeviceLog::class) {
                 // given
                 val moduleList = arrayOf(
-                    "com.unity3d.services.core.configuration.CoreModuleConfiguration",
+                    CoreModuleConfiguration::class.java,
                 )
                 every { configMock.moduleConfigurationList } returns moduleList
                 every { configMock.getModuleConfiguration(any()) } returns null
 
                 // when
-                val result: Result<Unit> =
-                    initializeStateError(InitializeStateError.Params(errorState, defaultException, configMock))
+                val result = runCatching {
+                    initializeStateError(
+                        InitializeStateError.Params(
+                            errorState,
+                            defaultException,
+                            configMock
+                        )
+                    )
+                }
 
                 // then
                 assertTrue(result.isSuccess)

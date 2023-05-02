@@ -1,6 +1,8 @@
 package com.unity3d.services.core.device.reader;
 
+import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.request.metrics.TSIMetric;
 
 import java.util.Map;
@@ -9,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 public class DeviceInfoReaderCompressorWithMetrics implements IDeviceInfoDataCompressor {
 
 	private final IDeviceInfoDataCompressor _deviceInfoDataCompressor;
+	private final SDKMetricsSender _sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
 
 	private long _startTimeInfo;
 	private long _startTimeCompression;
@@ -50,7 +53,7 @@ public class DeviceInfoReaderCompressorWithMetrics implements IDeviceInfoDataCom
 	}
 
 	private void sendDeviceInfoMetrics() {
-		SDKMetrics.getInstance().sendMetric(TSIMetric.newDeviceInfoCollectionLatency(getDeviceInfoCollectionDuration()));
-		SDKMetrics.getInstance().sendMetric(TSIMetric.newDeviceInfoCompressionLatency(getCompressionDuration()));
+		_sdkMetricsSender.sendMetric(TSIMetric.newDeviceInfoCollectionLatency(getDeviceInfoCollectionDuration()));
+		_sdkMetricsSender.sendMetric(TSIMetric.newDeviceInfoCompressionLatency(getCompressionDuration()));
 	}
 }

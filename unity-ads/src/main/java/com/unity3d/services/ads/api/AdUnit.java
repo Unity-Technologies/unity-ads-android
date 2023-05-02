@@ -12,6 +12,7 @@ import com.unity3d.services.ads.adunit.AdUnitMotionEvent;
 import com.unity3d.services.ads.adunit.AdUnitSoftwareActivity;
 import com.unity3d.services.ads.adunit.AdUnitTransparentActivity;
 import com.unity3d.services.ads.adunit.AdUnitTransparentSoftwareActivity;
+import com.unity3d.services.ads.adunit.IAdUnitActivity;
 import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
@@ -30,17 +31,17 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class AdUnit {
-	private static AdUnitActivity _adUnitActivity;
+	private static IAdUnitActivity _adUnitActivity;
 	private static int _currentActivityId = -1;
 
 	private AdUnit () {
 	}
 
-	public static void setAdUnitActivity (AdUnitActivity activity) {
+	public static void setAdUnitActivity (IAdUnitActivity activity) {
 		_adUnitActivity = activity;
 	}
 
-	public static AdUnitActivity getAdUnitActivity () {
+	public static IAdUnitActivity getAdUnitActivity () {
 		return _adUnitActivity;
 	}
 

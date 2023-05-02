@@ -22,10 +22,10 @@ import com.unity3d.ads.test.legacy.SdkPropertiesTest;
 import com.unity3d.ads.test.legacy.StorageDiskTest;
 import com.unity3d.ads.test.legacy.StorageGeneralTest;
 import com.unity3d.ads.test.legacy.StorageMemoryTest;
-import com.unity3d.ads.test.legacy.TokenStorageTest;
+import com.unity3d.ads.test.legacy.InMemoryTokenStorageTest;
 import com.unity3d.ads.test.legacy.UtilitiesTest;
 import com.unity3d.ads.test.legacy.VideoViewTest;
-import com.unity3d.ads.test.legacy.VolumeChangeTest;
+import com.unity3d.ads.test.legacy.VolumeChangeContentObserverTest;
 import com.unity3d.ads.test.legacy.WebPlayerViewTest;
 import com.unity3d.ads.test.legacy.WebRequestThreadPoolTest;
 import com.unity3d.ads.test.legacy.WebViewAppTest;
@@ -65,12 +65,12 @@ import org.junit.runners.Suite;
 	WebViewBridgeTest.class,
 	WebViewCallbackTest.class,
 	LifecycleListenerTest.class,
-	VolumeChangeTest.class,
+	VolumeChangeContentObserverTest.class,
 	UtilitiesTest.class,
 	WebPlayerViewTest.class,
 	PreferencesTest.class,
 	WebRequestThreadPoolTest.class,
-	TokenStorageTest.class
+	InMemoryTokenStorageTest.class
 })
 
 public class LegacyTestSuite {}

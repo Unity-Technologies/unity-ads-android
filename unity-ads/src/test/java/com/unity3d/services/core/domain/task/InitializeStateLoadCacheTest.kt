@@ -8,8 +8,12 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockkStatic
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -19,7 +23,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class InitializeStateLoadCacheTest {
     // Injected into InitializeStateLoadCache constructor
-    var dispatchers : TestSDKDispatchers = TestSDKDispatchers()
+    var dispatchers: TestSDKDispatchers = TestSDKDispatchers()
 
     @MockK
     lateinit var configMock: Configuration
@@ -30,25 +34,32 @@ class InitializeStateLoadCacheTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
+        Dispatchers.setMain(dispatchers.main)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun doWork_localWebViewFileNull_taskSuccessWithNullResult() = runBlockingTest {
+    fun doWork_localWebViewFileNull_taskSuccessWithNullDataResult() = runTest {
         mockkStatic(SdkProperties::class) {
             // given
             every { SdkProperties.getLocalWebViewFile() } returns null
 
             // when
-            val stateLoadConfigFileResult = initializeStateLoadCache(InitializeStateLoadCache.Params(Configuration()))
+            val stateLoadConfigFileResult =
+                runCatching { initializeStateLoadCache(InitializeStateLoadCache.Params(Configuration())) }
 
             // then
             assertTrue(stateLoadConfigFileResult.isSuccess)
-            assertNull(stateLoadConfigFileResult.getOrThrow())
+            assertNull(stateLoadConfigFileResult.getOrThrow().webViewData)
         }
     }
 
     @Test
-    fun doWork_localWebViewDataHashMismatch_taskSuccessWithNullResult() = runBlockingTest {
+    fun doWork_localWebViewDataHashMismatch_taskSuccessWithDataResultAndHashMismatch() = runTest {
         mockkStatic(SdkProperties::class) {
             mockkStatic(Utilities::class) {
                 // given
@@ -57,17 +68,18 @@ class InitializeStateLoadCacheTest {
                 every { configMock.webViewHash } returns "testHash"
 
                 // when
-                val stateLoadConfigFileResult = initializeStateLoadCache(InitializeStateLoadCache.Params(configMock))
+                val stateLoadConfigFileResult =
+                    runCatching { initializeStateLoadCache(InitializeStateLoadCache.Params(configMock)) }
 
                 // then
                 assertTrue(stateLoadConfigFileResult.isSuccess)
-                assertNull(stateLoadConfigFileResult.getOrThrow())
+                assertEquals(InitializeStateLoadCache.LoadCacheResult(true, "testData"), stateLoadConfigFileResult.getOrThrow())
             }
         }
     }
 
     @Test
-    fun doWork_localWebViewDataHashNull_taskSuccessWithNullResult() = runBlockingTest {
+    fun doWork_localWebViewDataHashNull_taskSuccessWithDataResultAndHashMismatch() = runTest {
         mockkStatic(SdkProperties::class) {
             mockkStatic(Utilities::class) {
                 // given
@@ -77,17 +89,18 @@ class InitializeStateLoadCacheTest {
                 every { configMock.webViewHash } returns "testHash"
 
                 // when
-                val stateLoadConfigFileResult = initializeStateLoadCache(InitializeStateLoadCache.Params(configMock))
+                val stateLoadConfigFileResult =
+                    runCatching { initializeStateLoadCache(InitializeStateLoadCache.Params(configMock)) }
 
                 // then
                 assertTrue(stateLoadConfigFileResult.isSuccess)
-                assertNull(stateLoadConfigFileResult.getOrThrow())
+                assertEquals(InitializeStateLoadCache.LoadCacheResult(true, "testData"), stateLoadConfigFileResult.getOrThrow())
             }
         }
     }
 
     @Test
-    fun doWork_localWebViewDataHashMatch_taskSuccessWithWebViewData() = runBlockingTest {
+    fun doWork_localWebViewDataHashMatch_taskSuccessWithWebViewData() = runTest {
         mockkStatic(SdkProperties::class) {
             mockkStatic(Utilities::class) {
                 // given
@@ -96,11 +109,12 @@ class InitializeStateLoadCacheTest {
                 every { configMock.webViewHash } returns "ba477a0ac57e10dd90bb5bf0289c5990fe839c619b26fde7c2aac62f526d4113"
 
                 // when
-                val stateLoadConfigFileResult = initializeStateLoadCache(InitializeStateLoadCache.Params(configMock))
+                val stateLoadConfigFileResult =
+                    runCatching { initializeStateLoadCache(InitializeStateLoadCache.Params(configMock)) }
 
                 // then
                 assertTrue(stateLoadConfigFileResult.isSuccess)
-                assertEquals("testData", stateLoadConfigFileResult.getOrNull())
+                assertEquals(InitializeStateLoadCache.LoadCacheResult(false, "testData"), stateLoadConfigFileResult.getOrNull())
             }
         }
     }

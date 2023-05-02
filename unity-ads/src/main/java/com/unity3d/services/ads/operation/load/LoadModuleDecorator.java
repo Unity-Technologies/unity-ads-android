@@ -1,7 +1,7 @@
 package com.unity3d.services.ads.operation.load;
 
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
 public class LoadModuleDecorator implements ILoadModule {
@@ -17,7 +17,7 @@ public class LoadModuleDecorator implements ILoadModule {
 	}
 
 	@Override
-	public ISDKMetrics getMetricSender() {
+	public SDKMetricsSender getMetricSender() {
 		return _loadModule.getMetricSender();
 	}
 

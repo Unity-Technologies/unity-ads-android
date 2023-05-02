@@ -11,7 +11,7 @@ import com.unity3d.services.ads.gmascar.managers.BiddingBaseManager;
 import com.unity3d.services.ads.gmascar.models.BiddingSignals;
 import com.unity3d.services.ads.gmascar.utils.ScarRequestHandler;
 import com.unity3d.services.core.properties.ClientProperties;
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.request.metrics.Metric;
 import com.unity3d.services.core.request.metrics.ScarMetric;
 
@@ -31,7 +31,7 @@ public class BiddingBaseManagerTest {
 	IUnityAdsTokenListener publisherListener;
 
 	@Mock
-	ISDKMetrics _metricSenderMock;
+    SDKMetricsSender _metricSenderMock;
 
 	@Mock
 	ScarRequestHandler _scarRequestHandlerMock;

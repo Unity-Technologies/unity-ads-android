@@ -3,7 +3,8 @@ package com.unity3d.services.ads.operation.load;
 import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.configuration.InitializationNotificationCenter;
 
-import com.unity3d.services.core.request.metrics.ISDKMetrics;
+import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
 
 import org.json.JSONException;
@@ -15,7 +16,7 @@ public class LoadModule extends BaseLoadModule {
 
 	public static ILoadModule getInstance() {
 		if (_instance == null) {
-			LoadModule loadModule = new LoadModule(SDKMetrics.getInstance());
+			LoadModule loadModule = new LoadModule(Utilities.getService(SDKMetricsSender.class));
 			LoadModuleDecoratorInitializationBuffer bufferedLoadModule = new LoadModuleDecoratorInitializationBuffer(loadModule, InitializationNotificationCenter.getInstance());
 			LoadModuleDecoratorTimeout timedLoadModule = new LoadModuleDecoratorTimeout(bufferedLoadModule, new ConfigurationReader());
 			_instance = timedLoadModule;
@@ -23,12 +24,12 @@ public class LoadModule extends BaseLoadModule {
 		return _instance;
 	}
 
-	public LoadModule(ISDKMetrics sdkMetrics) {
+	public LoadModule(SDKMetricsSender sdkMetrics) {
 		super(sdkMetrics);
 	}
 
 	@Override
-	void addOptionalParameters(LoadOperationState state, JSONObject parameters) throws JSONException {
+	void addOptionalParameters(LoadOperationState state, JSONObject parameters) {
 		// none needed
 	}
 

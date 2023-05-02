@@ -179,21 +179,6 @@ public class InitializeThreadTest {
 	}
 
 	@Test
-	public void testInitializeStateAdBlockerCheck() {
-		Configuration goodConfig = new Configuration("http://www.unity3d.com/test");
-		InitializeThread.InitializeStateInitModules state = new InitializeThread.InitializeStateInitModules(goodConfig);
-		Object nextState = state.execute();
-
-		assertTrue("Init state ad blocker check test: next state is not load config", nextState instanceof InitializeThread.InitializeStateConfig);
-
-		Configuration badConfig = new Configuration("http://localhost/test");
-		InitializeThread.InitializeStateInitModules state2 = new InitializeThread.InitializeStateInitModules(badConfig);
-		Object nextState2 = state2.execute();
-
-		assertTrue("Init state ad blocker check test: next state is not error state", nextState2  instanceof InitializeThread.InitializeStateError);
-	}
-
-	@Test
 	public void testInitializeStateConfig() {
 		Configuration initConfig = new Configuration(SdkProperties.getConfigUrl());
 		InitializeThread.InitializeStateConfig state = new InitializeThread.InitializeStateConfig(initConfig);

@@ -2,12 +2,12 @@ package com.unity3d.services.core.request.metrics;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 import static java.lang.Thread.currentThread;
 
+import com.unity3d.services.core.configuration.InitializeEventsMetricSender;
 import com.unity3d.services.core.properties.InitializationStatusReader;
 
 import org.junit.Test;
@@ -28,9 +28,11 @@ import java.util.concurrent.Executors;
 public class MetricSenderWithBatchTest{
 
 	@Mock
-	public ISDKMetrics _original;
+	private SDKMetricsSender _original;
+	@Mock
+	private InitializationStatusReader _initializationStatusReader;
 	@InjectMocks
-	public MetricSenderWithBatch _batchedSender;
+	private MetricSenderWithBatch _batchedSender;
 
 	@Test
 	public void testBatchEventsWhenNoMetricUrlIsSet() {
@@ -47,7 +49,7 @@ public class MetricSenderWithBatchTest{
 
 		_batchedSender.sendQueueIfNeeded();
 
-		Mockito.verify(_original, never()).sendMetrics(Mockito.<Metric>anyList());
+		Mockito.verify(_original, never()).sendMetrics(Mockito.anyList());
 		assertEquals("url", _batchedSender.getMetricEndPoint());
 	}
 
@@ -60,7 +62,7 @@ public class MetricSenderWithBatchTest{
 
 		_batchedSender.sendQueueIfNeeded();
 
-		Mockito.verify(_original, Mockito.times(1)).sendMetrics(Mockito.<Metric>anyList());
+		Mockito.verify(_original, Mockito.times(1)).sendMetrics(Mockito.anyList());
 	}
 
 	@Test
@@ -74,12 +76,12 @@ public class MetricSenderWithBatchTest{
 		List<Metric> metrics = new ArrayList<>();
 
 		for (int i = 0; i < METRICS_SIZE; i++) {
-			metrics.add(new Metric(String.valueOf(i), i, null));
+			metrics.add(new Metric(String.valueOf(i), i));
 		}
 
 		senderWithBatch.sendMetrics(metrics);
 
-		Mockito.verify(_original, Mockito.times(1)).sendMetrics(Mockito.<Metric>anyList());
+		Mockito.verify(_original, Mockito.times(1)).sendMetrics(Mockito.anyList());
 		Mockito.verify(_original).sendMetrics(metricsCapture.capture());
 		assertEquals(METRICS_SIZE, metricsCapture.getValue().size());
 	}
@@ -98,21 +100,18 @@ public class MetricSenderWithBatchTest{
 		final MetricSenderWithBatch senderWithBatch = new MetricSenderWithBatch(_original, new InitializationStatusReader());
 
 		for (int i = 0; i < NUM_THREADS; i++) {
-			service.execute(new Runnable() {
-				@Override
-				public void run() {
-					List<Metric> metrics = new ArrayList<>();
-					for (int i = 0; i < METRICS_SIZE / NUM_THREADS; i++) {
-						metrics.add(new Metric(currentThread().getName(), i, null));
-					}
-					senderWithBatch.sendMetrics(metrics);
-					latch.countDown();
+			service.execute(() -> {
+				List<Metric> metrics = new ArrayList<>();
+				for (int i1 = 0; i1 < METRICS_SIZE / NUM_THREADS; i1++) {
+					metrics.add(new Metric(currentThread().getName(), i1));
 				}
+				senderWithBatch.sendMetrics(metrics);
+				latch.countDown();
 			});
 		}
 		latch.await();
 
-		Mockito.verify(_original, times(NUM_THREADS)).sendMetrics(Mockito.<Metric>anyList());
+		Mockito.verify(_original, times(NUM_THREADS)).sendMetrics(Mockito.anyList());
 		Mockito.verify(_original, times(NUM_THREADS)).sendMetrics(metricsCapture.capture());
 		List<List<Metric>> metricsSent = metricsCapture.getAllValues();
 		int metricsCount = 0;

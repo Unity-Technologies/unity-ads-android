@@ -1,7 +1,8 @@
 package com.unity3d.services.core.domain.task
 
 import com.unity3d.services.core.configuration.InitializeEventsMetricSender
-import com.unity3d.services.core.request.metrics.ISDKMetrics
+import com.unity3d.services.core.di.get
+import com.unity3d.services.core.request.metrics.SDKMetricsSender
 import com.unity3d.services.core.request.metrics.Metric
 import com.unity3d.services.core.request.metrics.SDKMetrics
 import java.util.concurrent.TimeUnit
@@ -61,14 +62,14 @@ abstract class MetricTask<in P : BaseParams, R> : BaseTask<P, R> {
     /**
      * @return a map of tags to attach to initialization tasks
      */
-    private fun getMetricTagsForState(): Map<String, String> {
+    private fun getMetricTagsForState(): MutableMap<String, String> {
         return InitializeEventsMetricSender.getInstance().retryTags
     }
 
     /**
      * @return the component responsible for sending metrics
      */
-    private fun getSDKMetrics(): ISDKMetrics = SDKMetrics.getInstance()
+    private fun getSDKMetrics(): SDKMetricsSender = get()
 
     /**
      * @param task is the initialization task from which we want to extract the metric name
@@ -80,7 +81,7 @@ abstract class MetricTask<in P : BaseParams, R> : BaseTask<P, R> {
         var className = task.javaClass.simpleName
         if (className.isEmpty()) return null
         className = className.substring(getStatePrefixLength())
-            .toLowerCase() // remove InitializeState prefix
+            .lowercase() // remove InitializeState prefix
         return StringBuilder(nativePrefix.length + className.length + statePostfix.length)
             .append(nativePrefix)
             .append(className)

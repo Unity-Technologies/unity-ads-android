@@ -3,6 +3,8 @@ package com.unity3d.services.core.device.reader;
 import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.configuration.InitRequestType;
 import com.unity3d.services.core.configuration.PrivacyConfigStorage;
+import com.unity3d.services.core.device.reader.builder.DeviceInfoReaderBuilder;
+import com.unity3d.services.core.device.reader.builder.DeviceInfoReaderPrivacyBuilder;
 
 public class DeviceInfoDataFactory {
 	public IDeviceInfoDataContainer getDeviceInfoData(InitRequestType callType) {

@@ -3,17 +3,25 @@ package com.unity3d.ads.test.instrumentation.services.banners;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.test.instrumentation.InstrumentationTestActivity;
+import com.unity3d.services.ads.operation.load.ILoadModule;
+import com.unity3d.services.ads.operation.load.ILoadOperation;
+import com.unity3d.services.ads.operation.load.LoadBannerModule;
+import com.unity3d.services.ads.operation.load.LoadOperationState;
 import com.unity3d.services.banners.BannerErrorCode;
 import com.unity3d.services.banners.BannerErrorInfo;
 import com.unity3d.services.banners.BannerView;
 import com.unity3d.services.banners.UnityBannerSize;
 import com.unity3d.services.banners.BannerViewCache;
 
+import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.Semaphore;
 
 import static org.junit.Assert.assertEquals;
@@ -94,20 +102,46 @@ public class BannerViewCacheTests {
 	}
 
 	@Test
-	public void testTriggerBannerErrorEvent() throws InterruptedException {
+	public void testTriggerBannerErrorEvent() throws InterruptedException, NoSuchFieldException, IllegalAccessException {
 		BannerViewCache bannerViewCache = new BannerViewCache();
 		final BannerView bannerView = new BannerView(_activityRule.getActivity(), "test", new UnityBannerSize(320, 50));
 		final BannerErrorInfo bannerErrorInfo = new BannerErrorInfo("test error", BannerErrorCode.NATIVE_ERROR);
 		String bannerAdId = bannerViewCache.addBannerView(bannerView);
+
+		LoadOperationState loadOperationState = Mockito.mock(LoadOperationState.class);
+		Mockito.when(loadOperationState.isBanner()).thenReturn(true);
+		Mockito.when(loadOperationState.duration()).thenReturn(Long.MAX_VALUE);
+		loadOperationState.placementId = "test";
+
+		ILoadOperation loadOperation = Mockito.mock(ILoadOperation.class);
+		Mockito.when(loadOperation.getLoadOperationState()).thenReturn(loadOperationState);
+
+		ILoadModule loadBannerModule = new LoadBannerModule(Mockito.mock(SDKMetricsSender.class));
+		ILoadModule spy = Mockito.spy(loadBannerModule);
+		Mockito.when(spy.get(Mockito.anyString())).thenReturn(loadOperation);
+		Mockito.doAnswer(invocation -> {
+			Mockito.doAnswer(invocation1 -> {
+				LoadOperationState state = invocation.getArgument(1);
+				state.onUnityAdsFailedToLoad(UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "test error");
+				return null;
+			}).when(loadOperation).onUnityAdsFailedToLoad(Mockito.anyString(), Mockito.any(), Mockito.any());
+			return null;
+		}).when(spy).executeAdOperation(Mockito.any(), Mockito.any());
+
+		Field instance = LoadBannerModule.class.getDeclaredField("_instance");
+		instance.setAccessible(true);
+		instance.set(LoadBannerModule.class, spy);
+
 		final Semaphore _errorSemaphore = new Semaphore(0);
 		bannerView.setListener(new BannerView.Listener() {
 			@Override
 			public void onBannerFailedToLoad(BannerView bannerAdView, BannerErrorInfo _bannerErrorInfo) {
 				assertEquals(bannerView, bannerAdView);
-				assertEquals(bannerErrorInfo, _bannerErrorInfo);
+				Mockito.verify(spy).onUnityAdsFailedToLoad(bannerAdId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, "test error");
 				_errorSemaphore.release();
 			}
 		});
+		bannerView.load();
 		bannerViewCache.triggerBannerErrorEvent(bannerAdId, bannerErrorInfo);
 		_errorSemaphore.acquire();
 	}

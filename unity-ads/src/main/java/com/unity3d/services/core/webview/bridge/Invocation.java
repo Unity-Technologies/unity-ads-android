@@ -15,13 +15,19 @@ public class Invocation {
 	private ArrayList<ArrayList<Object>> _responses;
 	private int _invocationId;
 	private IInvocationCallbackInvoker _invocationCallbackInvoker;
+  private final IWebViewBridge _webViewBridge;
 
 	public Invocation() {
-		this(SharedInstances.INSTANCE.getWebViewAppInvocationCallbackInvoker());
+		this(SharedInstances.INSTANCE.getWebViewAppInvocationCallbackInvoker(), SharedInstances.INSTANCE.getWebViewBridge());
 	}
 
-	public Invocation(IInvocationCallbackInvoker invocationHandler) {
+	public Invocation(IWebViewBridge webViewBridge) {
+		this(SharedInstances.INSTANCE.getWebViewAppInvocationCallbackInvoker(), webViewBridge);
+	}
+
+	public Invocation(IInvocationCallbackInvoker invocationHandler, IWebViewBridge webViewBridge) {
 		_invocationCallbackInvoker = invocationHandler;
+    _webViewBridge = webViewBridge;
 		_invocationId = _idCount.getAndIncrement();
 
 		if (_invocationSets == null) {
@@ -54,7 +60,7 @@ public class Invocation {
 			WebViewCallback callback = (WebViewCallback)invocation.get(3);
 
 			try {
-				WebViewBridge.handleInvocation(className, methodName, params, callback);
+				_webViewBridge.handleInvocation(className, methodName, params, callback);
 			}
 			catch (Exception e) {
 				DeviceLog.exception(String.format("Error handling invocation %s.%s(%s)", className, methodName, Arrays.toString(params)), e);

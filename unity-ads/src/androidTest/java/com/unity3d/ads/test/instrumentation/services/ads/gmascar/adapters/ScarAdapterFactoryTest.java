@@ -2,6 +2,7 @@ package com.unity3d.ads.test.instrumentation.services.ads.gmascar.adapters;
 
 import com.unity3d.scar.adapter.common.IAdsErrorHandler;
 import com.unity3d.scar.adapter.common.IScarAdapter;
+import com.unity3d.scar.adapter.common.WebViewAdsError;
 import com.unity3d.services.ads.gmascar.adapters.ScarAdapterFactory;
 import com.unity3d.services.ads.gmascar.finder.ScarAdapterVersion;
 
@@ -14,9 +15,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ScarAdapterFactoryTest {
 	@Mock
-	private IAdsErrorHandler adsErrorHandlerMock;
+	private IAdsErrorHandler<WebViewAdsError> adsErrorHandlerMock;
 
-	private ScarAdapterFactory _scarAdapterFactory = new ScarAdapterFactory();
+	private final ScarAdapterFactory _scarAdapterFactory = new ScarAdapterFactory();
 
 	@Test
 	public void testScarAdapterFactory1920() {
