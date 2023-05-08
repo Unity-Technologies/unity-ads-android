@@ -20,7 +20,5 @@ public enum WebViewEventCategory {
 	LOAD_API,
 	TOKEN,
 	INIT_GMA,
-	GMA,
-	MEASUREMENTS,
-	TOPICS
+	GMA
 }
