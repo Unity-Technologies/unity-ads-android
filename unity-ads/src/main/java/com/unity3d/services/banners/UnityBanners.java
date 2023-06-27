@@ -103,6 +103,13 @@ public final class UnityBanners {
 				}
 
 				@Override
+				public void onBannerShown(BannerView bannerView) {
+					if (self._bannerListener != null) {
+						self._bannerListener.onUnityBannerShow(bannerView.getPlacementId());
+					}
+				}
+
+				@Override
 				public void onBannerFailedToLoad(BannerView bannerView, BannerErrorInfo errorInfo) {
 					if (self._bannerListener != null) {
 						self._bannerListener.onUnityBannerError(bannerView.getPlacementId()+ " " + errorInfo.errorMessage);

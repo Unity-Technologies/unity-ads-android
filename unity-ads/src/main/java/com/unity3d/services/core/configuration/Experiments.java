@@ -80,6 +80,11 @@ public class Experiments extends ExperimentsBase {
 		return _experimentData.optBoolean(EXP_TAG_WEBVIEW_ASYNC_DOWNLOAD, false);
 	}
 
+	@Override
+	public boolean isCronetCheckEnabled() {
+		return _experimentData.optBoolean(EXP_TAG_CRONET_CHECK, false);
+	}
+
 	public JSONObject getExperimentsAsJson() {
 		return _experimentData;
 	}

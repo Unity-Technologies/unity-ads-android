@@ -78,6 +78,11 @@ public class ExperimentObjects extends ExperimentsBase {
 		return getExperimentValueOrDefault(EXP_TAG_WEBVIEW_ASYNC_DOWNLOAD);
 	}
 
+	@Override
+	public boolean isCronetCheckEnabled() {
+		return getExperimentValueOrDefault(EXP_TAG_CRONET_CHECK);
+	}
+
 	private String getExperimentValue(String experimentName, String defaultValue) {
 		ExperimentObject expo = getExperimentObject(experimentName);
 		return (expo != null) ? expo.getStringValue() : defaultValue;

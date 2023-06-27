@@ -69,6 +69,21 @@ public class BannerViewCache {
 		}
 	}
 
+	public synchronized void triggerBannerShowEvent(String bannerAdId) {
+		final BannerView bannerView = this.getBannerView(bannerAdId);
+		if (bannerView != null && bannerView.getListener() != null) {
+			final BannerView.IListener listener = bannerView.getListener();
+			Utilities.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					if (listener != null) {
+						listener.onBannerShown(bannerView);
+					}
+				}
+			});
+		}
+	}
+
 	public synchronized void triggerBannerClickEvent(String bannerAdId) {
 		final BannerView bannerView = this.getBannerView(bannerAdId);
 		if (bannerView != null && bannerView.getListener() != null) {

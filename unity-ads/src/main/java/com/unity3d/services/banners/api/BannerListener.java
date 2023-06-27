@@ -15,6 +15,12 @@ public class BannerListener {
 	}
 
 	@WebViewExposed
+	public static void sendShowEvent(final String bannerAdId, WebViewCallback callback) {
+		BannerViewCache.getInstance().triggerBannerShowEvent(bannerAdId);
+		callback.invoke();
+	}
+
+	@WebViewExposed
 	public static void sendClickEvent(final String bannerAdId, WebViewCallback callback) {
 		BannerViewCache.getInstance().triggerBannerClickEvent(bannerAdId);
 		callback.invoke();

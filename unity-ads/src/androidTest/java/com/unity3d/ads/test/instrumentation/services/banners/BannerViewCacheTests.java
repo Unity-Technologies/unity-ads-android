@@ -85,6 +85,23 @@ public class BannerViewCacheTests {
 	}
 
 	@Test
+	public void testTriggerBannerShowEvent() throws InterruptedException {
+		BannerViewCache bannerViewCache = new BannerViewCache();
+		final BannerView bannerView = new BannerView(_activityRule.getActivity(), "test", new UnityBannerSize(320, 50));
+		String bannerAdId = bannerViewCache.addBannerView(bannerView);
+		final Semaphore _shownSemaphore = new Semaphore(0);
+		bannerView.setListener(new BannerView.Listener() {
+			@Override
+			public void onBannerShown(BannerView bannerAdView) {
+				assertEquals(bannerView, bannerAdView);
+				_shownSemaphore.release();
+			}
+		});
+		bannerViewCache.triggerBannerShowEvent(bannerAdId);
+		_shownSemaphore.acquire();
+	}
+
+	@Test
 	public void testTriggerBannerClickEvent() throws InterruptedException {
 		BannerViewCache bannerViewCache = new BannerViewCache();
 		final BannerView bannerView = new BannerView(_activityRule.getActivity(), "test", new UnityBannerSize(320, 50));

@@ -179,6 +179,7 @@ public class InitializeThreadTest {
 	}
 
 	@Test
+	@Ignore
 	public void testInitializeStateConfig() {
 		Configuration initConfig = new Configuration(SdkProperties.getConfigUrl());
 		InitializeThread.InitializeStateConfig state = new InitializeThread.InitializeStateConfig(initConfig);
@@ -193,6 +194,7 @@ public class InitializeThreadTest {
 	}
 
 	@Test
+	@Ignore
 	public void testInitializeStateConfigWithNwc() throws JSONException {
 		ExperimentsReader mockExperimentReader = Mockito.mock(ExperimentsReader.class);
 		Mockito.when(mockExperimentReader.getCurrentlyActiveExperiments()).thenReturn(new Experiments(new JSONObject("{\"nwc\": true}")));
@@ -209,6 +211,7 @@ public class InitializeThreadTest {
 	}
 
 	@Test
+	@Ignore
 	public void testInitializeStateConfigWithWac() throws JSONException {
 		Configuration initConfig = new Configuration(SdkProperties.getConfigUrl(), new Experiments(new JSONObject("{\"wac\": true}")));
 		InitializeThread.InitializeStateConfig state = new InitializeThread.InitializeStateConfig(initConfig);

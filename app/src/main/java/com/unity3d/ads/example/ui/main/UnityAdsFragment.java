@@ -61,6 +61,11 @@ public class UnityAdsFragment extends Fragment {
 		}
 
 		@Override
+		public void onBannerShown(BannerView bannerAdView) {
+			Log.v(LOGTAG, "onBannerShown : " + bannerAdView.getPlacementId());
+		}
+
+		@Override
 		public void onBannerFailedToLoad(BannerView bannerAdView, BannerErrorInfo errorInfo) {
 			Log.e(LOGTAG, "Unity Ads failed to load banner for " + bannerAdView.getPlacementId() + " with error: [" + errorInfo.errorCode + "] " + errorInfo.errorMessage);
 		}

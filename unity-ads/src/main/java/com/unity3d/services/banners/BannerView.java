@@ -106,6 +106,8 @@ public class BannerView extends RelativeLayout {
 	public interface IListener {
 		void onBannerLoaded(BannerView bannerAdView);
 
+		void onBannerShown(BannerView bannerAdView);
+
 		void onBannerClick(BannerView bannerAdView);
 
 		void onBannerFailedToLoad(BannerView bannerAdView, BannerErrorInfo errorInfo);
@@ -116,6 +118,10 @@ public class BannerView extends RelativeLayout {
 	public static abstract class Listener implements IListener {
 		@Override
 		public void onBannerLoaded(BannerView bannerAdView) {
+		}
+
+		@Override
+		public void onBannerShown(BannerView bannerAdView) {
 		}
 
 		@Override

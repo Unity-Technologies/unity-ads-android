@@ -13,8 +13,8 @@ if (project.rootProject.file('local.properties').exists()) {
 ext {
   GROUP_ID = "com.unity3d.ads"
   ARTIFACT_ID = "unity-ads"
-  VERSION_ID = "4.7.1"
-  VERSION_CODE = 4710
+  VERSION_ID = "4.8.0"
+  VERSION_CODE = 4800
   SIGN_AAR = properties.getProperty("SIGN_AAR") ?: false
 }
 
@@ -79,6 +79,7 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "androidx.webkit:webkit:$androidx_webkit"
     implementation "androidx.core:core-ktx:$androidx_core"
+    implementation "com.google.android.gms:play-services-cronet:$play_services_cronet"
     androidTestCompileOnly project(':unity-scaradapter-2100')
     androidTestCompileOnly project(':unity-scaradapter-2000')
     androidTestCompileOnly project(':unity-scaradapter-1950')

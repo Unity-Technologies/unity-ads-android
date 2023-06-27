@@ -47,6 +47,11 @@
             <meta-data
                 android:name="com.unity3d.services.core.configuration.AdsSdkInitializer"
                 android:value="androidx.startup" />
+
+            <meta-data
+                android:name="com.unity3d.services.core.network.core.CronetInitializer"
+                android:value="androidx.startup"
+                tools:node="remove"/>
         </provider>
     </application>
 

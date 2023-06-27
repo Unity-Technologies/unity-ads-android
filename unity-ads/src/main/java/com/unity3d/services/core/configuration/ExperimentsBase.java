@@ -11,6 +11,7 @@ public abstract class ExperimentsBase implements IExperiments {
 	static final String EXP_TAG_OK_HTTP = "okhttp";
 	static final String EXP_TAG_WEB_MESSAGE = "jwm";
 	static final String EXP_TAG_WEBVIEW_ASYNC_DOWNLOAD = "wad";
+	static final String EXP_TAG_CRONET_CHECK = "cce";
 
 	static final boolean EXP_DEFAULT_VALUE = false;
 }

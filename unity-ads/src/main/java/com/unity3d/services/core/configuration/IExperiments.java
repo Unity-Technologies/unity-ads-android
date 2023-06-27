@@ -15,6 +15,7 @@ public interface IExperiments {
 	boolean isOkHttpEnabled();
 	boolean isWebMessageEnabled();
 	boolean isWebViewAsyncDownloadEnabled();
+	boolean isCronetCheckEnabled();
 
 	JSONObject getCurrentSessionExperiments();
 	JSONObject getNextSessionExperiments();

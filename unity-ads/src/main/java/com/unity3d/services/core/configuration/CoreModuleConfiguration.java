@@ -1,5 +1,7 @@
 package com.unity3d.services.core.configuration;
 
+import androidx.startup.AppInitializer;
+
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.core.broadcast.BroadcastMonitor;
 import com.unity3d.services.core.cache.CacheThread;
@@ -9,8 +11,8 @@ import com.unity3d.services.core.device.Device;
 import com.unity3d.services.core.device.OpenAdvertisingId;
 import com.unity3d.services.core.device.StorageManager;
 import com.unity3d.services.core.device.VolumeChange;
-import com.unity3d.services.core.device.VolumeChangeContentObserver;
 import com.unity3d.services.core.misc.Utilities;
+import com.unity3d.services.core.network.core.CronetInitializer;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.properties.SdkProperties;
 import com.unity3d.services.core.request.WebRequestThread;
@@ -24,20 +26,20 @@ import java.util.List;
 public class CoreModuleConfiguration implements IModuleConfiguration {
 	public Class[] getWebAppApiClassList() {
 		Class[] list = {
-				com.unity3d.services.core.api.Broadcast.class,
-				com.unity3d.services.core.api.Cache.class,
-				com.unity3d.services.core.api.Connectivity.class,
-				com.unity3d.services.core.api.DeviceInfo.class,
-				com.unity3d.services.core.api.ClassDetection.class,
-				com.unity3d.services.core.api.Storage.class,
-				com.unity3d.services.core.api.Sdk.class,
-				com.unity3d.services.core.api.Request.class,
-				com.unity3d.services.core.api.Resolve.class,
-				com.unity3d.services.core.api.Intent.class,
-				com.unity3d.services.core.api.Lifecycle.class,
-				com.unity3d.services.core.api.Preferences.class,
-				com.unity3d.services.core.api.SensorInfo.class,
-				com.unity3d.services.core.api.Permissions.class
+			com.unity3d.services.core.api.Broadcast.class,
+			com.unity3d.services.core.api.Cache.class,
+			com.unity3d.services.core.api.Connectivity.class,
+			com.unity3d.services.core.api.DeviceInfo.class,
+			com.unity3d.services.core.api.ClassDetection.class,
+			com.unity3d.services.core.api.Storage.class,
+			com.unity3d.services.core.api.Sdk.class,
+			com.unity3d.services.core.api.Request.class,
+			com.unity3d.services.core.api.Resolve.class,
+			com.unity3d.services.core.api.Intent.class,
+			com.unity3d.services.core.api.Lifecycle.class,
+			com.unity3d.services.core.api.Preferences.class,
+			com.unity3d.services.core.api.SensorInfo.class,
+			com.unity3d.services.core.api.Permissions.class
 		};
 
 		return list;
@@ -52,7 +54,7 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 		StorageManager.init(ClientProperties.getApplicationContext());
 		AdvertisingId.init(ClientProperties.getApplicationContext());
 		OpenAdvertisingId.init(ClientProperties.getApplicationContext());
-		((VolumeChange)Utilities.getService(VolumeChange.class)).clearAllListeners();
+		((VolumeChange) Utilities.getService(VolumeChange.class)).clearAllListeners();
 
 		return true;
 	}
@@ -96,11 +98,11 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 				SdkProperties.notifyInitializationComplete();
 			}
 		});
-		collectMetrics();
+		collectMetrics(configuration);
 		return true;
 	}
 
-	private void collectMetrics() {
+	private void collectMetrics(Configuration configuration) {
 		List<Metric> metrics = new ArrayList<>();
 		int hasX264 = Device.hasX264Decoder() ? 1 : 0;
 		int hasX265 = Device.hasX265Decoder() ? 1 : 0;
@@ -108,5 +110,13 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 		metrics.add(new Metric("native_device_decoder_x265", hasX265));
 		SDKMetricsSender sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
 		sdkMetricsSender.sendMetrics(metrics);
+		checkForCronet(configuration);
+	}
+
+	private void checkForCronet(Configuration configuration) {
+		if (configuration.getExperiments().isCronetCheckEnabled()) {
+			AppInitializer.getInstance(ClientProperties.getApplicationContext())
+				.initializeComponent(CronetInitializer.class);
+		}
 	}
 }
