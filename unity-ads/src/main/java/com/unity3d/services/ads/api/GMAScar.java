@@ -1,5 +1,6 @@
 package com.unity3d.services.ads.api;
 
+import com.unity3d.scar.adapter.common.scarads.UnityAdFormat;
 import com.unity3d.services.ads.gmascar.GMAScarAdapterBridge;
 import com.unity3d.services.ads.gmascar.GMA;
 import com.unity3d.services.core.webview.bridge.WebViewCallback;
@@ -30,8 +31,8 @@ public class GMAScar {
 	}
 
 	@WebViewExposed
-	public static void getSCARSignals(final JSONArray interstitialList, final JSONArray rewardedList, final WebViewCallback callback) throws JSONException {
-		gmaScarAdapterBridge.getSCARSignals(getPlacementList(interstitialList), getPlacementList(rewardedList));
+	public static void getSCARSignal(final String placementId, final String adFormatStr, final WebViewCallback callback) {
+		gmaScarAdapterBridge.getSCARSignal(placementId, UnityAdFormat.valueOf(adFormatStr.toUpperCase()));
 		callback.invoke();
 	}
 
@@ -46,13 +47,4 @@ public class GMAScar {
 		gmaScarAdapterBridge.show(placementId, queryId, canSkip);
 		callback.invoke();
 	}
-
-	private static String[] getPlacementList(JSONArray placements) throws JSONException {
-		String[] placementIdList = new String[placements.length()];
-		for (int placementIndex = 0; placementIndex < placements.length(); placementIndex++) {
-			placementIdList[placementIndex] = placements.getString(placementIndex);
-		}
-		return placementIdList;
-	}
-
 }

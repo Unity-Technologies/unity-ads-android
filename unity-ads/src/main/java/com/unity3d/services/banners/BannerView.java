@@ -7,9 +7,13 @@ import android.view.ViewParent;
 import android.widget.RelativeLayout;
 
 import com.unity3d.ads.UnityAdsLoadOptions;
+import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
+import com.unity3d.services.ads.gmascar.GMA;
+import com.unity3d.services.ads.gmascar.GMAScarAdapterBridge;
 import com.unity3d.services.ads.webplayer.WebPlayerSettingsCache;
 import com.unity3d.services.banners.bridge.BannerBridge;
 import com.unity3d.services.banners.view.BannerWebPlayerContainer;
+import com.unity3d.services.banners.view.ScarBannerContainer;
 import com.unity3d.services.core.configuration.ErrorState;
 import com.unity3d.services.core.configuration.IInitializationListener;
 import com.unity3d.services.core.configuration.InitializationNotificationCenter;
@@ -29,7 +33,9 @@ public class BannerView extends RelativeLayout {
 	private UnityBannerSize size;
 	private IListener listener;
 	private BannerWebPlayerContainer bannerWebPlayerContainer;
+	private ScarBannerContainer scarBannerContainer;
 	private IInitializationListener initializationListener;
+	private final GMAScarAdapterBridge gmaScarAdapterBridge = GMA.getInstance().getBridge();
 
 	// Public
 
@@ -95,6 +101,10 @@ public class BannerView extends RelativeLayout {
 			bannerWebPlayerContainer.destroy();
 		}
 
+		if (scarBannerContainer != null) {
+			scarBannerContainer.destroy();
+		}
+
 		// Log the banner was destroyed
 		DeviceLog.info("Banner [" + this.placementId + "] was destroyed");
 
@@ -138,6 +148,15 @@ public class BannerView extends RelativeLayout {
 	}
 
 	// Module Private
+
+	void loadScarPlayer(String operationId, ScarAdMetadata scarAdMetadata, UnityBannerSize size) {
+		gmaScarAdapterBridge.loadBanner(getContext(), this, operationId, scarAdMetadata, size);
+	}
+
+	public void addScarContainer() {
+		scarBannerContainer = new ScarBannerContainer(getContext(), viewId);
+		Utilities.runOnUiThread(() -> addView(scarBannerContainer));
+	}
 
 	void loadWebPlayer(final UnityBannerSize unityBannerSize) {
 		final BannerView self = this;

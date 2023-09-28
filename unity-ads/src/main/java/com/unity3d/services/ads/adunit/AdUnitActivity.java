@@ -75,9 +75,10 @@ public class AdUnitActivity extends Activity implements IAdUnitActivity {
 
 	@Override
 	protected void onDestroy() {
+		if (_controller != null) {
+			_controller.onDestroy();
+		}
 		super.onDestroy();
-
-		_controller.onDestroy();
 	}
 
 	@Override

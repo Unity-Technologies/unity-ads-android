@@ -8,8 +8,8 @@ import com.unity3d.services.core.di.IServiceComponent
  */
 interface BaseTask<in P: BaseParams, R>: IServiceComponent {
 
-    suspend operator fun invoke(params: P): R = doWork(params)
+    suspend operator fun invoke(params: P): Result<R> = doWork(params)
 
-    suspend fun doWork(params: P): R
+    suspend fun doWork(params: P): Result<R>
 
 }

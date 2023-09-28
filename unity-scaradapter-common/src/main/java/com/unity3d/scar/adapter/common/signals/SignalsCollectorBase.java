@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.unity3d.scar.adapter.common.DispatchGroup;
 
+import com.unity3d.scar.adapter.common.scarads.UnityAdFormat;
 import org.json.JSONObject;
 
 import java.util.Map;
@@ -12,38 +13,37 @@ public abstract class SignalsCollectorBase implements ISignalsCollector {
 
 	public static final String SCAR_RV_SIGNAL = "gmaScarBiddingRewardedSignal";
 	public static final String SCAR_INT_SIGNAL = "gmaScarBiddingInterstitialSignal";
+	public static final String SCAR_BAN_SIGNAL = "gmaScarBiddingBannerSignal";
 
 	public SignalsCollectorBase() {}
 
 	@Override
-	public void getSCARSignals(Context context, String[] interstitialList, String[] rewardedList,
+	public void getSCARSignal(Context context, String placementId, UnityAdFormat adFormat,
 							   ISignalCollectionListener signalCompletionListener) {
 		DispatchGroup dispatchGroup = new DispatchGroup();
 		SignalsResult signalsResult = new SignalsResult();
 
-		for (String interstitialId : interstitialList) {
-			dispatchGroup.enter();
-			getSCARSignal(context, interstitialId, true, dispatchGroup, signalsResult);
-		}
-
-		for (String rewardedId : rewardedList) {
-			dispatchGroup.enter();
-			getSCARSignal(context, rewardedId, false, dispatchGroup, signalsResult);
-		}
+		dispatchGroup.enter();
+		getSCARSignal(context, placementId, adFormat, dispatchGroup, signalsResult);
 
 		dispatchGroup.notify(new GMAScarDispatchCompleted(signalCompletionListener, signalsResult));
 	}
 
 	@Override
-	public void getSCARBiddingSignals(Context context, ISignalCollectionListener signalCompletionListener) {
+	public void getSCARBiddingSignals(Context context, boolean isBannerEnabled, ISignalCollectionListener signalCompletionListener) {
 		DispatchGroup dispatchGroup = new DispatchGroup();
 		SignalsResult signalsResult = new SignalsResult();
 
 		dispatchGroup.enter();
-		getSCARSignal(context, true, dispatchGroup, signalsResult);
+		getSCARSignalForHB(context, UnityAdFormat.INTERSTITIAL, dispatchGroup, signalsResult);
 
 		dispatchGroup.enter();
-		getSCARSignal(context, false, dispatchGroup, signalsResult);
+		getSCARSignalForHB(context, UnityAdFormat.REWARDED, dispatchGroup, signalsResult);
+
+		if (isBannerEnabled) {
+			dispatchGroup.enter();
+			getSCARSignalForHB(context, UnityAdFormat.BANNER, dispatchGroup, signalsResult);
+		}
 
 		dispatchGroup.notify(new GMAScarDispatchCompleted(signalCompletionListener, signalsResult));
 	}
@@ -78,5 +78,17 @@ public abstract class SignalsCollectorBase implements ISignalsCollector {
 				_signalListener.onSignalsCollectionFailed(_signalsResult.getErrorMessage());
 			}
 		}
+	}
+
+	public String getAdKey(UnityAdFormat adFormat) {
+		switch (adFormat) {
+			case BANNER:
+				return SCAR_BAN_SIGNAL;
+			case INTERSTITIAL:
+				return SCAR_INT_SIGNAL;
+			case REWARDED:
+				return SCAR_RV_SIGNAL;
+		}
+		return "";
 	}
 }

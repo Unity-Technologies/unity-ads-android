@@ -101,31 +101,6 @@ public class SDKMetricsTest {
 	}
 
 	@Test
-	public void testSettingMsr100Then0() throws NoSuchFieldException, IllegalAccessException {
-		validateAndTestChangingSampleRate("testUrl", 100.0, 0.0, MetricSender.class);
-		Assert.assertTrue("Metrics expected to be enabled for session", SDKMetrics.getInstance().areMetricsEnabledForCurrentSession());
-	}
-
-	@Test
-	public void testSettingMsr0Then100() throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException {
-		Class expectedClass = Class.forName("com.unity3d.services.core.request.metrics.SDKMetrics$NullInstance");
-		validateAndTestChangingSampleRate("testUrl", 0.0, 100.0, expectedClass);
-		Assert.assertFalse("Metrics expected to be disabled for session", SDKMetrics.getInstance().areMetricsEnabledForCurrentSession());
-	}
-
-	@Test
-	public void testSettingMsrWithNullUrl() throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException {
-		Class expectedClass = Class.forName("com.unity3d.services.core.request.metrics.SDKMetrics$NullInstance");
-		validateAndTestChangingSampleRate(null, 100.0, 100.0, expectedClass);
-	}
-
-	@Test
-	public void testSettingMsrWithEmptyUrl() throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException {
-		Class expectedClass = Class.forName("com.unity3d.services.core.request.metrics.SDKMetrics$NullInstance");
-		validateAndTestChangingSampleRate("", 100.0, 100.0, expectedClass);
-	}
-
-	@Test
 	public void testMalformedUrlFromConfiguration() throws Exception {
 		JSONObject json = new JSONObject();
 		json.put("url", "fakeUrl");
@@ -158,21 +133,5 @@ public class SDKMetricsTest {
 
 		Mockito.verify(_metricSenderMock).sendMetric(metricCapture.capture());
 		Assert.assertEquals(TEST_STATE_TAGS, metricCapture.getValue().getTags());
-	}
-
-	private void validateAndTestChangingSampleRate(String metricsUrl, double oldMsr, double newMsr, Class expectedMetricsClass) throws NoSuchFieldException, IllegalAccessException {
-		Configuration mockConfiguration = Mockito.mock(Configuration.class);
-		Mockito.when(mockConfiguration.getMetricsUrl()).thenReturn(metricsUrl);
-		Mockito.when(mockConfiguration.getMetricSampleRate()).thenReturn(oldMsr);
-		SDKMetrics.setConfiguration(mockConfiguration);
-		SDKMetrics.getInstance();
-		Field instanceField = SDKMetrics.class.getDeclaredField("_instance");
-		instanceField.setAccessible(true);
-		Object instanceFieldObj = instanceField.get(SDKMetricsSender.class);
-		Assert.assertEquals(expectedMetricsClass, instanceFieldObj.getClass());
-		Mockito.when(mockConfiguration.getMetricSampleRate()).thenReturn(newMsr);
-		SDKMetrics.setConfiguration(mockConfiguration);
-		instanceFieldObj = instanceField.get(SDKMetricsSender.class);
-		Assert.assertEquals(expectedMetricsClass, instanceFieldObj.getClass());
 	}
 }

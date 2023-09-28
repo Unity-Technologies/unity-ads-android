@@ -1,7 +1,7 @@
 package com.unity3d.services.ads.operation.show;
 
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.core.configuration.ConfigurationReader;
+import com.unity3d.services.core.configuration.ExperimentsReader;
 import com.unity3d.services.core.request.metrics.AdOperationError;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
 import com.unity3d.services.core.timer.BaseTimer;
@@ -13,15 +13,20 @@ import java.util.concurrent.Executors;
 public class ShowModuleDecoratorTimeout extends ShowModuleDecorator {
 	private static final String errorMsgTimeout = "[UnityAds] Timeout while trying to show ";
 
-	public ShowModuleDecoratorTimeout(IShowModule showModule, ConfigurationReader configurationReader) {
+	private final ExperimentsReader _experimentsReader;
+
+	public ShowModuleDecoratorTimeout(IShowModule showModule, ExperimentsReader experimentsReader) {
 		super(showModule);
+		this._experimentsReader = experimentsReader;
 	}
 
 	@Override
 	public void executeAdOperation(IWebViewBridgeInvoker webViewBridgeInvoker, ShowOperationState state) {
 		getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdShowStart());
 		state.start();
-		startShowTimeout(state);
+		if (!_experimentsReader.getCurrentlyActiveExperiments().isNativeShowTimeoutDisabled()) {
+			startShowTimeout(state);
+		}
 		super.executeAdOperation(webViewBridgeInvoker, state);
 	}
 

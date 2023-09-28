@@ -42,7 +42,7 @@ class InitializeStateConfigTest {
         every { configMock.experiments } returns experimentsMock
         every { configMock.experimentsReader } returns experimentsReaderMock
         every { experimentsReaderMock.currentlyActiveExperiments } returns experimentsMock
-        coEvery { initializeStateConfigWithLoaderMock(any()) } returns configMock
+        coEvery { initializeStateConfigWithLoaderMock(any()) } returns Result.success(configMock)
         Dispatchers.setMain(dispatchers.main)
     }
 

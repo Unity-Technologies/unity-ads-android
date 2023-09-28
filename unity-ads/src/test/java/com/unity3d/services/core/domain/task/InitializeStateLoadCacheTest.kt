@@ -49,8 +49,7 @@ class InitializeStateLoadCacheTest {
             every { SdkProperties.getLocalWebViewFile() } returns null
 
             // when
-            val stateLoadConfigFileResult =
-                runCatching { initializeStateLoadCache(InitializeStateLoadCache.Params(Configuration())) }
+            val stateLoadConfigFileResult = initializeStateLoadCache(InitializeStateLoadCache.Params(Configuration()))
 
             // then
             assertTrue(stateLoadConfigFileResult.isSuccess)
@@ -68,8 +67,7 @@ class InitializeStateLoadCacheTest {
                 every { configMock.webViewHash } returns "testHash"
 
                 // when
-                val stateLoadConfigFileResult =
-                    runCatching { initializeStateLoadCache(InitializeStateLoadCache.Params(configMock)) }
+                val stateLoadConfigFileResult = initializeStateLoadCache(InitializeStateLoadCache.Params(configMock))
 
                 // then
                 assertTrue(stateLoadConfigFileResult.isSuccess)
@@ -89,8 +87,7 @@ class InitializeStateLoadCacheTest {
                 every { configMock.webViewHash } returns "testHash"
 
                 // when
-                val stateLoadConfigFileResult =
-                    runCatching { initializeStateLoadCache(InitializeStateLoadCache.Params(configMock)) }
+                val stateLoadConfigFileResult = initializeStateLoadCache(InitializeStateLoadCache.Params(configMock))
 
                 // then
                 assertTrue(stateLoadConfigFileResult.isSuccess)
@@ -109,8 +106,7 @@ class InitializeStateLoadCacheTest {
                 every { configMock.webViewHash } returns "ba477a0ac57e10dd90bb5bf0289c5990fe839c619b26fde7c2aac62f526d4113"
 
                 // when
-                val stateLoadConfigFileResult =
-                    runCatching { initializeStateLoadCache(InitializeStateLoadCache.Params(configMock)) }
+                val stateLoadConfigFileResult = initializeStateLoadCache(InitializeStateLoadCache.Params(configMock))
 
                 // then
                 assertTrue(stateLoadConfigFileResult.isSuccess)

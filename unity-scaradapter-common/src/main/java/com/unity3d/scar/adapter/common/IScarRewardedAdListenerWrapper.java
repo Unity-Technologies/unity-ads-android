@@ -19,4 +19,9 @@ public interface IScarRewardedAdListenerWrapper extends IScarAdListenerWrapper {
 	 * Called when an impression is recorded for an ad.
 	 */
 	void onAdImpression();
+
+	/**
+	 * Called when the user does not watch the ad to completion.
+	 */
+	void onAdSkipped();
 }

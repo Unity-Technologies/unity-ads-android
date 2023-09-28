@@ -4,7 +4,6 @@ package com.unity3d.services.core.request.metrics;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.unity3d.services.core.configuration.Configuration;
 import com.unity3d.services.core.log.DeviceLog;
@@ -12,7 +11,6 @@ import com.unity3d.services.core.properties.InitializationStatusReader;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class SDKMetrics {
@@ -37,7 +35,7 @@ public final class SDKMetrics {
 			((MetricSender) _instance).shutdown();
 		}
 
-		if (configuration.getMetricSampleRate() >= new Random().nextInt(99) + 1) {
+		if (configuration.areMetricsEnabledForCurrentSession()) {
 			_instance = new MetricSender(configuration, new InitializationStatusReader());
 		} else {
 			DeviceLog.debug("Metrics will not be sent from the device for this session");
@@ -77,11 +75,6 @@ public final class SDKMetrics {
 
 		public NullInstance(String url) {
 			_metricEndpoint = url;
-		}
-
-		@Override
-		public boolean areMetricsEnabledForCurrentSession() {
-			return false;
 		}
 
 		public void sendEvent(@NonNull final String event) {

@@ -41,6 +41,11 @@ public class DeviceTest {
 	}
 
 	@Test
+	public void testExtensionVersion () {
+		assertTrue("Expected extension version should be > 4", Device.getExtensionVersion() >= -1);
+	}
+
+	@Test
 	public void testScreenLayout () {
 		assertTrue("Expected screenLayout property be something else than undefined (0)", Device.getScreenLayout() > 0);
 	}

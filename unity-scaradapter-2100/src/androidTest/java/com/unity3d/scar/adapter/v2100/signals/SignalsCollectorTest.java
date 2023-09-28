@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.unity3d.scar.adapter.common.requests.RequestExtras;
+import com.unity3d.scar.adapter.common.scarads.UnityAdFormat;
 import com.unity3d.scar.adapter.common.signals.ISignalCollectionListener;
 import com.unity3d.scar.adapter.v2100.requests.AdRequestFactory;
 
@@ -29,24 +30,24 @@ public class SignalsCollectorTest {
 	}
 
 	@Test
-	public void testGetScarSignals() {
+	public void testGetScarSignalInterstitial() {
 		SignalsCollector signalsCollector = new SignalsCollector(adRequestFactory);
-		signalsCollector.getSCARSignals(context, new String[]{"video"}, new String[]{"rewarded"}, _signalCollectionListener);
-		Mockito.verify(_signalCollectionListener, Mockito.timeout(10000).times(1)).onSignalsCollected(any(String.class));
+		signalsCollector.getSCARSignal(context, "video", UnityAdFormat.INTERSTITIAL, _signalCollectionListener);
+		Mockito.verify(_signalCollectionListener, Mockito.timeout(10000).times(1)).onSignalsCollected(Mockito.contains("{\"video\":"));
 	}
 
 	@Test
-	public void testGetScarSignalsNoRewarded() {
+	public void testGetScarSignalRewarded() {
 		SignalsCollector signalsCollector = new SignalsCollector(adRequestFactory);
-		signalsCollector.getSCARSignals(context, new String[]{"video"}, new String[]{}, _signalCollectionListener);
-		Mockito.verify(_signalCollectionListener, Mockito.timeout(10000).times(1)).onSignalsCollected(any(String.class));
+		signalsCollector.getSCARSignal(context, "rewarded", UnityAdFormat.REWARDED, _signalCollectionListener);
+		Mockito.verify(_signalCollectionListener, Mockito.timeout(10000).times(1)).onSignalsCollected(Mockito.contains("{\"rewarded\":"));
 	}
 
 	@Test
-	public void testGetScarSignalsNoInterstitial() {
+	public void testGetScarSignalBanner() {
 		SignalsCollector signalsCollector = new SignalsCollector(adRequestFactory);
-		signalsCollector.getSCARSignals(context, new String[]{}, new String[]{"rewarded"}, _signalCollectionListener);
-		Mockito.verify(_signalCollectionListener, Mockito.timeout(10000).times(1)).onSignalsCollected(any(String.class));
+		signalsCollector.getSCARSignal(context, "banner", UnityAdFormat.BANNER, _signalCollectionListener);
+		Mockito.verify(_signalCollectionListener, Mockito.timeout(10000).times(1)).onSignalsCollected(Mockito.contains("{\"banner\":"));
 	}
 }
 

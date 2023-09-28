@@ -18,8 +18,7 @@ public class WebViewUrlBuilder {
 
 		queryString += buildQueryParam("origin", configuration.getWebViewUrl());
 		queryString += buildQueryParam("version", configuration.getWebViewVersion());
-		queryString += buildQueryParam("isNativeCollectingMetrics", String.valueOf(_sdkMetricsSender.areMetricsEnabledForCurrentSession()));
-
+		queryString += buildQueryParam("isNativeCollectingMetrics", String.valueOf(configuration.areMetricsEnabledForCurrentSession()));
 		_urlWithQueryString = baseUrl + queryString;
 	}
 

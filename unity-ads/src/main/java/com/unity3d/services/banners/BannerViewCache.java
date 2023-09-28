@@ -1,8 +1,9 @@
 package com.unity3d.services.banners;
 
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.ads.operation.load.ILoadModule;
-import com.unity3d.services.ads.operation.load.LoadBannerModule;
+import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
+import com.unity3d.services.ads.operation.load.*;
+import com.unity3d.services.banners.bridge.BannerBridge;
 import com.unity3d.services.core.misc.Utilities;
 
 import java.lang.ref.WeakReference;
@@ -44,6 +45,37 @@ public class BannerViewCache {
 		_bannerViews.remove(bannerAdId);
 	}
 
+	public synchronized void loadBanner(LoadBannerOperationState state) {
+		String bannerAdId = state.getId();
+		UnityBannerSize size = state.getSize();
+
+		if (state.isScarAd()) {
+			ScarAdMetadata scarAdMetadata = state.getScarAdMetadata();
+			loadScarPlayer(bannerAdId, scarAdMetadata, size);
+		} else {
+			boolean successfullyLoaded = loadWebPlayer(bannerAdId, size);
+			if (successfullyLoaded) {
+				BannerBridge.didLoad(bannerAdId);
+			}
+		}
+	}
+
+	public synchronized void loadScarPlayer(String bannerAdId, ScarAdMetadata scarAdMetadata, UnityBannerSize size) {
+		BannerView bannerView = this.getBannerView(bannerAdId);
+
+		if (bannerView != null) {
+			bannerView.loadScarPlayer(bannerAdId, scarAdMetadata, size);
+		}
+	}
+
+	public synchronized void addScarContainer(String bannerAdId) {
+		BannerView bannerView = this.getBannerView(bannerAdId);
+
+		if (bannerView != null) {
+			bannerView.addScarContainer();
+		}
+	}
+
 	public synchronized boolean loadWebPlayer(String bannerAdId, UnityBannerSize size) {
 		BannerView bannerView = this.getBannerView(bannerAdId);
 		if (bannerView != null) {
@@ -57,6 +89,8 @@ public class BannerViewCache {
 	public synchronized void triggerBannerLoadEvent(String bannerAdId) {
 		final BannerView bannerView = this.getBannerView(bannerAdId);
 		if (bannerView != null && bannerView.getListener() != null) {
+			LoadBannerModule.getInstance().onUnityAdsAdLoaded(bannerAdId);
+
 			final BannerView.IListener listener = bannerView.getListener();
 			Utilities.runOnUiThread(new Runnable() {
 				@Override
@@ -100,7 +134,8 @@ public class BannerViewCache {
 	}
 
 	public synchronized void triggerBannerErrorEvent(String bannerAdId, final BannerErrorInfo bannerErrorInfo) {
-		LoadBannerModule.getInstance().onUnityAdsFailedToLoad(bannerAdId, UnityAds.UnityAdsLoadError.INTERNAL_ERROR, bannerErrorInfo.errorMessage);
+		final UnityAds.UnityAdsLoadError unityAdsLoadError = bannerErrorInfo.toLoadError();
+		LoadBannerModule.getInstance().onUnityAdsFailedToLoad(bannerAdId, unityAdsLoadError, bannerErrorInfo.errorMessage);
 	}
 
 	public synchronized void triggerBannerLeftApplicationEvent(String bannerAdId) {

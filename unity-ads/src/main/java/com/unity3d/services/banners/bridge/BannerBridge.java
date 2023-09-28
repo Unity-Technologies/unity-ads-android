@@ -104,6 +104,20 @@ public class BannerBridge {
 		}
 	}
 
+	public static void didAttachScarBanner(String bannerAdId) {
+		WebViewApp webViewApp = WebViewApp.getCurrentApp();
+		if (webViewApp != null) {
+			webViewApp.sendEvent(WebViewEventCategory.BANNER, BannerEvent.SCAR_BANNER_ATTACHED, bannerAdId);
+		}
+	}
+
+	public static void didDetachScarBanner(String bannerAdId) {
+		WebViewApp webViewApp = WebViewApp.getCurrentApp();
+		if (webViewApp != null) {
+			webViewApp.sendEvent(WebViewEventCategory.BANNER, BannerEvent.SCAR_BANNER_DETACHED, bannerAdId);
+		}
+	}
+
 	public enum BannerEvent {
 		BANNER_VISIBILITY_CHANGED,
 		BANNER_RESIZED,
@@ -112,6 +126,15 @@ public class BannerBridge {
 		BANNER_ATTACHED,
 		BANNER_DETACHED,
 		BANNER_LOAD_PLACEMENT,
-		BANNER_DESTROY_BANNER
+		BANNER_DESTROY_BANNER,
+		// Used for SCAR banners only
+		SCAR_BANNER_LOADED,
+		SCAR_BANNER_LOAD_FAILED,
+		SCAR_BANNER_ATTACHED,
+		SCAR_BANNER_DETACHED,
+		SCAR_BANNER_OPENED,
+		SCAR_BANNER_CLOSED,
+		SCAR_BANNER_IMPRESSION,
+		SCAR_BANNER_CLICKED
 	}
 }

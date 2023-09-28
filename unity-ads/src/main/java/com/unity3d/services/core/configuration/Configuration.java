@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class Configuration {
 	private String _webViewUrl;
@@ -49,6 +50,7 @@ public class Configuration {
 	private double _metricSampleRate;
 	private long _webViewAppCreateTimeout;
 	private String _scarBiddingUrl;
+	private Boolean _metricsEnabled;
 
 	private String _filteredJsonString;
 	private JSONObject _rawJsonData;
@@ -276,6 +278,7 @@ public class Configuration {
 		_privacyRequestWaitTimeout = configData.optInt("prwto", 3000);
 		_src = configData.optString("src", null);
 		_scarBiddingUrl = configData.optString("scurl", SCAR_PRD_BIDDING_ENDPOINT);
+		_metricsEnabled = _metricSampleRate >= new Random().nextInt(99) + 1;
 
 		IExperiments experiments;
 		if (configData.has("expo")) {
@@ -320,6 +323,10 @@ public class Configuration {
 			}
 		}
 		return filteredConfig;
+	}
+
+	public Boolean areMetricsEnabledForCurrentSession() {
+		return _metricsEnabled;
 	}
 
 }

@@ -3,10 +3,12 @@ package com.unity3d.services.core.di
 import android.os.Handler
 import android.os.Looper
 import com.unity3d.services.SDKErrorHandler
+import com.unity3d.services.ads.measurements.MeasurementsService
 import com.unity3d.services.ads.token.AsyncTokenStorage
 import com.unity3d.services.ads.token.InMemoryAsyncTokenStorage
 import com.unity3d.services.ads.token.InMemoryTokenStorage
 import com.unity3d.services.ads.token.TokenStorage
+import com.unity3d.services.ads.topics.TopicsService
 import com.unity3d.services.core.device.VolumeChange
 import com.unity3d.services.core.device.VolumeChangeContentObserver
 import com.unity3d.services.core.device.VolumeChangeMonitor
@@ -15,6 +17,7 @@ import com.unity3d.services.core.domain.SDKDispatchers
 import com.unity3d.services.core.domain.task.*
 import com.unity3d.services.core.network.core.LegacyHttpClient
 import com.unity3d.services.core.network.core.HttpClient
+import com.unity3d.services.core.properties.ClientProperties
 import com.unity3d.services.core.network.core.OkHttp3Client
 import com.unity3d.services.core.request.metrics.SDKMetrics
 import com.unity3d.services.core.request.metrics.SDKMetricsSender
@@ -84,6 +87,9 @@ object ServiceProvider : IServiceProvider {
         single<VolumeChange> { VolumeChangeContentObserver() }
         single { VolumeChangeMonitor(SharedInstances.webViewEventSender, get()) }
 
+        // android privacy sandbox
+        single { MeasurementsService(ClientProperties.getApplicationContext(), get(), SharedInstances.webViewEventSender) }
+        single { TopicsService(ClientProperties.getApplicationContext(), get(), SharedInstances.webViewEventSender) }
     }
 
     /**
@@ -125,7 +131,7 @@ object ServiceProvider : IServiceProvider {
      */
     private fun provideHttpClient(dispatchers: ISDKDispatchers, configFileFromLocalStorage: ConfigFileFromLocalStorage): HttpClient {
         val config = runBlocking {
-           runCatching { configFileFromLocalStorage(ConfigFileFromLocalStorage.Params()) }.getOrNull()
+            configFileFromLocalStorage(ConfigFileFromLocalStorage.Params()).getOrNull()
         }
 
         if (config?.experiments?.isOkHttpEnabled == true) {

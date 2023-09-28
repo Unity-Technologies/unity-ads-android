@@ -76,7 +76,7 @@ class InitializeStateNetworkErrorTest {
                 advanceTimeBy(300)
             }
             // when
-            val result = runCatching { initializeStateNetworkError(InitializeStateNetworkError.Params(configMock)) }
+            val result = initializeStateNetworkError(InitializeStateNetworkError.Params(configMock))
 
             // then
             verify(exactly = 1) { ConnectivityMonitor.removeListener(any()) }

@@ -8,11 +8,12 @@ import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.unity3d.scar.adapter.common.GMAAdsError;
 import com.unity3d.scar.adapter.common.IAdsErrorHandler;
 import com.unity3d.scar.adapter.common.IScarInterstitialAdListenerWrapper;
+import com.unity3d.scar.adapter.common.scarads.IScarFullScreenAd;
 import com.unity3d.scar.adapter.common.scarads.IScarLoadListener;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
 import com.unity3d.scar.adapter.v2100.requests.AdRequestFactory;
 
-public class ScarInterstitialAd extends ScarAdBase<InterstitialAd> {
+public class ScarInterstitialAd extends ScarAdBase<InterstitialAd> implements IScarFullScreenAd {
 
 	public ScarInterstitialAd(Context context, AdRequestFactory adRequestFactory, ScarAdMetadata scarAdMetadata, IAdsErrorHandler adsErrorHandler, IScarInterstitialAdListenerWrapper adListener) {
 		super(context, scarAdMetadata, adRequestFactory, adsErrorHandler);

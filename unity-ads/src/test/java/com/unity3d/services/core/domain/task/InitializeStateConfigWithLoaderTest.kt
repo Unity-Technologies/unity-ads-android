@@ -63,11 +63,7 @@ class InitializeStateConfigWithLoaderTest {
             every { tokenStorage.setInitToken(any()) } returns Unit
 
             // when
-            val configWithLoaderResult = runCatching {
-                initializeStateConfigWithLoader(
-                    InitializeStateConfigWithLoader.Params(configMock)
-                )
-            }
+            val configWithLoaderResult = initializeStateConfigWithLoader(InitializeStateConfigWithLoader.Params(configMock))
 
             // then
             Assert.assertTrue(configWithLoaderResult.isSuccess)
@@ -87,11 +83,7 @@ class InitializeStateConfigWithLoaderTest {
             every { configMock.maxRetries } returns 5
 
             // when
-            val configWithLoaderResult = runCatching {
-                initializeStateConfigWithLoader(
-                    InitializeStateConfigWithLoader.Params(configMock)
-                )
-            }
+            val configWithLoaderResult = initializeStateConfigWithLoader(InitializeStateConfigWithLoader.Params(configMock))
 
             // then
             Assert.assertTrue(configWithLoaderResult.isFailure)
@@ -112,11 +104,7 @@ class InitializeStateConfigWithLoaderTest {
             every { configMock.maxRetries } returns 5
 
             // when
-            val configWithLoaderResult = runCatching {
-                initializeStateConfigWithLoader(
-                    InitializeStateConfigWithLoader.Params(configMock)
-                )
-            }
+            val configWithLoaderResult = initializeStateConfigWithLoader(InitializeStateConfigWithLoader.Params(configMock))
 
             // then
             Assert.assertTrue(configWithLoaderResult.isFailure)
@@ -136,11 +124,7 @@ class InitializeStateConfigWithLoaderTest {
             every { configMock.maxRetries } returns 5
 
             // when
-            val configWithLoaderResult = runCatching {
-                initializeStateConfigWithLoader(
-                    InitializeStateConfigWithLoader.Params(configMock)
-                )
-            }
+            val configWithLoaderResult = initializeStateConfigWithLoader(InitializeStateConfigWithLoader.Params(configMock))
 
             // then
             Assert.assertTrue(configWithLoaderResult.isFailure)

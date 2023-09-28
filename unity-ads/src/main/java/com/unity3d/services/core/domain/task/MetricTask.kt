@@ -17,8 +17,8 @@ abstract class MetricTask<in P : BaseParams, R> : BaseTask<P, R> {
     var duration: Long = 0L
     var taskStatus: String = "unknown"
 
-    override suspend fun invoke(params: P): R {
-        var result: R
+    override suspend fun invoke(params: P): Result<R> {
+        var result: Result<R>
         duration = TimeUnit.NANOSECONDS.toMillis(
             measureNanoTime {
                 result = super.invoke(params)
@@ -27,12 +27,8 @@ abstract class MetricTask<in P : BaseParams, R> : BaseTask<P, R> {
         return result
     }
 
-    private fun captureMetric(result: R) {
-        taskStatus = if (result is Result<*>) {
-            if (result.isSuccess) "success" else "failure"
-        } else {
-            "success"
-        }
+    private fun captureMetric(result: Result<R>) {
+        taskStatus = if (result.isSuccess) "success" else "failure"
         sendMetric()
     }
 

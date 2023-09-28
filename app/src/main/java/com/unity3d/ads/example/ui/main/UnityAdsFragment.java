@@ -18,11 +18,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.unity3d.ads.IUnityAdsInitializationListener;
-import com.unity3d.ads.IUnityAdsLoadListener;
-import com.unity3d.ads.IUnityAdsShowListener;
-import com.unity3d.ads.UnityAds;
-import com.unity3d.ads.UnityAdsShowOptions;
+import com.unity3d.ads.*;
 import com.unity3d.ads.example.R;
 import com.unity3d.ads.metadata.MediationMetaData;
 import com.unity3d.ads.metadata.MetaData;
@@ -68,6 +64,7 @@ public class UnityAdsFragment extends Fragment {
 		@Override
 		public void onBannerFailedToLoad(BannerView bannerAdView, BannerErrorInfo errorInfo) {
 			Log.e(LOGTAG, "Unity Ads failed to load banner for " + bannerAdView.getPlacementId() + " with error: [" + errorInfo.errorCode + "] " + errorInfo.errorMessage);
+			enableButton(showBannerButton);
 		}
 
 		@Override
@@ -203,6 +200,7 @@ public class UnityAdsFragment extends Fragment {
 		this.showBannerButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				disableButton(showBannerButton);
 				bottomBanner = new BannerView((Activity)v.getContext(), "bannerads", new UnityBannerSize(320, 50));
 				bottomBanner.setListener(bannerListener);
 				bottomBanner.load();
@@ -213,11 +211,12 @@ public class UnityAdsFragment extends Fragment {
 		hideBannerButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				bottomBanner.removeAllViews();
 				if (bottomBanner != null) {
+					bottomBanner.removeAllViews();
 					bottomBanner = null;
 				}
-				showBannerButton.setEnabled(true);
+				enableButton(showBannerButton);
+				disableButton(hideBannerButton);
 			}
 		});
 

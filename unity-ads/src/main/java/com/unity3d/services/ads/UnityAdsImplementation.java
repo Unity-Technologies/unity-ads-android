@@ -27,7 +27,6 @@ import com.unity3d.services.core.log.DeviceLog;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
-import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.WebViewApp;
 import com.unity3d.services.core.webview.bridge.WebViewBridgeInvoker;
@@ -203,7 +202,7 @@ public final class UnityAdsImplementation implements IUnityAds {
 		}
 
 		Configuration config = configuration == null ? new ConfigurationReader().getCurrentConfiguration() : configuration;
-		BiddingBaseManager manager = BiddingManagerFactory.getInstance().createManager(listener, config.getExperiments());
+		BiddingBaseManager manager = BiddingManagerFactory.getInstance().createManager(null, config.getExperiments());
 		manager.start();
 
 		asyncTokenStorage.getToken(manager);

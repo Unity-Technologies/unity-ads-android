@@ -5,7 +5,7 @@ import com.unity3d.ads.IUnityAdsTokenListener;
 public class BiddingDisabledManager extends BiddingBaseManager {
 
 	public BiddingDisabledManager(IUnityAdsTokenListener unityAdsTokenListener) {
-		super(unityAdsTokenListener);
+		super(false, unityAdsTokenListener);
 	}
 
 	@Override
@@ -16,11 +16,6 @@ public class BiddingDisabledManager extends BiddingBaseManager {
 
 	@Override
 	public void start() {
-		// SCAR bidding signals collection should be blocked.
-	}
-
-	@Override
-	public void onUnityTokenSuccessfullyFetched() {
 		// SCAR bidding signals collection should be blocked.
 	}
 }

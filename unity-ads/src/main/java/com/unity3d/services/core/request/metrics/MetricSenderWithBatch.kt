@@ -16,10 +16,6 @@ class MetricSenderWithBatch(
         _original = metrics
     }
 
-    override fun areMetricsEnabledForCurrentSession(): Boolean {
-        return _original.areMetricsEnabledForCurrentSession()
-    }
-
     override fun sendEvent(event: String, value: String?, tags: Map<String, String>) {
         if (event.isEmpty()) {
             DeviceLog.debug("Metric event not sent due to being empty: $event")

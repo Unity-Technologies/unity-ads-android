@@ -28,10 +28,6 @@ open class MetricSender(
 
     override val metricEndPoint: String? = configuration.metricsUrl
 
-    override fun areMetricsEnabledForCurrentSession(): Boolean {
-        return true
-    }
-
     override fun sendEvent(event: String, value: String?, tags: Map<String, String>) {
         if (event.isEmpty()) {
             DeviceLog.debug("Metric event not sent due to being null or empty: $event")

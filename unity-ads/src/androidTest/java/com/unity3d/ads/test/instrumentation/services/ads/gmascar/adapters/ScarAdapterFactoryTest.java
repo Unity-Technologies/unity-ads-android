@@ -20,18 +20,6 @@ public class ScarAdapterFactoryTest {
 	private final ScarAdapterFactory _scarAdapterFactory = new ScarAdapterFactory();
 
 	@Test
-	public void testScarAdapterFactory1920() {
-		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterVersion.V192, adsErrorHandlerMock);
-		Assert.assertTrue(adapter instanceof com.unity3d.scar.adapter.v1920.ScarAdapter);
-	}
-
-	@Test
-	public void testScarAdapterFactory1950() {
-		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterVersion.V195, adsErrorHandlerMock);
-		Assert.assertTrue(adapter instanceof com.unity3d.scar.adapter.v1950.ScarAdapter);
-	}
-
-	@Test
 	public void testScarAdapterFactory2000() {
 		IScarAdapter adapter = _scarAdapterFactory.createScarAdapter(ScarAdapterVersion.V20, adsErrorHandlerMock);
 		Assert.assertTrue(adapter instanceof com.unity3d.scar.adapter.v2000.ScarAdapter);

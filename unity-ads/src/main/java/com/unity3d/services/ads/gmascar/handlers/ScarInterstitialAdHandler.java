@@ -18,9 +18,14 @@ public class ScarInterstitialAdHandler extends ScarAdHandlerBase implements ISca
 	}
 
 	@Override
+	public void onAdSkipped() {
+		_gmaEventSender.send(GMAEvent.AD_SKIPPED);
+	}
+
+	@Override
 	public void onAdClosed() {
 		if (!_eventSubject.eventQueueIsEmpty()) {
-			super.onAdSkipped();
+			onAdSkipped();
 		}
 		super.onAdClosed();
 	}

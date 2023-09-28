@@ -3,7 +3,8 @@ package com.unity3d.scar.adapter.common;
 import android.app.Activity;
 import android.content.Context;
 
-import com.unity3d.scar.adapter.common.scarads.IScarAd;
+import com.unity3d.scar.adapter.common.scarads.IScarFullScreenAd;
+import com.unity3d.scar.adapter.common.scarads.UnityAdFormat;
 import com.unity3d.scar.adapter.common.signals.ISignalCollectionListener;
 import com.unity3d.scar.adapter.common.signals.ISignalsCollector;
 
@@ -14,8 +15,8 @@ import static com.unity3d.scar.adapter.common.Utils.runOnUiThread;
 
 public abstract class ScarAdapterBase implements IScarAdapter {
 	protected ISignalsCollector _signalCollector;
-	protected Map<String, IScarAd> _loadedAds = new ConcurrentHashMap<>();
-	protected IScarAd _currentAdReference;
+	protected Map<String, IScarFullScreenAd> _loadedAds = new ConcurrentHashMap<>();
+	protected IScarFullScreenAd _currentAdReference;
 	protected IAdsErrorHandler<WebViewAdsError> _adsErrorHandler;
 
 	public ScarAdapterBase(IAdsErrorHandler<WebViewAdsError> adsErrorHandler) {
@@ -23,18 +24,18 @@ public abstract class ScarAdapterBase implements IScarAdapter {
 	}
 
 	@Override
-	public void getSCARBiddingSignals(Context context, ISignalCollectionListener signalCompletionListener) {
-		_signalCollector.getSCARBiddingSignals(context, signalCompletionListener);
+	public void getSCARBiddingSignals(Context context, boolean isBannerEnabled, ISignalCollectionListener signalCompletionListener) {
+		_signalCollector.getSCARBiddingSignals(context, isBannerEnabled, signalCompletionListener);
 	}
 
 	@Override
-	public void getSCARSignals(Context context, String[] interstitialList, String[] rewardedList, ISignalCollectionListener signalCompletionListener) {
-		_signalCollector.getSCARSignals(context, interstitialList, rewardedList, signalCompletionListener);
+	public void getSCARSignal(Context context, String placementId, UnityAdFormat adFormat, ISignalCollectionListener signalCompletionListener) {
+		_signalCollector.getSCARSignal(context, placementId, adFormat, signalCompletionListener);
 	}
 
 	@Override
 	public void show(final Activity activity, String queryId, String placementId) {
-		IScarAd scarAd = _loadedAds.get(placementId);
+		IScarFullScreenAd scarAd = _loadedAds.get(placementId);
 
 		if (scarAd == null) {
 			_adsErrorHandler.handleError(GMAAdsError.NoAdsError(placementId, queryId, "Could not find ad for placement '" + placementId + "'."));

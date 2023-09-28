@@ -7,8 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.unity3d.services.ads.gmascar.utils.ScarConstants.IN_SIGNAL_KEY;
-import static com.unity3d.services.ads.gmascar.utils.ScarConstants.RV_SIGNAL_KEY;
+import static com.unity3d.services.ads.gmascar.utils.ScarConstants.*;
 
 /**
  * Data structure for GMA bidding signals.
@@ -17,6 +16,7 @@ public class BiddingSignals {
 
 	private final String rvSignal;
 	private final String interstitialSignal;
+	private final String bannerSignal;
 
 	/**
 	 * Constructor that initialized the object with passed GMA bidding signals.
@@ -24,9 +24,16 @@ public class BiddingSignals {
 	 * @param rvSignal           rewarded video GMA Scar bidding signal.
 	 * @param interstitialSignal interstitial GMA Scar bidding signal.
 	 */
+	public BiddingSignals(String rvSignal, String interstitialSignal, String bannerSignal) {
+		this.rvSignal = rvSignal;
+		this.interstitialSignal = interstitialSignal;
+		this.bannerSignal = bannerSignal;
+	}
+
 	public BiddingSignals(String rvSignal, String interstitialSignal) {
 		this.rvSignal = rvSignal;
 		this.interstitialSignal = interstitialSignal;
+		this.bannerSignal = "";
 	}
 
 	/**
@@ -50,12 +57,22 @@ public class BiddingSignals {
 	}
 
 	/**
-	 * Checks if both bidding signals are empty in which case they should not be uploaded
+	 * Getter for banner GMA SCAR signal.
 	 *
-	 * @return true if both signals are empty, false otherwise
+	 * @return banner bidding signal
+	 */
+	@Nullable
+	public String getBannerSignal() {
+		return bannerSignal;
+	}
+
+	/**
+	 * Checks if all bidding signals are empty in which case they should not be uploaded
+	 *
+	 * @return true if all signals are empty, false otherwise
 	 */
 	public boolean isEmpty () {
-		return TextUtils.isEmpty(getRvSignal()) && TextUtils.isEmpty(getInterstitialSignal());
+		return TextUtils.isEmpty(getRvSignal()) && TextUtils.isEmpty(getInterstitialSignal()) && TextUtils.isEmpty(getBannerSignal());
 	}
 
 	/**
@@ -72,6 +89,10 @@ public class BiddingSignals {
 
 		if (!TextUtils.isEmpty(getInterstitialSignal())) {
 			signalsMap.put(IN_SIGNAL_KEY, getInterstitialSignal());
+		}
+
+		if (!TextUtils.isEmpty(getBannerSignal())) {
+			signalsMap.put(BN_SIGNAL_KEY, getBannerSignal());
 		}
 
 		return signalsMap;

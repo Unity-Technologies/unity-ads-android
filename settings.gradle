@@ -1,5 +1,3 @@
-include ':unity-scaradapter-1920'
-include ':unity-scaradapter-1950'
 include ':unity-scaradapter-2000'
 include ':unity-scaradapter-2100'
 include ':unity-scaradapter-common'

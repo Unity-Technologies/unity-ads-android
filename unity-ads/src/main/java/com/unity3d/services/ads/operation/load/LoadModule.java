@@ -1,13 +1,11 @@
 package com.unity3d.services.ads.operation.load;
 
-import com.unity3d.services.core.configuration.ConfigurationReader;
+import com.unity3d.services.core.configuration.ExperimentsReader;
 import com.unity3d.services.core.configuration.InitializationNotificationCenter;
 
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.request.metrics.SDKMetricsSender;
-import com.unity3d.services.core.request.metrics.SDKMetrics;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class LoadModule extends BaseLoadModule {
@@ -18,7 +16,7 @@ public class LoadModule extends BaseLoadModule {
 		if (_instance == null) {
 			LoadModule loadModule = new LoadModule(Utilities.getService(SDKMetricsSender.class));
 			LoadModuleDecoratorInitializationBuffer bufferedLoadModule = new LoadModuleDecoratorInitializationBuffer(loadModule, InitializationNotificationCenter.getInstance());
-			LoadModuleDecoratorTimeout timedLoadModule = new LoadModuleDecoratorTimeout(bufferedLoadModule, new ConfigurationReader());
+			LoadModuleDecoratorTimeout timedLoadModule = new LoadModuleDecoratorTimeout(bufferedLoadModule, new ExperimentsReader());
 			_instance = timedLoadModule;
 		}
 		return _instance;

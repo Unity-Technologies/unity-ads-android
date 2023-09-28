@@ -1,10 +1,7 @@
 package com.unity3d.services.core.configuration;
 
-import com.unity3d.services.ads.gmascar.managers.SCARBiddingManagerType;
-
 import org.json.JSONObject;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,8 +53,8 @@ public class Experiments extends ExperimentsBase {
 	}
 
 	@Override
-	public String getScarBiddingManager() {
-		return _experimentData.optString(EXP_TAG_SCAR_BIDDING_MANAGER, SCARBiddingManagerType.DISABLED.getName());
+	public boolean isScarBannerHbEnabled() {
+		return _experimentData.optBoolean(EXP_TAG_SCAR_HB_BN, false);
 	}
 
 	@Override
@@ -83,6 +80,26 @@ public class Experiments extends ExperimentsBase {
 	@Override
 	public boolean isCronetCheckEnabled() {
 		return _experimentData.optBoolean(EXP_TAG_CRONET_CHECK, false);
+	}
+
+	@Override
+	public boolean isNativeShowTimeoutDisabled() {
+		return _experimentData.optBoolean(EXP_TAG_SHOW_TIMEOUT_DISABLED, false);
+	}
+
+	@Override
+	public boolean isNativeLoadTimeoutDisabled() {
+		return _experimentData.optBoolean(EXP_TAG_LOAD_TIMEOUT_DISABLED, false);
+	}
+
+	@Override
+	public boolean isCaptureHDRCapabilitiesEnabled() {
+		return _experimentData.optBoolean(EXP_TAG_HDR_CAPABILITIES, false);
+	}
+
+	@Override
+	public boolean isPCCheckEnabled() {
+		return _experimentData.optBoolean(EXP_TAG_IS_PC_CHECK_ENABLED, false);
 	}
 
 	public JSONObject getExperimentsAsJson() {

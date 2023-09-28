@@ -51,8 +51,7 @@ class InitializeStateCreateWithRemoteTest {
             every { WebViewApp.create(any(), true) } returns null
 
             // when
-            val result =
-                runCatching { initializeSateCreateWithRemote(InitializeStateCreateWithRemote.Params(configMock)) }
+            val result = initializeSateCreateWithRemote(InitializeStateCreateWithRemote.Params(configMock))
 
             // then
             assertTrue(result.isSuccess)
@@ -72,8 +71,7 @@ class InitializeStateCreateWithRemoteTest {
             every { WebViewApp.create(any(), true) } returns ErrorState.CreateWebview
 
             // when
-            val result =
-                runCatching { initializeSateCreateWithRemote(InitializeStateCreateWithRemote.Params(configMock)) }
+            val result = initializeSateCreateWithRemote(InitializeStateCreateWithRemote.Params(configMock))
 
             // then
             assertTrue(result.isFailure)
@@ -99,8 +97,7 @@ class InitializeStateCreateWithRemoteTest {
             every { WebViewApp.create(any(), true) } returns ErrorState.CreateWebview
 
             // when
-            val result =
-                runCatching { initializeSateCreateWithRemote(InitializeStateCreateWithRemote.Params(configMock)) }
+            val result = initializeSateCreateWithRemote(InitializeStateCreateWithRemote.Params(configMock))
 
             // then
             assertTrue(result.isFailure)

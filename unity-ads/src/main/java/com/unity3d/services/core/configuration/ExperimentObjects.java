@@ -1,7 +1,5 @@
 package com.unity3d.services.core.configuration;
 
-import com.unity3d.services.ads.gmascar.managers.SCARBiddingManagerType;
-
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -54,11 +52,6 @@ public class ExperimentObjects extends ExperimentsBase {
 	}
 
 	@Override
-	public String getScarBiddingManager() {
-		return getExperimentValue(EXP_TAG_SCAR_BIDDING_MANAGER, SCARBiddingManagerType.DISABLED.getName());
-	}
-
-	@Override
 	public boolean isJetpackLifecycle() {
 		return getExperimentValueOrDefault(EXP_TAG_JETPACK_LIFECYCLE);
 	}
@@ -82,6 +75,27 @@ public class ExperimentObjects extends ExperimentsBase {
 	public boolean isCronetCheckEnabled() {
 		return getExperimentValueOrDefault(EXP_TAG_CRONET_CHECK);
 	}
+
+	@Override
+	public boolean isNativeShowTimeoutDisabled() {
+		return getExperimentValueOrDefault(EXP_TAG_SHOW_TIMEOUT_DISABLED);
+	}
+
+	@Override
+	public boolean isNativeLoadTimeoutDisabled() {
+		return getExperimentValueOrDefault(EXP_TAG_LOAD_TIMEOUT_DISABLED);
+	}
+
+	@Override
+	public boolean isCaptureHDRCapabilitiesEnabled() {
+		return getExperimentValueOrDefault(EXP_TAG_HDR_CAPABILITIES);
+	}
+
+	@Override
+	public boolean isScarBannerHbEnabled() { return getExperimentValueOrDefault(EXP_TAG_SCAR_HB_BN); }
+
+	@Override
+	public boolean isPCCheckEnabled() { return getExperimentValueOrDefault(EXP_TAG_IS_PC_CHECK_ENABLED); }
 
 	private String getExperimentValue(String experimentName, String defaultValue) {
 		ExperimentObject expo = getExperimentObject(experimentName);

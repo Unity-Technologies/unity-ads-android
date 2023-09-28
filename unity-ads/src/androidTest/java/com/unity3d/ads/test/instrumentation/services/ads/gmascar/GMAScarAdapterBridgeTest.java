@@ -10,10 +10,13 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 import android.app.Activity;
 import android.content.Context;
 
+import android.widget.RelativeLayout;
 import com.unity3d.scar.adapter.common.IScarAdapter;
+import com.unity3d.scar.adapter.common.IScarBannerAdListenerWrapper;
 import com.unity3d.scar.adapter.common.IScarInterstitialAdListenerWrapper;
 import com.unity3d.scar.adapter.common.IScarRewardedAdListenerWrapper;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
+import com.unity3d.scar.adapter.common.scarads.UnityAdFormat;
 import com.unity3d.scar.adapter.common.signals.ISignalCollectionListener;
 import com.unity3d.services.ads.gmascar.GMAScarAdapterBridge;
 import com.unity3d.services.ads.gmascar.adapters.ScarAdapterFactory;
@@ -64,19 +67,19 @@ public class GMAScarAdapterBridgeTest {
 	private static final ScarAdapterVersion VERSION = ScarAdapterVersion.V21;
 	private GMAScarAdapterBridge gmaScarAdapterBridge;
 	private IScarAdapter scarAdapter;
+	private boolean isBannerSignalEnabled = true;
 
 	@Before
 	public void setup() {
 		scarAdapter = new IScarAdapter() {
 			@Override
-			public void getSCARSignals(Context context, String[] strings,
-									   String[] strings1,
-									   ISignalCollectionListener iSignalCollectionListener) {
+			public void getSCARSignal(Context context, String placementId, UnityAdFormat adFormat, ISignalCollectionListener signalCompletionListener) {
 
 			}
 
 			@Override
 			public void getSCARBiddingSignals(Context context,
+											  boolean isBannerEnabled,
 											  ISignalCollectionListener iSignalCollectionListener) {
 				iSignalCollectionListener.onSignalsCollected(SIGNAL);
 			}
@@ -92,6 +95,11 @@ public class GMAScarAdapterBridgeTest {
 			public void loadRewardedAd(Context context,
 									   ScarAdMetadata scarAdMetadata,
 									   IScarRewardedAdListenerWrapper iScarRewardedAdListenerWrapper) {
+
+			}
+
+			@Override
+			public void loadBannerAd(Context context, RelativeLayout bannerView, ScarAdMetadata scarAdMetadata, int width, int height, IScarBannerAdListenerWrapper adListener) {
 
 			}
 
@@ -189,7 +197,7 @@ public class GMAScarAdapterBridgeTest {
 			gmaEventSenderMock
 		);
 
-		gmaScarAdapterBridge.getSCARBiddingSignals(handler);
+		gmaScarAdapterBridge.getSCARBiddingSignals(isBannerSignalEnabled, handler);
 		verify(handler, times(0)).onSignalsCollectionFailed(anyString());
 		verify(handler, times(1)).onSignalsCollected(SIGNAL);
 	}
@@ -208,7 +216,7 @@ public class GMAScarAdapterBridgeTest {
 			gmaEventSenderMock
 		);
 
-		gmaScarAdapterBridge.getSCARBiddingSignals(handler);
+		gmaScarAdapterBridge.getSCARBiddingSignals(isBannerSignalEnabled, handler);
 		verify(handler, times(0)).onSignalsCollected(anyString());
 		verify(handler, times(1)).onSignalsCollectionFailed("SCAR bidding unsupported.");
 	}
@@ -228,7 +236,7 @@ public class GMAScarAdapterBridgeTest {
 			gmaEventSenderMock
 		);
 
-		gmaScarAdapterBridge.getSCARBiddingSignals(handler);
+		gmaScarAdapterBridge.getSCARBiddingSignals(isBannerSignalEnabled, handler);
 		verify(handler, times(0)).onSignalsCollected(SIGNAL);
 		verify(handler, times(1)).onSignalsCollectionFailed("Could not create SCAR adapter object.");
 	}

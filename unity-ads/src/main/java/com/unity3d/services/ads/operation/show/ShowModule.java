@@ -10,14 +10,14 @@ import android.view.WindowManager;
 
 import com.unity3d.ads.UnityAds;
 import com.unity3d.services.ads.operation.AdModule;
-import com.unity3d.services.core.configuration.ConfigurationReader;
+import com.unity3d.services.core.configuration.ExperimentsReader;
 import com.unity3d.services.core.device.Device;
+import com.unity3d.services.core.device.reader.HdrInfoReader;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.request.metrics.AdOperationError;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
 import com.unity3d.services.core.request.metrics.SDKMetricsSender;
-import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 import com.unity3d.services.core.webview.bridge.invocation.IWebViewBridgeInvocationCallback;
@@ -34,7 +34,7 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 
 	public static IShowModule getInstance() {
 		if (instance == null) {
-			instance = new ShowModuleDecoratorTimeout(new ShowModule(Utilities.getService(SDKMetricsSender.class)), new ConfigurationReader());
+			instance = new ShowModuleDecoratorTimeout(new ShowModule(Utilities.getService(SDKMetricsSender.class)), new ExperimentsReader());
 		}
 		return instance;
 	}
@@ -106,6 +106,7 @@ public class ShowModule extends AdModule<IShowOperation, ShowOperationState> imp
 
 		set(showOperation);
 		showOperation.invoke(state.configuration.getWebViewBridgeTimeout(), parameters);
+		HdrInfoReader.getInstance().captureHDRCapabilityMetrics(activity, new ExperimentsReader());
 	}
 
 	public void onUnityAdsShowFailure(String id, UnityAds.UnityAdsShowError error, String message) {

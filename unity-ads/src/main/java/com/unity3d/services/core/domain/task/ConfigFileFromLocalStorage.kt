@@ -2,6 +2,7 @@ package com.unity3d.services.core.domain.task
 
 import com.unity3d.services.core.configuration.Configuration
 import com.unity3d.services.core.domain.ISDKDispatchers
+import com.unity3d.services.core.extensions.runReturnSuspendCatching
 import com.unity3d.services.core.properties.SdkProperties
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -20,12 +21,14 @@ class ConfigFileFromLocalStorage(
         return getMetricNameForInitializeTask("read_local_config")
     }
 
-    override suspend fun doWork(params: Params): Configuration =
+    override suspend fun doWork(params: Params): Result<Configuration> =
         withContext(dispatchers.io) {
-            val configFile = File(SdkProperties.getLocalConfigurationFilepath())
-            val fileContent = configFile.readText()
-            val loadedJson = JSONObject(fileContent)
-            Configuration(loadedJson)
+            runReturnSuspendCatching {
+                val configFile = File(SdkProperties.getLocalConfigurationFilepath())
+                val fileContent = configFile.readText()
+                val loadedJson = JSONObject(fileContent)
+                Configuration(loadedJson)
+            }
         }
 
     /**

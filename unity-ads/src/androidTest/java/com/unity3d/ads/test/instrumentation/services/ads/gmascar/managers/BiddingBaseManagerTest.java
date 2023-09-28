@@ -38,7 +38,7 @@ public class BiddingBaseManagerTest {
 
 	private BiddingBaseManager managerWithTokenListener;
 	private BiddingBaseManager managerWithNullListener;
-
+	private boolean isBannerEnabled = true;
 	private String TEST_TOKEN = "token";
 	private boolean isAsyncTokenCall = true;
 	private boolean isNotAsyncTokenCall = false;
@@ -48,26 +48,16 @@ public class BiddingBaseManagerTest {
 	public void setup() {
 		ClientProperties.setApplication((Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext());
 		ClientProperties.setApplicationContext(InstrumentationRegistry.getInstrumentation().getTargetContext());
-		managerWithTokenListener = Mockito.spy(new BiddingBaseManager(publisherListener) {
+		managerWithTokenListener = Mockito.spy(new BiddingBaseManager(isBannerEnabled, publisherListener) {
 			@Override
 			public void start() {
-
-			}
-
-			@Override
-			public void onUnityTokenSuccessfullyFetched() {
 
 			}
 		});
 
-		managerWithNullListener = Mockito.spy(new BiddingBaseManager(null) {
+		managerWithNullListener = Mockito.spy(new BiddingBaseManager(isBannerEnabled, null) {
 			@Override
 			public void start() {
-
-			}
-
-			@Override
-			public void onUnityTokenSuccessfullyFetched() {
 
 			}
 		});
@@ -115,14 +105,9 @@ public class BiddingBaseManagerTest {
 
 	@Test
 	public void testSendsAsyncMetricWhenUploadStartsAndSucceedsWithAsyncTokenCall() throws InterruptedException {
-		BiddingBaseManager managerWithScarRequestSender = Mockito.spy(new BiddingBaseManager(publisherListener, _scarRequestHandlerMock) {
+		BiddingBaseManager managerWithScarRequestSender = Mockito.spy(new BiddingBaseManager(isBannerEnabled, publisherListener, _scarRequestHandlerMock) {
 			@Override
 			public void start() {
-
-			}
-
-			@Override
-			public void onUnityTokenSuccessfullyFetched() {
 
 			}
 		});
@@ -133,7 +118,7 @@ public class BiddingBaseManagerTest {
 		final Metric secondDesiredMetric = ScarMetric.hbSignalsUploadSuccess(isAsyncTokenCall);
 
 		managerWithScarRequestSender.permitUpload();
-		managerWithScarRequestSender.onSignalsReady(new BiddingSignals("testRewardedSignal", "testInterstitialSignal"));
+		managerWithScarRequestSender.onSignalsReady(new BiddingSignals("testRewardedSignal", "testInterstitialSignal", "testBannerSignal"));
 
 		Thread.sleep(1000);
 
@@ -170,21 +155,16 @@ public class BiddingBaseManagerTest {
 	public void testSendsAsyncMetricWhenUploadRequestFailsWithMalformedUrlAndAsyncTokenCall() throws Exception {
 		String errorMessage = "bad request";
 		Mockito.doThrow(new Exception(errorMessage)).when(_scarRequestHandlerMock).makeUploadRequest(Mockito.<String>any(), Mockito.<BiddingSignals>any(), any(String.class));
-		BiddingBaseManager managerWithScarRequestSender = Mockito.spy(new BiddingBaseManager(publisherListener, _scarRequestHandlerMock) {
+		BiddingBaseManager managerWithScarRequestSender = Mockito.spy(new BiddingBaseManager(isBannerEnabled, publisherListener, _scarRequestHandlerMock) {
 			@Override
 			public void start() {
-
-			}
-
-			@Override
-			public void onUnityTokenSuccessfullyFetched() {
 
 			}
 		});
 		Mockito.when(managerWithScarRequestSender.getMetricSender()).thenReturn(_metricSenderMock);
 
 		managerWithScarRequestSender.permitUpload();
-		managerWithScarRequestSender.onSignalsReady(new BiddingSignals("testRewardedSignal", "testInterstitialSignal"));
+		managerWithScarRequestSender.onSignalsReady(new BiddingSignals("testRewardedSignal", "testInterstitialSignal", "testBannerSignal"));
 
 		final ArgumentCaptor<Metric> metricsCaptor = ArgumentCaptor.forClass(Metric.class);
 		final Metric firstDesiredMetric = ScarMetric.hbSignalsUploadStart(isAsyncTokenCall);
@@ -242,14 +222,9 @@ public class BiddingBaseManagerTest {
 
 	@Test
 	public void testSendsSyncMetricWhenUploadStartsAndSucceedsWithSyncTokenCall() throws InterruptedException {
-		BiddingBaseManager managerWithScarRequestSender = Mockito.spy(new BiddingBaseManager(null, _scarRequestHandlerMock) {
+		BiddingBaseManager managerWithScarRequestSender = Mockito.spy(new BiddingBaseManager(isBannerEnabled, null, _scarRequestHandlerMock) {
 			@Override
 			public void start() {
-
-			}
-
-			@Override
-			public void onUnityTokenSuccessfullyFetched() {
 
 			}
 		});
@@ -260,7 +235,7 @@ public class BiddingBaseManagerTest {
 		final Metric secondDesiredMetric = ScarMetric.hbSignalsUploadSuccess(isNotAsyncTokenCall);
 
 		managerWithScarRequestSender.permitUpload();
-		managerWithScarRequestSender.onSignalsReady(new BiddingSignals("testRewardedSignal", "testInterstitialSignal"));
+		managerWithScarRequestSender.onSignalsReady(new BiddingSignals("testRewardedSignal", "testInterstitialSignal", "testBannerSignal"));
 
 		Thread.sleep(1000);
 
@@ -297,21 +272,16 @@ public class BiddingBaseManagerTest {
 	public void testSendsSyncMetricWhenUploadRequestFailsWithMalformedUrlAndSyncTokenCall() throws Exception {
 		String errorMessage = "bad request";
 		Mockito.doThrow(new Exception(errorMessage)).when(_scarRequestHandlerMock).makeUploadRequest(Mockito.<String>any(), Mockito.<BiddingSignals>any(), any(String.class));
-		BiddingBaseManager managerWithScarRequestSender = Mockito.spy(new BiddingBaseManager(null, _scarRequestHandlerMock) {
+		BiddingBaseManager managerWithScarRequestSender = Mockito.spy(new BiddingBaseManager(isBannerEnabled, null, _scarRequestHandlerMock) {
 			@Override
 			public void start() {
-
-			}
-
-			@Override
-			public void onUnityTokenSuccessfullyFetched() {
 
 			}
 		});
 		Mockito.when(managerWithScarRequestSender.getMetricSender()).thenReturn(_metricSenderMock);
 
 		managerWithScarRequestSender.permitUpload();
-		managerWithScarRequestSender.onSignalsReady(new BiddingSignals("testRewardedSignal", "testInterstitialSignal"));
+		managerWithScarRequestSender.onSignalsReady(new BiddingSignals("testRewardedSignal", "testInterstitialSignal", "testBannerSignal"));
 
 		final ArgumentCaptor<Metric> metricsCaptor = ArgumentCaptor.forClass(Metric.class);
 		final Metric firstDesiredMetric = ScarMetric.hbSignalsUploadStart(isNotAsyncTokenCall);
@@ -337,28 +307,10 @@ public class BiddingBaseManagerTest {
 	}
 
 	@Test
-	public void testOnUnityTokenSuccessfullyFetchedAfterOnUnityAdsTokenReadyWithValidToken() {
-		managerWithTokenListener.onUnityAdsTokenReady(TEST_TOKEN);
-		Mockito.verify(managerWithTokenListener, Mockito.times(1)).onUnityTokenSuccessfullyFetched();
-	}
-
-	@Test
-	public void testOnUnityTokenSuccessfullyFetchedAfterOnUnityAdsTokenReadyWithNullToken() {
-		managerWithTokenListener.onUnityAdsTokenReady(null);
-		Mockito.verify(managerWithTokenListener, Mockito.times(0)).onUnityTokenSuccessfullyFetched();
-	}
-
-	@Test
-	public void testOnUnityTokenSuccessfullyFetchedAfterOnUnityAdsTokenReadyWithEmptyToken() {
-		managerWithTokenListener.onUnityAdsTokenReady("");
-		Mockito.verify(managerWithTokenListener, Mockito.times(0)).onUnityTokenSuccessfullyFetched();
-	}
-
-	@Test
 	public void testUploadSignalsAfterPermittedAndSignalsReady() throws InterruptedException {
 		managerWithTokenListener.permitSignalsUpload();
 		Thread.sleep(100);
-		managerWithTokenListener.onSignalsReady(new BiddingSignals("test", "test"));
+		managerWithTokenListener.onSignalsReady(new BiddingSignals("test", "test", "test"));
 		Mockito.verify(managerWithTokenListener, Mockito.times(1)).uploadSignals();
 	}
 
@@ -371,7 +323,7 @@ public class BiddingBaseManagerTest {
 
 	@Test
 	public void testUploadSignalsAfterSignalsReadyButNotPermitted() throws InterruptedException {
-		managerWithTokenListener.onSignalsReady(new BiddingSignals("test", "test"));
+		managerWithTokenListener.onSignalsReady(new BiddingSignals("test", "test", "test"));
 		Thread.sleep(100);
 		Mockito.verify(managerWithTokenListener, Mockito.times(0)).uploadSignals();
 	}
@@ -381,9 +333,9 @@ public class BiddingBaseManagerTest {
 		managerWithTokenListener.permitSignalsUpload();
 		Thread.sleep(100);
 		Mockito.verify(managerWithTokenListener, Mockito.times(0)).uploadSignals();
-		managerWithTokenListener.onSignalsReady(new BiddingSignals("test", "test"));
-		managerWithTokenListener.onSignalsReady(new BiddingSignals("test", "test"));
-		managerWithTokenListener.onSignalsReady(new BiddingSignals("test", "test"));
+		managerWithTokenListener.onSignalsReady(new BiddingSignals("test", "test", "test"));
+		managerWithTokenListener.onSignalsReady(new BiddingSignals("test", "test", "test"));
+		managerWithTokenListener.onSignalsReady(new BiddingSignals("test", "test", "test"));
 		Mockito.verify(managerWithTokenListener, Mockito.times(1)).uploadSignals();
 	}
 }

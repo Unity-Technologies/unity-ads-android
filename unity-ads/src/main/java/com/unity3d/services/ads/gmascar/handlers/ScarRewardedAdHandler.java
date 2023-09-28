@@ -26,9 +26,14 @@ public class ScarRewardedAdHandler extends ScarAdHandlerBase implements IScarRew
 	}
 
 	@Override
+	public void onAdSkipped() {
+		_gmaEventSender.send(GMAEvent.AD_SKIPPED);
+	}
+
+	@Override
 	public void onAdClosed() {
 		if (!_hasEarnedReward) {
-			super.onAdSkipped();
+			onAdSkipped();
 		}
 		super.onAdClosed();
 	}

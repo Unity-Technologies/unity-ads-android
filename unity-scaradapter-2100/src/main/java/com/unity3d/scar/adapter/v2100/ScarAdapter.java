@@ -2,16 +2,13 @@ package com.unity3d.scar.adapter.v2100;
 
 import android.content.Context;
 
-import com.unity3d.scar.adapter.common.IAdsErrorHandler;
-import com.unity3d.scar.adapter.common.IScarAdapter;
-import com.unity3d.scar.adapter.common.IScarInterstitialAdListenerWrapper;
-import com.unity3d.scar.adapter.common.IScarRewardedAdListenerWrapper;
-import com.unity3d.scar.adapter.common.ScarAdapterBase;
-import com.unity3d.scar.adapter.common.WebViewAdsError;
+import android.widget.RelativeLayout;
+import com.unity3d.scar.adapter.common.*;
 import com.unity3d.scar.adapter.common.requests.RequestExtras;
 import com.unity3d.scar.adapter.common.scarads.IScarLoadListener;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
 import com.unity3d.scar.adapter.v2100.requests.AdRequestFactory;
+import com.unity3d.scar.adapter.v2100.scarads.ScarBannerAd;
 import com.unity3d.scar.adapter.v2100.scarads.ScarInterstitialAd;
 import com.unity3d.scar.adapter.v2100.scarads.ScarRewardedAd;
 import com.unity3d.scar.adapter.v2100.signals.SignalsCollector;
@@ -57,4 +54,15 @@ public class ScarAdapter extends ScarAdapterBase implements IScarAdapter {
 		});
 	}
 
+	@Override
+	public void loadBannerAd(Context context, final RelativeLayout bannerView, final ScarAdMetadata scarAdMetadata, final int width, final int height, final IScarBannerAdListenerWrapper adListener) {
+		final ScarBannerAd bannerAd = new ScarBannerAd(context, bannerView, _adRequestFactory, scarAdMetadata, width, height, _adsErrorHandler, adListener);
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				// We do not need to store the banner ad since there is no show call for banners
+				bannerAd.loadAd(null);
+			}
+		});
+	}
 }

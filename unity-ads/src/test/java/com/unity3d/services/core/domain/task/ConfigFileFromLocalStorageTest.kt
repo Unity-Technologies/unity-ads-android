@@ -42,8 +42,7 @@ class ConfigFileFromLocalStorageTest {
             every { SdkProperties.getLocalConfigurationFilepath() } returns null
 
             // when
-            val stateLoadConfigFileResult =
-                runCatching { configFileFromLocalStorage(ConfigFileFromLocalStorage.Params()) }
+            val stateLoadConfigFileResult = configFileFromLocalStorage(ConfigFileFromLocalStorage.Params())
 
             // then
             assertTrue(stateLoadConfigFileResult.isFailure)
@@ -57,8 +56,7 @@ class ConfigFileFromLocalStorageTest {
             every { SdkProperties.getLocalConfigurationFilepath() } returns ""
 
             // when
-            val stateLoadConfigFileResult =
-                runCatching { configFileFromLocalStorage(ConfigFileFromLocalStorage.Params()) }
+            val stateLoadConfigFileResult = configFileFromLocalStorage(ConfigFileFromLocalStorage.Params())
 
             // then
             assertTrue(stateLoadConfigFileResult.isFailure)
@@ -75,8 +73,7 @@ class ConfigFileFromLocalStorageTest {
             every { SdkProperties.getLocalConfigurationFilepath() } returns temporaryFile.absolutePath
 
             // when
-            val stateLoadConfigFileResult =
-                runCatching { configFileFromLocalStorage(ConfigFileFromLocalStorage.Params()) }
+            val stateLoadConfigFileResult = configFileFromLocalStorage(ConfigFileFromLocalStorage.Params())
 
             // then
             assertTrue(stateLoadConfigFileResult.isSuccess)

@@ -15,14 +15,16 @@ import org.json.JSONObject;
 public class BiddingSignalsHandler implements ISignalCollectionListener {
 
 	private final IBiddingSignalsListener listener;
+	private final boolean isBannerEnabled;
 
 	/**
 	 * Constructor that initializes the handler with the passed listener.
 	 *
 	 * @param listener {@link IBiddingSignalsListener} implementation to notify sender.
 	 */
-	public BiddingSignalsHandler(IBiddingSignalsListener listener) {
+	public BiddingSignalsHandler(boolean isBannerEnabled, IBiddingSignalsListener listener) {
 		this.listener = listener;
+		this.isBannerEnabled = isBannerEnabled;
 	}
 
 	@Override
@@ -39,6 +41,14 @@ public class BiddingSignalsHandler implements ISignalCollectionListener {
 	private BiddingSignals getSignals(String signalsMap) {
 		try {
 			JSONObject signalsJson = new JSONObject(signalsMap);
+
+			if (isBannerEnabled) {
+				return new BiddingSignals(
+					getSignalFromJson(signalsJson, SignalsCollectorBase.SCAR_RV_SIGNAL),
+					getSignalFromJson(signalsJson, SignalsCollectorBase.SCAR_INT_SIGNAL),
+					getSignalFromJson(signalsJson, SignalsCollectorBase.SCAR_BAN_SIGNAL)
+				);
+			}
 			return new BiddingSignals(
 				getSignalFromJson(signalsJson, SignalsCollectorBase.SCAR_RV_SIGNAL),
 				getSignalFromJson(signalsJson, SignalsCollectorBase.SCAR_INT_SIGNAL)

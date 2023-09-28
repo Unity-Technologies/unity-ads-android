@@ -10,12 +10,16 @@ public interface IExperiments {
 	boolean isWebAssetAdCaching();
 	boolean isWebGestureNotRequired();
 	boolean isScarInitEnabled();
-	String getScarBiddingManager();
 	boolean isJetpackLifecycle();
 	boolean isOkHttpEnabled();
 	boolean isWebMessageEnabled();
 	boolean isWebViewAsyncDownloadEnabled();
 	boolean isCronetCheckEnabled();
+	boolean isNativeShowTimeoutDisabled();
+	boolean isNativeLoadTimeoutDisabled();
+	boolean isCaptureHDRCapabilitiesEnabled();
+	boolean isScarBannerHbEnabled();
+	boolean isPCCheckEnabled();
 
 	JSONObject getCurrentSessionExperiments();
 	JSONObject getNextSessionExperiments();

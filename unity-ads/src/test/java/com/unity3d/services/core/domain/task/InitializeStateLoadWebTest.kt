@@ -62,11 +62,7 @@ class InitializeStateLoadWebTest {
             coEvery { httpClient.execute(any()) } returns HttpResponse(body = TESTDATA)
 
             // when
-            val loadWebResult = runCatching {
-                initializeStateLoadWeb(
-                    InitializeStateLoadWeb.Params(configMock)
-                )
-            }
+            val loadWebResult = initializeStateLoadWeb(InitializeStateLoadWeb.Params(configMock))
 
             // then
             Assert.assertTrue(loadWebResult.isSuccess)
@@ -84,11 +80,7 @@ class InitializeStateLoadWebTest {
             coEvery { httpClient.execute(any()) } returns HttpResponse(body = TESTDATA)
 
             // when
-            val loadWebResult = runCatching {
-                initializeStateLoadWeb(
-                    InitializeStateLoadWeb.Params(configMock)
-                )
-            }
+            val loadWebResult = initializeStateLoadWeb(InitializeStateLoadWeb.Params(configMock))
 
             // then
             Assert.assertTrue(loadWebResult.isFailure)
@@ -110,11 +102,7 @@ class InitializeStateLoadWebTest {
             coEvery { initializeStateNetworkError.doWork(any()) } throws Exception("Network Error")
 
             // when
-            val loadWebResult = runCatching {
-                initializeStateLoadWeb(
-                    InitializeStateLoadWeb.Params(configMock)
-                )
-            }
+            val loadWebResult = initializeStateLoadWeb(InitializeStateLoadWeb.Params(configMock))
 
             // then
             Assert.assertTrue(loadWebResult.isFailure)
@@ -135,14 +123,10 @@ class InitializeStateLoadWebTest {
             every { SdkProperties.getLocalWebViewFile() } returns ""
             coEvery { httpClient.execute(any()) } throws Exception()
             every { configMock.webViewHash } returns TESTHASH
-            coEvery { initializeStateNetworkError.doWork(any()) } returns Unit
+            coEvery { initializeStateNetworkError.doWork(any()) } returns Result.success(Unit)
 
             // when
-            val loadWebResult = runCatching {
-                initializeStateLoadWeb(
-                    InitializeStateLoadWeb.Params(configMock)
-                )
-            }
+            val loadWebResult = initializeStateLoadWeb(InitializeStateLoadWeb.Params(configMock))
 
             // then
             Assert.assertTrue(loadWebResult.isFailure) // Failure still cause can't mock second request being success.

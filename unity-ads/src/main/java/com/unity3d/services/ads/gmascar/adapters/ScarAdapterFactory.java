@@ -14,12 +14,6 @@ public class ScarAdapterFactory {
 		IScarAdapter scarAdapter = null;
 
 		switch (adapterVersion) {
-			case V192:
-				scarAdapter = new com.unity3d.scar.adapter.v1920.ScarAdapter(adsErrorHandler);
-				break;
-			case V195:
-				scarAdapter = new com.unity3d.scar.adapter.v1950.ScarAdapter(adsErrorHandler);
-				break;
 			case V20:
 				scarAdapter = new com.unity3d.scar.adapter.v2000.ScarAdapter(adsErrorHandler);
 				break;

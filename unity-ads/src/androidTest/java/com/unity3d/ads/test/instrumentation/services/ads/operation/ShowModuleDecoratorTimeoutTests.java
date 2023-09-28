@@ -17,8 +17,8 @@ import com.unity3d.services.ads.operation.show.IShowModule;
 import com.unity3d.services.ads.operation.show.ShowModule;
 import com.unity3d.services.ads.operation.show.ShowModuleDecoratorTimeout;
 import com.unity3d.services.ads.operation.show.ShowOperationState;
-import com.unity3d.services.core.configuration.Configuration;
-import com.unity3d.services.core.configuration.ConfigurationReader;
+import com.unity3d.services.core.configuration.Experiments;
+import com.unity3d.services.core.configuration.ExperimentsReader;
 import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.bridge.CallbackStatus;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
@@ -41,7 +41,7 @@ public class ShowModuleDecoratorTimeoutTests {
 	private IUnityAdsShowListener showListenerMock;
 	private IShowModule showModule;
 	private SDKMetricsSender sdkMetricsMock;
-	private ConfigurationReader configurationReaderMock;
+	private ExperimentsReader experimentsReaderMock;
 
 	@Rule
 	public final ActivityTestRule<InstrumentationTestActivity> _activityRule = new ActivityTestRule<>(InstrumentationTestActivity.class);
@@ -50,16 +50,16 @@ public class ShowModuleDecoratorTimeoutTests {
 	public void beforeEachTest() {
 		showListenerMock = mock(IUnityAdsShowListener.class);
 		sdkMetricsMock = mock(SDKMetricsSender.class);
-		configurationReaderMock = mock(ConfigurationReader.class);
+		experimentsReaderMock = mock(ExperimentsReader.class);
 		// We need a real instance since ShowModule will create the Operation object (which holds the State with Listener ID)
 		showModule = new ShowModule(sdkMetricsMock);
 
-		Mockito.when(configurationReaderMock.getCurrentConfiguration()).thenReturn(new Configuration());
+		Mockito.when(experimentsReaderMock.getCurrentlyActiveExperiments()).thenReturn(new Experiments());
 	}
 
 	@Test
 	public void testShowModuleDecoratorTimeout() {
-		ShowModuleDecoratorTimeout showModuleDecoratorTimeout = new ShowModuleDecoratorTimeout(showModule, configurationReaderMock);
+		ShowModuleDecoratorTimeout showModuleDecoratorTimeout = new ShowModuleDecoratorTimeout(showModule, experimentsReaderMock);
 		ShowOperationState showOperationState = new ShowOperationState(placementId, showListenerMock, _activityRule.getActivity(), showOptions, OperationTestUtilities.createConfigurationWithShowTimeout(showTimeout));
 		showModuleDecoratorTimeout.executeAdOperation(mock(IWebViewBridgeInvoker.class), showOperationState);
 
@@ -68,7 +68,7 @@ public class ShowModuleDecoratorTimeoutTests {
 
 	@Test
 	public void testShowModuleDecoratorShowConsentNoTimeout() {
-		ShowModuleDecoratorTimeout showModuleDecoratorTimeout = new ShowModuleDecoratorTimeout(showModule, configurationReaderMock);
+		ShowModuleDecoratorTimeout showModuleDecoratorTimeout = new ShowModuleDecoratorTimeout(showModule, experimentsReaderMock);
 		ShowOperationState showOperationState = new ShowOperationState(placementId, showListenerMock, _activityRule.getActivity(), showOptions, OperationTestUtilities.createConfigurationWithShowTimeout(showTimeout));
 		IWebViewBridgeInvoker webViewBridgeInvoker = mock(IWebViewBridgeInvoker.class);
 		when(webViewBridgeInvoker.invokeMethod(anyString(), anyString(), any(Method.class), any())).thenReturn(true);

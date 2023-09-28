@@ -1,5 +1,6 @@
 package com.unity3d.services.core.device;
 
+
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.SystemClock;
+import android.os.ext.SdkExtensions;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
@@ -59,6 +61,14 @@ public class Device {
 
 	public static int getApiLevel() {
 		return Build.VERSION.SDK_INT;
+	}
+
+	public static int getExtensionVersion() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			return SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R);
+		} else {
+			return -1;
+		}
 	}
 
 	public static String getOsVersion() {
@@ -697,6 +707,10 @@ public class Device {
 
 	public static boolean hasX265Decoder() {
 		return Device.selectAllDecodeCodecs(MimeTypes.VIDEO_H265).size() > 0;
+	}
+
+	public static boolean hasAV1Decoder() {
+		return Device.selectAllDecodeCodecs(MimeTypes.VIDEO_AV1).size() > 0;
 	}
 
 	public static List<MediaCodecInfo> selectAllDecodeCodecs(String mimeType) {

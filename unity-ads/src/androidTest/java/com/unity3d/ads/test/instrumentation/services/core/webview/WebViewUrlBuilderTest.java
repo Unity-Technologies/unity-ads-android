@@ -1,12 +1,9 @@
 package com.unity3d.ads.test.instrumentation.services.core.webview;
 
 import com.unity3d.services.core.configuration.Configuration;
-import com.unity3d.services.core.configuration.Experiments;
 import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.webview.WebViewUrlBuilder;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +54,7 @@ public class WebViewUrlBuilderTest {
 	@Test
 	public void testWebViewUrlBuilderWithMetricsEnabled() {
 		Mockito.when(_configMock.getExperiments()).thenReturn(null);
-		Mockito.when(_configMock.getMetricSampleRate()).thenReturn(100.0);
+		Mockito.when(_configMock.areMetricsEnabledForCurrentSession()).thenReturn(Boolean.TRUE);
 		Mockito.when(_configMock.getMetricsUrl()).thenReturn(TEST_BASE_URL);
 		SDKMetrics.setConfiguration(_configMock);
 		WebViewUrlBuilder webViewUrlBuilder = new WebViewUrlBuilder(TEST_BASE_URL, _configMock);

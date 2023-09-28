@@ -1,5 +1,8 @@
 package com.unity3d.services.core.configuration;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+
 import androidx.startup.AppInitializer;
 
 import com.unity3d.ads.UnityAds;
@@ -106,17 +109,30 @@ public class CoreModuleConfiguration implements IModuleConfiguration {
 		List<Metric> metrics = new ArrayList<>();
 		int hasX264 = Device.hasX264Decoder() ? 1 : 0;
 		int hasX265 = Device.hasX265Decoder() ? 1 : 0;
+		int hasAV1 = Device.hasAV1Decoder() ? 1 : 0;
 		metrics.add(new Metric("native_device_decoder_x264", hasX264));
 		metrics.add(new Metric("native_device_decoder_x265", hasX265));
+		metrics.add(new Metric("native_device_decoder_av1", hasAV1));
 		SDKMetricsSender sdkMetricsSender = Utilities.getService(SDKMetricsSender.class);
 		sdkMetricsSender.sendMetrics(metrics);
 		checkForCronet(configuration);
+		checkForPC(configuration, sdkMetricsSender);
 	}
 
 	private void checkForCronet(Configuration configuration) {
 		if (configuration.getExperiments().isCronetCheckEnabled()) {
 			AppInitializer.getInstance(ClientProperties.getApplicationContext())
 				.initializeComponent(CronetInitializer.class);
+		}
+	}
+
+	private void checkForPC(Configuration configuration, SDKMetricsSender sdkMetricsSender) {
+		if (configuration.getExperiments().isPCCheckEnabled()) {
+			Context context = ClientProperties.getApplicationContext();
+			if (context == null) return;
+			PackageManager pm = context.getPackageManager();
+			boolean isPC = pm.hasSystemFeature("com.google.android.play.feature.HPE_EXPERIENCE");
+			sdkMetricsSender.sendMetric(new Metric("native_device_is_pc", isPC ? 1 : 0));
 		}
 	}
 }

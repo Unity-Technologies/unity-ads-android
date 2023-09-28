@@ -88,7 +88,7 @@ class InitializeStateResetTest {
                     advanceTimeBy(300)
                 }
                 // when
-                val result = runCatching { initializeStateReset(InitializeStateReset.Params(configMock)) }
+                val result = initializeStateReset(InitializeStateReset.Params(configMock))
 
                 // then
                 verify(exactly = 1) { webViewAppMock.resetWebViewAppInitialization() }

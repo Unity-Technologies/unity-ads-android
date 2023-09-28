@@ -1,9 +1,15 @@
 package com.unity3d.services.ads.adunit;
 
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_POINTER_DOWN;
+import static android.view.MotionEvent.ACTION_POINTER_UP;
+import static android.view.MotionEvent.ACTION_UP;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
@@ -13,6 +19,7 @@ public class AdUnitRelativeLayout extends RelativeLayout {
 	private final ArrayList<AdUnitMotionEvent> _motionEvents = new ArrayList<>();
 	private int _maxEvents = 10000;
 	private boolean _shouldCapture = false;
+	private InputEvent _lastInputEvent;
 
 	public AdUnitRelativeLayout(Context context) {
 		super(context);
@@ -21,6 +28,13 @@ public class AdUnitRelativeLayout extends RelativeLayout {
 	@TargetApi(14)
 	public boolean onInterceptTouchEvent(MotionEvent e) {
 		super.onInterceptTouchEvent(e);
+
+		if (e.getActionMasked() == ACTION_UP ||
+			e.getActionMasked() == ACTION_DOWN ||
+			e.getActionMasked() == ACTION_POINTER_UP ||
+			e.getActionMasked() == ACTION_POINTER_DOWN) {
+			_lastInputEvent = e;
+		}
 
 		if (_shouldCapture) {
 			if (_motionEvents.size() < _maxEvents) {
@@ -101,5 +115,9 @@ public class AdUnitRelativeLayout extends RelativeLayout {
 		}
 
 		return returnArray;
+	}
+
+	public InputEvent getLastInputEvent() {
+		return _lastInputEvent;
 	}
 }

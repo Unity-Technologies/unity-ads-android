@@ -1,7 +1,7 @@
 package com.unity3d.services.ads.operation.load;
 
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.core.configuration.ConfigurationReader;
+import com.unity3d.services.core.configuration.ExperimentsReader;
 import com.unity3d.services.core.request.metrics.AdOperationError;
 import com.unity3d.services.core.request.metrics.AdOperationMetric;
 import com.unity3d.services.core.timer.BaseTimer;
@@ -13,15 +13,20 @@ import java.util.concurrent.Executors;
 public class LoadModuleDecoratorTimeout extends LoadModuleDecorator {
 	private static final String errorMsgTimeoutLoading = "[UnityAds] Timeout while loading ";
 
-	public LoadModuleDecoratorTimeout(ILoadModule loadModule, ConfigurationReader configurationReader) {
+	private final ExperimentsReader _experimentsReader;
+
+	public LoadModuleDecoratorTimeout(ILoadModule loadModule, ExperimentsReader experimentsReader) {
 		super(loadModule);
+		this._experimentsReader = experimentsReader;
 	}
 
 	@Override
 	public void executeAdOperation(IWebViewBridgeInvoker webViewBridgeInvoker, LoadOperationState state) {
 		getMetricSender().sendMetricWithInitState(AdOperationMetric.newAdLoadStart());
 		state.start();
-		startLoadTimeout(state);
+		if (!_experimentsReader.getCurrentlyActiveExperiments().isNativeLoadTimeoutDisabled()) {
+			startLoadTimeout(state);
+		}
 		super.executeAdOperation(webViewBridgeInvoker, state);
 	}
 

@@ -30,7 +30,9 @@ public class AdsModuleConfiguration implements IAdsModuleConfiguration {
 			com.unity3d.services.ads.api.Load.class,
 			com.unity3d.services.ads.api.Show.class,
 			com.unity3d.services.ads.api.Token.class,
-			com.unity3d.services.ads.api.GMAScar.class
+			com.unity3d.services.ads.api.GMAScar.class,
+			com.unity3d.services.ads.api.Measurements.class,
+			com.unity3d.services.ads.api.Topics.class,
 		};
 
 		return list;

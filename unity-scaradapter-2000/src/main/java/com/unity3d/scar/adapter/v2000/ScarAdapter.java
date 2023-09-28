@@ -2,16 +2,13 @@ package com.unity3d.scar.adapter.v2000;
 
 import android.content.Context;
 
+import android.widget.RelativeLayout;
 import com.google.android.gms.ads.query.QueryInfo;
-import com.unity3d.scar.adapter.common.IAdsErrorHandler;
-import com.unity3d.scar.adapter.common.IScarAdapter;
-import com.unity3d.scar.adapter.common.IScarInterstitialAdListenerWrapper;
-import com.unity3d.scar.adapter.common.IScarRewardedAdListenerWrapper;
-import com.unity3d.scar.adapter.common.ScarAdapterBase;
-import com.unity3d.scar.adapter.common.WebViewAdsError;
+import com.unity3d.scar.adapter.common.*;
 import com.unity3d.scar.adapter.common.scarads.IScarLoadListener;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
 import com.unity3d.scar.adapter.common.signals.SignalsStorage;
+import com.unity3d.scar.adapter.v2000.scarads.ScarBannerAd;
 import com.unity3d.scar.adapter.v2000.scarads.ScarInterstitialAd;
 import com.unity3d.scar.adapter.v2000.scarads.ScarRewardedAd;
 import com.unity3d.scar.adapter.v2000.signals.SignalsCollector;
@@ -54,6 +51,18 @@ public class ScarAdapter extends ScarAdapterBase implements IScarAdapter {
 						_loadedAds.put(scarAd.getPlacementId(), rewardedAd);
 					}
 				});
+			}
+		});
+	}
+
+	@Override
+	public void loadBannerAd(Context context, RelativeLayout bannerView, ScarAdMetadata scarAd, int width, int height, IScarBannerAdListenerWrapper adListener) {
+		final ScarBannerAd bannerAd = new ScarBannerAd(context, _signalsStorage.getQueryInfo(scarAd.getPlacementId()), bannerView, scarAd, width, height, _adsErrorHandler, adListener);
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				// We do not need to store the banner ad since there is no show
+				bannerAd.loadAd(null);
 			}
 		});
 	}

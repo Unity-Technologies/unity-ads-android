@@ -54,6 +54,11 @@ public class DeviceInfo {
 	}
 
 	@WebViewExposed
+	public static void getExtensionVersion (WebViewCallback callback) {
+		callback.invoke(Device.getExtensionVersion());
+	}
+
+	@WebViewExposed
 	public static void getOsVersion (WebViewCallback callback) {
 		callback.invoke(Device.getOsVersion());
 	}
@@ -520,6 +525,21 @@ public class DeviceInfo {
 	@WebViewExposed
 	public static void getBuildVersionIncremental(WebViewCallback callback) {
 		callback.invoke(Device.getBuildVersionIncremental());
+	}
+
+	@WebViewExposed
+	public static void hasX264HWDecoder(WebViewCallback callback) {
+		callback.invoke(Device.hasX264Decoder());
+	}
+
+	@WebViewExposed
+	public static void hasX265HWDecoder(WebViewCallback callback) {
+		callback.invoke(Device.hasX265Decoder());
+	}
+
+	@WebViewExposed
+	public static void hasAV1HWDecoder(WebViewCallback callback) {
+		callback.invoke(Device.hasAV1Decoder());
 	}
 }
 

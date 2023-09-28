@@ -38,10 +38,10 @@ public class ScarVersionFinderTest {
 	public void testScarVersionFinderWithMobileAdsBridgeLegacy() {
 		doCallRealMethod().when(mobileAdsBridgeMock).getVersionCodeIndex();
 
-		Mockito.when(mobileAdsBridgeMock.getVersionString()).thenReturn("afma-sdk-a-v204890999.203404000.1");
+		Mockito.when(mobileAdsBridgeMock.getVersionString()).thenReturn("afma-sdk-a-v204890999.210402000.1");
 		ScarVersionFinder scarVersionFinder = new ScarVersionFinder(mobileAdsBridgeMock, presenceDetector, gmaInitializer, new GMAEventSender());
 		long versionCode = scarVersionFinder.getVersionCode();
-		Assert.assertEquals(MobileAdsBridgeLegacy.CODE_19_5, versionCode);
+		Assert.assertEquals(MobileAdsBridgeLegacy.CODE_20_0, versionCode);
 	}
 
 	@Test

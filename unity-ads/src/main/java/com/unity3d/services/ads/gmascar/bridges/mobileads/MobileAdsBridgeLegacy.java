@@ -12,9 +12,6 @@ public class MobileAdsBridgeLegacy extends MobileAdsBridgeBase {
 	// Codes returned by getVersionString in V20 and below
 	public static final int CODE_21_0 = 221310000;
 	public static final int CODE_20_0 = 210402000;
-	public static final int CODE_19_8 = 204890000;
-	public static final int CODE_19_5 = 203404000;
-	public static final int CODE_19_2 = 201604000;
 
 	// Deprecated in V21 - requires initialization and returns internal version (e.g., "afma-sdk-a-v<OTA services>.<SCAR version>.X")
 	public static final String versionStringMethodName = "getVersionString";
@@ -44,11 +41,7 @@ public class MobileAdsBridgeLegacy extends MobileAdsBridgeBase {
 	@Override
 	public ScarAdapterVersion getAdapterVersion(int versionCode) {
 		// Version codes in V20 and below are returned as internal nine digit numbers (e.g., "afma-sdk-a-vX.210402000.X)
-		if (versionCode >= CODE_19_2 && versionCode < CODE_19_5) {
-			return ScarAdapterVersion.V192;
-		} else if (versionCode >= CODE_19_5 && versionCode <= CODE_19_8) {
-			return ScarAdapterVersion.V195;
-		} else if (versionCode >= CODE_20_0 && versionCode < CODE_21_0) {
+		if (versionCode >= CODE_20_0 && versionCode < CODE_21_0) {
 			return ScarAdapterVersion.V20;
 		}
 

@@ -7,4 +7,5 @@ public class MimeTypes {
 	public static final String VIDEO_WEBM = BASE_TYPE_VIDEO + "/webm";
 	public static final String VIDEO_H264 = BASE_TYPE_VIDEO + "/avc";
 	public static final String VIDEO_H265 = BASE_TYPE_VIDEO + "/hevc";
+	public static final String VIDEO_AV1 = BASE_TYPE_VIDEO + "/av01";
 }

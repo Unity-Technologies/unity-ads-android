@@ -8,7 +8,6 @@ import com.unity3d.utils.corountine.coroutineNameIsUsed
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.resetMain
@@ -17,10 +16,8 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.ContinuationInterceptor
-import kotlin.coroutines.CoroutineContext
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -64,7 +61,7 @@ class InitializeSDKTest {
 
     @Before
     fun setUp() {
-        MockKAnnotations.init(this)
+        MockKAnnotations.init(this, relaxed = true)
         every { configMock.experiments.isNativeWebViewCacheEnabled } returns false
         every { configMock.experiments.isWebViewAsyncDownloadEnabled } returns false
         Dispatchers.setMain(dispatchers.main)
@@ -79,7 +76,7 @@ class InitializeSDKTest {
     @Test
     fun doWork_everyStateSuccess_initCompleteCalledReturnSuccess() = runTest {
         // when
-        val result = runCatching { initializeSDK(EmptyParams) }
+        val result = initializeSDK(EmptyParams)
 
         // then
         assertTrue(result.isSuccess)
@@ -91,10 +88,10 @@ class InitializeSDKTest {
     @Test
     fun doWork_failOnlyOnLoadConfigFile_returnSuccess() = runTest {
         // given
-        coEvery { configFileFromLocalStorage(any()) } throws Exception()
+        coEvery { configFileFromLocalStorage.doWork(any()) } returns Result.failure(Exception())
 
         // when
-        val result = runCatching { initializeSDK(EmptyParams) }
+        val result = initializeSDK(EmptyParams)
 
         // then
         assertTrue(result.isSuccess)
@@ -107,14 +104,14 @@ class InitializeSDKTest {
     fun doWork_failOnlyStateReset_returnFailure() = runTest {
         //given
         val exception = Exception("Reset failed on opening ConditionVariable")
-        coEvery { initializeStateReset(any()) } throws exception
+        coEvery { initializeStateReset.doWork(any()) } returns Result.failure(exception)
 
         // when
-        val result = runCatching { initializeSDK(EmptyParams) }
+        val result = initializeSDK(EmptyParams)
 
         // then
         assertTrue(result.isFailure)
-        assertEquals(exception, result.exceptionOrNull()?.cause)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify(exactly = 1) { initializeStateReset.doWork(any()) }
         coVerify(exactly = 1) { initializeStateError.doWork(any()) }
         coVerify(exactly = 0) { initializeStateComplete.doWork(any()) }
@@ -128,10 +125,10 @@ class InitializeSDKTest {
             Exception("No connected events within the timeout!"),
             configMock
         )
-        coEvery { initializeStateConfig(any()) } throws exception
+        coEvery { initializeStateConfig.doWork(any()) } returns Result.failure(exception)
 
         // when
-        val result = runCatching { initializeSDK(EmptyParams) }
+        val result = initializeSDK(EmptyParams)
 
         // then
         assertTrue(result.isFailure)
@@ -146,10 +143,10 @@ class InitializeSDKTest {
         //given
         every { configMock.experiments.isNativeWebViewCacheEnabled } returns true
         val exception = InitializationException(ErrorState.CreateWebApp, Exception(), configMock)
-        coEvery { initializeStateCreateWithRemote(any()) } throws exception
+        coEvery { initializeStateCreateWithRemote.doWork(any()) } returns Result.failure(exception)
 
         // when
-        val result = runCatching { initializeSDK(EmptyParams) }
+        val result = initializeSDK(EmptyParams)
 
         // then
         assertTrue(result.isFailure)
@@ -163,14 +160,14 @@ class InitializeSDKTest {
     fun doWork_failOnlyLoadCacheWithNativeWebViewCacheFalse_returnFailure() = runTest {
         //given
         val exception = Exception(ErrorState.LoadCache.toString())
-        coEvery { initializeStateLoadCache(any()) } throws exception
+        coEvery { initializeStateLoadCache.doWork(any()) } returns Result.failure(exception)
 
         // when
-        val result = runCatching { initializeSDK(EmptyParams) }
+        val result = initializeSDK(EmptyParams)
 
         // then
         assertTrue(result.isFailure)
-        assertEquals(exception, result.exceptionOrNull()?.cause)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify(exactly = 1) { initializeStateLoadCache.doWork(any()) }
         coVerify(exactly = 1) { initializeStateError.doWork(any()) }
         coVerify(exactly = 0) { initializeStateComplete.doWork(any()) }
@@ -183,13 +180,13 @@ class InitializeSDKTest {
             mockkConstructor(Configuration::class)
             every { configMock.experiments.isWebViewAsyncDownloadEnabled } returns true
             every { anyConstructed<Configuration>().experiments.isNativeWebViewCacheEnabled } returns false
-            coEvery { initializeStateLoadCache.doWork(any()) } returns InitializeStateLoadCache.LoadCacheResult(
+            coEvery { initializeStateLoadCache.doWork(any()) } returns Result.success(InitializeStateLoadCache.LoadCacheResult(
                 true,
                 null
-            )
+            ))
 
             // when
-            val result = runCatching { initializeSDK(EmptyParams) }
+            val result = initializeSDK(EmptyParams)
 
             // then
             assertTrue(result.isSuccess)
@@ -205,11 +202,11 @@ class InitializeSDKTest {
     fun doWork_loadCacheReturnNullAndLoadWebFailsWithNativeWebViewCacheFalse_returnFailure() = runTest {
         //given
         val webException = InitializationException(ErrorState.InvalidHash, Exception("Invalid webViewHash"), configMock)
-        coEvery { initializeStateLoadCache.doWork(any()) } returns InitializeStateLoadCache.LoadCacheResult(true, null)
-        coEvery { initializeStateLoadWeb.doWork(any()) } throws webException
+        coEvery { initializeStateLoadCache.doWork(any()) } returns Result.success(InitializeStateLoadCache.LoadCacheResult(true, null))
+        coEvery { initializeStateLoadWeb.doWork(any()) } returns Result.failure(webException)
 
         // when
-        val result = runCatching { initializeSDK(EmptyParams) }
+        val result = initializeSDK(EmptyParams)
 
         // then
         assertTrue(result.isFailure)
@@ -228,13 +225,13 @@ class InitializeSDKTest {
             mockkConstructor(Configuration::class)
             every { anyConstructed<Configuration>().experiments.isNativeWebViewCacheEnabled } returns false
             every { configMock.experiments.isWebViewAsyncDownloadEnabled } returns true
-            coEvery { initializeStateLoadCache.doWork(any()) } returns InitializeStateLoadCache.LoadCacheResult(
+            coEvery { initializeStateLoadCache.doWork(any()) } returns Result.success(InitializeStateLoadCache.LoadCacheResult(
                 true,
                 "WebView HTML Data"
-            )
+            ))
 
             // when
-            val result = runCatching { initializeSDK(EmptyParams) }
+            val result = initializeSDK(EmptyParams)
 
             // then
             assertTrue(result.isSuccess)
@@ -251,14 +248,13 @@ class InitializeSDKTest {
     fun doWork_initializeStateCreateFailsAndLoadWebWithNativeWebViewCacheFalse_returnFailure() = runTest {
         //given
         val exception = InitializationException(ErrorState.CreateWebApp, Exception(), configMock)
-        coEvery { initializeStateCreate(any()) } throws exception
+        coEvery { initializeStateCreate.doWork(any()) } returns Result.failure(exception)
 
         // when
-        val result = runCatching { initializeSDK(EmptyParams) }
+        val result = initializeSDK(EmptyParams)
 
         // then
         assertTrue(result.isFailure)
-        assertEquals(exception, result.exceptionOrNull())
         coVerify(exactly = 1) { initializeStateError.doWork(any()) }
         coVerify(exactly = 0) { initializeStateComplete.doWork(any()) }
     }
@@ -267,14 +263,14 @@ class InitializeSDKTest {
     fun doWork_initializeStateCompleteFailsAndLoadWebWithNativeWebViewCacheFalse_returnFailure() = runTest {
         //given
         val exception = Exception()
-        coEvery { initializeStateComplete(any()) } throws exception
+        coEvery { initializeStateComplete.doWork(any()) } returns Result.failure(exception)
 
         // when
-        val result = runCatching { initializeSDK(EmptyParams) }
+        val result = initializeSDK(EmptyParams)
 
         // then
         assertTrue(result.isFailure)
-        assertEquals(exception, result.exceptionOrNull()?.cause)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify(exactly = 0) { initializeStateError.doWork(any()) }
         coVerify(exactly = 1) { initializeStateComplete.doWork(any()) }
     }
@@ -283,36 +279,36 @@ class InitializeSDKTest {
     fun doWork_initializeStateCompleteFailsAndLoadWebWithNativeWebViewCacheTrue_returnFailure() = runTest {
         //given
         val exception = Exception()
-        coEvery { initializeStateComplete(any()) } throws exception
+        coEvery { initializeStateComplete.doWork(any()) } returns Result.failure(exception)
 
         // when
-        val result = runCatching { initializeSDK(EmptyParams) }
+        val result = initializeSDK(EmptyParams)
 
         // then
         assertTrue(result.isFailure)
-        assertEquals(exception, result.exceptionOrNull()?.cause)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify(exactly = 0) { initializeStateError.doWork(any()) }
         coVerify(exactly = 1) { initializeStateComplete.doWork(any()) }
     }
 
     private fun defaultSuccessMocks() {
-        coEvery { configFileFromLocalStorage.doWork(any()) } returns configMock
+        coEvery { configFileFromLocalStorage.doWork(any()) } returns Result.success(configMock)
         coEvery { configFileFromLocalStorage.getMetricName() } returns "loadConfigFile"
-        coEvery { initializeStateReset.doWork(any()) } returns configMock
+        coEvery { initializeStateReset.doWork(any()) } returns Result.success(configMock)
         coEvery { initializeStateReset.getMetricName() } returns "reset"
-        coEvery { initializeStateError.doWork(any()) } returns Unit
+        coEvery { initializeStateError.doWork(any()) } returns Result.success(Unit)
         coEvery { initializeStateError.getMetricName() } returns "error"
-        coEvery { initializeStateConfig.doWork(any()) } returns configMock
+        coEvery { initializeStateConfig.doWork(any()) } returns Result.success(configMock)
         coEvery { initializeStateConfig.getMetricName() } returns "config"
-        coEvery { initializeStateCreate.doWork(any()) } returns configMock
+        coEvery { initializeStateCreate.doWork(any()) } returns Result.success(configMock)
         coEvery { initializeStateCreate.getMetricName() } returns "create"
-        coEvery { initializeStateLoadCache.doWork(any()) } returns InitializeStateLoadCache.LoadCacheResult(false, "")
+        coEvery { initializeStateLoadCache.doWork(any()) } returns Result.success(InitializeStateLoadCache.LoadCacheResult(false, ""))
         coEvery { initializeStateLoadCache.getMetricName() } returns "loadCache"
-        coEvery { initializeStateCreateWithRemote.doWork(any()) } returns configMock
+        coEvery { initializeStateCreateWithRemote.doWork(any()) } returns Result.success(configMock)
         coEvery { initializeStateCreateWithRemote.getMetricName() } returns "createWithRemote"
-        coEvery { initializeStateLoadWeb.doWork(any()) } returns InitializeStateLoadWeb.LoadWebResult(configMock, "")
+        coEvery { initializeStateLoadWeb.doWork(any()) } returns Result.success(InitializeStateLoadWeb.LoadWebResult(configMock, ""))
         coEvery { initializeStateLoadWeb.getMetricName() } returns "loadWeb"
-        coEvery { initializeStateComplete.doWork(any()) } returns Unit
+        coEvery { initializeStateComplete.doWork(any()) } returns Result.success(Unit)
         coEvery { initializeStateComplete.getMetricName() } returns "complete"
     }
 }

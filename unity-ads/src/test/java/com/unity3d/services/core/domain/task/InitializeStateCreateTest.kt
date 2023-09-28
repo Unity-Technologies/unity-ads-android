@@ -61,7 +61,7 @@ class InitializeStateCreateTest {
             every { WebViewApp.create(config, false) } returns null
 
             // when
-            val result = runCatching { initializeSateCreate(InitializeStateCreate.Params(config, webViewData)) }
+            val result = initializeSateCreate(InitializeStateCreate.Params(config, webViewData))
 
             // then
             assertTrue(result.isSuccess)
@@ -78,7 +78,7 @@ class InitializeStateCreateTest {
             every { WebViewApp.create(configMock, false) } returns null
 
             // when
-            val result = runCatching { initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData)) }
+            val result = initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData))
 
             // then
             assertTrue(result.isSuccess)
@@ -98,7 +98,7 @@ class InitializeStateCreateTest {
             every { WebViewApp.create(any(), false) } returns ErrorState.CreateWebview
 
             // when
-            val result = runCatching { initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData)) }
+            val result = initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData))
 
             // then
             assertTrue(result.isFailure)
@@ -124,7 +124,7 @@ class InitializeStateCreateTest {
             every { WebViewApp.create(any(), false) } returns ErrorState.CreateWebview
 
             // when
-            val result = runCatching { initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData)) }
+            val result = initializeSateCreate(InitializeStateCreate.Params(configMock, webViewData))
 
             // then
             assertTrue(result.isFailure)

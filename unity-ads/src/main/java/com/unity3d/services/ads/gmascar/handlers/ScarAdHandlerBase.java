@@ -47,11 +47,6 @@ public abstract class ScarAdHandlerBase implements IScarAdListenerWrapper {
 	}
 
 	@Override
-	public void onAdSkipped() {
-		_gmaEventSender.send(GMAEvent.AD_SKIPPED);
-	}
-
-	@Override
 	public void onAdClosed() {
 		_gmaEventSender.send(GMAEvent.AD_CLOSED);
 		_eventSubject.unsubscribe();

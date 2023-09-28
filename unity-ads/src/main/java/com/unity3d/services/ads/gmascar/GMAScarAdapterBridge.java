@@ -1,9 +1,11 @@
 package com.unity3d.services.ads.gmascar;
 
+import android.content.Context;
 import com.unity3d.scar.adapter.common.GMAAdsError;
 import com.unity3d.scar.adapter.common.GMAEvent;
 import com.unity3d.scar.adapter.common.IScarAdapter;
 import com.unity3d.scar.adapter.common.scarads.ScarAdMetadata;
+import com.unity3d.scar.adapter.common.scarads.UnityAdFormat;
 import com.unity3d.services.ads.gmascar.adapters.ScarAdapterFactory;
 import com.unity3d.services.ads.gmascar.bridges.AdapterStatusBridge;
 import com.unity3d.services.ads.gmascar.bridges.InitializationStatusBridge;
@@ -13,16 +15,17 @@ import com.unity3d.services.ads.gmascar.finder.GMAInitializer;
 import com.unity3d.services.ads.gmascar.finder.PresenceDetector;
 import com.unity3d.services.ads.gmascar.finder.ScarAdapterVersion;
 import com.unity3d.services.ads.gmascar.finder.ScarVersionFinder;
-import com.unity3d.services.ads.gmascar.handlers.BiddingSignalsHandler;
-import com.unity3d.services.ads.gmascar.handlers.ScarInterstitialAdHandler;
-import com.unity3d.services.ads.gmascar.handlers.ScarRewardedAdHandler;
-import com.unity3d.services.ads.gmascar.handlers.SignalsHandler;
-import com.unity3d.services.ads.gmascar.handlers.WebViewErrorHandler;
+import com.unity3d.services.ads.gmascar.handlers.*;
 import com.unity3d.services.ads.gmascar.utils.GMAEventSender;
+import com.unity3d.services.banners.BannerView;
+import com.unity3d.services.banners.UnityBannerSize;
+import com.unity3d.services.banners.bridge.BannerBridge;
 import com.unity3d.services.core.misc.EventSubject;
 import com.unity3d.services.core.properties.ClientProperties;
 import com.unity3d.services.core.timer.DefaultIntervalTimerFactory;
 
+import com.unity3d.services.core.webview.WebViewApp;
+import com.unity3d.services.core.webview.WebViewEventCategory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -81,12 +84,12 @@ public class GMAScarAdapterBridge {
 		_scarVersionFinder.getVersion();
 	}
 
-	public void getSCARSignals(String[] interstitialList, String[] rewardedList) {
+	public void getSCARSignal(String placementId, UnityAdFormat adFormat) {
 		_scarAdapter = getScarAdapterObject();
 		SignalsHandler signalListener = new SignalsHandler(_gmaEventSender);
 
 		if (_scarAdapter != null) {
-			_scarAdapter.getSCARSignals(ClientProperties.getApplicationContext(), interstitialList, rewardedList, signalListener);
+			_scarAdapter.getSCARSignal(ClientProperties.getApplicationContext(), placementId, adFormat, signalListener);
 		} else {
 			_webViewErrorHandler.handleError(GMAAdsError.InternalSignalsError("Could not create SCAR adapter object"));
 		}
@@ -111,11 +114,11 @@ public class GMAScarAdapterBridge {
 	 *
 	 * @param handler {@link BiddingSignalsHandler} to be notified when signals are ready.
 	 */
-	public void getSCARBiddingSignals(BiddingSignalsHandler handler) {
+	public void getSCARBiddingSignals(boolean isBannerEnabled, BiddingSignalsHandler handler) {
 		if (_mobileAdsBridge != null && _mobileAdsBridge.hasSCARBiddingSupport()) {
 			_scarAdapter = getScarAdapterObject();
 			if (_scarAdapter != null) {
-				_scarAdapter.getSCARBiddingSignals(ClientProperties.getApplicationContext(), handler);
+				_scarAdapter.getSCARBiddingSignals(ClientProperties.getApplicationContext(), isBannerEnabled, handler);
 			} else {
 				handler.onSignalsCollectionFailed("Could not create SCAR adapter object.");
 			}
@@ -146,6 +149,16 @@ public class GMAScarAdapterBridge {
 	private void loadRewardedAd(final ScarAdMetadata scarAdMetadata) {
 		ScarRewardedAdHandler adListener = new ScarRewardedAdHandler(scarAdMetadata, getScarEventSubject(scarAdMetadata.getVideoLengthMs()), _gmaEventSender);
 		_scarAdapter.loadRewardedAd(ClientProperties.getApplicationContext(), scarAdMetadata, adListener);
+	}
+
+	public void loadBanner(final Context context, final BannerView bannerView, final String operationId, final ScarAdMetadata scarAdMetadata, final UnityBannerSize bannerSize) {
+		_scarAdapter = getScarAdapterObject();
+		ScarBannerAdHandler adHandler = new ScarBannerAdHandler(operationId);
+		if (_scarAdapter != null) {
+			_scarAdapter.loadBannerAd(context, bannerView, scarAdMetadata, bannerSize.getWidth(), bannerSize.getHeight(), adHandler);
+		} else {
+			WebViewApp.getCurrentApp().sendEvent(WebViewEventCategory.BANNER, BannerBridge.BannerEvent.SCAR_BANNER_LOAD_FAILED, operationId);
+		}
 	}
 
 	public void show(final String placementId, final String queryId, final boolean canSkip) {

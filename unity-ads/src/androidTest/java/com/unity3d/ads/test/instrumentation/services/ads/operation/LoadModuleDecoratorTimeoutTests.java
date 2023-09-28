@@ -13,11 +13,12 @@ import com.unity3d.ads.test.TestUtilities;
 import com.unity3d.services.ads.operation.load.ILoadModule;
 import com.unity3d.services.ads.operation.load.LoadModuleDecoratorTimeout;
 import com.unity3d.services.ads.operation.load.LoadOperationState;
-import com.unity3d.services.core.configuration.Configuration;
-import com.unity3d.services.core.configuration.ConfigurationReader;
+import com.unity3d.services.core.configuration.ExperimentObjects;
+import com.unity3d.services.core.configuration.ExperimentsReader;
 import com.unity3d.services.core.request.metrics.SDKMetricsSender;
 import com.unity3d.services.core.webview.bridge.IWebViewBridgeInvoker;
 
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -35,23 +36,23 @@ public class LoadModuleDecoratorTimeoutTests {
 	private IUnityAdsLoadListener loadListenerMock;
 	private ILoadModule loadModuleMock;
 	private SDKMetricsSender sdkMetricsMock;
-	private ConfigurationReader configurationReaderMock;
+	private ExperimentsReader experimentsReaderMock;
 
 	@Before
 	public void beforeEachTest() {
 		loadListenerMock = mock(IUnityAdsLoadListener.class);
 		loadModuleMock = mock(ILoadModule.class);
 		sdkMetricsMock = mock(SDKMetricsSender.class);
-		configurationReaderMock = mock(ConfigurationReader.class);
+		experimentsReaderMock = mock(ExperimentsReader.class);
 
-		Mockito.when(configurationReaderMock.getCurrentConfiguration()).thenReturn(new Configuration());
+		Mockito.when(experimentsReaderMock.getCurrentlyActiveExperiments()).thenReturn(new ExperimentObjects(new JSONObject()));
 	}
 
 	@Test
 	public void onUnityAdsFailedToLoadIsCalledWhenTimeoutIsReached() {
 		Mockito.when(loadModuleMock.getMetricSender()).thenReturn(sdkMetricsMock);
 		LoadOperationState loadOperationState = new LoadOperationState(placementId, loadListenerMock, loadOptions, OperationTestUtilities.createConfigurationWithLoadTimeout(loadTimeout));
-		LoadModuleDecoratorTimeout timeoutDecorator = new LoadModuleDecoratorTimeout(loadModuleMock, configurationReaderMock);
+		LoadModuleDecoratorTimeout timeoutDecorator = new LoadModuleDecoratorTimeout(loadModuleMock, experimentsReaderMock);
 
 		timeoutDecorator.executeAdOperation(mock(IWebViewBridgeInvoker.class), loadOperationState);
 		Mockito.verify(loadListenerMock, timeout(maxWaitTime).times(1)).onUnityAdsFailedToLoad(placementId, UnityAds.UnityAdsLoadError.TIMEOUT, "[UnityAds] Timeout while loading " + placementId);
@@ -61,7 +62,7 @@ public class LoadModuleDecoratorTimeoutTests {
 	public void onUnityAdsAdLoadedAndOnUnityAdsAdFailedToLoadIsNotCalledAgainWhenTimeoutHasBeenReached() {
 		Mockito.when(loadModuleMock.getMetricSender()).thenReturn(sdkMetricsMock);
 		LoadOperationState loadOperationState = new LoadOperationState(placementId, loadListenerMock, loadOptions, OperationTestUtilities.createConfigurationWithLoadTimeout(loadTimeout));
-		LoadModuleDecoratorTimeout timeoutDecorator = new LoadModuleDecoratorTimeout(loadModuleMock, configurationReaderMock);
+		LoadModuleDecoratorTimeout timeoutDecorator = new LoadModuleDecoratorTimeout(loadModuleMock, experimentsReaderMock);
 
 		timeoutDecorator.executeAdOperation(mock(IWebViewBridgeInvoker.class), loadOperationState);
 		TestUtilities.SleepCurrentThread(loadTimeoutExpireMs);
@@ -76,7 +77,7 @@ public class LoadModuleDecoratorTimeoutTests {
 	public void onUnityAdsAdFailedToLoadIsNotCalledWhenOnUnityAdsAdLoadedIsCalledBeforeTimeout() {
 		Mockito.when(loadModuleMock.getMetricSender()).thenReturn(sdkMetricsMock);
 		LoadOperationState loadOperationState = new LoadOperationState(placementId, loadListenerMock, loadOptions, OperationTestUtilities.createConfigurationWithLoadTimeout(loadTimeout));
-		LoadModuleDecoratorTimeout timeoutDecorator = new LoadModuleDecoratorTimeout(loadModuleMock, configurationReaderMock);
+		LoadModuleDecoratorTimeout timeoutDecorator = new LoadModuleDecoratorTimeout(loadModuleMock, experimentsReaderMock);
 
 		timeoutDecorator.executeAdOperation(mock(IWebViewBridgeInvoker.class), loadOperationState);
 		TestUtilities.SleepCurrentThread(25);
@@ -88,14 +89,14 @@ public class LoadModuleDecoratorTimeoutTests {
 
 	@Test
 	public void noNPEIsThrownWhenOnUnityAdsAdLoadedIsCalledWithoutCallingExecuteAdOperation() {
-		LoadModuleDecoratorTimeout timeoutDecorator = new LoadModuleDecoratorTimeout(loadModuleMock, configurationReaderMock);
+		LoadModuleDecoratorTimeout timeoutDecorator = new LoadModuleDecoratorTimeout(loadModuleMock, experimentsReaderMock);
 		timeoutDecorator.onUnityAdsAdLoaded(placementId);
 		Mockito.verify(loadModuleMock, times(0)).onUnityAdsFailedToLoad(anyString(), any(UnityAds.UnityAdsLoadError.class), anyString());
 	}
 
 	@Test
 	public void noNPEIsThrownWhenOnUnityAdsAdFailedToLoadIsCalledWithoutCallingExecuteAdOperation() {
-		LoadModuleDecoratorTimeout timeoutDecorator = new LoadModuleDecoratorTimeout(loadModuleMock, configurationReaderMock);
+		LoadModuleDecoratorTimeout timeoutDecorator = new LoadModuleDecoratorTimeout(loadModuleMock, experimentsReaderMock);
 		timeoutDecorator.onUnityAdsFailedToLoad(placementId, loadError, loadErrorMessage);
 		Mockito.verify(loadModuleMock, times(0)).onUnityAdsAdLoaded(anyString());
 	}

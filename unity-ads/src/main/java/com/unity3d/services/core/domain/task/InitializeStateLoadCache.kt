@@ -2,6 +2,7 @@ package com.unity3d.services.core.domain.task
 
 import com.unity3d.services.core.configuration.Configuration
 import com.unity3d.services.core.domain.ISDKDispatchers
+import com.unity3d.services.core.extensions.runReturnSuspendCatching
 import com.unity3d.services.core.log.DeviceLog
 import com.unity3d.services.core.misc.Utilities
 import com.unity3d.services.core.properties.SdkProperties
@@ -25,23 +26,27 @@ class InitializeStateLoadCache(
         return getMetricNameForInitializeTask("read_local_webview")
     }
 
-    override suspend fun doWork(params: Params): LoadCacheResult =
+    override suspend fun doWork(params: Params): Result<LoadCacheResult> =
         withContext(dispatchers.default) {
-            DeviceLog.debug("Unity Ads init: check if webapp can be loaded from local cache")
+            runReturnSuspendCatching {
+                DeviceLog.debug("Unity Ads init: check if webapp can be loaded from local cache")
 
-            val localWebViewData: ByteArray = getWebViewData() ?: return@withContext LoadCacheResult(hasHashMismatch = true)
-            val localWebViewHash: String? = Utilities.Sha256(localWebViewData)
+                val localWebViewData: ByteArray =
+                    getWebViewData() ?: return@runReturnSuspendCatching LoadCacheResult(hasHashMismatch = true)
+                val localWebViewHash: String? = Utilities.Sha256(localWebViewData)
 
-            // If charset isn't supported on device, might throw an exception (result.isFailure)
-            val webViewDataString = String(localWebViewData, Charset.forName("UTF-8"))
+                // If charset isn't supported on device, might throw an exception (result.isFailure)
+                val webViewDataString = String(localWebViewData, Charset.forName("UTF-8"))
 
-            val hashMismatch = localWebViewHash == null || localWebViewHash != params.config.webViewHash
+                val hashMismatch =
+                    localWebViewHash == null || localWebViewHash != params.config.webViewHash
 
-            if (!hashMismatch) {
-                DeviceLog.info("Unity Ads init: webapp loaded from local cache")
+                if (!hashMismatch) {
+                    DeviceLog.info("Unity Ads init: webapp loaded from local cache")
+                }
+
+                LoadCacheResult(hashMismatch, webViewDataString)
             }
-
-            LoadCacheResult(hashMismatch, webViewDataString)
         }
 
     /**

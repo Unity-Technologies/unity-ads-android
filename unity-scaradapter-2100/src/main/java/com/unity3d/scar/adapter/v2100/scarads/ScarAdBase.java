@@ -32,7 +32,9 @@ public abstract class ScarAdBase<T> implements IScarAd {
 	@Override
 	public void loadAd(IScarLoadListener loadListener) {
 		AdRequest adRequest = _adRequestFactory.buildAdRequestWithAdString(_scarAdMetadata.getAdString());
-		_scarAdListener.setLoadListener(loadListener);
+		if (loadListener != null) {
+			_scarAdListener.setLoadListener(loadListener);
+		}
 		loadAdInternal(adRequest, loadListener);
 	}
 

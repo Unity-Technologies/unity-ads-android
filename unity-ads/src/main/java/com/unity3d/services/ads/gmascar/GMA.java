@@ -52,7 +52,7 @@ public class GMA {
 	 * @param listener {@link IBiddingSignalsListener} implementation, to be notified when
 	 *                 signals are ready.
 	 */
-	public void getSCARBiddingSignals(IBiddingSignalsListener listener) {
-		_gmaScarAdapterBridge.getSCARBiddingSignals(new BiddingSignalsHandler(listener));
+	public void getSCARBiddingSignals(boolean isBannerEnabled, IBiddingSignalsListener listener) {
+		_gmaScarAdapterBridge.getSCARBiddingSignals(isBannerEnabled, new BiddingSignalsHandler(isBannerEnabled, listener));
 	}
 }

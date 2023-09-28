@@ -11,7 +11,6 @@ import com.unity3d.services.ads.gmascar.utils.ScarRequestHandler;
 import com.unity3d.services.core.configuration.ConfigurationReader;
 import com.unity3d.services.core.misc.Utilities;
 import com.unity3d.services.core.request.metrics.SDKMetricsSender;
-import com.unity3d.services.core.request.metrics.SDKMetrics;
 import com.unity3d.services.core.request.metrics.ScarMetric;
 
 import java.util.UUID;
@@ -25,24 +24,23 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 	private final IUnityAdsTokenListener unityAdsTokenListener;
 	private final ScarRequestHandler _scarRequestHandler;
 	private final boolean _isAsyncTokenCall;
-
+	private final boolean _isBannerEnabled;
 
 	private final AtomicReference<BiddingSignals> signals = new AtomicReference<>();
 
-	public BiddingBaseManager(IUnityAdsTokenListener unityAdsTokenListener) {
-		this(unityAdsTokenListener, new ScarRequestHandler());
+	public BiddingBaseManager(boolean isBannerEnabled, IUnityAdsTokenListener unityAdsTokenListener) {
+		this(isBannerEnabled, unityAdsTokenListener, new ScarRequestHandler());
 	}
 
-	public BiddingBaseManager(IUnityAdsTokenListener unityAdsTokenListener, ScarRequestHandler requestSender) {
+	public BiddingBaseManager(boolean isBannerEnabled, IUnityAdsTokenListener unityAdsTokenListener, ScarRequestHandler requestSender) {
 		this.tokenIdentifier = UUID.randomUUID().toString();
+		this._isBannerEnabled = isBannerEnabled;
 		this.unityAdsTokenListener = unityAdsTokenListener;
 		this._isAsyncTokenCall = unityAdsTokenListener != null;
 		this._scarRequestHandler = requestSender;
 	}
 
 	public abstract void start();
-
-	public abstract void onUnityTokenSuccessfullyFetched();
 
 	@Override
 	public String getTokenIdentifier() {
@@ -53,7 +51,7 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 	public String getFormattedToken(String unityToken) {
 		if (unityToken == null || unityToken.isEmpty()) return null;
 		String tokenIdentifier = getTokenIdentifier();
-		if (tokenIdentifier == null || (tokenIdentifier != null && tokenIdentifier.isEmpty())) return unityToken;
+		if (tokenIdentifier == null || tokenIdentifier.isEmpty()) return unityToken;
 		else return String.format(TOKEN_WITH_SCAR_FORMAT, tokenIdentifier, unityToken);
 	}
 
@@ -61,10 +59,6 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 	public final void onUnityAdsTokenReady(String token) {
 		if (unityAdsTokenListener != null) {
 			wrapCustomerListener(() -> unityAdsTokenListener.onUnityAdsTokenReady(token));
-		}
-
-		if (token != null && !token.isEmpty()) {
-			onUnityTokenSuccessfullyFetched();
 		}
 	}
 
@@ -80,23 +74,18 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 	public void fetchSignals() {
 		getMetricSender().sendMetric(ScarMetric.hbSignalsFetchStart(_isAsyncTokenCall));
 
-		new Thread(new Runnable() {
+		new Thread(() -> GMA.getInstance().getSCARBiddingSignals(this._isBannerEnabled, new IBiddingSignalsListener() {
 			@Override
-			public void run() {
-				GMA.getInstance().getSCARBiddingSignals(new IBiddingSignalsListener() {
-					@Override
-					public void onSignalsReady(BiddingSignals signals) {
-						BiddingBaseManager.this.onSignalsReady(signals);
-						sendFetchResult("");
-					}
-
-					@Override
-					public void onSignalsFailure(String msg) {
-						sendFetchResult(msg);
-					}
-				});
+			public void onSignalsReady(BiddingSignals signals) {
+				BiddingBaseManager.this.onSignalsReady(signals);
+				sendFetchResult("");
 			}
-		}).start();
+
+			@Override
+			public void onSignalsFailure(String msg) {
+				sendFetchResult(msg);
+			}
+		})).start();
 	}
 
 	public void sendFetchResult(String errorMsg) {
@@ -129,17 +118,14 @@ public abstract class BiddingBaseManager implements IBiddingManager {
 			return;
 		}
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					// Since there are potential side effects of file read in the
-					// getCurrentConfiguration call, we don't want this to be called in the constructor.
-					_scarRequestHandler.makeUploadRequest(tokenIdentifier, signals, new ConfigurationReader().getCurrentConfiguration().getScarBiddingUrl());
-					getMetricSender().sendMetric(ScarMetric.hbSignalsUploadSuccess(_isAsyncTokenCall));
-				} catch (Exception e) {
-					getMetricSender().sendMetric(ScarMetric.hbSignalsUploadFailure(_isAsyncTokenCall, e.getLocalizedMessage()));
-				}
+		new Thread(() -> {
+			try {
+				// Since there are potential side effects of file read in the
+				// getCurrentConfiguration call, we don't want this to be called in the constructor.
+				_scarRequestHandler.makeUploadRequest(tokenIdentifier, signals, new ConfigurationReader().getCurrentConfiguration().getScarBiddingUrl());
+				getMetricSender().sendMetric(ScarMetric.hbSignalsUploadSuccess(_isAsyncTokenCall));
+			} catch (Exception e) {
+				getMetricSender().sendMetric(ScarMetric.hbSignalsUploadFailure(_isAsyncTokenCall, e.getLocalizedMessage()));
 			}
 		}).start();
 	}

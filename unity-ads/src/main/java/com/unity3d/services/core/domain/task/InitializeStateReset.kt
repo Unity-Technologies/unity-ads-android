@@ -3,6 +3,7 @@ package com.unity3d.services.core.domain.task
 import com.unity3d.services.core.api.Lifecycle
 import com.unity3d.services.core.configuration.Configuration
 import com.unity3d.services.core.domain.ISDKDispatchers
+import com.unity3d.services.core.extensions.runReturnSuspendCatching
 import com.unity3d.services.core.log.DeviceLog
 import com.unity3d.services.core.properties.ClientProperties
 import com.unity3d.services.core.properties.SdkProperties
@@ -26,37 +27,39 @@ open class InitializeStateReset(
         return getMetricNameForInitializeTask("reset")
     }
 
-    override suspend fun doWork(params: Params): Configuration =
+    override suspend fun doWork(params: Params): Result<Configuration> =
         withContext(dispatchers.default) {
-            DeviceLog.debug("Unity Ads init: starting init")
+            runReturnSuspendCatching {
+                DeviceLog.debug("Unity Ads init: starting init")
 
-            val currentApp: WebViewApp? = WebViewApp.getCurrentApp()
+                val currentApp: WebViewApp? = WebViewApp.getCurrentApp()
 
-            currentApp?.resetWebViewAppInitialization()
-            if (currentApp?.webView != null) {
-                val success = withTimeoutOrNull(params.config.webViewAppCreateTimeout) {
-                    withContext(dispatchers.main) {
-                        currentApp.webView?.destroy()
-                        currentApp.webView = null
+                currentApp?.resetWebViewAppInitialization()
+                if (currentApp?.webView != null) {
+                    val success = withTimeoutOrNull(params.config.webViewAppCreateTimeout) {
+                        withContext(dispatchers.main) {
+                            currentApp.webView?.destroy()
+                            currentApp.webView = null
+                        }
                     }
+                    if (success == null) {
+                        throw Exception("Reset failed on opening ConditionVariable")
+                    }
+
                 }
-                if (success == null) {
-                    throw Exception("Reset failed on opening ConditionVariable")
+
+                unregisterLifecycleCallbacks()
+
+                SdkProperties.setCacheDirectory(null)
+                SdkProperties.getCacheDirectory() ?: throw Exception("Cache directory is NULL")
+
+                SdkProperties.setInitialized(false)
+
+                for (moduleName in params.config.moduleConfigurationList ?: emptyArray()) {
+                    params.config.getModuleConfiguration(moduleName)?.resetState(params.config)
                 }
-
+                params.config
             }
-
-            unregisterLifecycleCallbacks()
-
-            SdkProperties.setCacheDirectory(null)
-            SdkProperties.getCacheDirectory() ?: throw Exception("Cache directory is NULL")
-
-            SdkProperties.setInitialized(false)
-
-            for (moduleName in params.config.moduleConfigurationList ?: emptyArray()) {
-                params.config.getModuleConfiguration(moduleName)?.resetState(params.config)
-            }
-            params.config
         }
 
     private fun unregisterLifecycleCallbacks() {

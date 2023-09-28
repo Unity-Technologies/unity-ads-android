@@ -23,11 +23,6 @@ public interface IScarAdListenerWrapper {
 	void onAdClicked();
 
 	/**
-	 * Called when the user does not watch the ad to completion.
-	 */
-	void onAdSkipped();
-
-	/**
 	 * Called when an ad is closed.
 	 */
 	void onAdClosed();

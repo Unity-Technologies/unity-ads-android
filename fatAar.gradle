@@ -30,8 +30,6 @@ project.tasks.whenTaskAdded { Task theTask ->
                 }
                 if (tasksDependentOnScar("${buildType}").any { theTask.name == it }) {
                     theTask.dependsOn(":unity-scaradapter-common:copyJars${buildType}")
-                    theTask.dependsOn(":unity-scaradapter-1920:copyJars${buildType}")
-                    theTask.dependsOn(":unity-scaradapter-1950:copyJars${buildType}")
                     theTask.dependsOn(":unity-scaradapter-2000:copyJars${buildType}")
                     theTask.dependsOn(":unity-scaradapter-2100:copyJars${buildType}")
                 }

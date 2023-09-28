@@ -17,10 +17,11 @@ public class BiddingEagerManagerTest {
 	IUnityAdsTokenListener callerListener;
 	private BiddingEagerManager manager;
 	private String TEST_TOKEN = "token";
+	private boolean isBannerEnabled = true;
 
 	@Before
 	public void setup() {
-		manager = Mockito.spy(new BiddingEagerManager(callerListener));
+		manager = Mockito.spy(new BiddingEagerManager(isBannerEnabled, callerListener));
 	}
 
 	@Test
@@ -28,13 +29,6 @@ public class BiddingEagerManagerTest {
 		manager.start();
 		Mockito.verify(manager, Mockito.times(1)).fetchSignals();
 		Mockito.verify(manager, Mockito.times(1)).permitSignalsUpload();
-	}
-
-	@Test
-	public void testNoFetchAndUploadSignalsAfterOnUnityTokenSuccessfullyFetched() {
-		manager.onUnityTokenSuccessfullyFetched();
-		Mockito.verify(manager, Mockito.times(0)).fetchSignals();
-		Mockito.verify(manager, Mockito.times(0)).permitSignalsUpload();
 	}
 
 	@Test

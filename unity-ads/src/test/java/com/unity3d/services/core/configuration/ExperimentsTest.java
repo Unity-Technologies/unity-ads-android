@@ -12,11 +12,9 @@ public class ExperimentsTest {
 	private static final String TSI_TAG_NATIVE_WEBVIEW_CACHE = "nwc";
 	private static final String TSI_TAG_WEB_AD_ASSET_CACHING = "wac";
 	private static final String EXP_TAG_SCAR_INIT = "scar_init";
-
-	private static final String EXP_TAG_SCAR_BIDDING_MANAGER = "scar_bm";
-
 	private static final String EXP_TAG_JETPACK_LIFECYCLE = "gjl";
 	private static final String EXP_TAG_WEBVIEW_ASYNC_DOWNLOAD = "wad";
+	private static final String EXP_TAG_SCAR_HB_BN = "scar_bn";
 
 	@Test
 	public void testExperimentsWithData() throws JSONException {
@@ -25,16 +23,16 @@ public class ExperimentsTest {
 		jsonObject.put(TSI_TAG_NATIVE_WEBVIEW_CACHE, true);
 		jsonObject.put(TSI_TAG_WEB_AD_ASSET_CACHING, true);
 		jsonObject.put(EXP_TAG_SCAR_INIT, true);
-		jsonObject.put(EXP_TAG_SCAR_BIDDING_MANAGER, "laz");
 		jsonObject.put(EXP_TAG_JETPACK_LIFECYCLE, true);
 		jsonObject.put(EXP_TAG_WEBVIEW_ASYNC_DOWNLOAD, true);
+		jsonObject.put(EXP_TAG_SCAR_HB_BN, true);
 		Experiments experiments = new Experiments(jsonObject);
 		Assert.assertTrue(experiments.shouldNativeTokenAwaitPrivacy());
 		Assert.assertTrue(experiments.isNativeWebViewCacheEnabled());
 		Assert.assertTrue(experiments.isWebAssetAdCaching());
 		Assert.assertTrue(experiments.isScarInitEnabled());
-		Assert.assertEquals("laz", experiments.getScarBiddingManager());
 		Assert.assertTrue(experiments.isWebViewAsyncDownloadEnabled());
+		Assert.assertTrue(experiments.isScarBannerHbEnabled());
 	}
 
 	@Test
@@ -100,9 +98,9 @@ public class ExperimentsTest {
 		Assert.assertFalse(experiments.isNativeWebViewCacheEnabled());
 		Assert.assertFalse(experiments.isWebAssetAdCaching());
 		Assert.assertFalse(experiments.isScarInitEnabled());
-		Assert.assertEquals("dis", experiments.getScarBiddingManager());
 		Assert.assertFalse(experiments.isJetpackLifecycle());
 		Assert.assertFalse(experiments.isWebViewAsyncDownloadEnabled());
+		Assert.assertFalse(experiments.isScarBannerHbEnabled());
 	}
 
 }

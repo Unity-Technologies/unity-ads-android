@@ -35,27 +35,6 @@ public class MobileAdsBridgeLegacyTest {
 	}
 
 	@Test
-	public void testGetAdapterVersionWhen192() {
-		MobileAdsBridgeLegacy mobileAdsBridge = new MobileAdsBridgeLegacy();
-		ScarAdapterVersion adapterVersion = mobileAdsBridge.getAdapterVersion(MobileAdsBridgeLegacy.CODE_19_2);
-		Assert.assertEquals(ScarAdapterVersion.V192, adapterVersion);
-	}
-
-	@Test
-	public void testGetAdapterVersionWhen195() {
-		MobileAdsBridgeLegacy mobileAdsBridge = new MobileAdsBridgeLegacy();
-		ScarAdapterVersion adapterVersion = mobileAdsBridge.getAdapterVersion(MobileAdsBridgeLegacy.CODE_19_5);
-		Assert.assertEquals(ScarAdapterVersion.V195, adapterVersion);
-	}
-
-	@Test
-	public void testGetAdapterVersionWhen198() {
-		MobileAdsBridgeLegacy mobileAdsBridge = new MobileAdsBridgeLegacy();
-		ScarAdapterVersion adapterVersion = mobileAdsBridge.getAdapterVersion(MobileAdsBridgeLegacy.CODE_19_8);
-		Assert.assertEquals(ScarAdapterVersion.V195, adapterVersion);
-	}
-
-	@Test
 	public void testGetAdapterVersionWhen20() {
 		MobileAdsBridgeLegacy mobileAdsBridge = new MobileAdsBridgeLegacy();
 		ScarAdapterVersion adapterVersion = mobileAdsBridge.getAdapterVersion(MobileAdsBridgeLegacy.CODE_20_0);

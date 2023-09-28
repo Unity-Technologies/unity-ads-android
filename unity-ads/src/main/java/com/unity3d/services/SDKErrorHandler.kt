@@ -2,7 +2,6 @@ package com.unity3d.services
 
 import com.unity3d.services.core.domain.ISDKDispatchers
 import com.unity3d.services.core.request.metrics.Metric
-import com.unity3d.services.core.request.metrics.SDKMetrics
 import com.unity3d.services.core.request.metrics.SDKMetricsSender
 import kotlinx.coroutines.CoroutineExceptionHandler
 import java.lang.IllegalStateException
@@ -14,19 +13,19 @@ class SDKErrorHandler(private val dispatchers: ISDKDispatchers, private val sdkM
     override val key = CoroutineExceptionHandler.Key
 
     override fun handleException(context: CoroutineContext, exception: Throwable) {
-        val className: String = exception.stackTrace[0].fileName
-        val line: Int = exception.stackTrace[0].lineNumber
+        val className: String = exception.stackTrace[0]?.fileName ?: "unknown"
+        val line: Int = exception.stackTrace[0]?.lineNumber ?: 0
 
         val name: String = when (exception) {
             is NullPointerException -> "native_exception_npe"
             is OutOfMemoryError -> "native_exception_oom"
             is IllegalStateException -> "native_exception_ise"
-            is RuntimeException -> "native_exception_re"
             is SecurityException -> "native_exception_se"
+            is RuntimeException -> "native_exception_re"
             else -> "native_exception"
         }
 
-        sendMetric(Metric(name, "{$className}_$line"))
+        sendMetric(Metric(name, "${className}_$line"))
     }
 
 
