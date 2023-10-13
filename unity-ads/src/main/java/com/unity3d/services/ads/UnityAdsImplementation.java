@@ -202,7 +202,7 @@ public final class UnityAdsImplementation implements IUnityAds {
 		}
 
 		Configuration config = configuration == null ? new ConfigurationReader().getCurrentConfiguration() : configuration;
-		BiddingBaseManager manager = BiddingManagerFactory.getInstance().createManager(null, config.getExperiments());
+		BiddingBaseManager manager = BiddingManagerFactory.getInstance().createManager(listener, config.getExperiments());
 		manager.start();
 
 		asyncTokenStorage.getToken(manager);
